@@ -1,0 +1,35 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"networking.k8s.io/v1","kind":"Ingress","metadata":{"annotations":{"nginx.ingress.kubernetes.io/rewrite-target":"/","nginx.ingress.kubernetes.io/ssl-redirect":"true"},"name":"homepage-ingress","namespace":"homepage"},"spec":{"ingressClassName":"nginx","rules":[{"host":"homepage.vollminlab.com","http":{"paths":[{"backend":{"service":{"name":"homepage","port":{"number":3000}}},"path":"/","pathType":"Prefix"}]}}],"tls":[{"hosts":["homepage.vollminlab.com"],"secretName":"wildcard-tls"}]}}
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  creationTimestamp: "2025-01-20T23:48:02Z"
+  generation: 1
+  name: homepage-ingress
+  namespace: homepage
+  resourceVersion: "174601"
+  uid: 832608e3-2da8-403e-ac71-a4cce7a30e8f
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: homepage.vollminlab.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: homepage
+            port:
+              number: 3000
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - homepage.vollminlab.com
+    secretName: wildcard-tls
+status:
+  loadBalancer:
+    ingress:
+    - ip: 192.168.152.244

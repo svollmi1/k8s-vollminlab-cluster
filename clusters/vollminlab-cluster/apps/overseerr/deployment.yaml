@@ -1,0 +1,225 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+    meta.helm.sh/release-name: overseerr
+    meta.helm.sh/release-namespace: mediastack
+  creationTimestamp: "2025-02-04T05:12:20Z"
+  generation: 1
+  labels:
+    app: overseerr-15.5.1
+    app.kubernetes.io/instance: overseerr
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: overseerr
+    app.kubernetes.io/version: 1.33.2
+    helm-revision: "1"
+    helm.sh/chart: overseerr-15.5.1
+    release: overseerr
+  name: overseerr
+  namespace: mediastack
+  resourceVersion: "4436452"
+  uid: c9efd5a5-5cd3-4f5d-8e02-8badbf407e92
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: overseerr
+      app.kubernetes.io/name: overseerr
+      pod.name: main
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        checksum/cnpg: 2291fc448ae81adfd860632d73e38ffc039fc25959ede77cf692f754199383ee
+        checksum/configmaps: 44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+        checksum/mariadb: 09c85576cb45b1eecd1467732b11ea8fa3363b0105c465f02a6ad64991521d52
+        checksum/mongodb: 09c85576cb45b1eecd1467732b11ea8fa3363b0105c465f02a6ad64991521d52
+        checksum/persistence: 0de5c3e57511e3bdb2e3548c14afb19a2b2705f6f73a9378ba56df2712ec2769
+        checksum/redis: 013343a028cbb3f7e08f4ba7522702dd98e52632c688641074b0b1db3df29894
+        checksum/secrets: 44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+        checksum/services: 1fd6c2eb91ac7adfb8caa92db3a40256939ec8cc12bf8d64f9fbfab0d01101e5
+        checksum/solr: 29c14feeaddbf7762052db593898d274941f539cee681ddc613957587686f347
+      creationTimestamp: null
+      labels:
+        app: overseerr-15.5.1
+        app.kubernetes.io/instance: overseerr
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: overseerr
+        app.kubernetes.io/version: 1.33.2
+        helm-revision: "1"
+        helm.sh/chart: overseerr-15.5.1
+        pod.lifecycle: permanent
+        pod.name: main
+        release: overseerr
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: TZ
+          value: UTC
+        - name: UMASK
+          value: "0022"
+        - name: UMASK_SET
+          value: "0022"
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: void
+        - name: S6_READ_ONLY_ROOT
+          value: "1"
+        - name: LOG_LEVEL
+          value: info
+        image: ghcr.io/sct/overseerr:1.33.2@sha256:714ea6db2bc007a2262d112bef7eec74972eb33d9c72bddb9cbd98b8742de950
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /
+            port: 5055
+            scheme: HTTP
+          initialDelaySeconds: 12
+          periodSeconds: 15
+          successThreshold: 1
+          timeoutSeconds: 5
+        name: overseerr
+        ports:
+        - containerPort: 5055
+          name: main
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 4
+          httpGet:
+            path: /
+            port: 5055
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 12
+          successThreshold: 2
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: "4"
+            memory: 8Gi
+          requests:
+            cpu: 10m
+            memory: 50Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          readOnlyRootFilesystem: false
+          runAsGroup: 568
+          runAsNonRoot: true
+          runAsUser: 568
+          seccompProfile:
+            type: RuntimeDefault
+        startupProbe:
+          failureThreshold: 60
+          httpGet:
+            path: /
+            port: 5055
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 3
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /app/config
+          name: config
+        - mountPath: /dev/shm
+          name: devshm
+        - mountPath: /downloads/movies
+          name: movies
+        - mountPath: /shared
+          name: shared
+        - mountPath: /tmp
+          name: tmp
+        - mountPath: /downloads/tv
+          name: tv
+        - mountPath: /var/logs
+          name: varlogs
+        - mountPath: /var/run
+          name: varrun
+      dnsConfig:
+        options:
+        - name: ndots
+          value: "1"
+      dnsPolicy: ClusterFirst
+      enableServiceLinks: false
+      nodeSelector:
+        kubernetes.io/arch: amd64
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        supplementalGroups:
+        - 568
+      serviceAccount: default
+      serviceAccountName: default
+      shareProcessNamespace: false
+      terminationGracePeriodSeconds: 60
+      topologySpreadConstraints:
+      - labelSelector:
+          matchLabels:
+            app.kubernetes.io/instance: overseerr
+            app.kubernetes.io/name: overseerr
+            pod.name: main
+        maxSkew: 1
+        nodeAffinityPolicy: Honor
+        nodeTaintsPolicy: Honor
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: ScheduleAnyway
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: pvc-overseerr-config
+      - emptyDir:
+          medium: Memory
+          sizeLimit: 8Gi
+        name: devshm
+      - name: movies
+        persistentVolumeClaim:
+          claimName: pvc-movies
+      - emptyDir: {}
+        name: shared
+      - emptyDir:
+          medium: Memory
+          sizeLimit: 8Gi
+        name: tmp
+      - name: tv
+        persistentVolumeClaim:
+          claimName: pvc-tv
+      - emptyDir:
+          medium: Memory
+          sizeLimit: 8Gi
+        name: varlogs
+      - emptyDir:
+          medium: Memory
+          sizeLimit: 8Gi
+        name: varrun
+status:
+  availableReplicas: 1
+  conditions:
+  - lastTransitionTime: "2025-02-04T05:12:20Z"
+    lastUpdateTime: "2025-02-04T05:12:31Z"
+    message: ReplicaSet "overseerr-7d57958d4d" has successfully progressed.
+    reason: NewReplicaSetAvailable
+    status: "True"
+    type: Progressing
+  - lastTransitionTime: "2025-02-08T06:34:44Z"
+    lastUpdateTime: "2025-02-08T06:34:44Z"
+    message: Deployment has minimum availability.
+    reason: MinimumReplicasAvailable
+    status: "True"
+    type: Available
+  observedGeneration: 1
+  readyReplicas: 1
+  replicas: 1
+  updatedReplicas: 1

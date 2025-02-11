@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    meta.helm.sh/release-name: homepage
+    meta.helm.sh/release-namespace: homepage
+  creationTimestamp: "2025-01-20T23:42:04Z"
+  labels:
+    app.kubernetes.io/instance: homepage
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: homepage
+    app.kubernetes.io/service: homepage
+    app.kubernetes.io/version: v0.9.6
+    helm.sh/chart: homepage-2.0.1
+  name: homepage
+  namespace: homepage
+  resourceVersion: "173698"
+  uid: 5fedc7ed-039e-4671-bb65-816e2850ab46
+spec:
+  clusterIP: 10.104.87.226
+  clusterIPs:
+  - 10.104.87.226
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: http
+    port: 3000
+    protocol: TCP
+    targetPort: http
+  selector:
+    app.kubernetes.io/instance: homepage
+    app.kubernetes.io/name: homepage
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}

@@ -1,0 +1,239 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+    meta.helm.sh/release-name: sabnzbd
+    meta.helm.sh/release-namespace: mediastack
+  creationTimestamp: "2025-02-04T03:31:56Z"
+  generation: 1
+  labels:
+    app: sabnzbd-21.6.2
+    app.kubernetes.io/instance: sabnzbd
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: sabnzbd
+    app.kubernetes.io/version: 4.4.1
+    helm-revision: "1"
+    helm.sh/chart: sabnzbd-21.6.2
+    release: sabnzbd
+  name: sabnzbd
+  namespace: mediastack
+  resourceVersion: "4438462"
+  uid: 3c479b12-1b33-43cc-a731-af66c4b1b1c9
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: sabnzbd
+      app.kubernetes.io/name: sabnzbd
+      pod.name: main
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        checksum/cnpg: 2291fc448ae81adfd860632d73e38ffc039fc25959ede77cf692f754199383ee
+        checksum/configmaps: 44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+        checksum/mariadb: 09c85576cb45b1eecd1467732b11ea8fa3363b0105c465f02a6ad64991521d52
+        checksum/mongodb: 09c85576cb45b1eecd1467732b11ea8fa3363b0105c465f02a6ad64991521d52
+        checksum/persistence: f4a856f0ed054c0183cf625331216a25c25b7f625f5a6bb97b54bf9a1f799f1f
+        checksum/redis: 013343a028cbb3f7e08f4ba7522702dd98e52632c688641074b0b1db3df29894
+        checksum/secrets: 44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+        checksum/services: 51a60cb1ebba9925d6ff240bc0e26c11bdfc09fa3a9f51172a114ae1b4557f3d
+        checksum/solr: 29c14feeaddbf7762052db593898d274941f539cee681ddc613957587686f347
+      creationTimestamp: null
+      labels:
+        app: sabnzbd-21.6.2
+        app.kubernetes.io/instance: sabnzbd
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: sabnzbd
+        app.kubernetes.io/version: 4.4.1
+        helm-revision: "1"
+        helm.sh/chart: sabnzbd-21.6.2
+        pod.lifecycle: permanent
+        pod.name: main
+        release: sabnzbd
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: TZ
+          value: UTC
+        - name: UMASK
+          value: "0022"
+        - name: UMASK_SET
+          value: "0022"
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: void
+        - name: S6_READ_ONLY_ROOT
+          value: "1"
+        - name: SABNZBD__HOST_WHITELIST_ENTRIES
+        - name: SABNZBD__PORT
+          value: "10097"
+        image: ghcr.io/onedr0p/sabnzbd:4.4.1@sha256:fd85776610865ba5bd8da40415759871ee70dfe9371f88ee88f18a847391ce6a
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /
+            port: 10097
+            scheme: HTTP
+          initialDelaySeconds: 12
+          periodSeconds: 15
+          successThreshold: 1
+          timeoutSeconds: 5
+        name: sabnzbd
+        ports:
+        - containerPort: 10097
+          name: main
+          protocol: TCP
+        - containerPort: 8990
+          name: metrics
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 4
+          httpGet:
+            path: /
+            port: 10097
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 12
+          successThreshold: 2
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: "4"
+            memory: 8Gi
+          requests:
+            cpu: 10m
+            memory: 50Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+          runAsGroup: 568
+          runAsNonRoot: true
+          runAsUser: 568
+          seccompProfile:
+            type: RuntimeDefault
+        startupProbe:
+          failureThreshold: 60
+          httpGet:
+            path: /
+            port: 10097
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 3
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /downloads/completed-downloads
+          name: completed-downloads
+        - mountPath: /config
+          name: config
+        - mountPath: /dev/shm
+          name: devshm
+        - mountPath: /downloads/incomplete-downloads
+          name: incomplete-downloads
+        - mountPath: /downloads/movies
+          name: movies
+        - mountPath: /shared
+          name: shared
+        - mountPath: /tmp
+          name: tmp
+        - mountPath: /downloads/tv
+          name: tv
+        - mountPath: /var/logs
+          name: varlogs
+        - mountPath: /var/run
+          name: varrun
+      dnsConfig:
+        options:
+        - name: ndots
+          value: "1"
+      dnsPolicy: ClusterFirst
+      enableServiceLinks: false
+      nodeSelector:
+        kubernetes.io/arch: amd64
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        supplementalGroups:
+        - 568
+      serviceAccount: default
+      serviceAccountName: default
+      shareProcessNamespace: false
+      terminationGracePeriodSeconds: 60
+      topologySpreadConstraints:
+      - labelSelector:
+          matchLabels:
+            app.kubernetes.io/instance: sabnzbd
+            app.kubernetes.io/name: sabnzbd
+            pod.name: main
+        maxSkew: 1
+        nodeAffinityPolicy: Honor
+        nodeTaintsPolicy: Honor
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: ScheduleAnyway
+      volumes:
+      - name: completed-downloads
+        persistentVolumeClaim:
+          claimName: pvc-completed-downloads
+      - name: config
+        persistentVolumeClaim:
+          claimName: pvc-sabnzbd-config
+      - emptyDir:
+          medium: Memory
+          sizeLimit: 8Gi
+        name: devshm
+      - name: incomplete-downloads
+        persistentVolumeClaim:
+          claimName: pvc-incomplete-downloads
+      - name: movies
+        persistentVolumeClaim:
+          claimName: pvc-movies
+      - emptyDir: {}
+        name: shared
+      - emptyDir:
+          medium: Memory
+          sizeLimit: 8Gi
+        name: tmp
+      - name: tv
+        persistentVolumeClaim:
+          claimName: pvc-tv
+      - emptyDir:
+          medium: Memory
+          sizeLimit: 8Gi
+        name: varlogs
+      - emptyDir:
+          medium: Memory
+          sizeLimit: 8Gi
+        name: varrun
+status:
+  availableReplicas: 1
+  conditions:
+  - lastTransitionTime: "2025-02-04T03:31:56Z"
+    lastUpdateTime: "2025-02-04T03:32:20Z"
+    message: ReplicaSet "sabnzbd-7c598cb799" has successfully progressed.
+    reason: NewReplicaSetAvailable
+    status: "True"
+    type: Progressing
+  - lastTransitionTime: "2025-02-08T06:44:12Z"
+    lastUpdateTime: "2025-02-08T06:44:12Z"
+    message: Deployment has minimum availability.
+    reason: MinimumReplicasAvailable
+    status: "True"
+    type: Available
+  observedGeneration: 1
+  readyReplicas: 1
+  replicas: 1
+  updatedReplicas: 1

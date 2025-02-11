@@ -1,0 +1,35 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"networking.k8s.io/v1","kind":"Ingress","metadata":{"annotations":{"nginx.ingress.kubernetes.io/rewrite-target":"/","nginx.ingress.kubernetes.io/ssl-redirect":"true"},"name":"sonarr-ingress","namespace":"mediastack"},"spec":{"ingressClassName":"nginx","rules":[{"host":"sonarr.vollminlab.com","http":{"paths":[{"backend":{"service":{"name":"sonarr","port":{"number":8989}}},"path":"/","pathType":"Prefix"}]}}],"tls":[{"hosts":["sonarr.vollminlab.com"],"secretName":"wildcard-tls"}]}}
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  creationTimestamp: "2025-01-21T01:07:32Z"
+  generation: 1
+  name: sonarr-ingress
+  namespace: mediastack
+  resourceVersion: "185745"
+  uid: 221d3fc7-062c-4ce3-8c05-09fb1754ed7a
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: sonarr.vollminlab.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: sonarr
+            port:
+              number: 8989
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - sonarr.vollminlab.com
+    secretName: wildcard-tls
+status:
+  loadBalancer:
+    ingress:
+    - ip: 192.168.152.244

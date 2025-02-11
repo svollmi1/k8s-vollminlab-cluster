@@ -9,9 +9,9 @@ items:
       pv.kubernetes.io/bind-completed: "yes"
       pv.kubernetes.io/bound-by-controller: "yes"
       volume.beta.kubernetes.io/storage-provisioner: cluster.local/local-path-storage-local-path-provisioner
-      volume.kubernetes.io/selected-node: k8sworker01
+      volume.kubernetes.io/selected-node: k8sworker03
       volume.kubernetes.io/storage-provisioner: cluster.local/local-path-storage-local-path-provisioner
-    creationTimestamp: "2025-01-20T23:31:04Z"
+    creationTimestamp: "2025-02-11T03:06:17Z"
     finalizers:
     - kubernetes.io/pvc-protection
     labels:
@@ -22,8 +22,8 @@ items:
       release: bookstack
     name: bookstack-storage
     namespace: bookstack
-    resourceVersion: "172083"
-    uid: b06a9001-a876-4f61-9914-4d9a0cebc56f
+    resourceVersion: "5250443"
+    uid: d7272e4a-d199-4d8e-a6e2-b84e22a393ba
   spec:
     accessModes:
     - ReadWriteOnce
@@ -32,7 +32,7 @@ items:
         storage: 8Gi
     storageClassName: local-path
     volumeMode: Filesystem
-    volumeName: pvc-b06a9001-a876-4f61-9914-4d9a0cebc56f
+    volumeName: pvc-d7272e4a-d199-4d8e-a6e2-b84e22a393ba
   status:
     accessModes:
     - ReadWriteOnce
@@ -48,9 +48,9 @@ items:
       pv.kubernetes.io/bind-completed: "yes"
       pv.kubernetes.io/bound-by-controller: "yes"
       volume.beta.kubernetes.io/storage-provisioner: cluster.local/local-path-storage-local-path-provisioner
-      volume.kubernetes.io/selected-node: k8sworker01
+      volume.kubernetes.io/selected-node: k8sworker03
       volume.kubernetes.io/storage-provisioner: cluster.local/local-path-storage-local-path-provisioner
-    creationTimestamp: "2025-01-20T23:31:04Z"
+    creationTimestamp: "2025-02-11T03:06:17Z"
     finalizers:
     - kubernetes.io/pvc-protection
     labels:
@@ -61,8 +61,8 @@ items:
       release: bookstack
     name: bookstack-uploads
     namespace: bookstack
-    resourceVersion: "172080"
-    uid: 62304e0f-8004-4812-9a32-e6b9deabc21d
+    resourceVersion: "5250446"
+    uid: 8f12ca92-edbc-43f0-ae90-576597854cf9
   spec:
     accessModes:
     - ReadWriteOnce
@@ -71,7 +71,7 @@ items:
         storage: 8Gi
     storageClassName: local-path
     volumeMode: Filesystem
-    volumeName: pvc-62304e0f-8004-4812-9a32-e6b9deabc21d
+    volumeName: pvc-8f12ca92-edbc-43f0-ae90-576597854cf9
   status:
     accessModes:
     - ReadWriteOnce
