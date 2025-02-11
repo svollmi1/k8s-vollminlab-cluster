@@ -1,0 +1,325 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+    meta.helm.sh/release-name: sonarr
+    meta.helm.sh/release-namespace: mediastack
+  creationTimestamp: "2025-02-04T04:10:01Z"
+  generation: 1
+  labels:
+    app: sonarr-23.6.2
+    app.kubernetes.io/instance: sonarr
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: sonarr
+    app.kubernetes.io/version: 4.0.12.2823
+    helm-revision: "1"
+    helm.sh/chart: sonarr-23.6.2
+    release: sonarr
+  name: sonarr
+  namespace: mediastack
+  resourceVersion: "4438543"
+  uid: d2018ae7-1e90-4c88-8b8b-b92b45629a99
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: sonarr
+      app.kubernetes.io/name: sonarr
+      pod.name: main
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        checksum/cnpg: 2291fc448ae81adfd860632d73e38ffc039fc25959ede77cf692f754199383ee
+        checksum/configmaps: 44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+        checksum/mariadb: 09c85576cb45b1eecd1467732b11ea8fa3363b0105c465f02a6ad64991521d52
+        checksum/mongodb: 09c85576cb45b1eecd1467732b11ea8fa3363b0105c465f02a6ad64991521d52
+        checksum/persistence: a6a12315e9e144badc3e45f41f7fdeb92f9af28c40ee94582788f081b8a4704f
+        checksum/redis: 013343a028cbb3f7e08f4ba7522702dd98e52632c688641074b0b1db3df29894
+        checksum/secrets: 44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+        checksum/services: 58c29c89baa481b469b6216aadb241e2f7e2e3a6a6bd57e7691d25f5a13bce57
+        checksum/solr: 29c14feeaddbf7762052db593898d274941f539cee681ddc613957587686f347
+      creationTimestamp: null
+      labels:
+        app: sonarr-23.6.2
+        app.kubernetes.io/instance: sonarr
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: sonarr
+        app.kubernetes.io/version: 4.0.12.2823
+        helm-revision: "1"
+        helm.sh/chart: sonarr-23.6.2
+        pod.lifecycle: permanent
+        pod.name: main
+        release: sonarr
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - args:
+        - sonarr
+        env:
+        - name: TZ
+          value: UTC
+        - name: UMASK
+          value: "0022"
+        - name: UMASK_SET
+          value: "0022"
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: void
+        - name: S6_READ_ONLY_ROOT
+          value: "1"
+        - name: CONFIG
+          value: /config/config.xml
+        - name: INTERFACE
+          value: 0.0.0.0
+        - name: PORT
+          value: "8990"
+        - name: URL
+          value: http://sonarr:8989
+        image: ghcr.io/onedr0p/exportarr:v2.0.1@sha256:727e7bc8f2f0934a2117978c59f4476b954018b849a010ea6cfb380bd6539644
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /healthz
+            port: 8990
+            scheme: HTTP
+          initialDelaySeconds: 12
+          periodSeconds: 15
+          successThreshold: 1
+          timeoutSeconds: 5
+        name: sonarr-exportarr
+        readinessProbe:
+          failureThreshold: 4
+          httpGet:
+            path: /healthz
+            port: 8990
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 12
+          successThreshold: 2
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: "4"
+            memory: 8Gi
+          requests:
+            cpu: 10m
+            memory: 50Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+          runAsGroup: 568
+          runAsNonRoot: true
+          runAsUser: 568
+          seccompProfile:
+            type: RuntimeDefault
+        startupProbe:
+          failureThreshold: 60
+          httpGet:
+            path: /healthz
+            port: 8990
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 3
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /config
+          name: config
+          readOnly: true
+        - mountPath: /dev/shm
+          name: devshm
+        - mountPath: /shared
+          name: shared
+        - mountPath: /tmp
+          name: tmp
+        - mountPath: /var/logs
+          name: varlogs
+        - mountPath: /var/run
+          name: varrun
+      - env:
+        - name: TZ
+          value: UTC
+        - name: UMASK
+          value: "0022"
+        - name: UMASK_SET
+          value: "0022"
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: void
+        - name: S6_READ_ONLY_ROOT
+          value: "1"
+        - name: SONARR__AUTH__METHOD
+        - name: SONARR__AUTH__REQUIRED
+          value: DisabledForLocalAddresses
+        - name: SONARR__SERVER__PORT
+          value: "8989"
+        image: ghcr.io/onedr0p/sonarr:4.0.12.2823@sha256:55c6878a5367fc2398d15c9a16a70653f5e5f42c9fe9b708a038f2781fb0360f
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /ping
+            port: 8989
+            scheme: HTTP
+          initialDelaySeconds: 12
+          periodSeconds: 15
+          successThreshold: 1
+          timeoutSeconds: 5
+        name: sonarr
+        ports:
+        - containerPort: 8989
+          name: main
+          protocol: TCP
+        - containerPort: 8990
+          name: metrics
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 4
+          httpGet:
+            path: /ping
+            port: 8989
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 12
+          successThreshold: 2
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: "4"
+            memory: 8Gi
+          requests:
+            cpu: 10m
+            memory: 50Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+          runAsGroup: 568
+          runAsNonRoot: true
+          runAsUser: 568
+          seccompProfile:
+            type: RuntimeDefault
+        startupProbe:
+          failureThreshold: 60
+          httpGet:
+            path: /ping
+            port: 8989
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 3
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /downloads/completed-downloads
+          name: completed-downloads
+        - mountPath: /config
+          name: config
+        - mountPath: /dev/shm
+          name: devshm
+        - mountPath: /downloads/incomplete-downloads
+          name: incomplete-downloads
+        - mountPath: /downloads/tv
+          name: movies
+        - mountPath: /shared
+          name: shared
+        - mountPath: /tmp
+          name: tmp
+        - mountPath: /var/logs
+          name: varlogs
+        - mountPath: /var/run
+          name: varrun
+      dnsConfig:
+        options:
+        - name: ndots
+          value: "1"
+      dnsPolicy: ClusterFirst
+      enableServiceLinks: false
+      nodeSelector:
+        kubernetes.io/arch: amd64
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        fsGroup: 568
+        fsGroupChangePolicy: OnRootMismatch
+        supplementalGroups:
+        - 568
+      serviceAccount: default
+      serviceAccountName: default
+      shareProcessNamespace: false
+      terminationGracePeriodSeconds: 60
+      topologySpreadConstraints:
+      - labelSelector:
+          matchLabels:
+            app.kubernetes.io/instance: sonarr
+            app.kubernetes.io/name: sonarr
+            pod.name: main
+        maxSkew: 1
+        nodeAffinityPolicy: Honor
+        nodeTaintsPolicy: Honor
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: ScheduleAnyway
+      volumes:
+      - name: completed-downloads
+        persistentVolumeClaim:
+          claimName: pvc-completed-downloads
+      - name: config
+        persistentVolumeClaim:
+          claimName: pvc-sonarr-config
+      - emptyDir:
+          medium: Memory
+          sizeLimit: 8Gi
+        name: devshm
+      - name: incomplete-downloads
+        persistentVolumeClaim:
+          claimName: pvc-incomplete-downloads
+      - name: movies
+        persistentVolumeClaim:
+          claimName: pvc-tv
+      - emptyDir: {}
+        name: shared
+      - emptyDir:
+          medium: Memory
+          sizeLimit: 8Gi
+        name: tmp
+      - emptyDir:
+          medium: Memory
+          sizeLimit: 8Gi
+        name: varlogs
+      - emptyDir:
+          medium: Memory
+          sizeLimit: 8Gi
+        name: varrun
+status:
+  availableReplicas: 1
+  conditions:
+  - lastTransitionTime: "2025-02-04T04:10:01Z"
+    lastUpdateTime: "2025-02-04T04:10:18Z"
+    message: ReplicaSet "sonarr-c6f6449d" has successfully progressed.
+    reason: NewReplicaSetAvailable
+    status: "True"
+    type: Progressing
+  - lastTransitionTime: "2025-02-08T06:44:17Z"
+    lastUpdateTime: "2025-02-08T06:44:17Z"
+    message: Deployment has minimum availability.
+    reason: MinimumReplicasAvailable
+    status: "True"
+    type: Available
+  observedGeneration: 1
+  readyReplicas: 1
+  replicas: 1
+  updatedReplicas: 1

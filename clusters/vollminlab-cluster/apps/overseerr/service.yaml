@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    meta.helm.sh/release-name: overseerr
+    meta.helm.sh/release-namespace: mediastack
+  creationTimestamp: "2025-02-04T05:12:20Z"
+  labels:
+    app: overseerr-15.5.1
+    app.kubernetes.io/instance: overseerr
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: overseerr
+    app.kubernetes.io/version: 1.33.2
+    helm-revision: "1"
+    helm.sh/chart: overseerr-15.5.1
+    release: overseerr
+    service.name: main
+  name: overseerr
+  namespace: mediastack
+  resourceVersion: "3357535"
+  uid: 2e6d7466-f10a-4648-91bd-63eadf29424b
+spec:
+  clusterIP: 10.108.118.126
+  clusterIPs:
+  - 10.108.118.126
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: main
+    port: 5055
+    protocol: TCP
+    targetPort: 5055
+  selector:
+    app.kubernetes.io/instance: overseerr
+    app.kubernetes.io/name: overseerr
+    pod.name: main
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}

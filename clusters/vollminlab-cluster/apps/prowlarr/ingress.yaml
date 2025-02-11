@@ -1,0 +1,35 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"networking.k8s.io/v1","kind":"Ingress","metadata":{"annotations":{"nginx.ingress.kubernetes.io/rewrite-target":"/","nginx.ingress.kubernetes.io/ssl-redirect":"true"},"name":"prowlarr-ingress","namespace":"mediastack"},"spec":{"ingressClassName":"nginx","rules":[{"host":"prowlarr.vollminlab.com","http":{"paths":[{"backend":{"service":{"name":"prowlarr","port":{"number":9696}}},"path":"/","pathType":"Prefix"}]}}],"tls":[{"hosts":["prowlarr.vollminlab.com"],"secretName":"wildcard-tls"}]}}
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  creationTimestamp: "2025-01-25T06:31:49Z"
+  generation: 1
+  name: prowlarr-ingress
+  namespace: mediastack
+  resourceVersion: "1016071"
+  uid: f8d772f4-e414-4d7c-81e6-4e9f2219d61d
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: prowlarr.vollminlab.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: prowlarr
+            port:
+              number: 9696
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - prowlarr.vollminlab.com
+    secretName: wildcard-tls
+status:
+  loadBalancer:
+    ingress:
+    - ip: 192.168.152.244

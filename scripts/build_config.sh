@@ -1,26 +1,47 @@
 #!/bin/bash
 
 # Set base directory for repo output
-# Set base directory relative to the script location
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 OUTPUT_DIR="$REPO_DIR/clusters/vollminlab-cluster"
 
 # Ensure output directories exist
 mkdir -p $OUTPUT_DIR/{apps,system,storage,crds,operators,helm-releases}
 
-echo "🔍 Extracting non-Helm Deployments..."
+echo "🔍 Extracting all applications including Helm and non-Helm deployments..."
+
+# Extracting all deployments (both Helm and non-Helm) in the cluster
 kubectl get deployments -A --no-headers | awk '{print $1, $2}' | while read ns name; do 
-    if ! helm list -A | grep -q "$name"; then 
-        APP_DIR="$OUTPUT_DIR/apps/$name"
-        mkdir -p "$APP_DIR"
-        kubectl get deployment "$name" -n "$ns" -o yaml > "$APP_DIR/deployment.yaml"
-        kubectl get service "$name" -n "$ns" -o yaml > "$APP_DIR/service.yaml" 2>/dev/null
-        kubectl get ingress "$name" -n "$ns" -o yaml > "$APP_DIR/ingress.yaml" 2>/dev/null
-        echo "✅ Extracted $name in namespace $ns"
-    fi 
+    APP_DIR="$OUTPUT_DIR/apps/$name"
+    mkdir -p "$APP_DIR"
+
+    # Get the deployment YAML
+    kubectl get deployment "$name" -n "$ns" -o yaml > "$APP_DIR/deployment.yaml"
+
+    # Get the service YAML for the deployment (if it exists)
+    SERVICE_YAML=$(kubectl get service -n "$ns" | grep "$name" | awk '{print $1}' | while read service; do
+        kubectl get service "$service" -n "$ns" -o yaml
+    done)
+
+    if [ -n "$SERVICE_YAML" ]; then
+        echo "$SERVICE_YAML" > "$APP_DIR/service.yaml"
+    fi
+
+    # Get the ingress YAML for the deployment (if it exists)
+    INGRESS_YAML=$(kubectl get ingress -n "$ns" | grep "$name" | awk '{print $1}' | while read ingress; do
+        kubectl get ingress "$ingress" -n "$ns" -o yaml
+    done)
+
+    if [ -n "$INGRESS_YAML" ]; then
+        echo "$INGRESS_YAML" > "$APP_DIR/ingress.yaml"
+    fi
+
+    # Log success
+    echo "✅ Extracted resources for $name in namespace $ns"
 done
 
 echo "🔍 Extracting Helm Releases..."
+
+# Extracting Helm releases
 helm list -A -o json | jq -c '.[]' | while read obj; do
     name=$(echo $obj | jq -r '.name')
     ns=$(echo $obj | jq -r '.namespace')

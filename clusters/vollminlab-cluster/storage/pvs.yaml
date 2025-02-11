@@ -182,47 +182,6 @@ items:
     annotations:
       local.path.provisioner/selected-node: k8sworker01
       pv.kubernetes.io/provisioned-by: cluster.local/local-path-storage-local-path-provisioner
-    creationTimestamp: "2025-01-20T23:31:07Z"
-    finalizers:
-    - kubernetes.io/pv-protection
-    name: pvc-62304e0f-8004-4812-9a32-e6b9deabc21d
-    resourceVersion: "172074"
-    uid: 78cccaaa-1e92-4acd-b009-e8b564a55178
-  spec:
-    accessModes:
-    - ReadWriteOnce
-    capacity:
-      storage: 8Gi
-    claimRef:
-      apiVersion: v1
-      kind: PersistentVolumeClaim
-      name: bookstack-uploads
-      namespace: bookstack
-      resourceVersion: "172009"
-      uid: 62304e0f-8004-4812-9a32-e6b9deabc21d
-    hostPath:
-      path: /opt/local-path-provisioner/pvc-62304e0f-8004-4812-9a32-e6b9deabc21d_bookstack_bookstack-uploads
-      type: DirectoryOrCreate
-    nodeAffinity:
-      required:
-        nodeSelectorTerms:
-        - matchExpressions:
-          - key: kubernetes.io/hostname
-            operator: In
-            values:
-            - k8sworker01
-    persistentVolumeReclaimPolicy: Delete
-    storageClassName: local-path
-    volumeMode: Filesystem
-  status:
-    lastPhaseTransitionTime: "2025-01-20T23:31:07Z"
-    phase: Bound
-- apiVersion: v1
-  kind: PersistentVolume
-  metadata:
-    annotations:
-      local.path.provisioner/selected-node: k8sworker01
-      pv.kubernetes.io/provisioned-by: cluster.local/local-path-storage-local-path-provisioner
     creationTimestamp: "2025-01-28T00:09:51Z"
     finalizers:
     - kubernetes.io/pv-protection
@@ -344,6 +303,47 @@ items:
   kind: PersistentVolume
   metadata:
     annotations:
+      local.path.provisioner/selected-node: k8sworker03
+      pv.kubernetes.io/provisioned-by: cluster.local/local-path-storage-local-path-provisioner
+    creationTimestamp: "2025-02-11T03:06:22Z"
+    finalizers:
+    - kubernetes.io/pv-protection
+    name: pvc-8f12ca92-edbc-43f0-ae90-576597854cf9
+    resourceVersion: "5250444"
+    uid: 37b58c6e-9a5c-4e5e-88de-ae2e820761dc
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 8Gi
+    claimRef:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      name: bookstack-uploads
+      namespace: bookstack
+      resourceVersion: "5250371"
+      uid: 8f12ca92-edbc-43f0-ae90-576597854cf9
+    hostPath:
+      path: /opt/local-path-provisioner/pvc-8f12ca92-edbc-43f0-ae90-576597854cf9_bookstack_bookstack-uploads
+      type: DirectoryOrCreate
+    nodeAffinity:
+      required:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+            - k8sworker03
+    persistentVolumeReclaimPolicy: Delete
+    storageClassName: local-path
+    volumeMode: Filesystem
+  status:
+    lastPhaseTransitionTime: "2025-02-11T03:06:22Z"
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
       local.path.provisioner/selected-node: k8sworker02
       pv.kubernetes.io/provisioned-by: cluster.local/local-path-storage-local-path-provisioner
     creationTimestamp: "2025-01-28T00:08:25Z"
@@ -426,47 +426,6 @@ items:
   kind: PersistentVolume
   metadata:
     annotations:
-      local.path.provisioner/selected-node: k8sworker01
-      pv.kubernetes.io/provisioned-by: cluster.local/local-path-storage-local-path-provisioner
-    creationTimestamp: "2025-01-20T23:31:07Z"
-    finalizers:
-    - kubernetes.io/pv-protection
-    name: pvc-b06a9001-a876-4f61-9914-4d9a0cebc56f
-    resourceVersion: "172081"
-    uid: 4b6c30fb-21bd-46ad-b76e-ba0792a0f5b4
-  spec:
-    accessModes:
-    - ReadWriteOnce
-    capacity:
-      storage: 8Gi
-    claimRef:
-      apiVersion: v1
-      kind: PersistentVolumeClaim
-      name: bookstack-storage
-      namespace: bookstack
-      resourceVersion: "172015"
-      uid: b06a9001-a876-4f61-9914-4d9a0cebc56f
-    hostPath:
-      path: /opt/local-path-provisioner/pvc-b06a9001-a876-4f61-9914-4d9a0cebc56f_bookstack_bookstack-storage
-      type: DirectoryOrCreate
-    nodeAffinity:
-      required:
-        nodeSelectorTerms:
-        - matchExpressions:
-          - key: kubernetes.io/hostname
-            operator: In
-            values:
-            - k8sworker01
-    persistentVolumeReclaimPolicy: Delete
-    storageClassName: local-path
-    volumeMode: Filesystem
-  status:
-    lastPhaseTransitionTime: "2025-01-20T23:31:07Z"
-    phase: Bound
-- apiVersion: v1
-  kind: PersistentVolume
-  metadata:
-    annotations:
       local.path.provisioner/selected-node: k8sworker02
       pv.kubernetes.io/provisioned-by: cluster.local/local-path-storage-local-path-provisioner
     creationTimestamp: "2025-01-21T04:33:24Z"
@@ -503,6 +462,47 @@ items:
     volumeMode: Filesystem
   status:
     lastPhaseTransitionTime: "2025-01-21T04:33:24Z"
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      local.path.provisioner/selected-node: k8sworker03
+      pv.kubernetes.io/provisioned-by: cluster.local/local-path-storage-local-path-provisioner
+    creationTimestamp: "2025-02-11T03:06:22Z"
+    finalizers:
+    - kubernetes.io/pv-protection
+    name: pvc-d7272e4a-d199-4d8e-a6e2-b84e22a393ba
+    resourceVersion: "5250441"
+    uid: 0159ecf5-3b3e-4d57-bcfd-06fefd0f6c27
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 8Gi
+    claimRef:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      name: bookstack-storage
+      namespace: bookstack
+      resourceVersion: "5250373"
+      uid: d7272e4a-d199-4d8e-a6e2-b84e22a393ba
+    hostPath:
+      path: /opt/local-path-provisioner/pvc-d7272e4a-d199-4d8e-a6e2-b84e22a393ba_bookstack_bookstack-storage
+      type: DirectoryOrCreate
+    nodeAffinity:
+      required:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+            - k8sworker03
+    persistentVolumeReclaimPolicy: Delete
+    storageClassName: local-path
+    volumeMode: Filesystem
+  status:
+    lastPhaseTransitionTime: "2025-02-11T03:06:22Z"
     phase: Bound
 - apiVersion: v1
   kind: PersistentVolume

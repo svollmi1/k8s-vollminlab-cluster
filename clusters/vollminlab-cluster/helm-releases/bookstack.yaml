@@ -14,5 +14,4 @@ spec:
         name: bookstack
         namespace: flux-system
   values:
-env:
-  APP_URL: https://bookstack.vollminlab.com
+null

@@ -1,0 +1,2 @@
+        {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"name":"metallb-operator-webhook-service","namespace":"metallb-system"},"spec":{"ports":[{"port":443,"targetPort":9443}],"selector":{"control-plane":"controller-manager"}}}
+      control-plane: controller-manager

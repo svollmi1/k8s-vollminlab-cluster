@@ -33,7 +33,7 @@ items:
     annotations:
       meta.helm.sh/release-name: bookstack
       meta.helm.sh/release-namespace: bookstack
-    creationTimestamp: "2025-01-20T23:31:04Z"
+    creationTimestamp: "2025-02-11T03:06:17Z"
     labels:
       app.kubernetes.io/component: primary
       app.kubernetes.io/instance: bookstack
@@ -42,8 +42,8 @@ items:
       helm.sh/chart: mariadb-9.2.5
     name: bookstack-mariadb
     namespace: bookstack
-    resourceVersion: "171982"
-    uid: 3d12cabf-0b13-41a4-bb07-2964f028a260
+    resourceVersion: "5250329"
+    uid: 5ad3a144-28df-4c41-a46b-e60426fcb82a
 - apiVersion: v1
   data:
     ca.crt: |
@@ -5428,7 +5428,7 @@ items:
       service integrated-vtysh-config
   kind: ConfigMap
   metadata:
-    creationTimestamp: "2025-02-10T16:01:40Z"
+    creationTimestamp: "2025-02-11T02:04:52Z"
     labels:
       app: metallb
       app.kubernetes.io/managed-by: Helm
@@ -5444,8 +5444,8 @@ items:
       kind: MetalLB
       name: metallb
       uid: 9c7c250a-6037-4ed9-b5bd-b26a7d8a0dd5
-    resourceVersion: "5113532"
-    uid: a940a8b4-df90-41d9-951e-30415bbd37c3
+    resourceVersion: "5235140"
+    uid: c1e31733-91b6-4ca3-afcf-30c29f842b90
 - apiVersion: v1
   data:
     ca.crt: |
