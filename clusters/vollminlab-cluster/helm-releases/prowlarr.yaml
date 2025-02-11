@@ -1,0 +1,21 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: prowlarr
+  namespace: mediastack
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: prowlarr
+      version: 1.30.2.4939
+      sourceRef:
+        kind: HelmRepository
+        name: prowlarr
+        namespace: flux-system
+  values:
+persistence:
+  config:
+    enabled: true
+    existingClaim: pvc-prowlarr-config
+    mountPath: /config

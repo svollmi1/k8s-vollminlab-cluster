@@ -1,0 +1,550 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolume","metadata":{"annotations":{},"name":"pv-completed-downloads"},"spec":{"accessModes":["ReadWriteMany"],"capacity":{"storage":"100Gi"},"csi":{"driver":"smb.csi.k8s.io","nodeStageSecretRef":{"name":"smb-credentials","namespace":"mediastack"},"volumeAttributes":{"source":"//192.168.150.2/completed-downloads"},"volumeHandle":"completed-downloads-share"},"mountOptions":["uid=568","gid=568","dir_mode=0755","file_mode=0755"],"persistentVolumeReclaimPolicy":"Retain","storageClassName":"smb"}}
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2025-01-27T05:31:32Z"
+    finalizers:
+    - kubernetes.io/pv-protection
+    name: pv-completed-downloads
+    resourceVersion: "1434853"
+    uid: b24dc987-c7a3-4f2d-9af5-df1dc849379e
+  spec:
+    accessModes:
+    - ReadWriteMany
+    capacity:
+      storage: 100Gi
+    claimRef:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      name: pvc-completed-downloads
+      namespace: mediastack
+      resourceVersion: "1434851"
+      uid: 513fe48b-c7ff-4976-8750-1ebeddb0b7c3
+    csi:
+      driver: smb.csi.k8s.io
+      nodeStageSecretRef:
+        name: smb-credentials
+        namespace: mediastack
+      volumeAttributes:
+        source: //192.168.150.2/completed-downloads
+      volumeHandle: completed-downloads-share
+    mountOptions:
+    - uid=568
+    - gid=568
+    - dir_mode=0755
+    - file_mode=0755
+    persistentVolumeReclaimPolicy: Retain
+    storageClassName: smb
+    volumeMode: Filesystem
+  status:
+    lastPhaseTransitionTime: "2025-01-27T05:32:09Z"
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolume","metadata":{"annotations":{},"name":"pv-incomplete-downloads"},"spec":{"accessModes":["ReadWriteMany"],"capacity":{"storage":"100Gi"},"csi":{"driver":"smb.csi.k8s.io","nodeStageSecretRef":{"name":"smb-credentials","namespace":"mediastack"},"volumeAttributes":{"source":"//192.168.150.2/incomplete-downloads"},"volumeHandle":"incomplete-downloads-share"},"mountOptions":["uid=568","gid=568","dir_mode=0755","file_mode=0755"],"persistentVolumeReclaimPolicy":"Retain","storageClassName":"smb"}}
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2025-01-27T05:37:24Z"
+    finalizers:
+    - kubernetes.io/pv-protection
+    name: pv-incomplete-downloads
+    resourceVersion: "1435797"
+    uid: 5226e0df-0a5c-4aff-9d32-833677b4ad5a
+  spec:
+    accessModes:
+    - ReadWriteMany
+    capacity:
+      storage: 100Gi
+    claimRef:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      name: pvc-incomplete-downloads
+      namespace: mediastack
+      resourceVersion: "1435795"
+      uid: 2472fc0e-23cf-45d7-89ec-f58865948d08
+    csi:
+      driver: smb.csi.k8s.io
+      nodeStageSecretRef:
+        name: smb-credentials
+        namespace: mediastack
+      volumeAttributes:
+        source: //192.168.150.2/incomplete-downloads
+      volumeHandle: incomplete-downloads-share
+    mountOptions:
+    - uid=568
+    - gid=568
+    - dir_mode=0755
+    - file_mode=0755
+    persistentVolumeReclaimPolicy: Retain
+    storageClassName: smb
+    volumeMode: Filesystem
+  status:
+    lastPhaseTransitionTime: "2025-01-27T05:37:56Z"
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolume","metadata":{"annotations":{},"name":"pv-movies"},"spec":{"accessModes":["ReadWriteMany"],"capacity":{"storage":"100Gi"},"csi":{"driver":"smb.csi.k8s.io","nodeStageSecretRef":{"name":"smb-credentials","namespace":"mediastack"},"volumeAttributes":{"source":"//192.168.150.2/movies"},"volumeHandle":"movies"},"mountOptions":["uid=568","gid=568","dir_mode=0755","file_mode=0755"],"persistentVolumeReclaimPolicy":"Retain","storageClassName":"smb"}}
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2025-01-27T05:37:30Z"
+    finalizers:
+    - kubernetes.io/pv-protection
+    name: pv-movies
+    resourceVersion: "1435814"
+    uid: 413b0ed1-cf8c-45ba-a4f6-8f7696574e97
+  spec:
+    accessModes:
+    - ReadWriteMany
+    capacity:
+      storage: 100Gi
+    claimRef:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      name: pvc-movies
+      namespace: mediastack
+      resourceVersion: "1435812"
+      uid: 30817667-4542-4735-8503-0cddb02c76ca
+    csi:
+      driver: smb.csi.k8s.io
+      nodeStageSecretRef:
+        name: smb-credentials
+        namespace: mediastack
+      volumeAttributes:
+        source: //192.168.150.2/movies
+      volumeHandle: movies
+    mountOptions:
+    - uid=568
+    - gid=568
+    - dir_mode=0755
+    - file_mode=0755
+    persistentVolumeReclaimPolicy: Retain
+    storageClassName: smb
+    volumeMode: Filesystem
+  status:
+    lastPhaseTransitionTime: "2025-01-27T05:38:01Z"
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolume","metadata":{"annotations":{},"name":"pv-tv"},"spec":{"accessModes":["ReadWriteMany"],"capacity":{"storage":"100Gi"},"csi":{"driver":"smb.csi.k8s.io","nodeStageSecretRef":{"name":"smb-credentials","namespace":"mediastack"},"volumeAttributes":{"source":"//192.168.150.2/tv"},"volumeHandle":"tv"},"mountOptions":["uid=568","gid=568","dir_mode=0755","file_mode=0755"],"persistentVolumeReclaimPolicy":"Retain","storageClassName":"smb"}}
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2025-01-27T05:37:35Z"
+    finalizers:
+    - kubernetes.io/pv-protection
+    name: pv-tv
+    resourceVersion: "1435827"
+    uid: de1e6e7d-099f-4034-9813-94c319ac8447
+  spec:
+    accessModes:
+    - ReadWriteMany
+    capacity:
+      storage: 100Gi
+    claimRef:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      name: pvc-tv
+      namespace: mediastack
+      resourceVersion: "1435825"
+      uid: a03bde74-1723-4f75-85be-1ec7bd814152
+    csi:
+      driver: smb.csi.k8s.io
+      nodeStageSecretRef:
+        name: smb-credentials
+        namespace: mediastack
+      volumeAttributes:
+        source: //192.168.150.2/tv
+      volumeHandle: tv
+    mountOptions:
+    - uid=568
+    - gid=568
+    - dir_mode=0755
+    - file_mode=0755
+    persistentVolumeReclaimPolicy: Retain
+    storageClassName: smb
+    volumeMode: Filesystem
+  status:
+    lastPhaseTransitionTime: "2025-01-27T05:38:05Z"
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      local.path.provisioner/selected-node: k8sworker01
+      pv.kubernetes.io/provisioned-by: cluster.local/local-path-storage-local-path-provisioner
+    creationTimestamp: "2025-01-20T23:31:07Z"
+    finalizers:
+    - kubernetes.io/pv-protection
+    name: pvc-62304e0f-8004-4812-9a32-e6b9deabc21d
+    resourceVersion: "172074"
+    uid: 78cccaaa-1e92-4acd-b009-e8b564a55178
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 8Gi
+    claimRef:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      name: bookstack-uploads
+      namespace: bookstack
+      resourceVersion: "172009"
+      uid: 62304e0f-8004-4812-9a32-e6b9deabc21d
+    hostPath:
+      path: /opt/local-path-provisioner/pvc-62304e0f-8004-4812-9a32-e6b9deabc21d_bookstack_bookstack-uploads
+      type: DirectoryOrCreate
+    nodeAffinity:
+      required:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+            - k8sworker01
+    persistentVolumeReclaimPolicy: Delete
+    storageClassName: local-path
+    volumeMode: Filesystem
+  status:
+    lastPhaseTransitionTime: "2025-01-20T23:31:07Z"
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      local.path.provisioner/selected-node: k8sworker01
+      pv.kubernetes.io/provisioned-by: cluster.local/local-path-storage-local-path-provisioner
+    creationTimestamp: "2025-01-28T00:09:51Z"
+    finalizers:
+    - kubernetes.io/pv-protection
+    name: pvc-772c2617-478b-46bd-b3f4-82daff5bd594
+    resourceVersion: "1614908"
+    uid: 35b00a7b-384f-47b0-97c0-687b175a6961
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 5Gi
+    claimRef:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      name: pvc-overseerr-config
+      namespace: mediastack
+      resourceVersion: "1614876"
+      uid: 772c2617-478b-46bd-b3f4-82daff5bd594
+    hostPath:
+      path: /opt/local-path-provisioner/pvc-772c2617-478b-46bd-b3f4-82daff5bd594_mediastack_pvc-overseerr-config
+      type: DirectoryOrCreate
+    nodeAffinity:
+      required:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+            - k8sworker01
+    persistentVolumeReclaimPolicy: Delete
+    storageClassName: local-path
+    volumeMode: Filesystem
+  status:
+    lastPhaseTransitionTime: "2025-01-28T00:09:51Z"
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      local.path.provisioner/selected-node: k8sworker02
+      pv.kubernetes.io/provisioned-by: cluster.local/local-path-storage-local-path-provisioner
+    creationTimestamp: "2025-01-27T23:48:32Z"
+    finalizers:
+    - kubernetes.io/pv-protection
+    name: pvc-7d3ba886-a7a4-4536-9b0b-399cf9883afb
+    resourceVersion: "1611080"
+    uid: 5e3356a9-c019-4744-9cbf-cf0680026371
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 5Gi
+    claimRef:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      name: pvc-sonarr-config
+      namespace: mediastack
+      resourceVersion: "1611043"
+      uid: 7d3ba886-a7a4-4536-9b0b-399cf9883afb
+    hostPath:
+      path: /opt/local-path-provisioner/pvc-7d3ba886-a7a4-4536-9b0b-399cf9883afb_mediastack_pvc-sonarr-config
+      type: DirectoryOrCreate
+    nodeAffinity:
+      required:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+            - k8sworker02
+    persistentVolumeReclaimPolicy: Delete
+    storageClassName: local-path
+    volumeMode: Filesystem
+  status:
+    lastPhaseTransitionTime: "2025-01-27T23:48:32Z"
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      local.path.provisioner/selected-node: k8sworker01
+      pv.kubernetes.io/provisioned-by: cluster.local/local-path-storage-local-path-provisioner
+    creationTimestamp: "2025-01-27T23:55:52Z"
+    finalizers:
+    - kubernetes.io/pv-protection
+    name: pvc-8426e880-aac0-44dd-aa1e-0e281ee556d5
+    resourceVersion: "1612435"
+    uid: 427b785b-72aa-41d7-a898-cf64ed4300c2
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 5Gi
+    claimRef:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      name: pvc-prowlarr-config
+      namespace: mediastack
+      resourceVersion: "1612405"
+      uid: 8426e880-aac0-44dd-aa1e-0e281ee556d5
+    hostPath:
+      path: /opt/local-path-provisioner/pvc-8426e880-aac0-44dd-aa1e-0e281ee556d5_mediastack_pvc-prowlarr-config
+      type: DirectoryOrCreate
+    nodeAffinity:
+      required:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+            - k8sworker01
+    persistentVolumeReclaimPolicy: Delete
+    storageClassName: local-path
+    volumeMode: Filesystem
+  status:
+    lastPhaseTransitionTime: "2025-01-27T23:55:52Z"
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      local.path.provisioner/selected-node: k8sworker02
+      pv.kubernetes.io/provisioned-by: cluster.local/local-path-storage-local-path-provisioner
+    creationTimestamp: "2025-01-28T00:08:25Z"
+    finalizers:
+    - kubernetes.io/pv-protection
+    name: pvc-9f0fa5bc-e00d-4b78-a886-36d29e3ae956
+    resourceVersion: "1614600"
+    uid: 88efc21c-ce7a-440f-82a5-2f08e0890810
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 5Gi
+    claimRef:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      name: pvc-sabnzbd-config
+      namespace: mediastack
+      resourceVersion: "1614572"
+      uid: 9f0fa5bc-e00d-4b78-a886-36d29e3ae956
+    hostPath:
+      path: /opt/local-path-provisioner/pvc-9f0fa5bc-e00d-4b78-a886-36d29e3ae956_mediastack_pvc-sabnzbd-config
+      type: DirectoryOrCreate
+    nodeAffinity:
+      required:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+            - k8sworker02
+    persistentVolumeReclaimPolicy: Delete
+    storageClassName: local-path
+    volumeMode: Filesystem
+  status:
+    lastPhaseTransitionTime: "2025-01-28T00:08:25Z"
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      local.path.provisioner/selected-node: k8sworker01
+      pv.kubernetes.io/provisioned-by: cluster.local/local-path-storage-local-path-provisioner
+    creationTimestamp: "2025-01-20T07:45:31Z"
+    finalizers:
+    - kubernetes.io/pv-protection
+    name: pvc-a129e16c-4e52-475b-859b-c223cab81106
+    resourceVersion: "25687"
+    uid: 5f3cf2ab-a1fc-4e9f-9fa6-899c80bc37ac
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 10Gi
+    claimRef:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      name: portainer
+      namespace: portainer
+      resourceVersion: "25653"
+      uid: a129e16c-4e52-475b-859b-c223cab81106
+    hostPath:
+      path: /opt/local-path-provisioner/pvc-a129e16c-4e52-475b-859b-c223cab81106_portainer_portainer
+      type: DirectoryOrCreate
+    nodeAffinity:
+      required:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+            - k8sworker01
+    persistentVolumeReclaimPolicy: Delete
+    storageClassName: local-path
+    volumeMode: Filesystem
+  status:
+    lastPhaseTransitionTime: "2025-01-20T07:45:31Z"
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      local.path.provisioner/selected-node: k8sworker01
+      pv.kubernetes.io/provisioned-by: cluster.local/local-path-storage-local-path-provisioner
+    creationTimestamp: "2025-01-20T23:31:07Z"
+    finalizers:
+    - kubernetes.io/pv-protection
+    name: pvc-b06a9001-a876-4f61-9914-4d9a0cebc56f
+    resourceVersion: "172081"
+    uid: 4b6c30fb-21bd-46ad-b76e-ba0792a0f5b4
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 8Gi
+    claimRef:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      name: bookstack-storage
+      namespace: bookstack
+      resourceVersion: "172015"
+      uid: b06a9001-a876-4f61-9914-4d9a0cebc56f
+    hostPath:
+      path: /opt/local-path-provisioner/pvc-b06a9001-a876-4f61-9914-4d9a0cebc56f_bookstack_bookstack-storage
+      type: DirectoryOrCreate
+    nodeAffinity:
+      required:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+            - k8sworker01
+    persistentVolumeReclaimPolicy: Delete
+    storageClassName: local-path
+    volumeMode: Filesystem
+  status:
+    lastPhaseTransitionTime: "2025-01-20T23:31:07Z"
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      local.path.provisioner/selected-node: k8sworker02
+      pv.kubernetes.io/provisioned-by: cluster.local/local-path-storage-local-path-provisioner
+    creationTimestamp: "2025-01-21T04:33:24Z"
+    finalizers:
+    - kubernetes.io/pv-protection
+    name: pvc-ca461420-0680-4979-91bc-d8938236e6b1
+    resourceVersion: "213975"
+    uid: 34d7b533-7730-4462-9cb4-fbb78e7c0a74
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 2Gi
+    claimRef:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      name: storage-prometheus-alertmanager-0
+      namespace: monitoring
+      resourceVersion: "213831"
+      uid: ca461420-0680-4979-91bc-d8938236e6b1
+    hostPath:
+      path: /opt/local-path-provisioner/pvc-ca461420-0680-4979-91bc-d8938236e6b1_monitoring_storage-prometheus-alertmanager-0
+      type: DirectoryOrCreate
+    nodeAffinity:
+      required:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+            - k8sworker02
+    persistentVolumeReclaimPolicy: Delete
+    storageClassName: local-path
+    volumeMode: Filesystem
+  status:
+    lastPhaseTransitionTime: "2025-01-21T04:33:24Z"
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      local.path.provisioner/selected-node: k8sworker01
+      pv.kubernetes.io/provisioned-by: cluster.local/local-path-storage-local-path-provisioner
+    creationTimestamp: "2025-01-28T00:06:25Z"
+    finalizers:
+    - kubernetes.io/pv-protection
+    name: pvc-ed217a11-6264-46f0-9991-b412cbded24e
+    resourceVersion: "1614207"
+    uid: 6d432085-5aa6-48ed-88ff-239f9902bf9a
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 5Gi
+    claimRef:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      name: pvc-radarr-config
+      namespace: mediastack
+      resourceVersion: "1614173"
+      uid: ed217a11-6264-46f0-9991-b412cbded24e
+    hostPath:
+      path: /opt/local-path-provisioner/pvc-ed217a11-6264-46f0-9991-b412cbded24e_mediastack_pvc-radarr-config
+      type: DirectoryOrCreate
+    nodeAffinity:
+      required:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+            - k8sworker01
+    persistentVolumeReclaimPolicy: Delete
+    storageClassName: local-path
+    volumeMode: Filesystem
+  status:
+    lastPhaseTransitionTime: "2025-01-28T00:06:25Z"
+    phase: Bound
+kind: List
+metadata:
+  resourceVersion: ""

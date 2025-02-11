@@ -1,0 +1,33 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: sonarr
+  namespace: mediastack
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: sonarr
+      version: 4.0.12.2823
+      sourceRef:
+        kind: HelmRepository
+        name: sonarr
+        namespace: flux-system
+  values:
+persistence:
+  completed-downloads:
+    enabled: true
+    existingClaim: pvc-completed-downloads
+    mountPath: /downloads/completed-downloads
+  config:
+    enabled: true
+    existingClaim: pvc-sonarr-config
+    mountPath: /config
+  incomplete-downloads:
+    enabled: true
+    existingClaim: pvc-incomplete-downloads
+    mountPath: /downloads/incomplete-downloads
+  movies:
+    enabled: true
+    existingClaim: pvc-tv
+    mountPath: /downloads/tv
