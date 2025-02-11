@@ -1,0 +1,155 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+  creationTimestamp: "2025-02-11T01:25:51Z"
+  generation: 1
+  labels:
+    app.kubernetes.io/component: source-controller
+    app.kubernetes.io/instance: flux-system
+    app.kubernetes.io/part-of: flux
+    app.kubernetes.io/version: v2.4.0
+    control-plane: controller
+    kustomize.toolkit.fluxcd.io/name: flux-system
+    kustomize.toolkit.fluxcd.io/namespace: flux-system
+  name: source-controller
+  namespace: flux-system
+  resourceVersion: "5225583"
+  uid: 59a08b15-d8da-4425-9417-64a2961ba054
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: source-controller
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        prometheus.io/port: "8080"
+        prometheus.io/scrape: "true"
+      creationTimestamp: null
+      labels:
+        app: source-controller
+    spec:
+      containers:
+      - args:
+        - --events-addr=http://notification-controller.flux-system.svc.cluster.local./
+        - --watch-all-namespaces=true
+        - --log-level=info
+        - --log-encoding=json
+        - --enable-leader-election
+        - --storage-path=/data
+        - --storage-adv-addr=source-controller.$(RUNTIME_NAMESPACE).svc.cluster.local.
+        env:
+        - name: RUNTIME_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: TUF_ROOT
+          value: /tmp/.sigstore
+        - name: GOMAXPROCS
+          valueFrom:
+            resourceFieldRef:
+              containerName: manager
+              divisor: "0"
+              resource: limits.cpu
+        - name: GOMEMLIMIT
+          valueFrom:
+            resourceFieldRef:
+              containerName: manager
+              divisor: "0"
+              resource: limits.memory
+        image: ghcr.io/fluxcd/source-controller:v1.4.1
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthz
+            port: healthz
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: manager
+        ports:
+        - containerPort: 9090
+          name: http
+          protocol: TCP
+        - containerPort: 8080
+          name: http-prom
+          protocol: TCP
+        - containerPort: 9440
+          name: healthz
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: http
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          limits:
+            cpu: "1"
+            memory: 1Gi
+          requests:
+            cpu: 50m
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          seccompProfile:
+            type: RuntimeDefault
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /data
+          name: data
+        - mountPath: /tmp
+          name: tmp
+      dnsPolicy: ClusterFirst
+      nodeSelector:
+        kubernetes.io/os: linux
+      priorityClassName: system-cluster-critical
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        fsGroup: 1337
+      serviceAccount: source-controller
+      serviceAccountName: source-controller
+      terminationGracePeriodSeconds: 10
+      volumes:
+      - emptyDir: {}
+        name: data
+      - emptyDir: {}
+        name: tmp
+status:
+  availableReplicas: 1
+  conditions:
+  - lastTransitionTime: "2025-02-11T01:25:56Z"
+    lastUpdateTime: "2025-02-11T01:25:56Z"
+    message: Deployment has minimum availability.
+    reason: MinimumReplicasAvailable
+    status: "True"
+    type: Available
+  - lastTransitionTime: "2025-02-11T01:25:51Z"
+    lastUpdateTime: "2025-02-11T01:25:56Z"
+    message: ReplicaSet "source-controller-6d597849c8" has successfully progressed.
+    reason: NewReplicaSetAvailable
+    status: "True"
+    type: Progressing
+  observedGeneration: 1
+  readyReplicas: 1
+  replicas: 1
+  updatedReplicas: 1

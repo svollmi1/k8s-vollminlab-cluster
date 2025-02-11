@@ -1,0 +1,145 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+  creationTimestamp: "2025-02-05T05:35:13Z"
+  generation: 1
+  labels:
+    app.kubernetes.io/name: calico-kube-controllers
+    k8s-app: calico-kube-controllers
+  name: calico-kube-controllers
+  namespace: calico-system
+  ownerReferences:
+  - apiVersion: operator.tigera.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Installation
+    name: default
+    uid: ab7a8510-608a-4cc0-aa71-390cf5f2d954
+  resourceVersion: "4438558"
+  uid: 73fd453a-c6de-44fe-af28-59dede7cc5fe
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      k8s-app: calico-kube-controllers
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        hash.operator.tigera.io/system: fdde45054a8ae4f629960ce37570929502e59449
+        tigera-operator.hash.operator.tigera.io/tigera-ca-private: 4f9790e2e83c5941def50741f51b9c20aa879899
+      creationTimestamp: null
+      labels:
+        app.kubernetes.io/name: calico-kube-controllers
+        k8s-app: calico-kube-controllers
+      name: calico-kube-controllers
+      namespace: calico-system
+    spec:
+      containers:
+      - env:
+        - name: KUBE_CONTROLLERS_CONFIG_NAME
+          value: default
+        - name: DATASTORE_TYPE
+          value: kubernetes
+        - name: ENABLED_CONTROLLERS
+          value: node
+        - name: FIPS_MODE_ENABLED
+          value: "false"
+        - name: DISABLE_KUBE_CONTROLLERS_CONFIG_API
+          value: "false"
+        - name: KUBERNETES_SERVICE_HOST
+          value: 10.96.0.1
+        - name: KUBERNETES_SERVICE_PORT
+          value: "443"
+        - name: CA_CRT_PATH
+          value: /etc/pki/tls/certs/tigera-ca-bundle.crt
+        image: docker.io/calico/kube-controllers:v3.29.1
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          exec:
+            command:
+            - /usr/bin/check-status
+            - -l
+          failureThreshold: 6
+          initialDelaySeconds: 10
+          periodSeconds: 60
+          successThreshold: 1
+          timeoutSeconds: 10
+        name: calico-kube-controllers
+        readinessProbe:
+          exec:
+            command:
+            - /usr/bin/check-status
+            - -r
+          failureThreshold: 3
+          periodSeconds: 30
+          successThreshold: 1
+          timeoutSeconds: 10
+        resources: {}
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          runAsGroup: 0
+          runAsNonRoot: true
+          runAsUser: 999
+          seccompProfile:
+            type: RuntimeDefault
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /etc/pki/tls/certs
+          name: tigera-ca-bundle
+          readOnly: true
+        - mountPath: /etc/pki/tls/cert.pem
+          name: tigera-ca-bundle
+          readOnly: true
+          subPath: ca-bundle.crt
+      dnsPolicy: ClusterFirst
+      nodeSelector:
+        kubernetes.io/os: linux
+      priorityClassName: system-cluster-critical
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: calico-kube-controllers
+      serviceAccountName: calico-kube-controllers
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/control-plane
+      - key: CriticalAddonsOnly
+        operator: Exists
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: tigera-ca-bundle
+        name: tigera-ca-bundle
+status:
+  availableReplicas: 1
+  conditions:
+  - lastTransitionTime: "2025-02-05T05:35:13Z"
+    lastUpdateTime: "2025-02-05T05:35:20Z"
+    message: ReplicaSet "calico-kube-controllers-688c9ff74d" has successfully progressed.
+    reason: NewReplicaSetAvailable
+    status: "True"
+    type: Progressing
+  - lastTransitionTime: "2025-02-08T06:44:20Z"
+    lastUpdateTime: "2025-02-08T06:44:20Z"
+    message: Deployment has minimum availability.
+    reason: MinimumReplicasAvailable
+    status: "True"
+    type: Available
+  observedGeneration: 1
+  readyReplicas: 1
+  replicas: 1
+  updatedReplicas: 1

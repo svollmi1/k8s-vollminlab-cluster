@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2025-02-11T01:25:51Z"
+  labels:
+    app.kubernetes.io/component: source-controller
+    app.kubernetes.io/instance: flux-system
+    app.kubernetes.io/part-of: flux
+    app.kubernetes.io/version: v2.4.0
+    control-plane: controller
+    kustomize.toolkit.fluxcd.io/name: flux-system
+    kustomize.toolkit.fluxcd.io/namespace: flux-system
+  name: source-controller
+  namespace: flux-system
+  resourceVersion: "5225572"
+  uid: bd3de05a-dfab-4bd4-a46e-1d5af24fafe5
+spec:
+  clusterIP: 10.111.241.142
+  clusterIPs:
+  - 10.111.241.142
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: http
+  selector:
+    app: source-controller
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}

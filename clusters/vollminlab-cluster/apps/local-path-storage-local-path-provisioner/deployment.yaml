@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+    meta.helm.sh/release-name: local-path-storage
+    meta.helm.sh/release-namespace: local-path-storage
+  creationTimestamp: "2025-01-20T05:07:14Z"
+  generation: 1
+  labels:
+    app.kubernetes.io/instance: local-path-storage
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: local-path-provisioner
+    app.kubernetes.io/version: v0.0.30
+    helm.sh/chart: local-path-provisioner-0.0.30
+  name: local-path-storage-local-path-provisioner
+  namespace: local-path-storage
+  resourceVersion: "3557716"
+  uid: 2d6fed6d-4992-454b-8906-1ac9d590cc08
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: local-path-storage
+      app.kubernetes.io/name: local-path-provisioner
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app.kubernetes.io/instance: local-path-storage
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: local-path-provisioner
+        app.kubernetes.io/version: v0.0.30
+        helm.sh/chart: local-path-provisioner-0.0.30
+    spec:
+      containers:
+      - command:
+        - local-path-provisioner
+        - --debug
+        - start
+        - --config
+        - /etc/config/config.json
+        - --service-account-name
+        - local-path-storage-local-path-provisioner
+        - --provisioner-name
+        - cluster.local/local-path-storage-local-path-provisioner
+        - --helper-image
+        - busybox:latest
+        - --configmap-name
+        - local-path-config
+        env:
+        - name: POD_NAMESPACE
+          value: local-path-storage
+        - name: CONFIG_MOUNT_PATH
+          value: /etc/config/
+        image: rancher/local-path-provisioner:v0.0.30
+        imagePullPolicy: IfNotPresent
+        name: local-path-provisioner
+        resources: {}
+        securityContext: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /etc/config/
+          name: config-volume
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: local-path-storage-local-path-provisioner
+      serviceAccountName: local-path-storage-local-path-provisioner
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: local-path-config
+        name: config-volume
+status:
+  availableReplicas: 1
+  conditions:
+  - lastTransitionTime: "2025-01-20T05:07:14Z"
+    lastUpdateTime: "2025-01-20T05:07:16Z"
+    message: ReplicaSet "local-path-storage-local-path-provisioner-5d994b58dd" has
+      successfully progressed.
+    reason: NewReplicaSetAvailable
+    status: "True"
+    type: Progressing
+  - lastTransitionTime: "2025-02-05T04:07:45Z"
+    lastUpdateTime: "2025-02-05T04:07:45Z"
+    message: Deployment has minimum availability.
+    reason: MinimumReplicasAvailable
+    status: "True"
+    type: Available
+  observedGeneration: 1
+  readyReplicas: 1
+  replicas: 1
+  updatedReplicas: 1
