@@ -14,5 +14,3 @@ spec:
   sourceRef:
     kind: OCIRepository
     name: capacitor
-  resources:
-    - ingress.yaml
