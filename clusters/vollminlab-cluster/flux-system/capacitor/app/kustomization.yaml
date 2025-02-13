@@ -14,7 +14,3 @@ spec:
   sourceRef:
     kind: OCIRepository
     name: capacitor
-    kind: Ingress
-    name: capacitor-ingress
-    kind: NetworkPolicy
-    name: capacitor-ingress
