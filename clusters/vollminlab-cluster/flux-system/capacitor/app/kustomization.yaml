@@ -1,20 +1,10 @@
-apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 metadata:
   name: capacitor-deployment
   namespace: flux-system
-spec:
-  targetNamespace: flux-system
-  resources:
-    - helmrepository.yaml
-    - helmrelease.yaml
-    - ingress.yaml
-    - networkpolicy.yaml
-  commonLabels:
-    app.kubernetes.io/name: capacitor
-    app.kubernetes.io/instance: capacitor
-  healthChecks:
-    - apiVersion: helm.toolkit.fluxcd.io/v2beta2
-      kind: HelmRelease
-      name: capacitor
-      namespace: flux-system
+resources:
+  - helmrepository.yaml
+  - helmrelease.yaml
+  - ingress.yaml
+  - networkpolicy.yaml

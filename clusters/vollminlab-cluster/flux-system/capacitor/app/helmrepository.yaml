@@ -1,7 +1,8 @@
 apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
-  name: onechart
+  name: capacitor-repo
   namespace: flux-system
 spec:
   url: https://chart.onechart.dev
+  interval: 1m
