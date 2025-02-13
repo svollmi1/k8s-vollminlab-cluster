@@ -12,6 +12,7 @@ spec:
         kind: HelmRepository
         name: homepage-repo
         namespace: flux-system
+  interval: 5m
   values:
     config:
       bookmarks:
