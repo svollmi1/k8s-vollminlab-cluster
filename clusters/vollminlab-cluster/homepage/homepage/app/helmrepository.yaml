@@ -1,0 +1,10 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: homepage
+  namespace: flux-system
+spec:
+  url: https://jameswynn.github.io/helm-charts
+  interval: 1m0s
+  provider: generic
+

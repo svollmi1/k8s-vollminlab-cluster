@@ -1,0 +1,80 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: homepage
+  namespace: homepage
+spec:
+  chart:
+    spec:
+      chart: homepage
+      version: 2.0.1  # Make sure to use the correct version of the Helm chart you want to deploy
+      sourceRef:
+        kind: HelmRepository
+        name: homepage-repo
+        namespace: flux-system
+  values:
+    config:
+      bookmarks:
+        - Developer:
+            - Github:
+                - abbr: GH
+                  href: https://github.com/
+      kubernetes:
+        mode: cluster
+      services:
+        - My First Group:
+            - My First Service:
+                description: Homepage is awesome
+                href: http://localhost/
+        - My Second Group:
+            - My Second Service:
+                description: Homepage is the best
+                href: http://localhost/
+        - My Third Group:
+            - My Third Service:
+                description: "Homepage is \U0001F60E"
+                href: http://localhost/
+      settings: null
+      widgets:
+        - kubernetes:
+            cluster:
+              cpu: true
+              label: cluster
+              memory: true
+              show: true
+              showLabel: true
+          nodes:
+            cpu: true
+            memory: true
+            show: true
+            showLabel: true
+        - search:
+            provider: duckduckgo
+            target: _blank
+    enableRbac: true
+    ingress:
+      main:
+        ingressClassName: nginx
+        enabled: true
+        annotations:
+          gethomepage.dev/description: Dynamically Detected Homepage
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Dynamic
+          gethomepage.dev/icon: homepage.png
+          gethomepage.dev/name: Homepage
+          nginx.ingress.kubernetes.io/rewrite-target: /
+          nginx.ingress.kubernetes.io/ssl-redirect: "true"
+        hosts:
+          - host: homepage.vollminlab.com
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - hosts:
+              - homepage.vollminlab.com
+            secretName: wildcard-tls
+        service:
+          port: 3000
+    serviceAccount:
+      create: true
+      name: homepage
