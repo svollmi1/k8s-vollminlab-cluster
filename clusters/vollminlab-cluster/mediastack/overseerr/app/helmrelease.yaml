@@ -4,6 +4,7 @@ metadata:
   name: overseerr
   namespace: mediastack
 spec:
+  interval: 5m
   chart:
     spec:
       chart: overseerr
