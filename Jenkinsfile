@@ -1,13 +1,13 @@
 pipeline {
     agent any
     environment {
-        KUBECONFIG = '/home/jenkins/.kube/config'  // Ensure kubeconfig path is correct
+        KUBECONFIG = '/home/vollmin/.kube/config'  // Ensure kubeconfig path is correct
         GITHUB_TOKEN = credentials('4e6c3324-d53c-4c9c-afd9-6fc96ae88f72')  // GitHub Personal Access Token (PAT)
     }
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/your-user/your-repo.git'
+                git branch: 'main', url: 'https://github.com/svollmi1/k8s-vollminlab-cluster.git'
             }
         }
 
@@ -58,7 +58,7 @@ pipeline {
     post {
         always {
             // Clean up the workspace (local files)
-            cleanWs()  
+            cleanWs()
         }
 
         success {
@@ -68,7 +68,7 @@ pipeline {
                 sh """
                 curl -X POST -H 'Authorization: token ${GITHUB_TOKEN}' \
                     -d '{"state": "success", "target_url": "http://your-jenkins-url.com", "description": "CI passed", "context": "ci/check"}' \
-                    https://api.github.com/repos/your-user/your-repo/statuses/${commitSha}
+                    https://api.github.com/repos/svollmi1/k8s-vollminlab-cluster/statuses/${commitSha}
                 """
             }
         }
@@ -80,7 +80,7 @@ pipeline {
                 sh """
                 curl -X POST -H 'Authorization: token ${GITHUB_TOKEN}' \
                     -d '{"state": "error", "target_url": "http://your-jenkins-url.com", "description": "CI failed", "context": "ci/check"}' \
-                    https://api.github.com/repos/your-user/your-repo/statuses/${commitSha}
+                    https://api.github.com/repos/svollmi1/k8s-vollminlab-cluster/statuses/${commitSha}
                 """
             }
         }
