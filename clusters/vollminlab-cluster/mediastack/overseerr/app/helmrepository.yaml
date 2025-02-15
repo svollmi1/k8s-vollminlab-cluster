@@ -6,3 +6,5 @@ metadata:
 spec:
   url: oci://tccr.io/truecharts/overseerr
   interval: 1m
+  ref:
+    tag: latest
