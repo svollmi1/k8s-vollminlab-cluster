@@ -8,7 +8,7 @@ spec:
   releaseName: capacitor
   chart:
     spec:
-      chart: onechart/onechart
+      chart: onechart
       version: 0.73.0
       sourceRef:
         kind: HelmRepository
