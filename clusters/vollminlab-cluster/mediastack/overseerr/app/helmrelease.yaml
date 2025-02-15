@@ -9,13 +9,9 @@ spec:
       chart: overseerr
       sourceRef:
         kind: HelmRepository
-        name: overseerr-repo  # Ensure this matches the HelmRepository name you created
+        name: overseerr-repo
         namespace: flux-system
       version: "15.5.1"
-  valuesFrom:
-    - configMapKeyRef:
-        name: overseerr-values  # If you decide to use a ConfigMap or Secret
-        key: values.yaml
   values: |
     image:
       pullPolicy: IfNotPresent
