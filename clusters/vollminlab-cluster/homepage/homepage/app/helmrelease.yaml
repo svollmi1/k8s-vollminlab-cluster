@@ -53,29 +53,6 @@ spec:
             provider: duckduckgo
             target: _blank
     enableRbac: true
-    ingress:
-      main:
-        ingressClassName: nginx
-        enabled: true
-        annotations:
-          gethomepage.dev/description: Dynamically Detected Homepage
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Dynamic
-          gethomepage.dev/icon: homepage.png
-          gethomepage.dev/name: Homepage
-          nginx.ingress.kubernetes.io/rewrite-target: /
-          nginx.ingress.kubernetes.io/ssl-redirect: "true"
-        hosts:
-          - host: homepage.vollminlab.com
-            paths:
-              - path: /
-                pathType: Prefix
-        tls:
-          - hosts:
-              - homepage.vollminlab.com
-            secretName: wildcard-tls
-        service:
-          port: 3000
     serviceAccount:
       create: true
       name: homepage
