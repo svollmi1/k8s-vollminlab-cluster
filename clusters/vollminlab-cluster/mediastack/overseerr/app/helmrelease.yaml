@@ -5,14 +5,10 @@ metadata:
   namespace: mediastack
 spec:
   interval: 5m
-  chart:
-    spec:
-      chart: overseerr
-      sourceRef:
-        kind: OCIRepository
-        name: overseerr-repo
-        namespace: flux-system
-      version: "15.5.1"
+  chartRef:
+    kind: OCIRepository
+    name: overseerr-repo
+    namespace: flux-system
   values: |
     image:
       pullPolicy: IfNotPresent
