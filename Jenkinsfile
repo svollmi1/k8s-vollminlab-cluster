@@ -5,6 +5,20 @@ pipeline {
         GITHUB_TOKEN = credentials('4e6c3324-d53c-4c9c-afd9-6fc96ae88f72')  // GitHub Personal Access Token (PAT)
     }
     stages {
+        stage('Install kubectl') {
+            steps {
+                script {
+                    // Install kubectl on the Jenkins agent
+                    sh '''
+                    curl -LO https://dl.k8s.io/release/v1.26.3/bin/linux/amd64/kubectl
+                    chmod +x ./kubectl
+                    mv ./kubectl /usr/local/bin/kubectl
+                    '''
+                }
+            }
+        }
+
+        // The rest of your pipeline stages
         stage('Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/svollmi1/k8s-vollminlab-cluster.git'
