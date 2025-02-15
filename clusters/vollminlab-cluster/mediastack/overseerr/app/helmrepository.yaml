@@ -5,3 +5,4 @@ metadata:
   namespace: flux-system
 spec:
   url: oci://tccr.io/truecharts/overseerr
+  interval: 1m
