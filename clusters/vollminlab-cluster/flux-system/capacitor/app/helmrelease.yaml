@@ -4,6 +4,7 @@ metadata:
   name: capacitor
   namespace: flux-system
 spec:
+  interval: 5m
   releaseName: capacitor
   chart:
     spec:
