@@ -1,0 +1,9 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: overseerr-deployment
+  namespace: flux-system
+resources:
+  - helmrepository.yaml
+  - helmrelease.yaml
+  - ingress.yaml

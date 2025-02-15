@@ -1,0 +1,56 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: overseerr
+  namespace: mediastack
+spec:
+  chart:
+    spec:
+      chart: overseerr
+      sourceRef:
+        kind: HelmRepository
+        name: overseerr-repo  # Ensure this matches the HelmRepository name you created
+        namespace: flux-system
+      version: "15.5.1"
+  valuesFrom:
+    - configMapKeyRef:
+        name: overseerr-values  # If you decide to use a ConfigMap or Secret
+        key: values.yaml
+  values: |
+    image:
+      pullPolicy: IfNotPresent
+      repository: ghcr.io/sct/overseerr
+      tag: 1.33.2@sha256:714ea6db2bc007a2262d112bef7eec74972eb33d9c72bddb9cbd98b8742de950
+    persistence:
+      config:
+        enabled: true
+        existingClaim: pvc-overseerr-config
+        mountPath: /app/config
+      movies:
+        enabled: true
+        existingClaim: pvc-movies
+        mountPath: /downloads/movies
+      tv:
+        enabled: true
+        existingClaim: pvc-tv
+        mountPath: /downloads/tv
+    portal:
+      open:
+        enabled: true
+    securityContext:
+      container:
+        readOnlyRootFilesystem: false
+    service:
+      main:
+        ports:
+          main:
+            port: 5055
+            targetPort: 5055
+    workload:
+      main:
+        podSpec:
+          containers:
+            main:
+              env:
+                LOG_LEVEL: info
+
