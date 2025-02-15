@@ -9,7 +9,7 @@ spec:
     spec:
       chart: overseerr
       sourceRef:
-        kind: HelmRepository
+        kind: OCIRepository
         name: overseerr-repo
         namespace: flux-system
       version: "15.5.1"
