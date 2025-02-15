@@ -1,80 +1,84 @@
 pipeline {
     agent any
-
     environment {
-        KUBECONFIG = credentials('jenkins-kubeconfig')  // Add a Kubernetes credential in Jenkins
+        KUBECONFIG = "/home/vollmin/.kube/config" // Path to your kubeconfig
+        TEST_NAMESPACE = "ci-testing"
+        GITHUB_TOKEN = credentials('4e6c3324-d53c-4c9c-afd9-6fc96ae88f72') // Reference the GitHub Personal Access Token (PAT)
     }
-
     stages {
-        stage('Checkout Code') {
+        stage('Checkout') {
             steps {
-                git branch: env.BRANCH_NAME, url: 'https://github.com/my-org/my-repo.git'
+                // Checkout the code from GitHub
+                checkout scm
             }
         }
-
         stage('Validate YAML') {
             steps {
                 script {
-                    sh 'yamllint -d "{extends: default, rules: {line-length: disable}}" . || exit 1'
+                    // Validate YAML files using kubeval or yamllint
+                    sh 'yamllint .'
+                    sh 'kubeval . --kubernetes-version "1.21.0"'
                 }
             }
         }
-
-        stage('Validate Helm Charts') {
+        stage('Check Image Changes') {
             steps {
                 script {
-                    sh 'helm lint helm/'  // Adjust path if needed
-                }
-            }
-        }
-
-        stage('Validate Kubernetes Manifests') {
-            steps {
-                script {
-                    sh 'kubeval -d k8s/'  // Validate all Kubernetes manifests
-                }
-            }
-        }
-
-        stage('Kubernetes Dry-Run') {
-            steps {
-                script {
-                    sh 'kubectl apply --dry-run=client -f k8s/'  // Ensure all k8s resources are valid
-                }
-            }
-        }
-
-        stage('Pull & Test Container Image') {
-            steps {
-                script {
-                    def image = sh(script: "yq e '.spec.values.image.repository' helm/helmrelease.yaml", returnStdout: true).trim()
-                    def tag = sh(script: "yq e '.spec.values.image.tag' helm/helmrelease.yaml", returnStdout: true).trim()
+                    // Check if any Dockerfiles or Helm charts have changed
+                    def changedFiles = sh(script: 'git diff --name-only $GIT_PREVIOUS_COMMIT $GIT_COMMIT', returnStdout: true).trim().split("\n")
+                    def imageChanges = changedFiles.find { it.contains('Dockerfile') || it.contains('helm') }
                     
-                    if (image && tag) {
-                        sh "docker pull ${image}:${tag}"
-                        sh "docker run --rm ${image}:${tag} /bin/sh -c 'echo Image is valid'"
+                    if (imageChanges) {
+                        echo "Image-related changes detected. Testing images."
+                        // Only pull and test images if changes are detected
+                        sh 'docker build -t my-image .'
+                        sh 'docker push my-image'
                     } else {
-                        error("Image repository or tag not found in helmrelease.yaml")
+                        echo "No image-related changes detected. Skipping image testing."
                     }
                 }
             }
         }
-
-        stage('CI Passed Notification') {
+        stage('Dry-run Kubernetes Resources') {
             steps {
                 script {
-                    echo "✅ All tests passed. Open a PR for review and merge!"
+                    // Dry-run all Kubernetes resources to validate them
+                    sh "kubectl apply --dry-run=client -f ."
+                }
+            }
+        }
+        stage('Deploy to Test Namespace') {
+            steps {
+                script {
+                    // Deploy to ci-testing namespace
+                    sh "kubectl apply -f . --namespace=${TEST_NAMESPACE}"
+                }
+            }
+        }
+        stage('Test Deployments') {
+            steps {
+                script {
+                    // Run your tests in ci-testing namespace here (e.g., using Helm or kubectl)
+                    // Example test: check if pods are running
+                    sh "kubectl get pods --namespace=${TEST_NAMESPACE}"
+                }
+            }
+        }
+        stage('Clean Up Test Namespace') {
+            steps {
+                script {
+                    // Clean up test environment after the tests
+                    sh "kubectl delete -f . --namespace=${TEST_NAMESPACE}"
                 }
             }
         }
     }
-
     post {
+        success {
+            echo 'CI pipeline passed! Ready to merge.'
+        }
         failure {
-            script {
-                echo "❌ CI failed. Check logs for details."
-            }
+            echo 'CI pipeline failed. Please check the logs.'
         }
     }
 }
-
