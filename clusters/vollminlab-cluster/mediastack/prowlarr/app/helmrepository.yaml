@@ -1,0 +1,10 @@
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: OCIRepository
+metadata:
+  name: prowlarr-repo
+  namespace: flux-system
+spec:
+  url: oci://tccr.io/truecharts/prowlarr
+  interval: 1m
+  ref:
+    tag: 18.15.1
