@@ -1,9 +1,8 @@
 apiVersion: source.toolkit.fluxcd.io/v1beta1
-kind: HelmRepository
+kind: OCIRepository
 metadata:
   name: overseerr-repo
   namespace: flux-system
 spec:
-  type: oci
   url: oci://tccr.io/truecharts/overseerr
   interval: 1m
