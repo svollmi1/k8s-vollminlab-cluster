@@ -4,5 +4,5 @@ metadata:
   name: jenkins-operator-repo
   namespace: flux-system
 spec:
-  url: https://charts.jenkins.io
+  url: https://raw.githubusercontent.com/jenkinsci/kubernetes-operator/master/chart
   interval: 5m
