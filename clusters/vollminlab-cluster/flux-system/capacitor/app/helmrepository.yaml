@@ -5,4 +5,4 @@ metadata:
   namespace: flux-system
 spec:
   url: https://chart.onechart.dev
-  interval: 1m
+  interval: 5m

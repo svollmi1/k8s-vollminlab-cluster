@@ -1,8 +1,8 @@
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
-  name: homepage-repo
+  name: jenkins-operator-repo
   namespace: flux-system
 spec:
-  url: https://jameswynn.github.io/helm-charts
+  url: https://charts.jenkins.io
   interval: 5m
