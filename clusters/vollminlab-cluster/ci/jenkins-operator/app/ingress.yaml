@@ -16,7 +16,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: jenkins
+            name: jenkins-operator-http-jenkins
             port:
               number: 8080
   tls:
