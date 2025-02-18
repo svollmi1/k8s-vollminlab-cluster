@@ -1,0 +1,182 @@
+apiVersion: v1
+items:
+- apiVersion: jenkins.io/v1alpha2
+  kind: Jenkins
+  metadata:
+    annotations:
+      meta.helm.sh/release-name: jenkins-operator
+      meta.helm.sh/release-namespace: ci
+    creationTimestamp: "2025-02-18T01:10:14Z"
+    generation: 11
+    labels:
+      app.kubernetes.io/managed-by: Helm
+      helm.toolkit.fluxcd.io/name: jenkins-operator
+      helm.toolkit.fluxcd.io/namespace: ci
+    name: jenkins
+    namespace: ci
+    resourceVersion: "7742035"
+    uid: 719eb7cb-4978-498c-be13-3b6125cc1fce
+  spec:
+    backup:
+      action:
+        exec:
+          command:
+          - /home/user/bin/backup.sh
+      containerName: backup
+      interval: 30
+      makeBackupBeforePodDeletion: true
+    configurationAsCode:
+      configurations: []
+      secret:
+        name: ""
+    groovyScripts:
+      configurations: []
+      secret:
+        name: ""
+    jenkinsAPISettings:
+      authorizationStrategy: createUser
+    master:
+      basePlugins:
+      - name: configuration-as-code
+        version: 1836.vccda_4a_122a_a_e
+      - name: git
+        version: 5.2.2
+      - name: job-dsl
+        version: "1.87"
+      - name: kubernetes
+        version: 4246.v5a_12b_1fe120e
+      - name: kubernetes-credentials-provider
+        version: 1.262.v2670ef7ea_0c5
+      - name: workflow-job
+        version: 1400.v7fd111b_ec82f
+      - name: workflow-aggregator
+        version: 596.v8c21c963d92d
+      containers:
+      - command:
+        - bash
+        - -c
+        - /var/jenkins/scripts/init.sh && exec /usr/bin/tini -s -- /usr/local/bin/jenkins.sh
+        env:
+        - name: JAVA_OPTS
+          value: -XX:MinRAMPercentage=50.0 -XX:MaxRAMPercentage=80.0 -Djenkins.install.runSetupWizard=false
+            -Djava.awt.headless=true
+        image: jenkins/jenkins:2.452.2-lts
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 20
+          httpGet:
+            path: /login
+            port: http
+            scheme: HTTP
+          initialDelaySeconds: 100
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 8
+        name: jenkins-master
+        readinessProbe:
+          failureThreshold: 60
+          httpGet:
+            path: /login
+            port: http
+            scheme: HTTP
+          initialDelaySeconds: 120
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 8
+        resources:
+          limits:
+            cpu: "1"
+            memory: 3Gi
+          requests:
+            cpu: 250m
+            memory: 500Mi
+      - env:
+        - name: BACKUP_DIR
+          value: /backup
+        - name: JENKINS_HOME
+          value: /jenkins-home
+        - name: BACKUP_COUNT
+          value: "3"
+        image: quay.io/jenkins-kubernetes-operator/backup-pvc:v0.4.1
+        imagePullPolicy: Always
+        name: backup
+        resources:
+          limits:
+            cpu: "1"
+            memory: 2Gi
+          requests:
+            cpu: 100m
+            memory: 500Mi
+        volumeMounts:
+        - mountPath: /jenkins-home
+          name: jenkins-home
+        - mountPath: /backup
+          name: backup
+      disableCSRFProtection: false
+      latestPlugins: true
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: backup
+        persistentVolumeClaim:
+          claimName: jenkins-backup
+    restore:
+      action:
+        exec:
+          command:
+          - /home/user/bin/restore.sh
+      containerName: backup
+      getLatestAction:
+        exec:
+          command:
+          - /home/user/bin/get-latest.sh
+    service:
+      port: 8080
+      type: ClusterIP
+    serviceAccount: {}
+    slaveService:
+      port: 50000
+      type: ClusterIP
+  status:
+    appliedGroovyScripts:
+    - configurationType: base-groovy
+      hash: 2ownqpRyBjQYmzTRttUx7axok3CKe2E45frI5iRwH0w=
+      name: 1-basic-settings.groovy
+      source: jenkins-operator-base-configuration-jenkins
+    - configurationType: base-groovy
+      hash: 1l7hg1In2vCY8oFKCxkp91ht1caBNePvivedRKUva7g=
+      name: 2-enable-csrf.groovy
+      source: jenkins-operator-base-configuration-jenkins
+    - configurationType: base-groovy
+      hash: ZP7WGnOA6YYKfhoa7IlP2lG2RLPn081QHIu1DznYTts=
+      name: 3-disable-usage-stats.groovy
+      source: jenkins-operator-base-configuration-jenkins
+    - configurationType: base-groovy
+      hash: uk6HnQuQLqW1VrSIAytWWgWN4Z02daQDt9kGiMURUeA=
+      name: 4-disable-insecure-features.groovy
+      source: jenkins-operator-base-configuration-jenkins
+    - configurationType: base-groovy
+      hash: 14C+T/8wRP74EsIHon0KjlbsIe6WRGxElWhRxB6b/Kc=
+      name: 5-configure-kubernetes-plugin.groovy
+      source: jenkins-operator-base-configuration-jenkins
+    - configurationType: base-groovy
+      hash: aPABPJnhR031/5yjCWtMPzD+ikJJYb2mBvMpiSWol+s=
+      name: 6-configure-views.groovy
+      source: jenkins-operator-base-configuration-jenkins
+    - configurationType: base-groovy
+      hash: pbDff5w1ZalLz0RZKLxfIt0KimXNuYPGIuuQgvGGpyk=
+      name: 7-disable-job-dsl-script-approval.groovy
+      source: jenkins-operator-base-configuration-jenkins
+    baseConfigurationCompletedTime: "2025-02-18T04:32:03Z"
+    lastBackup: 79
+    operatorVersion: v0.8.1
+    pendingBackup: 79
+    provisionStartTime: "2025-02-18T04:29:50Z"
+    restoredBackup: 1
+    userAndPasswordHash: ot2pL58Ec6ESMvbLx3tAjQcZfn+HMqHESy6cnLV1i40=
+    userConfigurationCompletedTime: "2025-02-18T04:32:03Z"
+kind: List
+metadata:
+  resourceVersion: ""
