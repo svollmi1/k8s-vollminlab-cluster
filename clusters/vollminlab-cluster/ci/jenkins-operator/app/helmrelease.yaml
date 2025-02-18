@@ -18,3 +18,4 @@ spec:
     jenkins:
       operator:
         namespace: ci
+      namespace: ci
