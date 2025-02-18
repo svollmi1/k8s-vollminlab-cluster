@@ -8,7 +8,7 @@ spec:
   releaseName: jenkins-operator
   chart:
     spec:
-      chart: jenkins/jenkins-operator
+      chart: jenkins-operator
       version: 0.8.1
       sourceRef:
         kind: HelmRepository
