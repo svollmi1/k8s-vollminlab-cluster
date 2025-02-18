@@ -14,7 +14,7 @@ items:
       helm.toolkit.fluxcd.io/namespace: ci
     name: jenkins
     namespace: ci
-    resourceVersion: "7742035"
+    resourceVersion: "7745494"
     uid: 719eb7cb-4978-498c-be13-3b6125cc1fce
   spec:
     backup:
@@ -170,9 +170,9 @@ items:
       name: 7-disable-job-dsl-script-approval.groovy
       source: jenkins-operator-base-configuration-jenkins
     baseConfigurationCompletedTime: "2025-02-18T04:32:03Z"
-    lastBackup: 79
+    lastBackup: 101
     operatorVersion: v0.8.1
-    pendingBackup: 79
+    pendingBackup: 101
     provisionStartTime: "2025-02-18T04:29:50Z"
     restoredBackup: 1
     userAndPasswordHash: ot2pL58Ec6ESMvbLx3tAjQcZfn+HMqHESy6cnLV1i40=
