@@ -16,6 +16,21 @@ spec:
         namespace: flux-system
   values:
     jenkins:
+      namespace: ci
+      basePlugins:
+        - name: kubernetes
+          version: "1.25.2"
+        - name: workflow-job
+          version: "2.39"
+        - name: workflow-aggregator
+          version: "2.6"
+        - name: git
+          version: "4.2.2"
+        - name: job-dsl
+          version: "1.77"
+        - name: configuration-as-code
+          version: "1.38"
+        - name: kubernetes-credentials-provider
+          version: "0.13"
       operator:
         namespace: ci
-      namespace: ci
