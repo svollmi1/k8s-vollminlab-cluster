@@ -17,7 +17,7 @@ spec:
   values:
     jenkins:
       namespace: ci
-      basePlugins:
+      basePlugins: {}
 #        - name: kubernetes
 #          version: "1.30.11"
 #        - name: workflow-job
@@ -28,8 +28,8 @@ spec:
 #          version: "4.10.0"
 #        - name: job-dsl
 #          version: "1.78.1"
-        - name: configuration-as-code
-          version: 1836.vccda_4a_122a_a_e
+#        - name: configuration-as-code
+#          version: 1836.vccda_4a_122a_a_e
 #        - name: kubernetes-credentials-provider
 #          version: "0.20"
       operator:
