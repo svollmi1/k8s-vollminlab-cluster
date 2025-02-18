@@ -7,4 +7,3 @@ resources:
   - helmrepository.yaml
   - helmrelease.yaml
   - ingress.yaml
-  - jenkins-cr.yaml
