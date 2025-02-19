@@ -6,3 +6,7 @@ resources:
 #  - ./radarr/app
 #  - ./sabnzbd/app
 #  - ./sonarr/app
+  - ./pvc-completed-downloads.yaml
+  - ./pvc-incomplete-downloads.yaml
+  - ./pvc-movies.yaml
+  - ./pvc-tv.yaml
