@@ -14,12 +14,6 @@ spec:
         kind: HelmRepository
         name: jenkins-operator-repo
         namespace: flux-system
-  values:
-    jenkins:
-      volumes:
-        - name: backup
-          persistentVolumeClaim:
-            claimName: pvc-jenkins-backup
   valuesFrom:
     - kind: ConfigMap
       name: jenkins-operator-values
