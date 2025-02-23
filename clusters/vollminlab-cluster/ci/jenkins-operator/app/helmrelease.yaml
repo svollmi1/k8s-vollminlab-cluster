@@ -14,7 +14,31 @@ spec:
         kind: HelmRepository
         name: jenkins-operator-repo
         namespace: flux-system
-  valuesFrom:
-    - kind: ConfigMap
-      name: jenkins-operator-values
-      valuesKey: values.yaml
+values:
+    jenkins:
+      namespace: ci
+      volumes:
+        - name: backup
+          persistentVolumeClaim:
+            claimName: pvc-jenkins-backup
+      basePlugins:
+        - name: configuration-as-code
+          version: 1836.vccda_4a_122a_a_e
+        - name: git
+          version: 5.2.2
+        - name: job-dsl
+          version: "1.87"
+        - name: kubernetes
+          version: 4246.v5a_12b_1fe120e
+        - name: kubernetes-credentials-provider
+          version: 1.262.v2670ef7ea_0c5
+        - name: workflow-job
+          version: 1400.v7fd111b_ec82f
+        - name: workflow-aggregator
+          version: 596.v8c21c963d92d
+      operator:
+        namespace: ci
+#  valuesFrom:
+#    - kind: ConfigMap
+#      name: jenkins-operator-values
+#      valuesKey: values.yaml
