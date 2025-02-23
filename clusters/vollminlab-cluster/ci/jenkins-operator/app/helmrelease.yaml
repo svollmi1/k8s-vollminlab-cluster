@@ -19,7 +19,7 @@ spec:
       volumes:
         - name: backup
           persistentVolumeClaim:
-          claimName: pvc-jenkins-backup
+            claimName: pvc-jenkins-backup
   valuesFrom:
     - kind: ConfigMap
       name: jenkins-operator-values
