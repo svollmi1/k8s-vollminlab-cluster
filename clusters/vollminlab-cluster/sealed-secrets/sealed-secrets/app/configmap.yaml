@@ -34,7 +34,7 @@ data:
     ## @param image.pullSecrets [array]  Sealed Secrets image pull secrets
     ##
     image:
-      registry: quay.io
+      registry: docker.io
       repository: bitnami/sealed-secrets-controller
       tag: v0.28.0
       ## Specify a imagePullPolicy
