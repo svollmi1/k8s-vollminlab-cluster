@@ -7,10 +7,6 @@ data:
   values.yaml: |
     jenkins:
       namespace: ci
-      volumes:
-        - name: backup
-          persistentVolumeClaim:
-            claimName: pvc-jenkins-backup
       basePlugins:
         - name: configuration-as-code
           version: 1836.vccda_4a_122a_a_e
