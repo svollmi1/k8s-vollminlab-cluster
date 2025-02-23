@@ -4,7 +4,7 @@ metadata:
   name: jenkins-operator-values
   namespace: ci
 data:
-  values.yaml: |-
+  values.yaml: |
     jenkins:
       namespace: ci
       volumes:
