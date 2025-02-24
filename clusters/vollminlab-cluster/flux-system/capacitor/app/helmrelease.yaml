@@ -15,6 +15,6 @@ spec:
         name: capacitor-repo
         namespace: flux-system
   valuesFrom:
-    - configMapKeyRef:
-        name: capacitor-values
-        key: values.yaml
+    - kind: ConfigMap
+      name: capacitor-values
+      valueskey: values.yaml
