@@ -13,7 +13,7 @@ data:
             claimName: pvc-jenkins-backup
       backup:
         makeBackupBeforePodDeletion: true
-        interval: 1m
+        interval: 60
         pvc:  
           size: 50Gi
       basePlugins:
