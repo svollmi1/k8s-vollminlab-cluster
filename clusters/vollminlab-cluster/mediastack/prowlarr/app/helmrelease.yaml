@@ -9,9 +9,7 @@ spec:
     kind: OCIRepository
     name: prowlarr-repo
     namespace: flux-system
-  values:
-    persistence:
-      config:
-        enabled: true
-        existingClaim: pvc-prowlarr-config
-        mountPath: /config
+  valuesFrom:
+    - kind: ConfigMap
+      name: prowlarr-values
+      valuesKey: values.yaml

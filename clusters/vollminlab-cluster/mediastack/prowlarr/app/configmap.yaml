@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prowlarr-values
+  namespace: mediastack
+data:
+  values.yaml: |
+    persistence:
+      config:
+        enabled: true
+        existingClaim: pvc-prowlarr-config
+        mountPath: /config
