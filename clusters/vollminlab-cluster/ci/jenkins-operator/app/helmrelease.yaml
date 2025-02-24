@@ -4,7 +4,7 @@ metadata:
   name: jenkins-operator
   namespace: ci
 spec:
-  interval: 5m
+  interval: 1m
   releaseName: jenkins-operator
   chart:
     spec:
