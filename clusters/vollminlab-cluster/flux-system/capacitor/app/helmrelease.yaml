@@ -17,4 +17,4 @@ spec:
   valuesFrom:
     - kind: ConfigMap
       name: capacitor-values
-      valueskey: values.yaml
+      valuesKey: values.yaml
