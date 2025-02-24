@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: capacitor-values
+  namespace: flux-system
+data:
+  values.yaml: |
+    image:
+      repository: ghcr.io/gimlet-io/capacitor
+      tag: v0.4.8
+    containerPort: 9000
+    probe:
+      enabled: true
+      path: /
+    resources:
+      ignoreLimits: true
+    serviceAccount: capacitor
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 100
+      runAsGroup: 101
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+          - ALL
+      seccompProfile:
+        type: RuntimeDefault
