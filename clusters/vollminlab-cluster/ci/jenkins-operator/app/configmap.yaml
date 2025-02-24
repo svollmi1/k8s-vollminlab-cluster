@@ -7,16 +7,11 @@ data:
   values.yaml: |
     jenkins:
       namespace: ci
-      volumes:
-        - name: backup
-          persistentVolumeClaim:
-            claimName: pvc-jenkins-backup
       backup:
         makeBackupBeforePodDeletion: true
         interval: 60
         pvc:  
-          #size: 50Gi
-          existingClaimName: pvc-jenkins-backup
+          size: 50Gi
       basePlugins:
         - name: configuration-as-code
           version: 1836.vccda_4a_122a_a_e
