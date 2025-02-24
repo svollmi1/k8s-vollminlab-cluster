@@ -10,7 +10,7 @@ data:
       volumes:
         - name: backup
           persistentVolumeClaim:
-            claimName: jenkins-backup
+            claimName: pvc-jenkins-backup
       basePlugins:
         - name: configuration-as-code
           version: 1836.vccda_4a_122a_a_e

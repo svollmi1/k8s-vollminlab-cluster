@@ -4,7 +4,7 @@ metadata:
   name: jenkins-operator-deployment
   namespace: flux-system
 resources:
-  - configmap.yaml
+#  - configmap.yaml
   - helmrepository.yaml
   - helmrelease.yaml
   - ingress.yaml
