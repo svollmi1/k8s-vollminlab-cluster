@@ -4,6 +4,7 @@ metadata:
   name: homepage-deployment
   namespace: flux-system
 resources:
+  - configmap.yaml
   - helmrepository.yaml
   - helmrelease.yaml
   - ingress.yaml

@@ -13,46 +13,7 @@ spec:
         name: homepage-repo
         namespace: flux-system
   interval: 5m
-  values:
-    config:
-      bookmarks:
-        - Developer:
-            - Github:
-                - abbr: GH
-                  href: https://github.com/
-      kubernetes:
-        mode: cluster
-      services:
-        - My First Group:
-            - My First Service:
-                description: Homepage is awesome
-                href: http://localhost/
-        - My Second Group:
-            - My Second Service:
-                description: Homepage is the best
-                href: http://localhost/
-        - My Third Group:
-            - My Third Service:
-                description: "Homepage is \U0001F60E"
-                href: http://localhost/
-      settings: null
-      widgets:
-        - kubernetes:
-            cluster:
-              cpu: true
-              label: cluster
-              memory: true
-              show: true
-              showLabel: true
-          nodes:
-            cpu: true
-            memory: true
-            show: true
-            showLabel: true
-        - search:
-            provider: duckduckgo
-            target: _blank
-    enableRbac: true
-    serviceAccount:
-      create: true
-      name: homepage
+  valuesFrom:
+    - kind: ConfigMap
+      name: homepage-values
+      valuesKey: values.yaml
