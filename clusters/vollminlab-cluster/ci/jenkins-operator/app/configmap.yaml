@@ -15,7 +15,8 @@ data:
         makeBackupBeforePodDeletion: true
         interval: 60
         pvc:  
-          size: 50Gi
+          #size: 50Gi
+          existingClaimName: pvc-jenkins-backup
       basePlugins:
         - name: configuration-as-code
           version: 1836.vccda_4a_122a_a_e
