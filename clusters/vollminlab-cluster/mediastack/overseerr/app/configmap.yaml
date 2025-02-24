@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: overseerr-values
+  namespace: mediastack
+data:
+  values.yaml: |
+    persistence:
+      config:
+        enabled: true
+        existingClaim: pvc-overseerr-config
+        mountPath: /app/config
+      movies:
+        enabled: true
+        existingClaim: pvc-movies
+        mountPath: /downloads/movies
+      tv:
+        enabled: true
+        existingClaim: pvc-tv
+        mountPath: /downloads/tv

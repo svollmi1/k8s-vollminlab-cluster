@@ -9,17 +9,7 @@ spec:
     kind: OCIRepository
     name: overseerr-repo
     namespace: flux-system
-  values:
-    persistence:
-      config:
-        enabled: true
-        existingClaim: pvc-overseerr-config
-        mountPath: /app/config
-      movies:
-        enabled: true
-        existingClaim: pvc-movies
-        mountPath: /downloads/movies
-      tv:
-        enabled: true
-        existingClaim: pvc-tv
-        mountPath: /downloads/tv
+  valuesFrom:
+    - kind: ConfigMap
+      name: overseerr-values
+      valuesKey: values.yaml
