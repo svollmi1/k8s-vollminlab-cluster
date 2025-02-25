@@ -28,10 +28,11 @@ data:
         - name: workflow-aggregator
           version: 596.v8c21c963d92d
       seedJobs:
-        - id: jenkins-operator
+        - id: test-k8s-deployment
           targets: "cicd/jobs/*.jenkins"
-          description: "k8s-home-lab Jenkins Operator jobs"
+          description: "Jenkins CI job for Kubernetes GitOps deployments"
           repositoryBranch: main
           repositoryUrl: https://github.com/svollmi1/k8s-vollminlab-cluster
       operator:
         namespace: ci
+      secretRefName: github-pat
