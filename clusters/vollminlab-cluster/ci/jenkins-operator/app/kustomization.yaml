@@ -5,6 +5,7 @@ metadata:
   namespace: flux-system
 resources:
   - configmap.yaml
+  - github-pat-sealed.yaml
   - helmrepository.yaml
   - helmrelease.yaml
   - ingress.yaml
