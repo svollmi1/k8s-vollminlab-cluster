@@ -35,4 +35,5 @@ data:
           repositoryUrl: https://github.com/svollmi1/k8s-vollminlab-cluster
       operator:
         namespace: ci
-      secretRefName: github-pat
+      configuration:
+        secretRefName: github-pat
