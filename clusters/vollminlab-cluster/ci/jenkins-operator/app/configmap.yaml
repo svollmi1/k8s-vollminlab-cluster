@@ -30,7 +30,7 @@ data:
       seedJobs:
         - id: test-k8s-deployment
           credentialID: github-pat
-          targets: "./cicd/jobs/*.jenkins"
+          targets: "clusters/vollminlab-cluster/ci/jenkins-operator/app/cicd/jobs/*.jenkins"
           description: "Jenkins CI job for Kubernetes GitOps deployments"
           repositoryBranch: main
           repositoryUrl: https://github.com/svollmi1/k8s-vollminlab-cluster
