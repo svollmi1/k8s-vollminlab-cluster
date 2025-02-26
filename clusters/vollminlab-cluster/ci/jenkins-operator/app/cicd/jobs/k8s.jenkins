@@ -1,0 +1,31 @@
+#!/usr/bin/env groovy
+
+pipelineJob('k8s-test-deploy') {
+    displayName('Kubernetes Test Deployment')
+
+    logRotator {
+        numToKeep(10)
+        daysToKeep(30)
+    }
+
+    configure { project ->
+        project / 'properties' / 'org.jenkinsci.plugins.workflow.job.properties.DurabilityHintJobProperty' {
+            hint('PERFORMANCE_OPTIMIZED')
+        }
+    }
+
+    definition {
+        cpsScm {
+            scm {
+                git {
+                    remote {
+                        url('https://github.com/svollmi1/k8s-vollminlab-cluster')
+                        credentials('github-pat')  // GitHub credentials reference
+                    }
+                    branches('*/main')  // Or another branch as needed
+                }
+            }
+            scriptPath('cicd/pipelines/k8s.jenkins')  // Path to the pipeline definition
+        }
+    }
+}

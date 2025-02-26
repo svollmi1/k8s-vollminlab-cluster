@@ -29,11 +29,10 @@ data:
           version: 596.v8c21c963d92d
       seedJobs:
         - id: test-k8s-deployment
+          credentialID: github-pat
           targets: "cicd/jobs/*.jenkins"
           description: "Jenkins CI job for Kubernetes GitOps deployments"
           repositoryBranch: main
           repositoryUrl: https://github.com/svollmi1/k8s-vollminlab-cluster
       operator:
         namespace: ci
-      configuration:
-        secretRefName: github-pat
