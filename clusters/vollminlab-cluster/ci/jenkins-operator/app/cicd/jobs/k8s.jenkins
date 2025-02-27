@@ -20,7 +20,7 @@ pipelineJob('k8s-test-deploy') {
                 git {
                     remote {
                         url('https://github.com/svollmi1/k8s-vollminlab-cluster')
-                        credentials('github-pat')  // GitHub credentials reference
+                        credentialsID('github-pat')  // GitHub credentials reference
                     }
                     branches('*/main')  // Or another branch as needed
                 }
