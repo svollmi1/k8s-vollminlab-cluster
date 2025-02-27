@@ -2,7 +2,7 @@
 
 def label = "k8s-${UUID.randomUUID().toString()}"
 def home = "/home/jenkins"
-def workspace = "${home}/workspace/build-jenkins-operator"
+def workspace = "${home}/agent/workspace/k8s-test-deploy"  // Assuming this is the workspace path
 
 podTemplate(label: label,
     containers: [
@@ -14,15 +14,33 @@ podTemplate(label: label,
     node(label) {
         stage('Checkout Code') {
             container('git') {
-                sh 'git config --global --add safe.directory /workspace'
+                // Ensure the repository is marked as a safe directory
+                sh "git config --global --add safe.directory ${workspace}"
+                
+                // Checkout the SCM repository, which should include fetching the code
                 checkout scm
+                // Verify repository status after checkout
+                def gitStatus = sh(script: "git status", returnStatus: true)
+                if (gitStatus != 0) {
+                    error "Git repository checkout failed or repository is in an invalid state."
+                }
+                echo "Repository successfully checked out."
             }
         }
 
         stage('Detect Changed Files') {
             container('git') {
-                changedFiles = sh(script: "git diff --name-only origin/main", returnStdout: true).trim().split("\n")
-                echo "Changed files: ${changedFiles}"
+                script {
+                    // Ensure the Git repository is initialized and on the correct branch
+                    sh "git fetch origin main"  // Fetch the latest changes from the main branch
+                    changedFiles = sh(script: "git diff --name-only origin/main", returnStdout: true).trim().split("\n")
+
+                    if (changedFiles.isEmpty()) {
+                        echo "No changes detected."
+                    } else {
+                        echo "Changed files: ${changedFiles}"
+                    }
+                }
             }
         }
 
@@ -61,4 +79,3 @@ podTemplate(label: label,
         }
     }
 }
-
