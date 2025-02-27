@@ -6,9 +6,9 @@ def workspace = "${home}/workspace/build-jenkins-operator"
 
 podTemplate(label: label,
     containers: [
-        containerTemplate(name: 'kubectl', image: 'bitnami/kubectl:latest', ttyEnabled: true, command: 'sh', args: "-c sleep infinity"),
-        containerTemplate(name: 'git', image: 'alpine/git:latest', ttyEnabled: true, command: 'sh', args: "-c sleep infinity"),
-        containerTemplate(name: 'yq', image: 'mikefarah/yq:latest', ttyEnabled: true, command: 'sh', args: "-c sleep infinity"),
+        containerTemplate(name: 'kubectl', image: 'bitnami/kubectl:latest', ttyEnabled: true, command: 'sh', args: "-c 3600"),
+        containerTemplate(name: 'git', image: 'alpine/git:latest', ttyEnabled: true, command: 'sh', args: "-c sleep 3600"),
+        containerTemplate(name: 'yq', image: 'mikefarah/yq:latest', ttyEnabled: true, command: 'sh', args: "-c sleep 3600"),
     ],
 ) {
     node(label) {
