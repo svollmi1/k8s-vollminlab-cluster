@@ -1,6 +1,8 @@
 #!/usr/bin/env groovy
 
 def label = "k8s-${UUID.randomUUID().toString()}"
+def home = "/home/jenkins"
+def workspace = "${home}/workspace/build-jenkins-operator"
 
 podTemplate(label: label,
     containers: [
@@ -12,6 +14,7 @@ podTemplate(label: label,
     node(label) {
         stage('Checkout Code') {
             container('git') {
+                sh 'git config --global --add safe.directory /workspace'
                 checkout scm
             }
         }
