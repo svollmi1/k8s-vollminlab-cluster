@@ -9,5 +9,3 @@ resources:
   - helmrepository.yaml
   - helmrelease.yaml
   - ingress.yaml
-  - ./cicd/jobs/k8s.jenkins
-  - ./cicd/pipelines/k8s.jenkins
