@@ -1,18 +1,13 @@
 #!/usr/bin/env groovy
 
 def label = "k8s-${UUID.randomUUID().toString()}"
-def home = "/home/jenkins"
-def workspace = "${home}/workspace/build-jenkins-operator"
 
 podTemplate(label: label,
     containers: [
-        containerTemplate(name: 'kubectl', image: 'bitnami/kubectl:latest', ttyEnabled: true, command: 'sh', args: "cat", volumeMounts: [volumeMount(name: 'workspace-volume', mountPath: "/home/jenkins/agent")]),
-        containerTemplate(name: 'git', image: 'alpine/git:latest', ttyEnabled: true, command: 'sh', args: "cat", volumeMounts: [volumeMount(name: 'workspace-volume', mountPath: "/home/jenkins/agent")]),
-        containerTemplate(name: 'yq', image: 'mikefarah/yq:latest', ttyEnabled: true, command: 'sh', args: "cat", volumeMounts: [volumeMount(name: 'workspace-volume', mountPath: "/home/jenkins/agent")]),
+        containerTemplate(name: 'kubectl', image: 'bitnami/kubectl:latest', ttyEnabled: true, command: 'sh', args: "cat"),
+        containerTemplate(name: 'git', image: 'alpine/git:latest', ttyEnabled: true, command: 'sh', args: "cat"),
+        containerTemplate(name: 'yq', image: 'mikefarah/yq:latest', ttyEnabled: true, command: 'sh', args: "cat"),
     ],
-    volumes: [
-        emptyDirVolume(name: 'workspace-volume')
-    ]
 ) {
     node(label) {
         stage('Checkout Code') {
@@ -34,7 +29,7 @@ podTemplate(label: label,
                 changedFiles.each { file ->
                     if (file.endsWith(".yaml") || file.endsWith(".yml")) {
                         echo "Linting ${file}"
-                        sh "yq eval '.' ${workspace}/${file} > /dev/null"
+                        sh "yq eval '.' ${file} > /dev/null"
                     }
                 }
             }
@@ -45,8 +40,8 @@ podTemplate(label: label,
                 changedFiles.each { file ->
                     if (file.endsWith(".yaml") || file.endsWith(".yml")) {
                         echo "Validating and applying ${file}"
-                        sh "kubectl apply --dry-run=client -f ${workspace}/${file} -n ci-testing"
-                        sh "kubectl apply -f ${workspace}/${file} -n ci-testing"
+                        sh "kubectl apply --dry-run=client -f ${file} -n ci-testing"
+                        sh "kubectl apply -f ${file} -n ci-testing"
                     }
                 }
             }
@@ -57,10 +52,11 @@ podTemplate(label: label,
                 changedFiles.each { file ->
                     if (file.endsWith(".yaml") || file.endsWith(".yml")) {
                         echo "Deleting ${file} from ci-testing"
-                        sh "kubectl delete -f ${workspace}/${file} -n ci-testing || true"
+                        sh "kubectl delete -f ${file} -n ci-testing || true"
                     }
                 }
             }
         }
     }
 }
+
