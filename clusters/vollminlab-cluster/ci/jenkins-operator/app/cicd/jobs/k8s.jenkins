@@ -25,7 +25,7 @@ pipelineJob('k8s-test-deploy') {
                     branches('*/main')  // Or another branch as needed
                 }
             }
-            scriptPath('cicd/pipelines/k8s.jenkins')  // Path to the pipeline definition
+            scriptPath('clusters/vollminlab-cluster/ci/jenkins-operator/app/cicd/pipelines/k8s.jenkins')  // Path to the pipeline definition
         }
     }
 }
