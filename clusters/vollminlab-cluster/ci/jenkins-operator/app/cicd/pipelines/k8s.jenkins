@@ -33,9 +33,10 @@ podTemplate(label: label,
                 script {
                     // Ensure the Git repository is initialized and on the correct branch
                     sh "git fetch origin main"  // Fetch the latest changes from the main branch
-                    changedFiles = sh(script: "git diff --name-only origin/main", returnStdout: true).trim().split("\n")
+                    def changedFilesOutput = sh(script: "git diff --name-only origin/main", returnStdout: true).trim()
+                    def changedFiles = changedFilesOutput ? changedFilesOutput.split("\n") : []
 
-                    if (changedFiles.isEmpty()) {
+                    if (changedFiles.size() == 0) {
                         echo "No changes detected."
                     } else {
                         echo "Changed files: ${changedFiles}"
