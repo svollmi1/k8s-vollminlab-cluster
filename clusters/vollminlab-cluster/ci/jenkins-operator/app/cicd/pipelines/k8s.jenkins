@@ -4,9 +4,9 @@ def label = "k8s-${UUID.randomUUID().toString()}"
 
 podTemplate(label: label,
     containers: [
-        containerTemplate(name: 'kubectl', image: 'bitnami/kubectl:latest', ttyEnabled: true, command: 'sh', args: "cat"),
-        containerTemplate(name: 'git', image: 'alpine/git:latest', ttyEnabled: true, command: 'sh', args: "cat"),
-        containerTemplate(name: 'yq', image: 'mikefarah/yq:latest', ttyEnabled: true, command: 'sh', args: "cat"),
+        containerTemplate(name: 'kubectl', image: 'bitnami/kubectl:latest', ttyEnabled: true, command: 'cat'),
+        containerTemplate(name: 'git', image: 'alpine/git:latest', ttyEnabled: true, command: 'cat'),
+        containerTemplate(name: 'yq', image: 'mikefarah/yq:latest', ttyEnabled: true, command: 'cat'),
     ],
 ) {
     node(label) {
