@@ -28,19 +28,15 @@ podTemplate(label: label,
             }
         }
 
-        stage('Detect Changed Files') {
-            container('git') {
-                script {
-                    // Ensure the Git repository is initialized and on the correct branch
-                    sh "git fetch origin main"  // Fetch the latest changes from the main branch
-                    def changedFilesOutput = sh(script: "git diff --name-only origin/main", returnStdout: true).trim()
-                    def changedFiles = changedFilesOutput ? changedFilesOutput.split("\n") : []
-
-                    if (changedFiles.size() == 0) {
-                        echo "No changes detected."
-                    } else {
-                        echo "Changed files: ${changedFiles}"
-                    }
+	stage('Detect Changed Files') {
+    	    container('git') {
+        	script {
+            	// Fetch the latest changes from the remote main branch
+                sh 'git fetch origin main'
+                // Capture the list of changed files into the 'changedFiles' variable
+                def changedFiles = sh(script: 'git diff --name-only origin/main', returnStdout: true).trim().split("\n")
+                // Output the changed files (for debugging purposes)
+                echo "Changed files: ${changedFiles}"
                 }
             }
         }
