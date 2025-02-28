@@ -33,6 +33,5 @@ data:
           description: "Jenkins CI job for Kubernetes GitOps deployments"
           repositoryBranch: main
           repositoryUrl: https://github.com/svollmi1/k8s-vollminlab-cluster
-          credentialID: github-pat
       operator:
         namespace: ci
