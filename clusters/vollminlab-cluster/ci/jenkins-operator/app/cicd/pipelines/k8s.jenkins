@@ -9,11 +9,11 @@ podTemplate(
     label: label,
     containers: [
         containerTemplate(
-            name: 'alpine',
-            image: 'alpine:3.11',
+            name: 'kubectl-container',
+            image: 'lachlanevenson/k8s-kubectl:v1.21.2',
             ttyEnabled: true,
-            command: 'sh',  // Use sh to keep the container alive
-            args: '-c "apk add --no-cache kubectl yamllint && tail -f /dev/null"', // Ensure the container runs and doesn't exit
+            command: 'sh',
+            args: '-c "kubectl version && tail -f /dev/null"',  // Ensure the container keeps running
         ),
     ]
 ) {
