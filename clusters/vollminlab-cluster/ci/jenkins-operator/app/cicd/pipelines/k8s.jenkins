@@ -12,7 +12,7 @@ podTemplate(
             name: 'kubectl-container',
             image: 'lachlanevenson/k8s-kubectl:v1.21.2',
             ttyEnabled: true,
-            command: 'sh',
+            command: 'bash',  // Use bash instead of sh to ensure compatibility
             args: '-c "kubectl version && tail -f /dev/null"',  // Ensure the container keeps running
         ),
     ]
@@ -24,13 +24,14 @@ podTemplate(
         }
 
         // Get list of changed files
-        def files = sh(script: 'git diff --name-only origin/${env.BRANCH_NAME} HEAD', returnStdout: true).trim().split("\n")
+        def files = sh(script: 'git diff --name-only origin/${BRANCH_NAME} HEAD', returnStdout: true).trim().split("\n")
 
         stage('Parse and Validate YAML') {
             files.each { file ->
                 if (file.endsWith(".yaml") || file.endsWith(".yml")) {
                     echo "Validating ${file}"
                     try {
+                        // Ensure kubectl and yamllint run properly with bash
                         sh "yamllint ${file}"
                         sh "kubectl apply --dry-run=client -f ${file} --namespace=${testNamespace}"
                     } catch (Exception e) {
