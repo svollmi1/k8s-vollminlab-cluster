@@ -18,7 +18,7 @@ data:
         - name: git
           version: 5.5.2
         - name: github-branch-source
-          version: 1810.v913311241fa_9
+          version: 1807.v50351eb_7dd13
         - name: job-dsl
           version: "1.87"
         - name: kubernetes
