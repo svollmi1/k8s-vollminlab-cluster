@@ -9,54 +9,65 @@ podTemplate(
     label: label,
     containers: [
         containerTemplate(
-            name: 'alpine', 
-            image: 'alpine:3.11', 
-            ttyEnabled: true, 
+            name: 'alpine',
+            image: 'alpine:3.11',
+            ttyEnabled: true,
             command: 'cat',
             envVars: [
-                // Inject the GitHub credentials as environment variables
-                envVar(key: 'GITHUB_TOKEN', value: credentials('github-pat')) // Use 'github-pat' or the correct credential ID
-            ]
+                envVar(key: 'GITHUB_TOKEN', value: credentials('github-pat'))
+            ],
+            args: '''/bin/sh -c "apk add --no-cache kubectl yamllint && cat"'''
         ),
     ]
 ) {
     node(label) {
-        // Clone the repo and checkout the branch
+        // Checkout repository
         stage('Checkout Repo') {
-            withCredentials([string(credentialsId: 'github-pat', variable: 'GITHUB_TOKEN')]) {
-                checkout scm
-            }
+            checkout scm
         }
 
+        // Get list of changed files
+        def files = sh(script: 'git diff --name-only origin/${env.BRANCH_NAME} HEAD', returnStdout: true).trim().split("\n")
+
         stage('Parse and Validate YAML') {
-            def files = sh(script: 'git diff --name-only origin/${env.BRANCH_NAME} HEAD', returnStdout: true).trim().split("\n")
             files.each { file ->
                 if (file.endsWith(".yaml") || file.endsWith(".yml")) {
                     echo "Validating ${file}"
-                    sh "yamllint ${file}" // Validate YAML syntax
-                    sh "kubectl apply --dry-run=client -f ${file} --namespace=${testNamespace}" // Dry run
+                    try {
+                        sh "yamllint ${file}"
+                        sh "kubectl apply --dry-run=client -f ${file} --namespace=${testNamespace}"
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        throw e
+                    }
                 }
             }
         }
 
         stage('Apply Resources') {
-            def files = sh(script: 'git diff --name-only origin/${env.BRANCH_NAME} HEAD', returnStdout: true).trim().split("\n")
-            files.each { file ->
-                if (file.endsWith(".yaml") || file.endsWith(".yml")) {
-                    echo "Applying ${file}"
-                    sh "kubectl apply -f ${file} --namespace=${testNamespace}"
+            parallel(
+                files.collectEntries { file ->
+                    if (file.endsWith(".yaml") || file.endsWith(".yml")) {
+                        ["Apply ${file}": {
+                            echo "Applying ${file}"
+                            sh "kubectl apply -f ${file} --namespace=${testNamespace}"
+                        }]
+                    }
                 }
-            }
+            )
         }
 
         stage('Cleanup') {
-            def files = sh(script: 'git diff --name-only origin/${env.BRANCH_NAME} HEAD', returnStdout: true).trim().split("\n")
-            files.each { file ->
-                if (file.endsWith(".yaml") || file.endsWith(".yml")) {
-                    echo "Cleaning up ${file}"
-                    sh "kubectl delete -f ${file} --namespace=${testNamespace}"
+            parallel(
+                files.collectEntries { file ->
+                    if (file.endsWith(".yaml") || file.endsWith(".yml")) {
+                        ["Cleanup ${file}": {
+                            echo "Cleaning up ${file}"
+                            sh "kubectl delete -f ${file} --namespace=${testNamespace}"
+                        }]
+                    }
                 }
-            }
+            )
         }
     }
 }
