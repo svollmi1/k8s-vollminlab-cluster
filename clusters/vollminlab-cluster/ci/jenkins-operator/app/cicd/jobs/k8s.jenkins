@@ -8,8 +8,12 @@ multibranchPipelineJob('k8s-test-deploy') {
             id('k8s-test-deploy')
             repoOwner('svollmi1')
             repository('k8s-vollminlab-cluster')
-            configuredByUrl(true)
-            credentialsId('github-pat')
+            scanCredentialsId('github-pat')
+            buildOriginBranch(true)
+            buildOriginPRMerge(true)
+            buildOriginPRHead(false)
+            buildForkPRMerge(false)
+            buildForkPRHead(false)
         }
     }
 
