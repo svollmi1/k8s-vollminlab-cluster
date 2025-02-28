@@ -12,8 +12,8 @@ podTemplate(
             name: 'alpine',
             image: 'alpine:3.11',
             ttyEnabled: true,
-            command: 'cat',
-            args: '''/bin/sh -c "apk add --no-cache kubectl yamllint && cat"'''
+            command: 'sh',  // Use sh to keep the container alive
+            args: '-c "apk add --no-cache kubectl yamllint && tail -f /dev/null"', // Ensure the container runs and doesn't exit
         ),
     ]
 ) {
@@ -42,29 +42,39 @@ podTemplate(
         }
 
         stage('Apply Resources') {
-            parallel(
-                files.collectEntries { file ->
-                    if (file.endsWith(".yaml") || file.endsWith(".yml")) {
-                        ["Apply ${file}": {
-                            echo "Applying ${file}"
-                            sh "kubectl apply -f ${file} --namespace=${testNamespace}"
-                        }]
+            try {
+                parallel(
+                    files.collectEntries { file ->
+                        if (file.endsWith(".yaml") || file.endsWith(".yml")) {
+                            ["Apply ${file}": {
+                                echo "Applying ${file}"
+                                sh "kubectl apply -f ${file} --namespace=${testNamespace}"
+                            }]
+                        }
                     }
-                }
-            )
+                )
+            } catch (Exception e) {
+                currentBuild.result = 'FAILURE'
+                throw e
+            }
         }
 
         stage('Cleanup') {
-            parallel(
-                files.collectEntries { file ->
-                    if (file.endsWith(".yaml") || file.endsWith(".yml")) {
-                        ["Cleanup ${file}": {
-                            echo "Cleaning up ${file}"
-                            sh "kubectl delete -f ${file} --namespace=${testNamespace}"
-                        }]
+            try {
+                parallel(
+                    files.collectEntries { file ->
+                        if (file.endsWith(".yaml") || file.endsWith(".yml")) {
+                            ["Cleanup ${file}": {
+                                echo "Cleaning up ${file}"
+                                sh "kubectl delete -f ${file} --namespace=${testNamespace}"
+                            }]
+                        }
                     }
-                }
-            )
+                )
+            } catch (Exception e) {
+                currentBuild.result = 'FAILURE'
+                throw e
+            }
         }
     }
 }
