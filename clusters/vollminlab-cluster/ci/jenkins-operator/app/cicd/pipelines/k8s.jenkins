@@ -11,8 +11,13 @@ podTemplate(label: label,
         ],
 ) {
     node(label) {
+        // Clone the repo and checkout the branch
+        stage('Checkout Repo') {
+            checkout scm
+        }
+
         stage('Parse and Validate YAML') {
-            def files = sh(script: 'git diff --name-only HEAD~1 HEAD', returnStdout: true).trim().split("\n")
+            def files = sh(script: 'git diff --name-only origin/${env.BRANCH_NAME} HEAD', returnStdout: true).trim().split("\n")
             files.each { file ->
                 if (file.endsWith(".yaml") || file.endsWith(".yml")) {
                     echo "Validating ${file}"
@@ -23,7 +28,7 @@ podTemplate(label: label,
         }
 
         stage('Apply Resources') {
-            def files = sh(script: 'git diff --name-only HEAD~1 HEAD', returnStdout: true).trim().split("\n")
+            def files = sh(script: 'git diff --name-only origin/${env.BRANCH_NAME} HEAD', returnStdout: true).trim().split("\n")
             files.each { file ->
                 if (file.endsWith(".yaml") || file.endsWith(".yml")) {
                     echo "Applying ${file}"
@@ -33,7 +38,7 @@ podTemplate(label: label,
         }
 
         stage('Cleanup') {
-            def files = sh(script: 'git diff --name-only HEAD~1 HEAD', returnStdout: true).trim().split("\n")
+            def files = sh(script: 'git diff --name-only origin/${env.BRANCH_NAME} HEAD', returnStdout: true).trim().split("\n")
             files.each { file ->
                 if (file.endsWith(".yaml") || file.endsWith(".yml")) {
                     echo "Cleaning up ${file}"
@@ -43,3 +48,4 @@ podTemplate(label: label,
         }
     }
 }
+
