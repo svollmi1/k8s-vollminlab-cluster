@@ -10,7 +10,7 @@ data:
       backup:
         makeBackupBeforePodDeletion: true
         interval: 60
-        pvc:  
+        pvc:
           size: 50Gi
       basePlugins:
         - name: configuration-as-code
