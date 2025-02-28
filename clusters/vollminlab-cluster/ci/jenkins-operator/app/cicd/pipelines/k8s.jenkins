@@ -1,91 +1,136 @@
 #!/usr/bin/env groovy
 
+properties([
+    pipelineTriggers([
+        [
+            $class: 'GitHubPushTrigger'
+        ]
+    ])
+])
+
 def label = "k8s-${UUID.randomUUID().toString()}"
 def home = "/home/jenkins"
 def workspace = "${home}/workspace"
 def testNamespace = "ci-testing"
-def branchName = env.BRANCH_NAME ?: 'main'  // Fallback to 'main' if BRANCH_NAME is null
 
-echo "Using branch: ${branchName}"
+echo "Branch name: ${env.BRANCH_NAME}"
+echo "Change ID (PR number): ${env.CHANGE_ID}"
+echo "Change target (PR target branch): ${env.CHANGE_TARGET}"
 
-podTemplate(
-    label: label,
-    containers: [
-        containerTemplate(
-            name: 'kubectl-container',
-            image: 'lachlanevenson/k8s-kubectl:v1.21.2',
-            ttyEnabled: true,
-            command: 'sh',
-            args: '-c "kubectl version && tail -f /dev/null"',
-        ),
-        containerTemplate(
-            name: 'yamllint-container',
-            image: 'cytopia/yamllint:latest',
-            ttyEnabled: true,
-            command: 'sh',
-            args: '-c "yamllint --version && tail -f /dev/null"',
-        ),
-    ]
-) {
-    node(label) {
-        stage('Checkout Repo') {
-            checkout scm
+pipeline {
+    agent {
+        kubernetes {
+            label label
+            defaultContainer 'jnlp'
+            yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: kubectl
+    image: lachlanevenson/k8s-kubectl:v1.21.2
+    command:
+    - cat
+    tty: true
+  - name: yamllint
+    image: cytopia/yamllint:latest
+    command:
+    - cat
+    tty: true
+"""
+        }
+    }
+
+    stages {
+        stage('Validate Branch') {
+            steps {
+                script {
+                    if (env.BRANCH_NAME == 'main' && env.CHANGE_ID == null) {
+                        error "Direct pushes to main branch are not allowed. Please create a pull request."
+                    }
+                }
+            }
         }
 
-        def files = []
+        stage('Checkout Repo') {
+            steps {
+                checkout scm
+            }
+        }
+
         stage('Get Changed Files') {
-            files = sh(script: "git diff --name-only origin/${branchName} HEAD", returnStdout: true).trim().split("\n")
+            steps {
+                script {
+                    if (env.CHANGE_ID) {
+                        // This is a pull request
+                        env.CHANGED_FILES = sh(script: "git diff --name-only origin/${env.CHANGE_TARGET} HEAD", returnStdout: true).trim()
+                    } else {
+                        // This is a push to a non-main branch
+                        env.CHANGED_FILES = sh(script: "git diff --name-only HEAD^1 HEAD", returnStdout: true).trim()
+                    }
+                    echo "Changed files: ${env.CHANGED_FILES}"
+                }
+            }
         }
 
         stage('Parse and Validate YAML') {
-            files.each { file ->
-                if (file.endsWith(".yaml") || file.endsWith(".yml")) {
-                    echo "Validating ${file}"
-                    try {
-                        container('yamllint-container') {
-                            sh "yamllint ${file}"
+            steps {
+                script {
+                    env.CHANGED_FILES.split('\n').each { file ->
+                        if (file.endsWith(".yaml") || file.endsWith(".yml")) {
+                            echo "Validating ${file}"
+                            container('yamllint') {
+                                sh "yamllint ${file}"
+                            }
+                            container('kubectl') {
+                                sh "kubectl apply --dry-run=client -f ${file} --namespace=${testNamespace}"
+                            }
                         }
-                        container('kubectl-container') {
-                            sh "kubectl apply --dry-run=client -f ${file} --namespace=${testNamespace}"
-                        }
-                    } catch (Exception e) {
-                        currentBuild.result = 'FAILURE'
-                        throw e
                     }
                 }
             }
         }
 
         stage('Apply Resources') {
-            try {
-                container('kubectl-container') {
-                    files.each { file ->
+            steps {
+                script {
+                    env.CHANGED_FILES.split('\n').each { file ->
                         if (file.endsWith(".yaml") || file.endsWith(".yml")) {
                             echo "Applying ${file}"
-                            sh "kubectl apply -f ${file} --namespace=${testNamespace}"
+                            container('kubectl') {
+                                sh "kubectl apply -f ${file} --namespace=${testNamespace}"
+                            }
                         }
                     }
                 }
-            } catch (Exception e) {
-                currentBuild.result = 'FAILURE'
-                throw e
             }
         }
 
         stage('Cleanup') {
-            try {
-                container('kubectl-container') {
-                    files.each { file ->
+            steps {
+                script {
+                    env.CHANGED_FILES.split('\n').each { file ->
                         if (file.endsWith(".yaml") || file.endsWith(".yml")) {
                             echo "Cleaning up ${file}"
-                            sh "kubectl delete -f ${file} --namespace=${testNamespace}"
+                            container('kubectl') {
+                                sh "kubectl delete -f ${file} --namespace=${testNamespace}"
+                            }
                         }
                     }
                 }
-            } catch (Exception e) {
-                currentBuild.result = 'FAILURE'
-                throw e
+            }
+        }
+    }
+
+    post {
+        always {
+            script {
+                if (env.CHANGE_ID) {
+                    def status = currentBuild.resultIsBetterOrEqualTo('SUCCESS') ? 'SUCCESS' : 'FAILURE'
+                    setGitHubPullRequestStatus(status: status)
+                }
             }
         }
     }
 }
+
