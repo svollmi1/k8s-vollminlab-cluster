@@ -27,9 +27,6 @@ data:
           version: 1400.v7fd111b_ec82f
         - name: workflow-aggregator
           version: 596.v8c21c963d92d
-#      configurationAsCode:
-#        configurations:
-#        - name: jenkins-credential-config
       seedJobs:
         - id: test-k8s-deployment
           targets: "clusters/vollminlab-cluster/ci/jenkins-operator/app/cicd/jobs/*.jenkins"
