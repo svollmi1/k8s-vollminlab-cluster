@@ -4,6 +4,9 @@ def label = "k8s-${UUID.randomUUID().toString()}"
 def home = "/home/jenkins"
 def workspace = "${home}/workspace"
 def testNamespace = "ci-testing"
+def branchName = env.BRANCH_NAME ?: 'main'  // Fallback to 'main' if BRANCH_NAME is null
+
+echo "Using branch: ${branchName}"
 
 podTemplate(
     label: label,
@@ -24,7 +27,7 @@ podTemplate(
         }
 
         // Get list of changed files
-        def files = sh(script: "git diff --name-only origin/${env.BRANCH_NAME} HEAD", returnStdout: true).trim().split("\n")
+        def files = sh(script: "git diff --name-only origin/${branchName} HEAD", returnStdout: true).trim().split("\n")
 
         stage('Parse and Validate YAML') {
             files.each { file ->
