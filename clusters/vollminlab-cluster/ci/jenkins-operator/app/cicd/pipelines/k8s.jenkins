@@ -4,8 +4,10 @@ pipeline {
             yaml '''
 apiVersion: v1
 kind: Pod
+metadata:
+  namespace: ci
 spec:
-  serviceAccountName: jenkins
+  serviceAccountName: jenkins-operator-jenkins
   containers:
   - name: kubectl
     image: lachlanevenson/k8s-kubectl:v1.21.2
@@ -21,16 +23,19 @@ spec:
             defaultContainer 'jnlp'
         }
     }
+    
     environment {
         GITHUB_TOKEN = credentials('github-pat')
         TEST_NAMESPACE = 'ci-testing'
     }
+    
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
+        
         stage('Get Changed Files') {
             steps {
                 script {
@@ -43,6 +48,7 @@ spec:
                 }
             }
         }
+        
         stage('Lint Changed YAML') {
             steps {
                 container('yamllint') {
@@ -56,13 +62,7 @@ spec:
                 }
             }
         }
-        stage('Verify Permissions') {
-            steps {
-                container('kubectl') {
-                    sh "kubectl auth can-i --list -n ${TEST_NAMESPACE}"
-                }
-            }
-        }
+        
         stage('Validate Changed Kubernetes Resources') {
             steps {
                 container('kubectl') {
@@ -76,6 +76,7 @@ spec:
                 }
             }
         }
+        
         stage('Deploy Changed Resources to Test Namespace') {
             steps {
                 container('kubectl') {
@@ -89,6 +90,7 @@ spec:
                 }
             }
         }
+        
         stage('Verify Deployment') {
             steps {
                 container('kubectl') {
@@ -98,13 +100,16 @@ spec:
             }
         }
     }
+    
     post {
         always {
             container('kubectl') {
                 script {
-                    env.CHANGED_FILES.split('\n').each { file ->
-                        if (file.endsWith('.yaml') || file.endsWith('.yml')) {
-                            sh "kubectl delete -f ${file} -n ${TEST_NAMESPACE}"
+                    if (env.CHANGED_FILES) {
+                        env.CHANGED_FILES.split('\n').each { file ->
+                            if (file.endsWith('.yaml') || file.endsWith('.yml')) {
+                                sh "kubectl delete -f ${file} -n ${TEST_NAMESPACE}"
+                            }
                         }
                     }
                 }

@@ -2,7 +2,7 @@
 
 multibranchPipelineJob('k8s-test-deploy') {
     displayName('Kubernetes Test Deployment')
-
+    
     branchSources {
         github {
             id('k8s-test-deploy')
@@ -19,9 +19,9 @@ multibranchPipelineJob('k8s-test-deploy') {
     }
 
     configure { project ->
-        project / 'sources' / 'data' / 'jenkins.branch.BranchSource' / source << {
-            apiUri('https://api.github.com')
-            credentialsId('github-pat')
+        project / 'triggers' << 'com.cloudbees.hudson.plugins.folder.computed.PeriodicFolderTrigger' {
+            spec('')
+            interval(0)
         }
     }
 
