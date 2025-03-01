@@ -9,17 +9,12 @@ multibranchPipelineJob('k8s-test-deploy') {
             repoOwner('svollmi1')
             repository('k8s-vollminlab-cluster')
             scanCredentialsId('github-pat')
-            traits {
-                gitHubBranchDiscovery()
-                gitHubPullRequestDiscovery {
-                    strategyId(1) // 1 - Merging the pull request with the current target branch revision
-                }
-                pruneStaleBranchTrait()
-                gitHubSCMSourceStatusChecksTrait {
-                    name('k8s-test-deploy')
-                    context('k8s-test-deploy')
-                }
-            }
+            buildOriginBranch(true)
+            buildOriginBranchWithPR(true)
+            buildOriginPRMerge(true)
+            buildOriginPRHead(false)
+            buildForkPRMerge(false)
+            buildForkPRHead(false)
         }
     }
 
@@ -35,4 +30,15 @@ multibranchPipelineJob('k8s-test-deploy') {
             scriptPath('clusters/vollminlab-cluster/ci/jenkins-operator/app/cicd/pipelines/k8s.jenkins')
         }
     }
+
+    configure { project ->
+        project / 'sources' / 'data' / 'jenkins.branch.BranchSource' / source / 'traits' << {
+            'org.jenkinsci.plugins.github__branch__source.BranchDiscoveryTrait' { strategyId(1) }
+            'org.jenkinsci.plugins.github__branch__source.OriginPullRequestDiscoveryTrait' { strategyId(1) }
+            'jenkins.plugins.git.traits.CleanBeforeCheckoutTrait' {}
+            'jenkins.plugins.git.traits.CleanAfterCheckoutTrait' {}
+            'jenkins.plugins.git.traits.LocalBranchTrait' {}
+        }
+    }
 }
+
