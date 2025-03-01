@@ -15,8 +15,9 @@ multibranchPipelineJob('k8s-test-deploy') {
                     strategyId(1) // 1 - Merging the pull request with the current target branch revision
                 }
                 pruneStaleBranchTrait()
-                gitHubStatusContextLabelTrait {
-                    labelName('k8s-test-deploy')
+                gitHubSCMSourceStatusChecksTrait {
+                    name('k8s-test-deploy')
+                    context('k8s-test-deploy')
                 }
             }
         }
@@ -35,4 +36,3 @@ multibranchPipelineJob('k8s-test-deploy') {
         }
     }
 }
-
