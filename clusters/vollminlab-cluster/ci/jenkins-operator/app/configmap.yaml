@@ -16,9 +16,9 @@ data:
           size: 50Gi
       basePlugins:
         - name: configuration-as-code
-          version: 1873.vea_5814ca_9c93
+          version: 1932.v75cb_b_f1b_698d
         - name: git
-          version: 5.5.2
+          version: 5.6.0
         - name: github-branch-source
           version: 1807.v50351eb_7dd13
         - name: job-dsl
@@ -28,7 +28,7 @@ data:
         - name: kubernetes-credentials-provider
           version: 1.262.v2670ef7ea_0c5
         - name: workflow-job
-          version: 1400.v7fd111b_ec82f
+          version: 1505.vea_4b_20a_4a_495
         - name: workflow-aggregator
           version: 596.v8c21c963d92d
       seedJobs:
