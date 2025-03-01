@@ -18,6 +18,13 @@ multibranchPipelineJob('k8s-test-deploy') {
         }
     }
 
+    configure { project ->
+        project / 'sources' / 'data' / 'jenkins.branch.BranchSource' / source << {
+            apiUri('https://api.github.com')
+            credentialsId('github-pat')
+        }
+    }
+
     orphanedItemStrategy {
         discardOldItems {
             numToKeep(20)
@@ -30,15 +37,4 @@ multibranchPipelineJob('k8s-test-deploy') {
             scriptPath('clusters/vollminlab-cluster/ci/jenkins-operator/app/cicd/pipelines/k8s.jenkins')
         }
     }
-
-    configure { project ->
-        project / 'sources' / 'data' / 'jenkins.branch.BranchSource' / source / 'traits' << {
-            'org.jenkinsci.plugins.github__branch__source.BranchDiscoveryTrait' { strategyId(1) }
-            'org.jenkinsci.plugins.github__branch__source.OriginPullRequestDiscoveryTrait' { strategyId(1) }
-            'jenkins.plugins.git.traits.CleanBeforeCheckoutTrait' {}
-            'jenkins.plugins.git.traits.CleanAfterCheckoutTrait' {}
-            'jenkins.plugins.git.traits.LocalBranchTrait' {}
-        }
-    }
 }
-

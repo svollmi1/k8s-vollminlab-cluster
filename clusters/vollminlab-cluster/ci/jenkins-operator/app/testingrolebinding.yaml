@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: jenkins-ci-rolebinding
+  namespace: ci-testing
+subjects:
+- kind: ServiceAccount
+  name: jenkins-operator-jenkins
+  namespace: ci
+roleRef:
+  kind: Role
+  name: jenkins-ci-role
+  apiGroup: rbac.authorization.k8s.io
