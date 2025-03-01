@@ -7,6 +7,8 @@ data:
   values.yaml: |
     jenkins:
       namespace: ci
+      image: jenkins/jenkins:lts
+      imagePullPolicy: Always
       backup:
         makeBackupBeforePodDeletion: true
         interval: 60

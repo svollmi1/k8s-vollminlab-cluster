@@ -8,31 +8,31 @@ multibranchPipelineJob('k8s-test-deploy') {
             id('k8s-test-deploy')
             repoOwner('svollmi1')
             repository('k8s-vollminlab-cluster')
-            scanCredentialsId('github-pat')
-            buildOriginBranch(true)
-            buildOriginPRMerge(true)
-            buildOriginPRHead(false)
-            buildForkPRMerge(false)
-            buildForkPRHead(false)
-        }
-    }
-
-    triggers {
-        periodicFolderTrigger {
-            interval('1d')
+            credentialsId('github-pat')
+            traits {
+                gitHubBranchDiscovery()
+                gitHubPullRequestDiscovery {
+                    strategyId(1) // 1 - Merging the pull request with the current target branch revision
+                }
+                pruneStaleBranchTrait()
+                gitHubStatusContextLabelTrait {
+                    labelName('k8s-test-deploy')
+                }
+            }
         }
     }
 
     orphanedItemStrategy {
         discardOldItems {
-            numToKeep(10)
+            numToKeep(20)
             daysToKeep(30)
         }
     }
 
-    configure { project ->
-        project / 'properties' / 'org.jenkinsci.plugins.workflow.job.properties.DurabilityHintJobProperty' {
-            hint('PERFORMANCE_OPTIMIZED')
+    factory {
+        workflowBranchProjectFactory {
+            scriptPath('clusters/vollminlab-cluster/ci/jenkins-operator/app/cicd/pipelines/k8s.jenkins')
         }
     }
 }
+
