@@ -23,34 +23,53 @@ spec:
             defaultContainer 'jnlp'
         }
     }
-    
+
     environment {
         GITHUB_TOKEN = credentials('github-pat')
         TEST_NAMESPACE = 'ci-testing'
     }
-    
+
     stages {
-        stage('Checkout') {
+        stage('Configure Git') {
             steps {
-                checkout scm
-            }
-        }
-        
-        stage('Get Changed Files') {
-            steps {
-                script {
-                    if (env.CHANGE_ID) {
-                        env.CHANGED_FILES = sh(script: "git diff --name-only origin/${env.CHANGE_TARGET} HEAD", returnStdout: true).trim()
-                    } else {
-                        env.CHANGED_FILES = sh(script: "git diff --name-only HEAD^1 HEAD", returnStdout: true).trim()
-                    }
-                    echo "Changed files: ${env.CHANGED_FILES}"
+                withCredentials([string(credentialsId: 'github-pat', variable: 'GITHUB_TOKEN')]) {
+                    sh '''
+                        git config --global credential.helper '!f() { echo username=pat; echo password=$GITHUB_TOKEN; }; f'
+                    '''
                 }
             }
         }
-        
+
+        stage('Checkout') {
+            steps {
+                checkout([$class: 'GitSCM', 
+                    branches: [[name: '*/main']], 
+                    userRemoteConfigs: [[
+                        url: 'https://github.com/svollmi1/k8s-vollminlab-cluster.git',
+                        credentialsId: 'github-pat'
+                    ]]
+                ])
+            }
+        }
+
+        stage('Get Changed Files') {
+            steps {
+                withCredentials([string(credentialsId: 'github-pat', variable: 'GITHUB_TOKEN')]) {
+                    script {
+                        if (env.CHANGE_ID) {
+                            env.CHANGED_FILES = sh(script: "git diff --name-only origin/${env.CHANGE_TARGET} HEAD", returnStdout: true).trim()
+                        } else {
+                            env.CHANGED_FILES = sh(script: "git diff --name-only HEAD^1 HEAD", returnStdout: true).trim()
+                        }
+                        echo "Changed files: ${env.CHANGED_FILES}"
+                    }
+                }
+            }
+        }
+
         stage('Lint Changed YAML') {
             steps {
+                setGitHubStatus('pending', 'Linting YAML files')
                 container('yamllint') {
                     script {
                         env.CHANGED_FILES.split('\n').each { file ->
@@ -61,10 +80,19 @@ spec:
                     }
                 }
             }
+            post {
+                success {
+                    setGitHubStatus('success', 'YAML linting passed')
+                }
+                failure {
+                    setGitHubStatus('failure', 'YAML linting failed')
+                }
+            }
         }
-        
+
         stage('Validate Changed Kubernetes Resources') {
             steps {
+                setGitHubStatus('pending', 'Validating Kubernetes resources')
                 container('kubectl') {
                     script {
                         env.CHANGED_FILES.split('\n').each { file ->
@@ -75,10 +103,19 @@ spec:
                     }
                 }
             }
+            post {
+                success {
+                    setGitHubStatus('success', 'Kubernetes resource validation passed')
+                }
+                failure {
+                    setGitHubStatus('failure', 'Kubernetes resource validation failed')
+                }
+            }
         }
-        
+
         stage('Deploy Changed Resources to Test Namespace') {
             steps {
+                setGitHubStatus('pending', 'Deploying resources to test namespace')
                 container('kubectl') {
                     script {
                         env.CHANGED_FILES.split('\n').each { file ->
@@ -89,18 +126,35 @@ spec:
                     }
                 }
             }
+            post {
+                success {
+                    setGitHubStatus('success', 'Deployment to test namespace successful')
+                }
+                failure {
+                    setGitHubStatus('failure', 'Deployment to test namespace failed')
+                }
+            }
         }
-        
+
         stage('Verify Deployment') {
             steps {
+                setGitHubStatus('pending', 'Verifying deployment')
                 container('kubectl') {
                     sh "kubectl get all -n ${TEST_NAMESPACE}"
                     // Add more verification steps as needed
                 }
             }
+            post {
+                success {
+                    setGitHubStatus('success', 'Deployment verification successful')
+                }
+                failure {
+                    setGitHubStatus('failure', 'Deployment verification failed')
+                }
+            }
         }
     }
-    
+
     post {
         always {
             container('kubectl') {
@@ -118,3 +172,14 @@ spec:
     }
 }
 
+void setGitHubStatus(String state, String description) {
+    withCredentials([string(credentialsId: 'github-pat', variable: 'GITHUB_TOKEN')]) {
+        sh """
+            curl -H "Authorization: token ${GITHUB_TOKEN}" \
+                 -H "Accept: application/vnd.github.v3+json" \
+                 -X POST \
+                 https://api.github.com/repos/svollmi1/k8s-vollminlab-cluster/statuses/${env.GIT_COMMIT} \
+                 -d '{"state": "${state}", "description": "${description}", "context": "continuous-integration/jenkins"}'
+        """
+    }
+}
