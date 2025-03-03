@@ -15,6 +15,8 @@ data:
         pvc:
           size: 50Gi
       basePlugins:
+        - name: cloudbees-folder
+          version: 6.982.vf165a_16c9507
         - name: configuration-as-code
           version: 1932.v75cb_b_f1b_698d
         - name: git
