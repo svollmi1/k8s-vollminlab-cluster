@@ -8,13 +8,11 @@ multibranchPipelineJob('k8s-test-deploy') {
             id('k8s-test-deploy')
             repoOwner('svollmi1')
             repository('k8s-vollminlab-cluster')
-            scanCredentialsId('github-pat')
-            buildOriginBranch(true)
-            buildOriginBranchWithPR(true)
-            buildOriginPRMerge(true)
-            buildOriginPRHead(false)
-            buildForkPRMerge(false)
-            buildForkPRHead(false)
+            credentialsId('github-pat')
+            traits {
+                gitHubBranchDiscovery()
+                gitHubPullRequestDiscovery { strategyId(1) }
+            }
         }
     }
 
@@ -31,17 +29,15 @@ multibranchPipelineJob('k8s-test-deploy') {
         }
     }
 
-    factory {
-        workflowBranchProjectFactory {
+    configure { project ->
+        project / factory(class: 'org.jenkinsci.plugins.workflow.multibranch.WorkflowBranchProjectFactory') {
+            owner(class: 'org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject', reference: '../..')
             scriptPath('clusters/vollminlab-cluster/ci/jenkins-operator/app/cicd/pipelines/k8s.jenkins')
         }
-    }
-
-    configure { project ->
-        project / 'properties' / 'org.jenkinsci.plugins.pipeline.modeldefinition.config.FolderConfig' {
-            dockerLabel('')
-            registry()
-        }
+        
+        // Use scanCredentialsId instead of credentialsId
+        def sources = project / sources / data / 'jenkins.branch.BranchSource' / source
+        sources / credentialsId('github-pat')
+        sources / scanCredentialsId('github-pat')
     }
 }
-
