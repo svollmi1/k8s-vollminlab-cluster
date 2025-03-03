@@ -31,13 +31,21 @@ spec:
 
     environment {
         GITHUB_TOKEN = credentials('github-pat')
-        TEST_NAMESPACE = 'ci-testing'
     }
 
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
+                script {
+                    checkout([$class: 'GitSCM', 
+                        branches: [[name: '*/main']], 
+                        extensions: [[$class: 'CloneOption', depth: 0, noTags: false, reference: '', shallow: false]], 
+                        userRemoteConfigs: [[
+                            url: 'https://github.com/svollmi1/k8s-vollminlab-cluster.git',
+                            credentialsId: 'github-pat'
+                        ]]
+                    ])
+                }
             }
         }
 
@@ -45,7 +53,18 @@ spec:
             steps {
                 container('git') {
                     script {
-                        env.CHANGED_FILES = sh(script: "git diff --name-only HEAD^1 HEAD || git ls-files", returnStdout: true).trim()
+                        withCredentials([string(credentialsId: 'github-pat', variable: 'GITHUB_TOKEN')]) {
+                            sh """
+                                git config --global --add safe.directory /home/jenkins/agent/workspace/k8s-test-deploy_main
+                                git config --global user.email "scottvollmin@gmail.com"
+                                git config --global user.name "svollmi1"
+                                git config --global credential.helper '!f() { echo username=svollmi1; echo password=$GITHUB_TOKEN; }; f'
+                                git fetch --all
+                                CHANGED_FILES=\$(git diff --name-only HEAD^1 HEAD || git ls-files)
+                                echo "\$CHANGED_FILES" > changed_files.txt
+                            """
+                        }
+                        env.CHANGED_FILES = readFile('changed_files.txt').trim()
                         echo "Changed files: ${env.CHANGED_FILES}"
                     }
                 }
@@ -57,19 +76,18 @@ spec:
                 container('yamllint') {
                     script {
                         sh '''
-                        if [ ! -f .yamllint ]; then
-                            cat << EOF > .yamllint
-        extends: default
+                        cat << EOF > .yamllint
+extends: default
 
-        rules:
-          line-length:
-            max: 120
-            level: warning
-          document-start: disable
-          truthy: disable
-        EOF
-                        fi
+rules:
+  line-length:
+    max: 120
+    level: warning
+  document-start: disable
+  truthy: disable
+EOF
                         '''
+
                         env.CHANGED_FILES.split('\n').each { file ->
                             if (file.endsWith('.yaml') || file.endsWith('.yml')) {
                                 echo "Linting file: ${file}"
@@ -87,7 +105,7 @@ spec:
                     script {
                         env.CHANGED_FILES.split('\n').each { file ->
                             if (file.endsWith('.yaml') || file.endsWith('.yml')) {
-                                sh "kubectl apply --dry-run=client -f ${file} -n ${TEST_NAMESPACE}"
+                                sh "kubectl apply --dry-run=client -f ${file} -n ci-testing"
                             }
                         }
                     }
@@ -101,7 +119,7 @@ spec:
                     script {
                         env.CHANGED_FILES.split('\n').each { file ->
                             if (file.endsWith('.yaml') || file.endsWith('.yml')) {
-                                sh "kubectl apply -f ${file} -n ${TEST_NAMESPACE}"
+                                sh "kubectl apply -f ${file} -n ci-testing"
                             }
                         }
                     }
@@ -112,7 +130,7 @@ spec:
         stage('Verify Deployment') {
             steps {
                 container('kubectl') {
-                    sh "kubectl get all -n ${TEST_NAMESPACE}"
+                    sh "kubectl get all -n ci-testing"
                     // Add more verification steps as needed
                 }
             }
@@ -126,7 +144,7 @@ spec:
                     if (env.CHANGED_FILES) {
                         env.CHANGED_FILES.split('\n').each { file ->
                             if (file.endsWith('.yaml') || file.endsWith('.yml')) {
-                                sh "kubectl delete -f ${file} -n ${TEST_NAMESPACE}"
+                                sh "kubectl delete -f ${file} -n ci-testing || true"
                             }
                         }
                     }
