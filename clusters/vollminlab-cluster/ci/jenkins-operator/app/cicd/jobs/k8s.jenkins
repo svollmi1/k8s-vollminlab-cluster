@@ -17,19 +17,15 @@ multibranchPipelineJob('k8s-test-deploy') {
         project / sources / data / 'jenkins.branch.BranchSource' / source / credentialsId('github-pat')
 
         // Add durability hint
-        project / 'properties' / 'org.jenkinsci.plugins.workflow.job.properties.DurabilityHintJobProperty' {
-            hint('PERFORMANCE_OPTIMIZED')
-        }
+        def durabilityHint = project / properties / 'org.jenkinsci.plugins.workflow.job.properties.DurabilityHintJobProperty'
+        durabilityHint << hint('PERFORMANCE_OPTIMIZED')
 
         // Add log rotation
-        project / 'properties' / 'jenkins.model.BuildDiscarderProperty' {
-            strategy {
-                'daysToKeep'('30')
-                'numToKeep'('10')
-                'artifactDaysToKeep'('-1')
-                'artifactNumToKeep'('-1')
-            }
-        }
+        def buildDiscarder = project / properties / 'jenkins.model.BuildDiscarderProperty' / strategy(class: 'hudson.tasks.LogRotator')
+        buildDiscarder << daysToKeep(30)
+        buildDiscarder << numToKeep(10)
+        buildDiscarder << artifactDaysToKeep(-1)
+        buildDiscarder << artifactNumToKeep(-1)
     }
 
     // Discover branches
@@ -61,6 +57,7 @@ multibranchPipelineJob('k8s-test-deploy') {
     orphanedItemStrategy {
         discardOldItems {
             numToKeep(20)
+            daysToKeep(30)
         }
     }
 }
