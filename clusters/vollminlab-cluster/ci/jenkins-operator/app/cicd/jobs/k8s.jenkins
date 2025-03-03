@@ -16,28 +16,24 @@ multibranchPipelineJob('k8s-test-deploy') {
         // Use github-pat credential for API access
         project / sources / data / 'jenkins.branch.BranchSource' / source / credentialsId('github-pat')
 
-        // Add durability hint
-        def durabilityHint = project / properties / 'org.jenkinsci.plugins.workflow.job.properties.DurabilityHintJobProperty'
-        durabilityHint << hint('PERFORMANCE_OPTIMIZED')
+        // Add branch discovery traits
+        def traits = project / sources / data / 'jenkins.branch.BranchSource' / source / traits
+        traits << 'org.jenkinsci.plugins.github__branch__source.BranchDiscoveryTrait' {}
+        traits << 'org.jenkinsci.plugins.github__branch__source.OriginPullRequestDiscoveryTrait' {
+            strategyId(1)
+        }
+        traits << 'org.jenkinsci.plugins.github__branch__source.ForkPullRequestDiscoveryTrait' {
+            strategyId(1)
+            trust(class: 'org.jenkinsci.plugins.github_branch_source.ForkPullRequestDiscoveryTrait$TrustPermission')
+        }
 
         // Add log rotation
-        def buildDiscarder = project / properties / 'jenkins.model.BuildDiscarderProperty' / strategy(class: 'hudson.tasks.LogRotator')
-        buildDiscarder << daysToKeep(30)
-        buildDiscarder << numToKeep(10)
-        buildDiscarder << artifactDaysToKeep(-1)
-        buildDiscarder << artifactNumToKeep(-1)
-    }
-
-    // Discover branches
-    configure { project ->
-        project / sources / data / 'jenkins.branch.BranchSource' / source / traits {
-            'org.jenkinsci.plugins.github__branch__source.BranchDiscoveryTrait' {}
-            'org.jenkinsci.plugins.github__branch__source.OriginPullRequestDiscoveryTrait' {
-                strategyId(1)
-            }
-            'org.jenkinsci.plugins.github__branch__source.ForkPullRequestDiscoveryTrait' {
-                strategyId(1)
-                trust(class: 'org.jenkinsci.plugins.github_branch_source.ForkPullRequestDiscoveryTrait$TrustPermission')
+        project / 'properties' << 'jenkins.model.BuildDiscarderProperty' {
+            strategy(class: 'hudson.tasks.LogRotator') {
+                daysToKeep(30)
+                numToKeep(10)
+                artifactDaysToKeep(-1)
+                artifactNumToKeep(-1)
             }
         }
     }
@@ -61,3 +57,4 @@ multibranchPipelineJob('k8s-test-deploy') {
         }
     }
 }
+
