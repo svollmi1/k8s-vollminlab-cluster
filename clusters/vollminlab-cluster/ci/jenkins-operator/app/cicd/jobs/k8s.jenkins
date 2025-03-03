@@ -2,7 +2,7 @@
 
 multibranchPipelineJob('k8s-test-deploy') {
     displayName('Kubernetes Test Deployment')
-    
+
     branchSources {
         github {
             id('k8s-test-deploy')
@@ -15,9 +15,20 @@ multibranchPipelineJob('k8s-test-deploy') {
             buildOriginPRHead(false)
             buildForkPRMerge(false)
             buildForkPRHead(false)
-            traits {
-                gitHubBranchDiscovery()
-                gitHubPullRequestDiscovery { strategyId(1) }
+        }
+    }
+
+    configure { project ->
+        project / 'sources' / 'data' / 'jenkins.branch.BranchSource' / source / traits {
+            'org.jenkinsci.plugins.github__branch__source.BranchDiscoveryTrait' {
+                strategyId(1)
+            }
+            'org.jenkinsci.plugins.github__branch__source.OriginPullRequestDiscoveryTrait' {
+                strategyId(1)
+            }
+            'org.jenkinsci.plugins.github__branch__source.ForkPullRequestDiscoveryTrait' {
+                strategyId(1)
+                trust(class: 'org.jenkinsci.plugins.github_branch_source.ForkPullRequestDiscoveryTrait$TrustPermission')
             }
         }
     }
