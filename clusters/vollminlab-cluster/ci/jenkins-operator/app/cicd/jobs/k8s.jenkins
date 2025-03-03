@@ -8,7 +8,7 @@ multibranchPipelineJob('k8s-test-deploy') {
             id('k8s-test-deploy')
             repoOwner('svollmi1')
             repository('k8s-vollminlab-cluster')
-            credentialsId('github-pat')
+            scanCredentialsId('github-pat')
             traits {
                 gitHubBranchDiscovery()
                 gitHubPullRequestDiscovery { strategyId(1) }
@@ -29,15 +29,15 @@ multibranchPipelineJob('k8s-test-deploy') {
         }
     }
 
-    configure { project ->
-        project / factory(class: 'org.jenkinsci.plugins.workflow.multibranch.WorkflowBranchProjectFactory') {
-            owner(class: 'org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject', reference: '../..')
+    factory {
+        workflowBranchProjectFactory {
             scriptPath('clusters/vollminlab-cluster/ci/jenkins-operator/app/cicd/pipelines/k8s.jenkins')
         }
-        
-        // Use scanCredentialsId instead of credentialsId
-        def sources = project / sources / data / 'jenkins.branch.BranchSource' / source
-        sources / credentialsId('github-pat')
-        sources / scanCredentialsId('github-pat')
+    }
+
+    configure { project ->
+        // Ensure the credential is used for API access as well
+        project / sources / data / 'jenkins.branch.BranchSource' / source / scanCredentialsId('github-pat')
     }
 }
+
