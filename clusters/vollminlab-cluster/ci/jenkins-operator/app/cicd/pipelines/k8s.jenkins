@@ -34,21 +34,6 @@ spec:
     }
     
     stages {
-        stage('List Credentials') {
-            steps {
-                script {
-                    def creds = com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials(
-                        com.cloudbees.plugins.credentials.common.StandardCredentials.class,
-                        jenkins.model.Jenkins.instance
-                    )
-                    echo "Available credentials:"
-                    creds.each { c ->
-                        echo "ID: ${c.id}, Description: ${c.description}, Class: ${c.class}"
-                    }
-                }
-            }
-        }
-
         stage('Check Credential') {
             steps {
                 script {
