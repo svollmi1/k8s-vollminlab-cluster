@@ -34,6 +34,19 @@ spec:
     }
 
     stages {
+        stage('Test GitHub API') {
+            steps {
+                script {
+                    def response = sh(script: """
+                        curl -s -H "Authorization: token ${GITHUB_TOKEN}" https://api.github.com/user
+                    """, returnStdout: true)
+                    def user = readJSON text: response
+                    echo "Successfully authenticated as ${user.login}"
+                }
+            }
+        }
+
+    stages {
         stage('Checkout') {
             steps {
                 script {
