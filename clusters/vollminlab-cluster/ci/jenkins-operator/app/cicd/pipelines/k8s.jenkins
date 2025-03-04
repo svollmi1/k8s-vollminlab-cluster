@@ -34,14 +34,30 @@ spec:
     }
     
     stages {
+        stage('List Credentials') {
+            steps {
+                script {
+                    def creds = com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials(
+                        com.cloudbees.plugins.credentials.common.StandardCredentials.class,
+                        jenkins.model.Jenkins.instance
+                    )
+                    echo "Available credentials:"
+                    creds.each { c ->
+                        echo "ID: ${c.id}, Description: ${c.description}, Class: ${c.class}"
+                    }
+                }
+            }
+        }
+
         stage('Check Credential') {
             steps {
                 script {
-                    withCredentials([string(credentialsId: 'k8s-github-pat', variable: 'TOKEN')]) {
+                    withCredentials([string(credentialsId: 'github-pat', variable: 'TOKEN')]) {
                         if (TOKEN) {
-                            echo "Credential 'k8s-github-pat' is available"
+                            echo "Credential 'github-pat' is available"
+                            echo "Token starts with: ${TOKEN.take(4)}..."
                         } else {
-                            error "Credential 'k8s-github-pat' is not available"
+                            error "Credential 'github-pat' is not available"
                         }
                     }
                 }
@@ -57,7 +73,7 @@ spec:
                         extensions: [[$class: 'CloneOption', depth: 0, noTags: false, reference: '', shallow: false]], 
                         userRemoteConfigs: [[
                             url: 'https://github.com/svollmi1/k8s-vollminlab-cluster.git',
-                            credentialsId: 'k8s-github-pat'
+                            credentialsId: 'github-pat'
                         ]]
                     ])
                 }
@@ -68,7 +84,7 @@ spec:
             steps {
                 container('git') {
                     script {
-                        withCredentials([string(credentialsId: 'k8s-github-pat', variable: 'GITHUB_TOKEN')]) {
+                        withCredentials([string(credentialsId: 'github-pat', variable: 'GITHUB_TOKEN')]) {
                             sh """
                                 git config user.email "scottvollmin@gmail.com"
                                 git config user.name "svollmi1"
