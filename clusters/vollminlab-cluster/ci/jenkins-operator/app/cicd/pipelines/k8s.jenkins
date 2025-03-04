@@ -37,11 +37,11 @@ spec:
         stage('Check Credential') {
             steps {
                 script {
-                    withCredentials([string(credentialsId: 'github-pat', variable: 'TOKEN')]) {
+                    withCredentials([string(credentialsId: 'k8s-github-pat', variable: 'TOKEN')]) {
                         if (TOKEN) {
-                            echo "Credential 'github-pat' is available"
+                            echo "Credential 'k8s-github-pat' is available"
                         } else {
-                            error "Credential 'github-pat' is not available"
+                            error "Credential 'k8s-github-pat' is not available"
                         }
                     }
                 }
@@ -51,12 +51,13 @@ spec:
         stage('Checkout') {
             steps {
                 script {
+                    def branch = env.CHANGE_BRANCH ?: env.BRANCH_NAME ?: 'main'
                     checkout([$class: 'GitSCM', 
-                        branches: [[name: '*/main']], 
+                        branches: [[name: "*/${branch}"]],
                         extensions: [[$class: 'CloneOption', depth: 0, noTags: false, reference: '', shallow: false]], 
                         userRemoteConfigs: [[
                             url: 'https://github.com/svollmi1/k8s-vollminlab-cluster.git',
-                            credentialsId: 'github-pat'
+                            credentialsId: 'k8s-github-pat'
                         ]]
                     ])
                 }
@@ -67,15 +68,21 @@ spec:
             steps {
                 container('git') {
                     script {
-                        withCredentials([string(credentialsId: 'github-pat', variable: 'GITHUB_TOKEN')]) {
+                        withCredentials([string(credentialsId: 'k8s-github-pat', variable: 'GITHUB_TOKEN')]) {
                             sh """
-                                git config --local user.email "scottvollmin@gmail.com"
-                                git config --local user.name "svollmi1"
-                                git config --local credential.helper '!f() { echo username=svollmi1; echo password=$GITHUB_TOKEN; }; f'
+                                git config user.email "scottvollmin@gmail.com"
+                                git config user.name "svollmi1"
+                                git config credential.helper '!f() { echo username=svollmi1; echo password=$GITHUB_TOKEN; }; f'
                                 git fetch --all
-                                CHANGED_FILES=\$(git diff --name-only HEAD^1 HEAD || git ls-files)
-                                echo "\$CHANGED_FILES" > changed_files.txt
                             """
+                            
+                            if (env.CHANGE_TARGET) {
+                                // This is a PR
+                                sh "git diff --name-only origin/${env.CHANGE_TARGET}...HEAD > changed_files.txt"
+                            } else {
+                                // This is a branch build
+                                sh "git diff --name-only HEAD^1 HEAD > changed_files.txt"
+                            }
                         }
                         env.CHANGED_FILES = readFile('changed_files.txt').trim()
                         echo "Changed files: ${env.CHANGED_FILES}"
