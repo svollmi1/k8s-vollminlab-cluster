@@ -32,31 +32,22 @@ spec:
     environment {
         GITHUB_TOKEN = credentials('github-pat')
     }
-
+    
     stages {
-        stage('Test GitHub API - Test 1') {
+        stage('Check Credential') {
             steps {
                 script {
-                    def response = sh(script: """
-                        curl -s -H "Authorization: token ${GITHUB_TOKEN}" https://api.github.com/user
-                    """, returnStdout: true)
-                    def user = readJSON text: response
-                    echo "Successfully authenticated as ${user.login}"
-                }
-            }
-        }
-
-        stage('Test GitHub API - Test 2') {
-            steps {
-                script {
-                    withCredentials([string(credentialsId: 'github-pat', variable: 'GITHUB_TOKEN')]) {
-                        def response = sh(script: "curl -H 'Authorization: token ${GITHUB_TOKEN}' https://api.github.com/user", returnStdout: true).trim()
-                        echo response
+                    withCredentials([string(credentialsId: 'github-pat', variable: 'TOKEN')]) {
+                        if (TOKEN) {
+                            echo "Credential 'github-pat' is available"
+                        } else {
+                            error "Credential 'github-pat' is not available"
+                        }
                     }
                 }
             }
         }
-        
+
         stage('Checkout') {
             steps {
                 script {
