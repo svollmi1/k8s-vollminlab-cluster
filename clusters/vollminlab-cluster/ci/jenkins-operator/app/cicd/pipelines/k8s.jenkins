@@ -29,8 +29,8 @@ spec:
         }
     }
 
-    environment {
-        GITHUB_TOKEN = credentials('github-pat')
+    options {
+        skipDefaultCheckout()
     }
     
     stages {
@@ -69,10 +69,9 @@ spec:
                     script {
                         withCredentials([string(credentialsId: 'github-pat', variable: 'GITHUB_TOKEN')]) {
                             sh """
-                                git config --global --add safe.directory /home/jenkins/agent/workspace/k8s-test-deploy_main
-                                git config --global user.email "scottvollmin@gmail.com"
-                                git config --global user.name "svollmi1"
-                                git config --global credential.helper '!f() { echo username=svollmi1; echo password=$GITHUB_TOKEN; }; f'
+                                git config --local user.email "scottvollmin@gmail.com"
+                                git config --local user.name "svollmi1"
+                                git config --local credential.helper '!f() { echo username=svollmi1; echo password=$GITHUB_TOKEN; }; f'
                                 git fetch --all
                                 CHANGED_FILES=\$(git diff --name-only HEAD^1 HEAD || git ls-files)
                                 echo "\$CHANGED_FILES" > changed_files.txt
@@ -167,3 +166,4 @@ EOF
         }
     }
 }
+
