@@ -8,7 +8,7 @@ multibranchPipelineJob('k8s-test-deploy') {
             id('k8s-test-deploy')
             repoOwner('svollmi1')
             repository('k8s-vollminlab-cluster')
-            scanCredentialsId('github-pat')
+            scanCredentialsId('github-pat-userpass')
             buildOriginBranch(true)
             buildOriginBranchWithPR(true)
             buildOriginPRMerge(true)

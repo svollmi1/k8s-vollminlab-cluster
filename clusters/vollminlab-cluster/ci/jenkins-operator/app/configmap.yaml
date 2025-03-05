@@ -43,23 +43,4 @@ data:
           repositoryUrl: https://github.com/svollmi1/k8s-vollminlab-cluster
           credentialID: github-pat
       operator:
-        namespace: cii
-      configurationAsCode:
-        configurations:
-          - name: github-config
-            data: |
-              credentials:
-                system:
-                  domainCredentials:
-                    - credentials:
-                        - string:
-                            scope: GLOBAL
-                            id: "github-pat"
-                            secret: ${GITHUB_PAT}
-                            description: "GitHub Personal Access Token"
-              unclassified:
-                githubpluginconfig:
-                  configs:
-                    - apiUrl: "https://api.github.com"
-                      credentialsId: "github-pat"
-                      name: "GitHub"
+        namespace: ci
