@@ -31,23 +31,10 @@ spec:
 
     options {
         skipDefaultCheckout()
+        buildDiscarder(logRotator(numToKeepStr: '10'))
     }
     
     stages {
-        stage('Check Credential') {
-            steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: 'github-pat-userpass', 
-                                                    usernameVariable: 'GIT_USERNAME', 
-                                                    passwordVariable: 'GIT_PASSWORD')]) {
-                        echo "Credential 'github-pat-userpass' is available"
-                        echo "Username: ${GIT_USERNAME}"
-                        echo "Password starts with: ${GIT_PASSWORD.take(4)}..."
-                    }
-                }
-            }
-        }
-
         stage('Checkout') {
             steps {
                 script {
@@ -69,27 +56,14 @@ spec:
                 container('git') {
                     script {
                         withCredentials([usernamePassword(credentialsId: 'github-pat-userpass', 
-                                                        usernameVariable: 'GIT_USERNAME', 
-                                                        passwordVariable: 'GIT_PASSWORD')]) {
-                            // Debug information
+                                                       usernameVariable: 'GIT_USERNAME', 
+                                                       passwordVariable: 'GIT_PASSWORD')]) {
+                            // Clone the repository to get an accurate git environment
                             sh '''
-                                pwd
-                                ls -la
-                                echo "Current directory: $(pwd)"
-                                echo "Checking git binary and version:"
-                                which git
-                                git --version
-                                echo "Looking for .git directory:"
-                                find . -name .git -type d
-                            '''
-                            
-                            // Try a different approach - clone the repo again in the git container
-                            sh '''
-                                # Clean the current directory to avoid conflicts
+                                # Remove any existing git directory
                                 rm -rf .git 2>/dev/null || true
                                 
-                                # Clone the repository fresh
-                                echo "Cloning repository..."
+                                # Clone the repository
                                 git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/svollmi1/k8s-vollminlab-cluster.git temp_repo
                                 
                                 # Move into the cloned directory
@@ -99,24 +73,17 @@ spec:
                                 git config user.email "scottvollmin@gmail.com"
                                 git config user.name "svollmi1"
                                 
-                                # Get latest commit hash
-                                CURRENT_COMMIT=$(git rev-parse HEAD)
-                                echo "Current commit: ${CURRENT_COMMIT}"
-                                
                                 # Get changed files
                                 if git rev-parse HEAD^1 >/dev/null 2>&1; then
+                                    # Get files changed in the most recent commit
                                     git diff --name-only HEAD^1 HEAD > ../changed_files.txt
-                                    echo "Created changed_files.txt using git diff"
                                 else
                                     # If this is the first commit, list all tracked files
                                     git ls-tree -r HEAD --name-only > ../changed_files.txt
-                                    echo "Created changed_files.txt using git ls-tree"
                                 fi
                                 
-                                # Move back to original directory
-                                cd ..
-                                
                                 # Clean up
+                                cd ..
                                 rm -rf temp_repo
                             '''
                             
@@ -209,5 +176,16 @@ EOF
                 }
             }
         }
+        success {
+            script {
+                echo "Pipeline completed successfully"
+            }
+        }
+        failure {
+            script {
+                echo "Pipeline failed"
+            }
+        }
     }
 }
+
