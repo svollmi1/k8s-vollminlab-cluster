@@ -36,12 +36,6 @@ multibranchPipelineJob('k8s-test-deploy') {
         }
     }
 
-    configure { project ->
-        project / 'properties' / 'org.jenkinsci.plugins.workflow.multibranch.DurabilityHintBranchProperty' {
-            hint('PERFORMANCE_OPTIMIZED')
-        }
-    }
-
     orphanedItemStrategy {
         discardOldItems {
             numToKeep(20)
