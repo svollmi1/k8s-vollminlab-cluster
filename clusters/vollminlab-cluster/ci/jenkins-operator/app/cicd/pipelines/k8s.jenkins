@@ -52,15 +52,17 @@ spec:
         stage('Checkout') {
             steps {
                 script {
-                    def branch = env.CHANGE_BRANCH ?: env.BRANCH_NAME ?: 'main'
-                    checkout([$class: 'GitSCM', 
-                        branches: [[name: "*/${branch}"]],
-                        extensions: [[$class: 'CloneOption', depth: 0, noTags: false, reference: '', shallow: false]], 
-                        userRemoteConfigs: [[
-                            url: 'https://github.com/svollmi1/k8s-vollminlab-cluster.git',
-                            credentialsId: 'github-pat'
-                        ]]
-                    ])
+                    withCredentials([string(credentialsId: 'github-pat', variable: 'GITHUB_TOKEN')]) {
+                        def branch = env.CHANGE_BRANCH ?: env.BRANCH_NAME ?: 'main'
+                        checkout([$class: 'GitSCM', 
+                            branches: [[name: "*/${branch}"]],
+                            extensions: [[$class: 'CloneOption', depth: 0, noTags: false, reference: '', shallow: false]], 
+                            userRemoteConfigs: [[
+                                url: 'https://github.com/svollmi1/k8s-vollminlab-cluster.git',
+                                credentialsId: 'github-pat'
+                            ]]
+                        ])
+                    }
                 }
             }
         }

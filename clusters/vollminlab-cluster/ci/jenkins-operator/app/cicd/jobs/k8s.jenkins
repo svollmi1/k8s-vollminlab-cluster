@@ -9,6 +9,12 @@ multibranchPipelineJob('k8s-test-deploy') {
             repoOwner('svollmi1')
             repository('k8s-vollminlab-cluster')
             scanCredentialsId('github-pat')
+            buildOriginBranch(true)
+            buildOriginBranchWithPR(true)
+            buildOriginPRMerge(true)
+            buildOriginPRHead(false)
+            buildForkPRMerge(false)
+            buildForkPRHead(false)
         }
     }
 
@@ -23,6 +29,17 @@ multibranchPipelineJob('k8s-test-deploy') {
         traits << 'org.jenkinsci.plugins.github__branch__source.ForkPullRequestDiscoveryTrait' {
             strategyId(1)
             trust(class: 'org.jenkinsci.plugins.github_branch_source.ForkPullRequestDiscoveryTrait$TrustPermission')
+        }
+        traits << 'org.jenkinsci.plugins.github__branch__source.GitHubSCMSourceStatusChecksTrait' {
+            name('Jenkins')
+            context('continuous-integration/jenkins')
+        }
+    }
+
+    configure { project ->
+        project / 'properties' / 'jenkins.branch.RateLimitBranchProperty_-JobPropertyImpl' {
+            durationName('hour')
+            count('10')
         }
     }
 
