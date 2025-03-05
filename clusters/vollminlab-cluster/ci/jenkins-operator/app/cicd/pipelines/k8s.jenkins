@@ -71,50 +71,57 @@ spec:
                         withCredentials([usernamePassword(credentialsId: 'github-pat-userpass', 
                                                         usernameVariable: 'GIT_USERNAME', 
                                                         passwordVariable: 'GIT_PASSWORD')]) {
-                            // First, check if we're in a git directory and print debug info
+                            // Debug information
                             sh '''
                                 pwd
                                 ls -la
                                 echo "Current directory: $(pwd)"
+                                echo "Checking git binary and version:"
+                                which git
+                                git --version
+                                echo "Looking for .git directory:"
+                                find . -name .git -type d
                             '''
                             
-                            // Use the git repo already checked out by the previous stage
+                            // Try a different approach - clone the repo again in the git container
                             sh '''
-                                cd ${WORKSPACE}
-                                # Check if this is a git directory
-                                if [ -d .git ] || git rev-parse --git-dir > /dev/null 2>&1; then
-                                    echo "This is a git directory"
-                                else
-                                    echo "Not in a git directory, listing files:"
-                                    ls -la
-                                    exit 1
-                                fi
+                                # Clean the current directory to avoid conflicts
+                                rm -rf .git 2>/dev/null || true
                                 
+                                # Clone the repository fresh
+                                echo "Cloning repository..."
+                                git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/svollmi1/k8s-vollminlab-cluster.git temp_repo
+                                
+                                # Move into the cloned directory
+                                cd temp_repo
+                                
+                                # Setup git config
                                 git config user.email "scottvollmin@gmail.com"
                                 git config user.name "svollmi1"
-                                git remote set-url origin https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/svollmi1/k8s-vollminlab-cluster.git
-                                git fetch --all
+                                
+                                # Get latest commit hash
+                                CURRENT_COMMIT=$(git rev-parse HEAD)
+                                echo "Current commit: ${CURRENT_COMMIT}"
+                                
+                                # Get changed files
+                                if git rev-parse HEAD^1 >/dev/null 2>&1; then
+                                    git diff --name-only HEAD^1 HEAD > ../changed_files.txt
+                                    echo "Created changed_files.txt using git diff"
+                                else
+                                    # If this is the first commit, list all tracked files
+                                    git ls-tree -r HEAD --name-only > ../changed_files.txt
+                                    echo "Created changed_files.txt using git ls-tree"
+                                fi
+                                
+                                # Move back to original directory
+                                cd ..
+                                
+                                # Clean up
+                                rm -rf temp_repo
                             '''
                             
-                            if (env.CHANGE_TARGET) {
-                                // This is a PR
-                                sh "cd ${WORKSPACE} && git diff --name-only origin/${env.CHANGE_TARGET}...HEAD > changed_files.txt"
-                            } else {
-                                // This is a branch build - try to get changed files, but don't fail if it's the first commit
-                                sh '''
-                                    cd ${WORKSPACE}
-                                    # Try to get changed files compared to previous commit
-                                    if git rev-parse HEAD^1 > /dev/null 2>&1; then
-                                        git diff --name-only HEAD^1 HEAD > changed_files.txt
-                                    else
-                                        # If this is the first commit, list all tracked files
-                                        git ls-tree -r HEAD --name-only > changed_files.txt
-                                    fi
-                                '''
-                            }
-                            
                             // Read the changed files
-                            env.CHANGED_FILES = sh(script: "cat ${WORKSPACE}/changed_files.txt", returnStdout: true).trim()
+                            env.CHANGED_FILES = sh(script: "cat changed_files.txt", returnStdout: true).trim()
                             echo "Changed files: ${env.CHANGED_FILES}"
                         }
                     }
