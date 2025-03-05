@@ -37,9 +37,8 @@ multibranchPipelineJob('k8s-test-deploy') {
     }
 
     configure { project ->
-        project / 'properties' / 'jenkins.branch.RateLimitBranchProperty_-JobPropertyImpl' {
-            durationName('hour')
-            count('10')
+        project / 'properties' / 'org.jenkinsci.plugins.workflow.job.properties.DurabilityHintJobProperty' {
+            hint('PERFORMANCE_OPTIMIZED')
         }
     }
 
