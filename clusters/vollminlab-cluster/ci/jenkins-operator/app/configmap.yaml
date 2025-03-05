@@ -48,14 +48,11 @@ data:
       configurationAsCode:
         configurations:
           - name: github-config
-            content: |
+            data: |
               credentials:
                 system:
                   domainCredentials:
-                    - domain:
-                        name: "github.com"
-                        description: "GitHub"
-                      credentials:
+                    - credentials:
                         - string:
                             scope: GLOBAL
                             id: "github-pat"
@@ -69,8 +66,5 @@ data:
                       name: "GitHub"
                 gitHubConfiguration:
                   apiRateLimitChecker: ThrottleForNormalize
-      casc:
-        secrets:
-          - name: github-pat
-            keyMap:
-              GITHUB_PAT: token  
+      secretSourceRef:
+        - name: github-pat
