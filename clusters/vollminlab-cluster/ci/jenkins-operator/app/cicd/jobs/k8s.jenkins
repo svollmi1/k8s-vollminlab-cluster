@@ -37,7 +37,7 @@ multibranchPipelineJob('k8s-test-deploy') {
     }
 
     configure { project ->
-        project / 'properties' / 'org.jenkinsci.plugins.workflow.job.properties.DurabilityHintJobProperty' {
+        project / 'properties' / 'org.jenkinsci.plugins.workflow.multibranch.DurabilityHintBranchProperty' {
             hint('PERFORMANCE_OPTIMIZED')
         }
     }
