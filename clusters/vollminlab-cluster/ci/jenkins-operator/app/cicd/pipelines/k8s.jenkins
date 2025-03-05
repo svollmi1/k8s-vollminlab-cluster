@@ -71,28 +71,52 @@ spec:
                         withCredentials([usernamePassword(credentialsId: 'github-pat-userpass', 
                                                         usernameVariable: 'GIT_USERNAME', 
                                                         passwordVariable: 'GIT_PASSWORD')]) {
-                            // Make sure we're in the git directory
-                            sh """
-                                cd \${WORKSPACE}
+                            // First, check if we're in a git directory and print debug info
+                            sh '''
+                                pwd
+                                ls -la
+                                echo "Current directory: $(pwd)"
+                            '''
+                            
+                            // Use the git repo already checked out by the previous stage
+                            sh '''
+                                cd ${WORKSPACE}
+                                # Check if this is a git directory
+                                if [ -d .git ] || git rev-parse --git-dir > /dev/null 2>&1; then
+                                    echo "This is a git directory"
+                                else
+                                    echo "Not in a git directory, listing files:"
+                                    ls -la
+                                    exit 1
+                                fi
+                                
                                 git config user.email "scottvollmin@gmail.com"
                                 git config user.name "svollmi1"
-                                git remote set-url origin https://\${GIT_USERNAME}:\${GIT_PASSWORD}@github.com/svollmi1/k8s-vollminlab-cluster.git
+                                git remote set-url origin https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/svollmi1/k8s-vollminlab-cluster.git
                                 git fetch --all
-                            """
+                            '''
                             
                             if (env.CHANGE_TARGET) {
                                 // This is a PR
-                                sh "cd \${WORKSPACE} && git diff --name-only origin/${env.CHANGE_TARGET}...HEAD > changed_files.txt"
+                                sh "cd ${WORKSPACE} && git diff --name-only origin/${env.CHANGE_TARGET}...HEAD > changed_files.txt"
                             } else {
-                                // This is a branch build
-                                sh "cd \${WORKSPACE} && git diff --name-only HEAD^1 HEAD > changed_files.txt || echo 'No previous commit found, using all files'"
-                                
-                                // If the above fails (e.g., first commit), list all tracked files
-                                sh "cd \${WORKSPACE} && if [ ! -s changed_files.txt ]; then git ls-tree -r HEAD --name-only > changed_files.txt; fi"
+                                // This is a branch build - try to get changed files, but don't fail if it's the first commit
+                                sh '''
+                                    cd ${WORKSPACE}
+                                    # Try to get changed files compared to previous commit
+                                    if git rev-parse HEAD^1 > /dev/null 2>&1; then
+                                        git diff --name-only HEAD^1 HEAD > changed_files.txt
+                                    else
+                                        # If this is the first commit, list all tracked files
+                                        git ls-tree -r HEAD --name-only > changed_files.txt
+                                    fi
+                                '''
                             }
+                            
+                            // Read the changed files
+                            env.CHANGED_FILES = sh(script: "cat ${WORKSPACE}/changed_files.txt", returnStdout: true).trim()
+                            echo "Changed files: ${env.CHANGED_FILES}"
                         }
-                        env.CHANGED_FILES = readFile('changed_files.txt').trim()
-                        echo "Changed files: ${env.CHANGED_FILES}"
                     }
                 }
             }
