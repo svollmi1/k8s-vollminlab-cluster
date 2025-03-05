@@ -63,5 +63,3 @@ data:
                     - apiUrl: "https://api.github.com"
                       credentialsId: "github-pat"
                       name: "GitHub"
-                gitHubConfiguration:
-                  apiRateLimitChecker: ThrottleForNormalize
