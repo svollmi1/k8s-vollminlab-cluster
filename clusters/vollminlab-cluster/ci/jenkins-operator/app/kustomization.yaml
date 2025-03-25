@@ -6,6 +6,7 @@ metadata:
 resources:
   - configmap.yaml
   - github-pat-sealedsecret.yaml
+  - github-pat-userpass-sealedsecret.yaml
   - helmrepository.yaml
   - helmrelease.yaml
   - ingress.yaml
