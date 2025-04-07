@@ -1,0 +1,18 @@
+# actual root CA cert + private key
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: monitoring-ca
+  namespace: monitoring
+spec:
+  isCA: true
+  commonName: monitoring-ca
+  secretName: monitoring-ca-keypair
+  duration: 8760h # 1 year
+  renewBefore: 720h # 30 days
+  privateKey:
+    algorithm: RSA
+    size: 2048
+  issuerRef:
+    name: monitoring-ca-issuer
+    kind: Issuer

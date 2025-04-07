@@ -4,7 +4,5 @@ metadata:
   namespace: flux-system
 resources:
   - configmap.yaml
-  - helmrepository.yaml
+  - sealedsecret.yaml
   - helmrelease.yaml
-  - ingress.yaml
-  - networkpolicy.yaml

@@ -1,0 +1,28 @@
+# actual TLS cert for Elasticsearch + Kibana internal services
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: elastic-stack-tls
+  namespace: monitoring
+spec:
+  secretName: elastic-stack-tls
+  duration: 2160h # 90 days
+  renewBefore: 360h # 15 days
+  issuerRef:
+    name: monitoring-ca-signed
+    kind: Issuer
+  commonName: elastic-stack
+  dnsNames:
+    - elasticsearch
+    - elasticsearch.monitoring
+    - elasticsearch.monitoring.svc
+    - elasticsearch.monitoring.svc.cluster.local
+    - kibana
+    - kibana.monitoring
+    - kibana.monitoring.svc
+    - kibana.monitoring.svc.cluster.local
+  usages:
+    - digital signature
+    - key encipherment
+    - server auth
+    - client auth

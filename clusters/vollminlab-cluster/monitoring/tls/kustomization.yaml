@@ -3,8 +3,7 @@ kind: Kustomization
 metadata:
   namespace: flux-system
 resources:
-  - configmap.yaml
-  - helmrepository.yaml
-  - helmrelease.yaml
-  - ingress.yaml
-  - networkpolicy.yaml
+  - 01-ca-issuer.yaml
+  - 02-ca-cert.yaml
+  - 03-signed-issuer.yaml
+  - 04-elastic-stack-tls.yaml

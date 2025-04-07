@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: elasticsearch-values
+  namespace: monitoring
+data:
+  values.yaml: |
+    replicas: 1
+    minimumMasterNodes: 1
+    protocol: https
+    resources:
+      requests:
+        cpu: 100m
+        memory: 2Gi
+      limits:
+        memory: 4Gi
+    volumeClaimTemplate:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 30Gi
+    esConfig:
+      elasticsearch.yml: |
+        xpack.security.enabled: true
+        xpack.security.http.ssl.enabled: true
+        xpack.security.http.ssl.keystore.path: /usr/share/elasticsearch/config/certs/tls.p12
+        xpack.security.http.ssl.truststore.path: /usr/share/elasticsearch/config/certs/tls.p12
+    secretMounts:
+      - name: elastic-stack-tls
+        secretName: elastic-stack-tls
+        path: /usr/share/elasticsearch/config/certs
