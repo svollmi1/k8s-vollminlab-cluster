@@ -4,6 +4,7 @@ resources:
   - helmrepository.yaml
   - namespace.yaml
   - elasticsearch/app
-  - filebeat/app
-  - kibana/app
-  - logstash/app
+#  - filebeat/app
+#  - kibana/app
+#  - logstash/app
+  - tls/
