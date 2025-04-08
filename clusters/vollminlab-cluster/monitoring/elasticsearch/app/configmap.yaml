@@ -5,8 +5,7 @@ metadata:
   namespace: monitoring
 data:
   values.yaml: |
-    replicas: 1
-    minimumMasterNodes: 1
+    replicas: 3
     protocol: https
     resources:
       requests:
@@ -21,6 +20,10 @@ data:
           storage: 30Gi
     esConfig:
       elasticsearch.yml: |
+        cluster.initial_master_nodes:
+          - elasticsearch-master-0
+          - elasticsearch-master-1
+          - elasticsearch-master-2
         xpack.security.enabled: true
         xpack.security.http.ssl.enabled: true
         xpack.security.transport.ssl.enabled: true
