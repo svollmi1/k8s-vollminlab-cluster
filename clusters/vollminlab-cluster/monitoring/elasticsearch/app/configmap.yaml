@@ -25,7 +25,6 @@ data:
         xpack.security.http.ssl.enabled: true
         xpack.security.http.ssl.certificate: /usr/share/elasticsearch/config/certs/tls.crt
         xpack.security.http.ssl.key: /usr/share/elasticsearch/config/certs/tls.key
-        xpack.security.http.ssl.truststore.path: /usr/share/elasticsearch/config/certs/ca.crt
     createCert: false
     secretMounts:
       - name: elastic-stack-tls
