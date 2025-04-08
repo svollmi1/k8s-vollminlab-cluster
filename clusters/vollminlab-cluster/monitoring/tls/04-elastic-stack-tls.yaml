@@ -21,6 +21,10 @@ spec:
     - kibana.monitoring
     - kibana.monitoring.svc
     - kibana.monitoring.svc.cluster.local
+    - elasticsearch-master-headless
+    - elasticsearch-master-headless.monitoring
+    - elasticsearch-master-headless.monitoring.svc
+    - elasticsearch-master-headless.monitoring.svc.cluster.local
   usages:
     - digital signature
     - key encipherment
