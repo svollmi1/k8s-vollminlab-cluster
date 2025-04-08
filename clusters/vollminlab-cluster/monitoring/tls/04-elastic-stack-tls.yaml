@@ -26,7 +26,7 @@ spec:
     - elasticsearch-master-headless.monitoring.svc
     - elasticsearch-master-headless.monitoring.svc.cluster.local
   usages:
-    - digital signature
-    - key encipherment
-    - server auth
-    - client auth
+    - digitalSignature
+    - keyEncipherment
+    - serverAuth
+    - clientAuth
