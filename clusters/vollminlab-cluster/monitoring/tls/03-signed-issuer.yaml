@@ -1,9 +1,0 @@
-# internal CA issuer used for issuing real certs
-apiVersion: cert-manager.io/v1
-kind: Issuer
-metadata:
-  name: monitoring-ca-signed
-  namespace: monitoring
-spec:
-  ca:
-    secretName: monitoring-ca-keypair

@@ -1,8 +1,0 @@
-# internal root CA issuer (self-signed)
-apiVersion: cert-manager.io/v1
-kind: Issuer
-metadata:
-  name: monitoring-ca-issuer
-  namespace: monitoring
-spec:
-  selfSigned: {}

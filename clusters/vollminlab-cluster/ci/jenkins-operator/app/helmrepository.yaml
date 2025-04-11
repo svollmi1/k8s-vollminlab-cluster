@@ -1,8 +1,0 @@
-apiVersion: source.toolkit.fluxcd.io/v1
-kind: HelmRepository
-metadata:
-  name: jenkins-operator-repo
-  namespace: flux-system
-spec:
-  url: https://raw.githubusercontent.com/jenkinsci/kubernetes-operator/master/chart
-  interval: 5m
