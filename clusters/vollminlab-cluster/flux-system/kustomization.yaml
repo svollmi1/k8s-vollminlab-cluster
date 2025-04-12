@@ -4,3 +4,8 @@ resources:
   - gotk-components.yaml
   - gotk-sync.yaml
   - ./capacitor/app
+  - homepage-helmrepository.yaml
+  - elastic-helmrepository.yaml
+  - overseerr-helmrepository.yaml
+  - prowlarr-helmrepository.yaml
+  - sealed-secrets-helmrepository.yaml
