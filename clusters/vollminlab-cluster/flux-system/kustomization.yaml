@@ -3,10 +3,10 @@ kind: Kustomization
 resources:
   - gotk-components.yaml
   - gotk-sync.yaml
-  - ./capacitor/app
   - capacitor-helmrepository.yaml
   - homepage-helmrepository.yaml
   - elastic-helmrepository.yaml
   - overseerr-helmrepository.yaml
   - prowlarr-helmrepository.yaml
   - sealed-secrets-helmrepository.yaml
+  - ./capacitor/app
