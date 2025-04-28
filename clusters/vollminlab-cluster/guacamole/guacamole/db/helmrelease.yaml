@@ -25,6 +25,3 @@ spec:
           name: guacamole-db-secrets
           key: guacroot-password
       database: guacamole
-  dependsOn:
-    - name: guacamole-db-secrets
-      namespace: guacamole
