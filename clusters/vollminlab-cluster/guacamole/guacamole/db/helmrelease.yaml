@@ -1,0 +1,30 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: guacamole-postgresql
+  namespace: guacamole
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: postgresql
+      sourceRef:
+        kind: HelmRepository
+        name: bitnami
+        namespace: flux-system
+      version: "15.2.5"
+  values:
+    auth:
+      username: guacamole
+      passwordFrom:
+        secretKeyRef:
+          name: guacamole-db-secrets
+          key: guacdb-password
+      postgresPasswordFrom:
+        secretKeyRef:
+          name: guacamole-db-secrets
+          key: guacroot-password
+      database: guacamole
+  dependsOn:
+    - name: guacamole-db-secrets
+      namespace: guacamole

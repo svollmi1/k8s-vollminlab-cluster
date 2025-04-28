@@ -18,3 +18,6 @@ spec:
     - kind: ConfigMap
       name: guacamole-values
       valuesKey: values.yaml
+  dependsOn:
+    - name: guacamole-postgresql
+      namespace: guacamole

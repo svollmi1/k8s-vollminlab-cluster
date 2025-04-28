@@ -23,8 +23,8 @@ data:
 
     database:
       enabled: true
-      type: mysql
-      mysql:
+      type: postgres
+      postgres:
         user: guacamole
         passwordFrom:
           secretKeyRef:
@@ -35,8 +35,12 @@ data:
             name: guacamole-db-secrets
             key: guacroot-password
         database: guacdb
-        host: ""
+        host: guacamole-postgresql
 
     replicas:
       guacd: 1
       guacamole: 1
+
+    dependsOn:
+    - name: guacamole-postgresql
+      namespace: guacamole

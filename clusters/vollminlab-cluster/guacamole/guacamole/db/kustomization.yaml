@@ -3,6 +3,4 @@ kind: Kustomization
 metadata:
   namespace: flux-system
 resources:
-  - configmap.yaml
   - helmrelease.yaml
-  - ingress.yaml
