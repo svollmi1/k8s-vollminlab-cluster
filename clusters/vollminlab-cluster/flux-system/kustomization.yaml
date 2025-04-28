@@ -4,6 +4,7 @@ resources:
   - gotk-components.yaml
   - gotk-sync.yaml
   - capacitor-helmrepository.yaml
+  - guacamole-helmrepository.yaml
   - homepage-helmrepository.yaml
   - longhorn-helmrepository.yaml
   - elastic-helmrepository.yaml
