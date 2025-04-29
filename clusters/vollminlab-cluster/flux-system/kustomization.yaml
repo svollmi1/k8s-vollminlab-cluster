@@ -5,7 +5,6 @@ resources:
   - gotk-sync.yaml
   - bitnami-helmrepository.yaml
   - capacitor-helmrepository.yaml
-  - guacamole-helmrepository.yaml
   - homepage-helmrepository.yaml
   - longhorn-helmrepository.yaml
   - elastic-helmrepository.yaml
