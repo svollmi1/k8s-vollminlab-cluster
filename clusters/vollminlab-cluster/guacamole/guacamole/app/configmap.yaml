@@ -15,11 +15,10 @@ data:
       image:
         repository: guacamole/guacamole
         tag: 1.5.5
-
-    persistence:
-      enabled: true
-      storageClassName: "standard"
-      size: 8Gi
+      persistence:
+        enabled: true
+        storageClassName: "standard"
+        size: 8Gi
 
     database:
       enabled: true
@@ -40,7 +39,3 @@ data:
     replicas:
       guacd: 1
       guacamole: 1
-
-    dependsOn:
-    - name: guacamole-postgresql
-      namespace: guacamole

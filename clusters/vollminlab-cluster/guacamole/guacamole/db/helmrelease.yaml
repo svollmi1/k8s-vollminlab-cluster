@@ -24,4 +24,4 @@ spec:
         secretKeyRef:
           name: guacamole-db-secrets
           key: guacroot-password
-      database: guacamole
+      database: guacdb
