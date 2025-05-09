@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - gotk-components.yaml
   - gotk-sync.yaml
+  - flux-githubapp-sealedsecret.yaml
   - bitnami-helmrepository.yaml
   - capacitor-helmrepository.yaml
   - homepage-helmrepository.yaml
