@@ -3,4 +3,4 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - arc-githubapp-sealedsecret.yaml
-  #- ./actions-runner-controller/app
+  - ./actions-runner-controller/app
