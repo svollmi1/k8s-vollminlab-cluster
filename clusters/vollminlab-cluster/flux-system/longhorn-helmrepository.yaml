@@ -5,4 +5,4 @@ metadata:
   namespace: flux-system
 spec:
   url: https://charts.longhorn.io
-  interval: 1h
+  interval: 5m
