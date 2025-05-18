@@ -40,5 +40,3 @@ spec:
     containerMode:
       type: kubernetes
     logLevel: info
-    podLabels:
-      app.kubernetes.io/name: actions-runner-controller
