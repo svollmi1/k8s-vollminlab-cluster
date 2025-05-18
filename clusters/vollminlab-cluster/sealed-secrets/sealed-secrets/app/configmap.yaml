@@ -87,7 +87,10 @@ data:
     ## @param podLabels [object] Extra labels for Sealed Secret pods
     ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
     ##
-    podLabels: {}
+    podLabels:
+      app: sealed-secrets
+      env: production
+      category: security
     ## @param podAnnotations [object] Annotations for Sealed Secret pods
     ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
     ##
