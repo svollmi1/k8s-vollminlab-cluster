@@ -71,3 +71,7 @@ spec:
         app: longhorn
         env: production
         category: storage
+    global:
+      podLabels:
+        env: production
+        category: storage
