@@ -19,6 +19,8 @@ spec:
     config:
       logVerbosity: 1
     podTemplate:
+      spec:
+        containers: []
       labels:
         app: elastic-operator
         env: production
