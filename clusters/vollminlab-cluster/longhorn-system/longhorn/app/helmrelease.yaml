@@ -21,3 +21,53 @@ spec:
     defaultSettings:
       defaultReplicaCount: 3
       defaultDataPath: /var/lib/longhorn
+    longhornManager:
+      podLabels:
+        app: longhorn
+        env: production
+        category: storage
+    longhornDriver:
+      podLabels:
+        app: longhorn
+        env: production
+        category: storage
+    csiAttacher:
+      podLabels:
+        app: longhorn
+        env: production
+        category: storage
+    csiProvisioner:
+      podLabels:
+        app: longhorn
+        env: production
+        category: storage
+    csiResizer:
+      podLabels:
+        app: longhorn
+        env: production
+        category: storage
+    csiSnapshotter:
+      podLabels:
+        app: longhorn
+        env: production
+        category: storage
+    csiPlugin:
+      podLabels:
+        app: longhorn
+        env: production
+        category: storage
+    ui:
+      podLabels:
+        app: longhorn
+        env: production
+        category: storage
+    driverDeployer:
+      podLabels:
+        app: longhorn
+        env: production
+        category: storage
+    supportBundleKit:
+      podLabels:
+        app: longhorn
+        env: production
+        category: storage
