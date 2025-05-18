@@ -7,11 +7,12 @@ resources:
   - arc-helmrepository.yaml
   - bitnami-helmrepository.yaml
   - capacitor-helmrepository.yaml
+  - elastic-helmrepository.yaml
   - homepage-helmrepository.yaml
   - kyverno-helmrepository.yaml
   - kyverno-policyreporter-helmrepository.yaml
   - longhorn-helmrepository.yaml
-  - elastic-helmrepository.yaml
+  - metrics-server-helmrepository.yaml
   - overseerr-helmrepository.yaml
   - prowlarr-helmrepository.yaml
   - sealed-secrets-helmrepository.yaml
