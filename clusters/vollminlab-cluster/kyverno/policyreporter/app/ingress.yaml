@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: policy-reporter-ui
+  namespace: kyverno
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: policy-reporter.vollminlab.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: policy-reporter-ui
+                port:
+                  number: 8080
+  tls:
+    - hosts:
+        - policy-reporter.vollminlab.com
+      secretName: wildcard-tls

@@ -1,0 +1,21 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: policy-reporter
+  namespace: kyverno
+spec:
+  interval: 10m
+  releaseName: policy-reporter
+  chart:
+    spec:
+      chart: policy-reporter
+      sourceRef:
+        kind: HelmRepository
+        name: policy-reporter
+        namespace: flux-system
+      version: 3.1.3
+  values:
+    ui:
+      enabled: true
+    ingress:
+      enabled: false

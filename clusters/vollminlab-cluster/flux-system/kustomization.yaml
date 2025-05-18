@@ -8,6 +8,8 @@ resources:
   - bitnami-helmrepository.yaml
   - capacitor-helmrepository.yaml
   - homepage-helmrepository.yaml
+  - kyverno-helmrepository.yaml
+  - kyverno-policyreporter-helmrepository.yaml
   - longhorn-helmrepository.yaml
   - elastic-helmrepository.yaml
   - overseerr-helmrepository.yaml
