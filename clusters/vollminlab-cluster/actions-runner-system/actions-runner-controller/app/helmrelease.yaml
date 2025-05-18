@@ -1,0 +1,44 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: actions-runner-controller
+  namespace: actions-runner-system
+spec:
+  interval: 10m
+  releaseName: actions-runner-controller
+  chart:
+    spec:
+      chart: actions-runner-controller
+      sourceRef:
+        kind: HelmRepository
+        name: actions-runner-controller
+        namespace: flux-system
+      version: 0.26.3
+  values:
+    authSecret:
+      create: false
+      name: arc-githubapp-secret
+    githubWebhookServer:
+      enabled: false
+    syncPeriod: 1m
+    enableLeaderElection: true
+    controllerManager:
+      replicas: 3
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: actions-runner-controller
+                topologyKey: kubernetes.io/hostname
+    metrics:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+    containerMode:
+      type: kubernetes
+    logLevel: info
+    podLabels:
+      app.kubernetes.io/name: actions-runner-controller
