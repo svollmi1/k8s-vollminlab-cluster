@@ -18,10 +18,15 @@ spec:
       enabled: true
     config:
       logVerbosity: 1
-    podTemplate:
-      spec:
-        containers: []
-      labels:
-        app: elastic-operator
-        env: production
-        category: observability
+    labels:
+      app: elastic-operator
+      env: production
+      category: observability
+    podLabels:
+      app: elastic-operator
+      env: production
+      category: observability
+    statefulsetLabels:
+      app: elastic-operator
+      env: production
+      category: observability
