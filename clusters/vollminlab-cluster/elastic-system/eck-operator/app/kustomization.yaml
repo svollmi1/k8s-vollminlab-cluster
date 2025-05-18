@@ -5,5 +5,3 @@ metadata:
   namespace: flux-system
 resources:
   - helmrelease.yaml
-patchesStrategicMerge:
-  - ../patches/eck-operator-labels.yaml
