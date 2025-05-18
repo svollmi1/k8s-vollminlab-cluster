@@ -26,3 +26,7 @@ data:
           - ALL
       seccompProfile:
         type: RuntimeDefault
+    podLabels:
+      app: capacitor
+      env: production
+      category: core
