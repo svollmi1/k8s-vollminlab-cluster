@@ -5,4 +5,4 @@ metadata:
   namespace: flux-system
 resources:
   - helmrelease.yaml
-  - runnerdeplyment.yaml
+  - runnerdeployment.yaml
