@@ -10,3 +10,7 @@ data:
         enabled: true
         existingClaim: pvc-prowlarr-config
         mountPath: /config
+    podLabels:
+      app: prowlarr
+      env: production
+      category: apps

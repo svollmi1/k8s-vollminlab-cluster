@@ -18,3 +18,7 @@ data:
         enabled: true
         existingClaim: pvc-tv
         mountPath: /downloads/tv
+    podLabels:
+      app: overseerr
+      env: production
+      category: apps
