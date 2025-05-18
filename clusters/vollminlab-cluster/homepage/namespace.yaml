@@ -2,3 +2,7 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: homepage
+  labels:
+    app: homepage
+    env: production
+    category: apps
