@@ -19,8 +19,7 @@ spec:
     config:
       logVerbosity: 1
     podTemplate:
-      metadata:
-        labels:
-          app: elastic-operator
-          env: production
-          category: observability
+      labels:
+        app: elastic-operator
+        env: production
+        category: observability
