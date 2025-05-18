@@ -1,0 +1,6 @@
+# Normalize YAML files to LF
+*.yaml text eol=lf
+*.yml  text eol=lf
+
+# Optionally normalize shell scripts too
+*.sh   text eol=lf
