@@ -24,6 +24,10 @@ spec:
     enableLeaderElection: true
     controllerManager:
       replicas: 3
+      podLabels:
+        app: actions-runner-controller
+        env: production
+        category: ci
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
