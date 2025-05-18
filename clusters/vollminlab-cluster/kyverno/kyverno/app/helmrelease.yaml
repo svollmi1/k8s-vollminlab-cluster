@@ -18,10 +18,22 @@ spec:
     replicaCount: 3
     admissionController:
       replicas: 3
+      podLabels:
+        app: kyverno
+        env: production
+        category: security
     backgroundController:
       replicas: 1
+      podLabels:
+        app: kyverno
+        env: production
+        category: security
     cleanupController:
       replicas: 1
+      podLabels:
+        app: kyverno
+        env: production
+        category: security
     metricsService:
       enabled: true
     serviceMonitor:

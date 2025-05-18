@@ -19,3 +19,7 @@ spec:
       enabled: true
     ingress:
       enabled: false
+    podLabels:
+      app: policy-reporter
+      env: production
+      category: security
