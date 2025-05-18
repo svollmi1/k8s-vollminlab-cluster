@@ -3,4 +3,5 @@ kind: Kustomization
 metadata:
   name: actions-runner-controller-deployment
   namespace: flux-system
-resources: []
+resources:
+  - helmrelease.yaml
