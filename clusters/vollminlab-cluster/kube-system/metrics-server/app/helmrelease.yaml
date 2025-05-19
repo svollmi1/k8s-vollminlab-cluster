@@ -20,6 +20,10 @@ spec:
   install:
     createNamespace: false
   values:
+    commonLabels:
+      app: metrics-server
+      env: system
+      category: observability
     podLabels:
       app: metrics-server
       env: system
