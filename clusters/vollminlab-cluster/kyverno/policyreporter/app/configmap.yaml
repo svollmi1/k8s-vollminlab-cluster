@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: policy-reporter-values
+  namespace: kyverno
+data:
+  values.yaml: |
+    ui:
+      enabled: true
+    ingress:
+      enabled: false
+    podLabels:
+      app: policy-reporter
+      env: production
+      category: security
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 128Mi

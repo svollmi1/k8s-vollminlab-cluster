@@ -3,6 +3,10 @@ kind: HelmRelease
 metadata:
   name: prowlarr
   namespace: mediastack
+  labels:
+    app: prowlarr
+    env: production
+    category: apps
 spec:
   interval: 5m
   chartRef:

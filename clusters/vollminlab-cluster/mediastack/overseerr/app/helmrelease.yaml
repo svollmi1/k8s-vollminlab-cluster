@@ -3,6 +3,10 @@ kind: HelmRelease
 metadata:
   name: overseerr
   namespace: mediastack
+  labels:
+    app: overseerr
+    env: production
+    category: apps
 spec:
   interval: 5m
   chartRef:

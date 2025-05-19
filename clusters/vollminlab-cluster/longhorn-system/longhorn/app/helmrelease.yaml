@@ -3,6 +3,10 @@ kind: HelmRelease
 metadata:
   name: longhorn
   namespace: longhorn-system
+  labels:
+    app: longhorn
+    env: production
+    category: storage
 spec:
   interval: 5m
   chart:

@@ -13,7 +13,12 @@ data:
       enabled: true
       path: /
     resources:
-      ignoreLimits: true
+      requests:
+        cpu: 25m
+        memory: 64Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
     serviceAccount: capacitor
     securityContext:
       runAsNonRoot: true

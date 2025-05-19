@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: metrics-server-values
+  namespace: kube-system
+data:
+  values.yaml: |
+    commonLabels:
+      app: metrics-server
+      env: system
+      category: observability
+    podLabels:
+      app: metrics-server
+      env: system
+      category: observability
+    args:
+      - --kubelet-insecure-tls=true
+      - --kubelet-preferred-address-types=InternalIP,Hostname,InternalDNS
+    metrics:
+      enabled: true
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 128Mi
+    service:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "443"
+      port: 443
+      targetPort: https
+    serviceMonitor:
+      enabled: true
+      additionalLabels:
+        release: prometheus-stack
+      interval: 30s
+      scrapeTimeout: 10s
+      metricRelabelings: []
+      relabelings: []

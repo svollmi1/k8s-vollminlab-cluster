@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: actions-runner-controller-values
+  namespace: actions-runner-system
+data:
+  values.yaml: |
+    authSecret:
+      create: false
+      name: arc-githubapp-secret
+    githubWebhookServer:
+      enabled: false
+    syncPeriod: 1m
+    enableLeaderElection: true
+    controllerManager:
+      replicas: 3
+      podLabels:
+        app: actions-runner-controller
+        env: production
+        category: ci
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: actions-runner-controller
+                topologyKey: kubernetes.io/hostname
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          cpu: 200m
+          memory: 128Mi
+    metrics:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+    containerMode:
+      type: kubernetes
+    logLevel: info

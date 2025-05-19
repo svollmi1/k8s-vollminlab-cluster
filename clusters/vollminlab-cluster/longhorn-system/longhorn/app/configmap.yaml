@@ -10,7 +10,7 @@ data:
       defaultDataPath: /var/lib/longhorn
     longhornManager:
       podLabels:
-        app: longhorn
+        app: longhorn-manager
         env: production
         category: storage
       resources:
@@ -22,7 +22,7 @@ data:
           memory: 512Mi
     engineImage:
       podLabels:
-        app: longhorn
+        app: longhorn-engine-image
         env: production
         category: storage
       resources:
@@ -34,7 +34,7 @@ data:
           memory: 64Mi
     instanceManager:
       podLabels:
-        app: longhorn
+        app: longhorn-instance-manager
         env: production
         category: storage
       resources:
@@ -46,7 +46,7 @@ data:
           memory: 256Mi
     csiAttacher:
       podLabels:
-        app: longhorn
+        app: longhorn-csi-attacher
         env: production
         category: storage
       resources:
@@ -58,7 +58,7 @@ data:
           memory: 128Mi
     csiProvisioner:
       podLabels:
-        app: longhorn
+        app: longhorn-csi-provisioner
         env: production
         category: storage
       resources:
@@ -70,7 +70,7 @@ data:
           memory: 128Mi
     csiResizer:
       podLabels:
-        app: longhorn
+        app: longhorn-csi-resizer
         env: production
         category: storage
       resources:
@@ -82,7 +82,7 @@ data:
           memory: 128Mi
     csiSnapshotter:
       podLabels:
-        app: longhorn
+        app: longhorn-csi-snapshotter
         env: production
         category: storage
       resources:
@@ -94,7 +94,7 @@ data:
           memory: 128Mi
     csiPlugin:
       podLabels:
-        app: longhorn
+        app: longhorn-csi-plugin
         env: production
         category: storage
       resources:
@@ -106,7 +106,7 @@ data:
           memory: 128Mi
     driverDeployer:
       podLabels:
-        app: longhorn
+        app: longhorn-driver-deployer
         env: production
         category: storage
       resources:
@@ -118,7 +118,7 @@ data:
           memory: 64Mi
     ui:
       podLabels:
-        app: longhorn
+        app: longhorn-ui
         env: production
         category: storage
       resources:
@@ -130,7 +130,7 @@ data:
           memory: 32Mi
     supportBundleKit:
       podLabels:
-        app: longhorn
+        app: longhorn-support-bundle-kit
         env: production
         category: storage
       resources:

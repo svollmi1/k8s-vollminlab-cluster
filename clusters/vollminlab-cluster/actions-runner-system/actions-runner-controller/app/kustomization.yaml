@@ -4,5 +4,6 @@ metadata:
   name: actions-runner-controller-deployment
   namespace: flux-system
 resources:
+  - configmap.yaml
   - helmrelease.yaml
   - runnerdeployment.yaml

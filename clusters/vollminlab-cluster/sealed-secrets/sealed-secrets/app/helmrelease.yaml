@@ -3,6 +3,10 @@ kind: HelmRelease
 metadata:
   name: sealed-secrets
   namespace: sealed-secrets
+  labels:
+    app: sealed-secrets
+    env: production
+    category: security
 spec:
   chart:
     spec:
