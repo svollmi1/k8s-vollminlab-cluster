@@ -31,7 +31,10 @@ spec:
             - tigera-operator
       validate:
         message: "Using hostPath volumes is not allowed outside system namespaces."
-        pattern:
-          spec:
-            volumes:
-              - =(hostPath): null
+        foreach:
+          - list: "spec.template.spec.volumes"
+            deny:
+              conditions:
+                - key: "{{ element.hostPath }}"
+                  operator: NotEquals
+                  value: null
