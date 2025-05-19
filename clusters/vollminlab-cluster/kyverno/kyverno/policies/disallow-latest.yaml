@@ -10,7 +10,7 @@ metadata:
       Prevents use of the ':latest' image tag in containers, initContainers, and ephemeralContainers.
     kyverno.io/enable-background: "true"
 spec:
-  validationFailureAction: Enforce
+  validationFailureAction: Audit
   background: true
   rules:
     - name: disallow-latest-tags

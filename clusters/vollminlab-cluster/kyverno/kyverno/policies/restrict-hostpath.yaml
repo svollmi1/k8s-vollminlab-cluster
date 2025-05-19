@@ -10,7 +10,7 @@ metadata:
       Disallow use of hostPath volumes outside system namespaces like kube-system, calico, and longhorn.
     kyverno.io/enable-background: "true"
 spec:
-  validationFailureAction: Enforce
+  validationFailureAction: Audit
   background: true
   rules:
     - name: disallow-hostpath-except-system
