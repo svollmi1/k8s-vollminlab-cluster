@@ -6,7 +6,7 @@ metadata:
     policies.kyverno.io/title: Require Standard Labels
     policies.kyverno.io/category: Best Practices
     policies.kyverno.io/severity: medium
-    policies.kyverno.io/description: >-
+    policies.kyverno.io/description: >
       Enforces presence of common labels: app, env, and category for all core workloads and namespaces.
     kyverno.io/enable-background: "true"
 spec:
@@ -37,30 +37,18 @@ spec:
             - kube-system
             - flux-system
       validate:
-        allowExistingViolations: false
         message: "Required labels: app, env, category"
-        foreach:
-          - list: "metadata.labels"
-            deny:
-              conditions:
-                - key: "{{ element.app || '' }}"
-                  operator: Equals
-                  value: ""
-                - key: "{{ element.env || '' }}"
-                  operator: Equals
-                  value: ""
-                - key: "{{ element.category || '' }}"
-                  operator: Equals
-                  value: ""
-          - list: "spec.template.metadata.labels"
-            deny:
-              conditions:
-                - key: "{{ element.app || '' }}"
-                  operator: Equals
-                  value: ""
-                - key: "{{ element.env || '' }}"
-                  operator: Equals
-                  value: ""
-                - key: "{{ element.category || '' }}"
-                  operator: Equals
-                  value: ""
+        pattern:
+          metadata:
+            labels:
+              app: "?*"
+              env: "?*"
+              category: "?*"
+          spec:
+            template:
+              metadata:
+                labels:
+                  app: "?*"
+                  env: "?*"
+                  category: "?*"
+        allowExistingViolations: false

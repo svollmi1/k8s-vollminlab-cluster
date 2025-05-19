@@ -2,28 +2,37 @@ apiVersion: kyverno.io/v1
 kind: ClusterPolicy
 metadata:
   name: require-resources
+  annotations:
+    policies.kyverno.io/title: Require CPU/Memory Requests & Limits
+    policies.kyverno.io/category: Best Practices
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/description: >
+      Ensures that all containers define CPU and memory requests and limits.
+    kyverno.io/enable-background: "true"
 spec:
   validationFailureAction: Audit
+  background: true
   rules:
     - name: require-limits
       match:
         resources:
           kinds:
-            - Pod
             - Deployment
             - StatefulSet
             - DaemonSet
       skipBackgroundRequests: false
       validate:
-        allowExistingViolations: false
         message: "All containers must have CPU/memory requests and limits."
-        foreach:
-          - list: "spec.template.spec.containers"
-            pattern:
-              resources:
-                requests:
-                  memory: "?*"
-                  cpu: "?*"
-                limits:
-                  memory: "?*"
-                  cpu: "?*"
+        pattern:
+          spec:
+            template:
+              spec:
+                containers:
+                  - resources:
+                      requests:
+                        cpu: "?*"
+                        memory: "?*"
+                      limits:
+                        cpu: "?*"
+                        memory: "?*"
+        allowExistingViolations: false

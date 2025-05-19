@@ -5,9 +5,9 @@ metadata:
   annotations:
     policies.kyverno.io/title: Block Privileged Pods
     policies.kyverno.io/category: Pod Security Standards (Baseline)
-    policies.kyverno.io/description: >-
-      Prevent pods from running in privileged mode, excluding system namespaces.
     policies.kyverno.io/severity: high
+    policies.kyverno.io/description: >
+      Prevent pods from running in privileged mode, excluding system namespaces.
     kyverno.io/enable-background: "true"
 spec:
   validationFailureAction: Audit
@@ -17,31 +17,26 @@ spec:
       match:
         resources:
           kinds:
-            - Pod
             - Deployment
             - StatefulSet
             - DaemonSet
+      exclude:
+        resources:
           namespaces:
-            - "!kube-system"
-            - "!calico-system"
-            - "!longhorn-system"
-            - "!csi-driver"
-            - "!tigera-operator"
-            - "!ingress-nginx"
+            - kube-system
+            - calico-system
+            - longhorn-system
+            - csi-driver
+            - tigera-operator
+            - ingress-nginx
       skipBackgroundRequests: false
       validate:
-        allowExistingViolations: false
         message: "Privileged mode is not allowed."
-        anyPattern:
-          - spec:
-              containers:
-                - securityContext:
-                    privileged: false
-          - spec:
-              initContainers:
-                - securityContext:
-                    privileged: false
-          - spec:
-              ephemeralContainers:
-                - securityContext:
-                    privileged: false
+        pattern:
+          spec:
+            template:
+              spec:
+                containers:
+                  - securityContext:
+                      privileged: false
+        allowExistingViolations: false
