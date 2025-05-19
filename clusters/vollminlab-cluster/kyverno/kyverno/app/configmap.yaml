@@ -14,6 +14,14 @@ data:
   values.yaml: |
     rbac:
       create: true
+    webhooks:
+      namespaceSelector:
+        matchExpressions:
+          - key: kubernetes.io/metadata.name
+            operator: NotIn
+            values:
+              - kyverno
+              - kube-system
     replicaCount: 3
     podLabels:
       app: kyverno
