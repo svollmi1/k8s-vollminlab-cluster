@@ -1,0 +1,35 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: disallow-latest-tag
+  annotations:
+    policies.kyverno.io/title: Disallow `:latest` Image Tags
+    policies.kyverno.io/category: Best Practices
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/description: >-
+      Prevents use of the ':latest' image tag in containers, initContainers, and ephemeralContainers.
+    kyverno.io/enable-background: "true"
+spec:
+  validationFailureAction: enforce
+  background: true
+  rules:
+    - name: validate-image-tag
+      match:
+        resources:
+          kinds:
+            - Pod
+            - Deployment
+            - StatefulSet
+            - DaemonSet
+      validate:
+        message: "Using ':latest' tag is not allowed."
+        anyPattern:
+          - spec:
+              containers:
+                - image: "!*:latest"
+          - spec:
+              initContainers:
+                - image: "!*:latest"
+          - spec:
+              ephemeralContainers:
+                - image: "!*:latest"

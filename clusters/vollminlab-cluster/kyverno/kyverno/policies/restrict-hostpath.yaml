@@ -1,0 +1,37 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: restrict-hostpath-usage
+  annotations:
+    policies.kyverno.io/title: Restrict hostPath Usage
+    policies.kyverno.io/category: Pod Security
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/description: >-
+      Disallow use of hostPath volumes outside system namespaces like kube-system, calico, and longhorn.
+    kyverno.io/enable-background: "true"
+spec:
+  validationFailureAction: enforce
+  background: true
+  rules:
+    - name: disallow-hostpath-except-system
+      match:
+        resources:
+          kinds:
+            - Pod
+            - Deployment
+            - StatefulSet
+            - DaemonSet
+      exclude:
+        resources:
+          namespaces:
+            - kube-system
+            - calico-system
+            - longhorn-system
+            - monitoring
+            - tigera-operator
+      validate:
+        message: "Using hostPath volumes is not allowed outside system namespaces."
+        pattern:
+          spec:
+            volumes:
+              - =(hostPath): null

@@ -1,0 +1,40 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-standard-labels
+  annotations:
+    policies.kyverno.io/title: Require Standard Labels
+    policies.kyverno.io/category: Best Practices
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/description: >-
+      Enforces presence of common labels: app, env, and category for all core workloads and namespaces.
+    kyverno.io/enable-background: "true"
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: require-labels
+      match:
+        resources:
+          kinds:
+            - Pod
+            - Deployment
+            - StatefulSet
+            - DaemonSet
+            - Namespace
+      exclude:
+        resources:
+          kinds:
+            - DaemonSet
+          names:
+            - kube-proxy
+          namespaces:
+            - kube-system
+      validate:
+        message: "Required labels: app, env, category"
+        pattern:
+          metadata:
+            labels:
+              app: "?*"
+              env: "?*"
+              category: "?*"

@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+metadata:
+  namespace: flux-system
+resources:
+  - disallow-latest.yaml
+  - require-labels.yaml
+  - require-limits.yaml
+  - restrict-hostpath.yaml
+  - restrict-loadbalancer.yaml
+  - restrict-privileged.yaml

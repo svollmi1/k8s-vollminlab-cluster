@@ -1,0 +1,45 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: restrict-privileged
+  annotations:
+    policies.kyverno.io/title: Block Privileged Pods
+    policies.kyverno.io/category: Pod Security Standards (Baseline)
+    policies.kyverno.io/description: >-
+      Prevent pods from running in privileged mode, excluding system namespaces.
+    policies.kyverno.io/severity: high
+    kyverno.io/enable-background: "true"
+spec:
+  validationFailureAction: enforce
+  background: true
+  rules:
+    - name: block-privileged
+      match:
+        resources:
+          kinds:
+            - Pod
+            - Deployment
+            - StatefulSet
+            - DaemonSet
+          namespaces:
+            - "!kube-system"
+            - "!calico-system"
+            - "!longhorn-system"
+            - "!csi-driver"
+            - "!tigera-operator"
+            - "!ingress-nginx"
+      validate:
+        message: "Privileged mode is not allowed."
+        anyPattern:
+          - spec:
+              containers:
+                - securityContext:
+                    privileged: false
+          - spec:
+              initContainers:
+                - securityContext:
+                    privileged: false
+          - spec:
+              ephemeralContainers:
+                - securityContext:
+                    privileged: false
