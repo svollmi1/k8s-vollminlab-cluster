@@ -23,12 +23,3 @@ spec:
     - kind: ConfigMap
       name: kyverno-values
       valuesKey: values.yaml
-  values:
-    webhooks:
-      namespaceSelector:
-        matchExpressions:
-          - key: kubernetes.io/metadata.name
-            operator: NotIn
-            values:
-              - kyverno
-              - kube-system
