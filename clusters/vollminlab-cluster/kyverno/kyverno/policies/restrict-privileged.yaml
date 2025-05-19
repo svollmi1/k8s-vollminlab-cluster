@@ -28,6 +28,7 @@ spec:
             - "!csi-driver"
             - "!tigera-operator"
             - "!ingress-nginx"
+      skipBackgroundRequests: false
       validate:
         message: "Privileged mode is not allowed."
         anyPattern:

@@ -12,6 +12,7 @@ spec:
             - Deployment
             - StatefulSet
             - DaemonSet
+      skipBackgroundRequests: false
       validate:
         message: "All containers must have CPU/memory requests and limits."
         foreach:

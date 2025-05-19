@@ -21,6 +21,7 @@ spec:
             - Deployment
             - StatefulSet
             - DaemonSet
+      skipBackgroundRequests: false
       validate:
         message: "Using ':latest' tag is not allowed."
         foreach:

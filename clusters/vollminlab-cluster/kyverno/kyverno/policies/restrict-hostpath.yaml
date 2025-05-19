@@ -21,6 +21,7 @@ spec:
             - Deployment
             - StatefulSet
             - DaemonSet
+      skipBackgroundRequests: false
       exclude:
         resources:
           namespaces:
