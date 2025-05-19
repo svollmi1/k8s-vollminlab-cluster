@@ -14,7 +14,7 @@ data:
   values.yaml: |
     rbac:
       create: true
-    admissionController:
+    webhooks:
       namespaceSelector:
         matchExpressions:
           - key: kubernetes.io/metadata.name
@@ -22,6 +22,19 @@ data:
             values:
               - kyverno
               - kube-system
+    replicaCount: 3
+    podLabels:
+      app: kyverno
+      env: production
+      category: security
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+    admissionController:
       replicaCount: 3
       podLabels:
         app: kyverno-admission-controller
@@ -35,13 +48,6 @@ data:
           cpu: 200m
           memory: 256Mi
     backgroundController:
-      namespaceSelector:
-        matchExpressions:
-          - key: kubernetes.io/metadata.name
-            operator: NotIn
-            values:
-              - kyverno
-              - kube-system
       podLabels:
         app: kyverno-background-controller
         env: production
@@ -54,13 +60,6 @@ data:
           cpu: 200m
           memory: 256Mi
     cleanupController:
-      namespaceSelector:
-        matchExpressions:
-          - key: kubernetes.io/metadata.name
-            operator: NotIn
-            values:
-              - kyverno
-              - kube-system
       podLabels:
         app: kyverno-cleanup-controller
         env: production
@@ -73,13 +72,6 @@ data:
           cpu: 200m
           memory: 256Mi
     reportsController:
-      namespaceSelector:
-        matchExpressions:
-          - key: kubernetes.io/metadata.name
-            operator: NotIn
-            values:
-              - kyverno
-              - kube-system
       podLabels:
         app: kyverno-reports-controller
         env: production
@@ -91,18 +83,5 @@ data:
         limits:
           cpu: 200m
           memory: 256Mi
-    # Global settings
-    replicaCount: 3
-    podLabels:
-      app: kyverno
-      env: production
-      category: security
-    resources:
-      requests:
-        cpu: 100m
-        memory: 128Mi
-      limits:
-        cpu: 200m
-        memory: 256Mi
     serviceMonitor:
       enabled: true
