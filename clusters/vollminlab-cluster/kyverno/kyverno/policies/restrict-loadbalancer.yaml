@@ -23,13 +23,13 @@ spec:
         message: "Only ingress-nginx-controller in the ingress-nginx namespace may use Service type LoadBalancer."
         deny:
           conditions:
-            - key: "{{ object.spec.type || '' }}"
+            - key: "{{ spec.type || '' }}"
               operator: Equals
               value: LoadBalancer
-            - key: "{{ object.metadata.name }}"
+            - key: "{{ metadata.name }}"
               operator: NotEquals
               value: ingress-nginx-controller
-            - key: "{{ object.metadata.namespace }}"
+            - key: "{{ metadata.namespace }}"
               operator: NotEquals
               value: ingress-nginx
         allowExistingViolations: false
