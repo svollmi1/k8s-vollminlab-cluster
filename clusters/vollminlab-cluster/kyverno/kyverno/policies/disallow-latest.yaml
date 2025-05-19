@@ -22,10 +22,12 @@ spec:
             - DaemonSet
       validate:
         message: "Use of ':latest' tag is not allowed in containers."
-        foreach:
-          - list: spec.template.spec.containers
-            pattern:
-              image: "!*:latest"
+        pattern:
+          spec:
+            template:
+              spec:
+                containers:
+                  - image: "!*:latest"
         allowExistingViolations: false
       skipBackgroundRequests: false
 
@@ -38,10 +40,12 @@ spec:
             - DaemonSet
       validate:
         message: "Use of ':latest' tag is not allowed in initContainers."
-        foreach:
-          - list: spec.template.spec.initContainers
-            pattern:
-              image: "!*:latest"
+        pattern:
+          spec:
+            template:
+              spec:
+                initContainers:
+                  - image: "!*:latest"
         allowExistingViolations: false
       skipBackgroundRequests: false
 
@@ -54,9 +58,11 @@ spec:
             - DaemonSet
       validate:
         message: "Use of ':latest' tag is not allowed in ephemeralContainers."
-        foreach:
-          - list: spec.template.spec.ephemeralContainers
-            pattern:
-              image: "!*:latest"
+        pattern:
+          spec:
+            template:
+              spec:
+                ephemeralContainers:
+                  - image: "!*:latest"
         allowExistingViolations: false
       skipBackgroundRequests: false
