@@ -23,12 +23,9 @@ spec:
       validate:
         message: "Use of ':latest' tag is not allowed in containers."
         foreach:
-          - list: "spec.template.spec.containers"
-            deny:
-              conditions:
-                - key: "{{ element.image }}"
-                  operator: EndsWith
-                  value: ":latest"
+          - list: spec.template.spec.containers
+            pattern:
+              image: "!*:latest"
         allowExistingViolations: false
       skipBackgroundRequests: false
 
@@ -42,12 +39,9 @@ spec:
       validate:
         message: "Use of ':latest' tag is not allowed in initContainers."
         foreach:
-          - list: "spec.template.spec.initContainers"
-            deny:
-              conditions:
-                - key: "{{ element.image }}"
-                  operator: EndsWith
-                  value: ":latest"
+          - list: spec.template.spec.initContainers
+            pattern:
+              image: "!*:latest"
         allowExistingViolations: false
       skipBackgroundRequests: false
 
@@ -61,11 +55,8 @@ spec:
       validate:
         message: "Use of ':latest' tag is not allowed in ephemeralContainers."
         foreach:
-          - list: "spec.template.spec.ephemeralContainers"
-            deny:
-              conditions:
-                - key: "{{ element.image }}"
-                  operator: EndsWith
-                  value: ":latest"
+          - list: spec.template.spec.ephemeralContainers
+            pattern:
+              image: "!*:latest"
         allowExistingViolations: false
       skipBackgroundRequests: false
