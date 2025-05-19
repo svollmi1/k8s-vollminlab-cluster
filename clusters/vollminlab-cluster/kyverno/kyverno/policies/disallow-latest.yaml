@@ -21,16 +21,12 @@ spec:
             - StatefulSet
             - DaemonSet
       validate:
-        message: "Using ':latest' tag is not allowed."
-        foreach:
-          - list: spec.template.spec.containers
-            pattern:
-              image: "!*:latest"
-          - list: spec.template.spec.initContainers
-            pattern:
-              image: "!*:latest"
-          - list: spec.template.spec.ephemeralContainers
-            pattern:
-              image: "!*:latest"
+        message: "No :latest allowed"
+        pattern:
+          spec:
+            template:
+              spec:
+                containers:
+                  - image: "!*:latest"
         allowExistingViolations: false
       skipBackgroundRequests: false
