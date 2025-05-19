@@ -30,6 +30,7 @@ spec:
             - "!ingress-nginx"
       skipBackgroundRequests: false
       validate:
+        allowExistingViolations: false
         message: "Privileged mode is not allowed."
         anyPattern:
           - spec:

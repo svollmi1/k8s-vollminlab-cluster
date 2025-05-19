@@ -18,6 +18,7 @@ spec:
             operator: Equals
             value: LoadBalancer
       validate:
+        allowExistingViolations: false
         message: "Only ingress-nginx-controller may use Service type LoadBalancer."
         deny:
           conditions:

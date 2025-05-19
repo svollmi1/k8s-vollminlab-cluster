@@ -9,11 +9,13 @@ spec:
       match:
         resources:
           kinds:
+            - Pod
             - Deployment
             - StatefulSet
             - DaemonSet
       skipBackgroundRequests: false
       validate:
+        allowExistingViolations: false
         message: "All containers must have CPU/memory requests and limits."
         foreach:
           - list: "spec.template.spec.containers"

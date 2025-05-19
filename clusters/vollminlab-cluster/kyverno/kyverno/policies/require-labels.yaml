@@ -37,6 +37,7 @@ spec:
             - kube-system
             - flux-system
       validate:
+        allowExistingViolations: false
         message: "Required labels: app, env, category"
         foreach:
           - list: "metadata.labels"

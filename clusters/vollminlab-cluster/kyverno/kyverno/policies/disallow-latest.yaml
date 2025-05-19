@@ -23,6 +23,7 @@ spec:
             - DaemonSet
       skipBackgroundRequests: false
       validate:
+        allowExistingViolations: false
         message: "Using ':latest' tag is not allowed."
         foreach:
           - list: "spec.template.spec.containers"
