@@ -3,7 +3,7 @@ kind: ClusterPolicy
 metadata:
   name: restrict-loadbalancer-services
 spec:
-  validationFailureAction: enforce
+  validationFailureAction: Enforce
   background: true
   rules:
     - name: block-lb-except-nginx

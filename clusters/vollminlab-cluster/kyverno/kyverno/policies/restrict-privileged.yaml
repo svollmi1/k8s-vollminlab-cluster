@@ -10,7 +10,7 @@ metadata:
     policies.kyverno.io/severity: high
     kyverno.io/enable-background: "true"
 spec:
-  validationFailureAction: enforce
+  validationFailureAction: Enforce
   background: true
   rules:
     - name: block-privileged
