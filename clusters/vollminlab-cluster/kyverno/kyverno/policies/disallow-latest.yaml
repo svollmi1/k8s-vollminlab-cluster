@@ -13,7 +13,7 @@ spec:
   validationFailureAction: enforce
   background: true
   rules:
-    - name: validate-image-tag
+    - name: disallow-latest-tags
       match:
         resources:
           kinds:
@@ -23,13 +23,22 @@ spec:
             - DaemonSet
       validate:
         message: "Using ':latest' tag is not allowed."
-        anyPattern:
-          - spec:
-              containers:
-                - image: "!*:latest"
-          - spec:
-              initContainers:
-                - image: "!*:latest"
-          - spec:
-              ephemeralContainers:
-                - image: "!*:latest"
+        foreach:
+          - list: "spec.template.spec.containers"
+            deny:
+              conditions:
+                - key: "{{ element.image }}"
+                  operator: EndsWith
+                  value: ":latest"
+          - list: "spec.template.spec.initContainers"
+            deny:
+              conditions:
+                - key: "{{ element.image }}"
+                  operator: EndsWith
+                  value: ":latest"
+          - list: "spec.template.spec.ephemeralContainers"
+            deny:
+              conditions:
+                - key: "{{ element.image }}"
+                  operator: EndsWith
+                  value: ":latest"

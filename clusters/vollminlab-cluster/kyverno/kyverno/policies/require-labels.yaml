@@ -17,10 +17,10 @@ spec:
       match:
         resources:
           kinds:
-            - Pod
             - Deployment
             - StatefulSet
             - DaemonSet
+            - Pod
             - Namespace
       exclude:
         resources:
@@ -32,9 +32,28 @@ spec:
             - kube-system
       validate:
         message: "Required labels: app, env, category"
-        pattern:
-          metadata:
-            labels:
-              app: "?*"
-              env: "?*"
-              category: "?*"
+        foreach:
+          - list: "metadata.labels"
+            deny:
+              conditions:
+                - key: "{{ element.app || '' }}"
+                  operator: Equals
+                  value: ""
+                - key: "{{ element.env || '' }}"
+                  operator: Equals
+                  value: ""
+                - key: "{{ element.category || '' }}"
+                  operator: Equals
+                  value: ""
+          - list: "spec.template.metadata.labels"
+            deny:
+              conditions:
+                - key: "{{ element.app || '' }}"
+                  operator: Equals
+                  value: ""
+                - key: "{{ element.env || '' }}"
+                  operator: Equals
+                  value: ""
+                - key: "{{ element.category || '' }}"
+                  operator: Equals
+                  value: ""
