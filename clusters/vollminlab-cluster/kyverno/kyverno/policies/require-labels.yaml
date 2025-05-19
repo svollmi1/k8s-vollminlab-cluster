@@ -28,8 +28,13 @@ spec:
             - DaemonSet
           names:
             - kube-proxy
+            - helm-controller
+            - kustomize-controller
+            - notification-controller
+            - source-controller
           namespaces:
             - kube-system
+            - flux-system
       validate:
         message: "Required labels: app, env, category"
         foreach:
