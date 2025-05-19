@@ -17,21 +17,20 @@ spec:
       match:
         resources:
           kinds:
-            - Pod
             - Deployment
             - StatefulSet
             - DaemonSet
-      skipBackgroundRequests: false
       validate:
-        allowExistingViolations: false
         message: "Using ':latest' tag is not allowed."
         foreach:
-          - list: "spec.template.spec.containers"
+          - list: spec.template.spec.containers
             pattern:
               image: "!*:latest"
-          - list: "spec.template.spec.initContainers"
+          - list: spec.template.spec.initContainers
             pattern:
               image: "!*:latest"
-          - list: "spec.template.spec.ephemeralContainers"
+          - list: spec.template.spec.ephemeralContainers
             pattern:
               image: "!*:latest"
+        allowExistingViolations: false
+      skipBackgroundRequests: false
