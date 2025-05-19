@@ -12,6 +12,8 @@ metadata:
     meta.helm.sh/release-namespace: kyverno
 data:
   values.yaml: |
+    rbac:
+      create: true
     replicaCount: 3
     podLabels:
       app: kyverno
