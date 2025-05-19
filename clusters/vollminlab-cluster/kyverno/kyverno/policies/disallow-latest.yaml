@@ -3,17 +3,17 @@ kind: ClusterPolicy
 metadata:
   name: disallow-latest-tag
   annotations:
+    kyverno.io/enable-background: "true"
     policies.kyverno.io/title: Disallow `:latest` Image Tags
     policies.kyverno.io/category: Best Practices
     policies.kyverno.io/severity: high
-    policies.kyverno.io/description: >-
+    policies.kyverno.io/description: >
       Prevents use of the ':latest' image tag in containers, initContainers, and ephemeralContainers.
-    kyverno.io/enable-background: "true"
 spec:
   validationFailureAction: Audit
   background: true
   rules:
-    - name: disallow-latest-tags
+    - name: disallow-latest-containers
       match:
         resources:
           kinds:
@@ -21,12 +21,51 @@ spec:
             - StatefulSet
             - DaemonSet
       validate:
-        message: "No :latest allowed"
-        pattern:
-          spec:
-            template:
-              spec:
-                containers:
-                  - image: "!*:latest"
+        message: "Use of ':latest' tag is not allowed in containers."
+        foreach:
+          - list: "spec.template.spec.containers"
+            deny:
+              conditions:
+                - key: "{{ element.image }}"
+                  operator: EndsWith
+                  value: ":latest"
+        allowExistingViolations: false
+      skipBackgroundRequests: false
+
+    - name: disallow-latest-init-containers
+      match:
+        resources:
+          kinds:
+            - Deployment
+            - StatefulSet
+            - DaemonSet
+      validate:
+        message: "Use of ':latest' tag is not allowed in initContainers."
+        foreach:
+          - list: "spec.template.spec.initContainers"
+            deny:
+              conditions:
+                - key: "{{ element.image }}"
+                  operator: EndsWith
+                  value: ":latest"
+        allowExistingViolations: false
+      skipBackgroundRequests: false
+
+    - name: disallow-latest-ephemeral-containers
+      match:
+        resources:
+          kinds:
+            - Deployment
+            - StatefulSet
+            - DaemonSet
+      validate:
+        message: "Use of ':latest' tag is not allowed in ephemeralContainers."
+        foreach:
+          - list: "spec.template.spec.ephemeralContainers"
+            deny:
+              conditions:
+                - key: "{{ element.image }}"
+                  operator: EndsWith
+                  value: ":latest"
         allowExistingViolations: false
       skipBackgroundRequests: false
