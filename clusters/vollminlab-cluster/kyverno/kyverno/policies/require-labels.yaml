@@ -13,16 +13,13 @@ spec:
   validationFailureAction: Audit
   background: true
   rules:
-    - name: require-labels
+    - name: require-labels-on-controllers
       match:
         resources:
           kinds:
             - Deployment
             - StatefulSet
             - DaemonSet
-            - Pod
-            - Namespace
-      skipBackgroundRequests: false
       exclude:
         resources:
           kinds:
@@ -51,4 +48,23 @@ spec:
                   app: "?*"
                   env: "?*"
                   category: "?*"
-        allowExistingViolations: false
+
+    - name: require-labels-on-pods-namespaces
+      match:
+        resources:
+          kinds:
+            - Pod
+            - Namespace
+      exclude:
+        resources:
+          namespaces:
+            - kube-system
+            - flux-system
+      validate:
+        message: "Required labels: app, env, category"
+        pattern:
+          metadata:
+            labels:
+              app: "?*"
+              env: "?*"
+              category: "?*"
