@@ -4,17 +4,5 @@ resources:
   - gotk-components.yaml
   - gotk-sync.yaml
   - flux-githubapp-sealedsecret.yaml
-  - arc-helmrepository.yaml
-  - bitnami-helmrepository.yaml
-  - capacitor-helmrepository.yaml
-  - elastic-helmrepository.yaml
-  - homepage-helmrepository.yaml
-  - kyverno-helmrepository.yaml
-  - kyverno-policyreporter-helmrepository.yaml
-  - longhorn-helmrepository.yaml
-  - metallb-helmrepository.yaml
-  - metrics-server-helmrepository.yaml
-  - overseerr-helmrepository.yaml
-  - prowlarr-helmrepository.yaml
-  - sealed-secrets-helmrepository.yaml
+  - ./repositories
   - ./capacitor/app
