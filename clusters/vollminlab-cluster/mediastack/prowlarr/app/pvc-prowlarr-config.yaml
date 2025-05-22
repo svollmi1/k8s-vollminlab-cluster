@@ -3,6 +3,10 @@ kind: PersistentVolumeClaim
 metadata:
   name: pvc-prowlarr-config
   namespace: mediastack
+  labels:
+    app: prowlarr
+    env: production
+    category: apps
 spec:
   accessModes:
     - ReadWriteOnce

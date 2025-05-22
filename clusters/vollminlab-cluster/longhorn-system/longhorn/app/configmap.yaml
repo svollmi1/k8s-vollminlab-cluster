@@ -3,6 +3,10 @@ kind: ConfigMap
 metadata:
   name: longhorn-values
   namespace: longhorn-system
+  labels:
+    app: longhorn
+    env: production
+    category: storage
 data:
   values.yaml: |
     defaultSettings:

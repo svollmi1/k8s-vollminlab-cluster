@@ -3,6 +3,10 @@ kind: ConfigMap
 metadata:
   name: capacitor-values
   namespace: flux-system
+  labels:
+    app: capacitor
+    env: production
+    category: core
 data:
   values.yaml: |
     image:

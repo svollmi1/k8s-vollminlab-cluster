@@ -3,6 +3,10 @@ kind: ConfigMap
 metadata:
   name: policy-reporter-values
   namespace: kyverno
+  labels:
+    app: policy-reporter
+    env: production
+    category: security
 data:
   values.yaml: |
     ui:

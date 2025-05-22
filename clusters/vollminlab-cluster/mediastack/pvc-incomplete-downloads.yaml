@@ -3,6 +3,10 @@ kind: PersistentVolumeClaim
 metadata:
   name: pvc-incomplete-downloads
   namespace: mediastack
+  labels:
+    app: mediastack
+    env: production
+    category: apps
 spec:
   accessModes:
     - ReadWriteMany

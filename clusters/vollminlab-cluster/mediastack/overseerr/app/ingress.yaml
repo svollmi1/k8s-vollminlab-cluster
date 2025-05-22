@@ -6,6 +6,10 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  labels:
+    app: overseerr
+    env: production
+    category: apps
 spec:
   ingressClassName: nginx
   rules:

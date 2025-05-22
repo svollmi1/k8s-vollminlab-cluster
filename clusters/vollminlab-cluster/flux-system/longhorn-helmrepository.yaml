@@ -3,6 +3,10 @@ kind: HelmRepository
 metadata:
   name: longhorn-repo
   namespace: flux-system
+  labels:
+    app: longhorn
+    env: production
+    category: storage
 spec:
   url: https://charts.longhorn.io
   interval: 5m

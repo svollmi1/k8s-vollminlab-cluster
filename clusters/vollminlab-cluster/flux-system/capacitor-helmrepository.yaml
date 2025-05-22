@@ -3,6 +3,10 @@ kind: HelmRepository
 metadata:
   name: capacitor-repo
   namespace: flux-system
+  labels:
+    app: capacitor
+    env: production
+    category: core
 spec:
   url: https://chart.onechart.dev
   interval: 5m

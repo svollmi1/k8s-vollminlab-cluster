@@ -3,6 +3,10 @@ kind: HelmRepository
 metadata:
   name: elastic-repo
   namespace: flux-system
+  labels:
+    app: elastic
+    env: production
+    category: observability
 spec:
   interval: 5m
   url: https://helm.elastic.co

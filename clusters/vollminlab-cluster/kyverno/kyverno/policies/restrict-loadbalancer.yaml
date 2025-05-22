@@ -9,6 +9,10 @@ metadata:
     policies.kyverno.io/description: >
       Only ingress-nginx-controller in the ingress-nginx namespace may use type LoadBalancer.
     kyverno.io/enable-background: "true"
+  labels:
+    app: kyverno
+    env: production
+    category: security
 spec:
   validationFailureAction: Audit
   background: true

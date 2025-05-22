@@ -3,6 +3,10 @@ kind: ConfigMap
 metadata:
   name: actions-runner-controller-values
   namespace: actions-runner-system
+  labels:
+    app: actions-runner-controller
+    env: production
+    category: apps
 data:
   values.yaml: |
     authSecret:

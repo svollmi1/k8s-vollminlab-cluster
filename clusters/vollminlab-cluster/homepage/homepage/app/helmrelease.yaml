@@ -3,6 +3,10 @@ kind: HelmRelease
 metadata:
   name: homepage
   namespace: homepage
+  labels:
+    app: homepage
+    env: production
+    category: apps
 spec:
   chart:
     spec:

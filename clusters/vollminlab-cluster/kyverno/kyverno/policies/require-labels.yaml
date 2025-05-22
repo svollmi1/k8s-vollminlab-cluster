@@ -9,6 +9,10 @@ metadata:
     policies.kyverno.io/description: >
       Enforces presence of common labels: app, env, and category for all core workloads and namespaces.
     kyverno.io/enable-background: "true"
+  labels:
+    app: kyverno
+    env: production
+    category: security
 spec:
   validationFailureAction: Audit
   background: true

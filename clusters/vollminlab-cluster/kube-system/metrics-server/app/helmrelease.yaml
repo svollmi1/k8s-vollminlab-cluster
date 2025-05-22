@@ -5,7 +5,7 @@ metadata:
   namespace: kube-system
   labels:
     app: metrics-server
-    env: system
+    env: production
     category: observability
 spec:
   interval: 5m

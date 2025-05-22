@@ -3,6 +3,10 @@ kind: ConfigMap
 metadata:
   name: overseerr-values
   namespace: mediastack
+  labels:
+    app: overseerr
+    env: production
+    category: apps
 data:
   values.yaml: |
     persistence:

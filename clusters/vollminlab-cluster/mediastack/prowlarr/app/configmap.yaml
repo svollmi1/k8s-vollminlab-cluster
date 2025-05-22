@@ -3,6 +3,10 @@ kind: ConfigMap
 metadata:
   name: prowlarr-values
   namespace: mediastack
+  labels:
+    app: prowlarr
+    env: production
+    category: apps
 data:
   values.yaml: |
     persistence:

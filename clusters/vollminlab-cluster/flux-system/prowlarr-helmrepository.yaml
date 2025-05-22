@@ -3,6 +3,10 @@ kind: OCIRepository
 metadata:
   name: prowlarr-repo
   namespace: flux-system
+  labels:
+    app: prowlarr
+    env: production
+    category: apps
 spec:
   url: oci://tccr.io/truecharts/prowlarr
   interval: 5m

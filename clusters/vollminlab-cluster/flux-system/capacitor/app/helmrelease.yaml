@@ -3,6 +3,10 @@ kind: HelmRelease
 metadata:
   name: capacitor
   namespace: flux-system
+  labels:
+    app: capacitor
+    env: production
+    category: core
 spec:
   interval: 5m
   releaseName: capacitor

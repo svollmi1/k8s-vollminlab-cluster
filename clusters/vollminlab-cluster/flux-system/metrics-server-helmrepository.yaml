@@ -3,6 +3,10 @@ kind: HelmRepository
 metadata:
   name: metrics-server
   namespace: flux-system
+  labels:
+    app: metrics-server
+    env: production
+    category: observability
 spec:
   interval: 5m
   url: https://kubernetes-sigs.github.io/metrics-server/

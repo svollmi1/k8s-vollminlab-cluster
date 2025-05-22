@@ -3,6 +3,10 @@ kind: HelmRepository
 metadata:
   name: bitnami
   namespace: flux-system
+  labels:
+    app: bitnami
+    env: production
+    category: apps
 spec:
   interval: 5m
   url: https://charts.bitnami.com/bitnami

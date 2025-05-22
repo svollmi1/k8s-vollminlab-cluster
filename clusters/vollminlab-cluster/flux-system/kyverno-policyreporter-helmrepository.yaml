@@ -3,6 +3,10 @@ kind: HelmRepository
 metadata:
   name: policy-reporter
   namespace: flux-system
+  labels:
+    app: policy-reporter
+    env: production
+    category: security
 spec:
   interval: 5m
   url: https://kyverno.github.io/policy-reporter

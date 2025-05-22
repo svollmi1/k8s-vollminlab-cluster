@@ -3,6 +3,10 @@ kind: OCIRepository
 metadata:
   name: overseerr-repo
   namespace: flux-system
+  labels:
+    app: overseerr
+    env: production
+    category: apps
 spec:
   url: oci://tccr.io/truecharts/overseerr
   interval: 5m

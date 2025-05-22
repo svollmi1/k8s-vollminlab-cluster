@@ -3,6 +3,10 @@ kind: ConfigMap
 metadata:
   name: sealed-secrets-values
   namespace: sealed-secrets
+  labels:
+    app: sealed-secrets
+    env: production
+    category: security
 data:
   values.yaml: |
     image:

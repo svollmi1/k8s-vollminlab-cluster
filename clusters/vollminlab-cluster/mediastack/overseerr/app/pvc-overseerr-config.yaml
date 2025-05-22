@@ -3,6 +3,10 @@ kind: PersistentVolumeClaim
 metadata:
   name: pvc-overseerr-config
   namespace: mediastack
+  labels:
+    app: overseerr
+    env: production
+    category: apps
 spec:
   accessModes:
     - ReadWriteOnce

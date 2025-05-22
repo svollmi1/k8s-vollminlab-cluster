@@ -3,6 +3,10 @@ kind: NetworkPolicy
 metadata:
   name: capacitor-ingress
   namespace: flux-system
+  labels:
+    app: capacitor
+    env: production
+    category: core
 spec:
   policyTypes:
     - Ingress

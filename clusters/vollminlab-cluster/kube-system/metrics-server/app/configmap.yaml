@@ -3,15 +3,19 @@ kind: ConfigMap
 metadata:
   name: metrics-server-values
   namespace: kube-system
+  labels:
+    app: metrics-server
+    env: production
+    category: observability
 data:
   values.yaml: |
     commonLabels:
       app: metrics-server
-      env: system
+      env: production
       category: observability
     podLabels:
       app: metrics-server
-      env: system
+      env: production
       category: observability
     args:
       - --kubelet-insecure-tls=true

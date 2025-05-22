@@ -9,6 +9,10 @@ metadata:
     policies.kyverno.io/description: >
       Prevent pods from running in privileged mode, excluding system namespaces.
     kyverno.io/enable-background: "true"
+  labels:
+    app: kyverno
+    env: production
+    category: security
 spec:
   validationFailureAction: Audit
   background: true

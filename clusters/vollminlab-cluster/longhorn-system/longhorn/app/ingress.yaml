@@ -5,6 +5,10 @@ metadata:
   namespace: longhorn-system
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  labels:
+    app: longhorn
+    env: production
+    category: storage
 spec:
   ingressClassName: nginx
   rules:

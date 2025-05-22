@@ -3,6 +3,10 @@ kind: HelmRepository
 metadata:
   name: homepage-repo
   namespace: flux-system
+  labels:
+    app: homepage
+    env: production
+    category: apps
 spec:
   url: https://jameswynn.github.io/helm-charts
   interval: 5m

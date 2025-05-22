@@ -3,6 +3,10 @@ kind: Ingress
 metadata:
   name: capacitor-ingress
   namespace: flux-system
+  labels:
+    app: capacitor
+    env: production
+    category: core
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/ssl-redirect: "true"

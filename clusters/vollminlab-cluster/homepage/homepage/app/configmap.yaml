@@ -3,6 +3,10 @@ kind: ConfigMap
 metadata:
   name: homepage-values
   namespace: homepage
+  labels:
+    app: homepage
+    env: production
+    category: apps
 data:
   values.yaml: |
     config:

@@ -3,6 +3,10 @@ kind: HelmRelease
 metadata:
   name: eck-operator
   namespace: elastic-system
+  labels:
+    app: elastic-operator
+    env: production
+    category: observability
 spec:
   interval: 5m
   chart:

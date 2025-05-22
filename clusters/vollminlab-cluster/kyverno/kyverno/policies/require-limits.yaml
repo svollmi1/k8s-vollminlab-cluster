@@ -9,6 +9,10 @@ metadata:
     policies.kyverno.io/description: >
       Ensures that all containers define CPU and memory requests and limits.
     kyverno.io/enable-background: "true"
+  labels:
+    app: kyverno
+    env: production
+    category: security
 spec:
   validationFailureAction: Audit
   background: true

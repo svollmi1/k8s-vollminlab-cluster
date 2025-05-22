@@ -3,6 +3,10 @@ kind: HelmRepository
 metadata:
   name: kyverno
   namespace: flux-system
+  labels:
+    app: kyverno
+    env: production
+    category: security
 spec:
   interval: 5m
   url: https://kyverno.github.io/kyverno
