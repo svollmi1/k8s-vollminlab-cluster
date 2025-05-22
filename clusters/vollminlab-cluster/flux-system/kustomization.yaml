@@ -12,6 +12,7 @@ resources:
   - kyverno-helmrepository.yaml
   - kyverno-policyreporter-helmrepository.yaml
   - longhorn-helmrepository.yaml
+  - metallb-helmrepository.yaml
   - metrics-server-helmrepository.yaml
   - overseerr-helmrepository.yaml
   - prowlarr-helmrepository.yaml
