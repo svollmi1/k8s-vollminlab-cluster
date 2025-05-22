@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - arc-helmrepository.yaml
+  - bitnami-helmrepository.yaml
+  - capacitor-helmrepository.yaml
+  - elastic-helmrepository.yaml
+  - homepage-helmrepository.yaml
+  - kyverno-helmrepository.yaml
+  - kyverno-policyreporter-helmrepository.yaml
+  - longhorn-helmrepository.yaml
+  - metallb-helmrepository.yaml
+  - metrics-server-helmrepository.yaml
+  - overseer-helmrepository.yaml
+  - prowlarr-helmrepository.yaml
+  - sealed-secrets-helmrepository.yaml
