@@ -30,6 +30,7 @@ spec:
             - kube-system
             - calico-system
             - longhorn-system
+            - metallb-system
             - csi-driver
             - tigera-operator
             - ingress-nginx
