@@ -11,6 +11,6 @@ resources:
   - longhorn-helmrepository.yaml
   - metallb-helmrepository.yaml
   - metrics-server-helmrepository.yaml
-  - overseer-helmrepository.yaml
+  - overseerr-helmrepository.yaml
   - prowlarr-helmrepository.yaml
   - sealed-secrets-helmrepository.yaml
