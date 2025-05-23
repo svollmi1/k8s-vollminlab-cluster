@@ -16,7 +16,7 @@ data:
       enabled: false
     syncPeriod: 1m
     enableLeaderElection: true
-    controllerManager:
+    manager:
       replicas: 3
       podLabels:
         app: actions-runner-controller
