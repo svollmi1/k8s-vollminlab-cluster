@@ -22,14 +22,15 @@ spec:
         resources:
           kinds:
             - Service
-      skipBackgroundRequests: false
-      preconditions:
-        all:
-          - key: "{{ request.object.spec.type }}"
-            operator: Equals
-            value: LoadBalancer
-      deny:
-        conditions:
-          - key: "{{ not (request.object.metadata.name == 'ingress-nginx-controller' && request.object.metadata.namespace == 'ingress-nginx') }}"
-            operator: Equals
-            value: true
+      exclude:
+        resources:
+          namespaces:
+            - ingress-nginx
+        subjects:
+          - kind: Service
+            name: ingress-nginx-controller
+      validate:
+        message: "Only ingress-nginx-controller in the ingress-nginx namespace may use Service type LoadBalancer."
+        pattern:
+          spec:
+            type: ClusterIP
