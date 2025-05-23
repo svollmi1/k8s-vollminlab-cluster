@@ -26,17 +26,15 @@ spec:
             - DaemonSet
       skipBackgroundRequests: false
       validate:
-        message: "All containers must have CPU/memory requests and limits."
-        pattern:
-          spec:
-            template:
-              spec:
-                containers:
-                  - resources:
-                      requests:
-                        cpu: "?*"
-                        memory: "?*"
-                      limits:
-                        cpu: "?*"
-                        memory: "?*"
+        message: "All containers must have CPU and memory requests and limits."
+        foreach:
+          - list: "spec.template.spec.containers"
+            pattern:
+              resources:
+                requests:
+                  cpu: "?*"
+                  memory: "?*"
+                limits:
+                  cpu: "?*"
+                  memory: "?*"
         allowExistingViolations: false
