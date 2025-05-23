@@ -27,6 +27,10 @@ data:
       app: kyverno
       env: production
       category: security
+    labels:
+      app: kyverno
+      env: production
+      category: security
     resources:
       requests:
         cpu: 100m
@@ -35,11 +39,15 @@ data:
         cpu: 200m
         memory: 256Mi
     admissionController:
-      replicaCount: 3
+      labels:
+        app: kyverno-admission-controller
+        env: production
+        category: security
       podLabels:
         app: kyverno-admission-controller
         env: production
         category: security
+      replicaCount: 3
       resources:
         requests:
           cpu: 100m
@@ -48,6 +56,10 @@ data:
           cpu: 200m
           memory: 256Mi
     backgroundController:
+      labels:
+        app: kyverno-background-controller
+        env: production
+        category: security
       podLabels:
         app: kyverno-background-controller
         env: production
@@ -60,6 +72,10 @@ data:
           cpu: 200m
           memory: 256Mi
     cleanupController:
+      labels:
+        app: kyverno-cleanup-controller
+        env: production
+        category: security
       podLabels:
         app: kyverno-cleanup-controller
         env: production
@@ -72,6 +88,10 @@ data:
           cpu: 200m
           memory: 256Mi
     reportsController:
+      labels:
+        app: kyverno-reports-controller
+        env: production
+        category: security
       podLabels:
         app: kyverno-reports-controller
         env: production
