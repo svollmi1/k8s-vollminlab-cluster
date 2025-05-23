@@ -35,10 +35,13 @@ spec:
       skipBackgroundRequests: false
       validate:
         message: "Using hostPath volumes is not allowed outside system namespaces."
-        pattern:
-          spec:
-            template:
-              spec:
-                volumes:
-                  - hostPath: null
-        allowExistingViolations: false
+        anyPattern:
+          - spec:
+              template:
+                spec:
+                  =(volumes): []
+          - spec:
+              template:
+                spec:
+                  volumes:
+                    - =(hostPath): null
