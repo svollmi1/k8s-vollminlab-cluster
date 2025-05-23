@@ -43,5 +43,10 @@ spec:
                 spec:
                   containers:
                     - =(securityContext):
-                        privileged: false 
+                        =(privileged): false
+          - spec:
+              template:
+                spec:
+                  containers:
+                    - X(securityContext): null
         allowExistingViolations: false
