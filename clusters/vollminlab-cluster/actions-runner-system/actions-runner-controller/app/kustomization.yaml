@@ -5,4 +5,4 @@ resources:
   - helmrelease.yaml
   - runnerdeployment.yaml
 patchesStrategicMerge:
-  - patch-resources.yaml
+  - patch.yaml
