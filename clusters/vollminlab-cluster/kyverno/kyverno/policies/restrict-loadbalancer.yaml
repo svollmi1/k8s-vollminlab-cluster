@@ -28,10 +28,8 @@ spec:
           - key: "{{ request.object.spec.type }}"
             operator: Equals
             value: LoadBalancer
-      validate:
-        message: "Only ingress-nginx-controller in the ingress-nginx namespace may use Service type LoadBalancer."
-        deny:
-          conditions:
-            - key: "{{ not (request.object.metadata.name == 'ingress-nginx-controller' && request.object.metadata.namespace == 'ingress-nginx') }}"
-              operator: Equals
-              value: true
+      deny:
+        conditions:
+          - key: "{{ not (request.object.metadata.name == 'ingress-nginx-controller' && request.object.metadata.namespace == 'ingress-nginx') }}"
+            operator: Equals
+            value: true
