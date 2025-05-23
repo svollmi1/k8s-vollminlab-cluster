@@ -4,13 +4,7 @@ metadata:
   name: actions-runner-controller
   namespace: actions-runner-system
 spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: actions-runner-controller
   template:
-    metadata:
-      labels:
-        app.kubernetes.io/name: actions-runner-controller
     spec:
       containers:
         - name: manager
