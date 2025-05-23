@@ -17,7 +17,3 @@ spec:
     - kind: ConfigMap
       name: actions-runner-controller-values
       valuesKey: values.yaml
-  postRenderers:
-    - kustomize:
-        patchesStrategicMerge:
-          - patch.yaml
