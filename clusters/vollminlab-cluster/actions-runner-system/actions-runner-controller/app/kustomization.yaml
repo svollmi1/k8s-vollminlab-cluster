@@ -4,4 +4,3 @@ resources:
   - configmap.yaml
   - helmrelease.yaml
   - runnerdeployment.yaml
-  - patch.yaml
