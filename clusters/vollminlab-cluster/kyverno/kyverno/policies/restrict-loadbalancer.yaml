@@ -26,9 +26,8 @@ spec:
         resources:
           namespaces:
             - ingress-nginx
-        subjects:
-          - kind: Service
-            name: ingress-nginx-controller
+          names:
+            - ingress-nginx-controller
       validate:
         message: "Only ingress-nginx-controller in the ingress-nginx namespace may use Service type LoadBalancer."
         pattern:
