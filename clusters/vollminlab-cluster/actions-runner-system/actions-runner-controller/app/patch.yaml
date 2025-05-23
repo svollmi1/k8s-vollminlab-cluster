@@ -1,0 +1,13 @@
+spec:
+  template:
+    spec:
+      containers:
+        - name: manager
+          image: summerwind/actions-runner-controller:v0.27.6
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
