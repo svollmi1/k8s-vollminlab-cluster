@@ -1,9 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: actions-runner-controller
+  namespace: actions-runner-system
 spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: actions-runner-controller
+      app.kubernetes.io/instance: actions-runner-controller
   template:
     spec:
       containers:
         - name: manager
-          image: summerwind/actions-runner-controller:v0.27.6
           resources:
             requests:
               cpu: 50m
