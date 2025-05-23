@@ -22,3 +22,24 @@ spec:
     - kind: ConfigMap
       name: actions-runner-controller-values
       valuesKey: values.yaml
+  postRenderers:
+    - kustomize:
+        patchesStrategicMerge:
+          - |
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: actions-runner-controller
+              namespace: actions-runner-system
+            spec:
+              template:
+                spec:
+                  containers:
+                    - name: manager
+                      resources:
+                        requests:
+                          cpu: 50m
+                          memory: 64Mi
+                        limits:
+                          cpu: 200m
+                          memory: 128Mi
