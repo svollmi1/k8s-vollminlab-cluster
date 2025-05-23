@@ -8,7 +8,7 @@
             "file:///c%3A/git/k8s-vollminlab-cluster/clusters/vollminlab-cluster/kyverno/kyverno/policies/restrict-loadbalancer.yaml",
             "file:///c%3A/git/k8s-vollminlab-cluster/clusters/vollminlab-cluster/kyverno/kyverno/policies/restrict-privileged.yaml"
         ],
-        "https://json.schemastore.org/kustomization.json": "file:///c%3A/repos/k8s-vollminlab-cluster/clusters/vollminlab-cluster/kyverno/kyverno/app/policies/kustomization.yaml"
+        "https://json.schemastore.org/kustomization.json": "file:///c%3A/repos/k8s-vollminlab-cluster/clusters/vollminlab-cluster/kyverno/kyverno/app/policies/disallow-latest.yaml"
     },
   "files.eol": "\n"
 }

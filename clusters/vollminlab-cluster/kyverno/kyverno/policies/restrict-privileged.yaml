@@ -37,11 +37,11 @@ spec:
       skipBackgroundRequests: false
       validate:
         message: "Privileged mode is not allowed."
-        pattern:
-          spec:
-            template:
-              spec:
-                containers:
-                  - securityContext:
-                      privileged: false
+        anyPattern:
+          - spec:
+              template:
+                spec:
+                  containers:
+                    - =(securityContext):
+                        privileged: false 
         allowExistingViolations: false
