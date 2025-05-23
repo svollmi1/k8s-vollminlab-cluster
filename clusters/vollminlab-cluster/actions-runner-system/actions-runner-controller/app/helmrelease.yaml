@@ -3,21 +3,16 @@ kind: HelmRelease
 metadata:
   name: actions-runner-controller
   namespace: actions-runner-system
-  labels:
-    app: actions-runner-controller
-    env: production
-    category: ci
 spec:
   interval: 10m
-  releaseName: actions-runner-controller
   chart:
     spec:
       chart: actions-runner-controller
+      version: 0.23.7
       sourceRef:
         kind: HelmRepository
         name: actions-runner-controller
         namespace: flux-system
-      version: 0.23.7
   valuesFrom:
     - kind: ConfigMap
       name: actions-runner-controller-values
@@ -25,21 +20,4 @@ spec:
   postRenderers:
     - kustomize:
         patchesStrategicMerge:
-          - |
-            apiVersion: apps/v1
-            kind: Deployment
-            metadata:
-              name: actions-runner-controller
-              namespace: actions-runner-system
-            spec:
-              template:
-                spec:
-                  containers:
-                    - name: manager
-                      resources:
-                        requests:
-                          cpu: 50m
-                          memory: 64Mi
-                        limits:
-                          cpu: 200m
-                          memory: 128Mi
+          - patch.yaml
