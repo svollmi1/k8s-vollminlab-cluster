@@ -19,27 +19,31 @@ spec:
   rules:
     - name: require-labels-on-controllers
       match:
-        resources:
-          kinds:
-            - Deployment
-            - StatefulSet
-            - DaemonSet
+        any:
+          - resources:
+              kinds:
+                - Deployment
+                - StatefulSet
+                - DaemonSet
+              namespaces:
+                - flux-system
+          - resources:
+              kinds:
+                - Deployment
+                - StatefulSet
+                - DaemonSet
+              namespaceSelector:
+                matchExpressions:
+                  - key: kubernetes.io/metadata.name
+                    operator: NotIn
+                    values:
+                      - kube-system
+                      - default
       exclude:
         resources:
-          kinds:
-            - Deployment
           selector:
             matchLabels:
               app.kubernetes.io/part-of: flux
-          names:
-            - kube-proxy
-            - helm-controller
-            - kustomize-controller
-            - notification-controller
-            - source-controller
-          namespaces:
-            - kube-system
-            - default
       validate:
         message: "Required labels: app, env, category"
         pattern:
@@ -55,7 +59,6 @@ spec:
                   app: "?*"
                   env: "?*"
                   category: "?*"
-
     - name: require-labels-on-pods-and-namespaces
       match:
         resources:
