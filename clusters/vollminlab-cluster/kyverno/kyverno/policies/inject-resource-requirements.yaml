@@ -21,16 +21,20 @@ spec:
                 - StatefulSet
               namespaces:
                 - longhorn-system
-              names:
-                - csi-attacher
-                - csi-provisioner
-                - csi-resizer
-                - csi-snapshotter
-                - longhorn-driver-deployer
-                - longhorn-ui
-                - engine-image-ei-db6c2b6f
-                - longhorn-csi-plugin
-                - longhorn-manager
+              selector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - longhorn-driver-deployer
+                      - longhorn-ui
+                      - csi-attacher
+                      - csi-provisioner
+                      - csi-resizer
+                      - csi-snapshotter
+                      - longhorn-csi-plugin
+                      - longhorn-manager
+                      - engine-image-ei-db6c2b6f
       mutate:
         foreach:
           - list: "spec.template.spec.containers"
