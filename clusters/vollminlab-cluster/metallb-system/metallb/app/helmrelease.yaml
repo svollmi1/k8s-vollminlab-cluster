@@ -21,3 +21,16 @@ spec:
     - kind: ConfigMap
       name: metallb-values
       valuesKey: values.yaml
+  postRenderers:
+    - kustomize:
+        patchesStrategicMerge:
+          - |
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: metallb-controller
+              namespace: metallb-system
+              labels:
+                app: metallb
+                env: production
+                category: networking
