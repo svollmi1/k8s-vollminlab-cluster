@@ -14,6 +14,11 @@ data:
   values.yaml: |
     rbac:
       create: true
+      clusterPolicyController:
+        additionalPermissions:
+          - apiGroups: ["apps"]
+            resources: ["deployments", "statefulsets", "daemonsets"]
+            verbs: ["get", "list", "watch", "patch", "update"]
     webhooks:
       namespaceSelector:
         matchExpressions:
