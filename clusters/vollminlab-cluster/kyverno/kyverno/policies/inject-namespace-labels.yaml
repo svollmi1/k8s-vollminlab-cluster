@@ -14,6 +14,7 @@ metadata:
     env: production
     category: security
 spec:
+  mutateExistingOnPolicyUpdate: true
   background: true
   validationFailureAction: Enforce
   rules:
