@@ -32,3 +32,8 @@ spec:
               app: "{{ request.namespace | lookup('v1', 'Namespace', request.namespace).metadata.labels.app }}"
               env: "{{ request.namespace | lookup('v1', 'Namespace', request.namespace).metadata.labels.env }}"
               category: "{{ request.namespace | lookup('v1', 'Namespace', request.namespace).metadata.labels.category }}"
+              preconditions:
+                all:
+                  - key: "{{ request.object.metadata.labels.app }}"
+                    operator: Equals
+                    value: null
