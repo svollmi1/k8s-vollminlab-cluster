@@ -26,6 +26,9 @@ spec:
             - DaemonSet
       exclude:
         resources:
+          selector:
+            matchLabels:
+              app.kubernetes.io/part-of: flux
           names:
             - kube-proxy
             - helm-controller
@@ -34,7 +37,6 @@ spec:
             - source-controller
           namespaces:
             - kube-system
-            - flux-system
             - default
       validate:
         message: "Required labels: app, env, category"
