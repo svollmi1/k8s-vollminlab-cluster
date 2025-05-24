@@ -17,10 +17,7 @@ spec:
         kind: HelmRepository
         name: metallb
         namespace: flux-system
-  values:
-    crds:
-      enabled: true
-    controller:
-      enabled: true
-    speaker:
-      enabled: true
+  valuesFrom:
+    - kind: ConfigMap
+      name: metallb-values
+      valuesKey: values.yaml
