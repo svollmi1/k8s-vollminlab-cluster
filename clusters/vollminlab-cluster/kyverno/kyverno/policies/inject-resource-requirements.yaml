@@ -1,0 +1,206 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: inject-resource-requirements
+  annotations:
+    policies.kyverno.io/title: Inject Manual Resource Limits
+    policies.kyverno.io/category: Best Practices
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/description: >
+      Injects CPU and memory requests/limits for workloads that cannot be configured via Helm values,
+      such as Longhorn and other non-standard charts.
+spec:
+  rules:
+    - name: inject-resource-requirements
+      match:
+        any:
+          - resources:
+              kinds:
+                - Deployment
+                - DaemonSet
+                - StatefulSet
+              namespaces:
+                - longhorn-system
+              names:
+                - csi-attacher
+                - csi-provisioner
+                - csi-resizer
+                - csi-snapshotter
+                - longhorn-driver-deployer
+                - longhorn-ui
+                - engine-image-ei-db6c2b6f
+                - longhorn-csi-plugin
+                - longhorn-manager
+      mutate:
+        foreach:
+          - list: "spec.template.spec.containers"
+            preconditions:
+              all:
+                - key: "{{element.name}}"
+                  operator: Equals
+                  value: csi-attacher
+            patchStrategicMerge:
+              spec:
+                template:
+                  spec:
+                    containers:
+                      - (name): csi-attacher
+                        resources:
+                          requests:
+                            cpu: "20m"
+                            memory: "64Mi"
+                          limits:
+                            cpu: "100m"
+                            memory: "128Mi"
+          - list: "spec.template.spec.containers"
+            preconditions:
+              all:
+                - key: "{{element.name}}"
+                  operator: Equals
+                  value: csi-provisioner
+            patchStrategicMerge:
+              spec:
+                template:
+                  spec:
+                    containers:
+                      - (name): csi-provisioner
+                        resources:
+                          requests:
+                            cpu: "20m"
+                            memory: "64Mi"
+                          limits:
+                            cpu: "100m"
+                            memory: "128Mi"
+          - list: "spec.template.spec.containers"
+            preconditions:
+              all:
+                - key: "{{element.name}}"
+                  operator: Equals
+                  value: csi-resizer
+            patchStrategicMerge:
+              spec:
+                template:
+                  spec:
+                    containers:
+                      - (name): csi-resizer
+                        resources:
+                          requests:
+                            cpu: "20m"
+                            memory: "64Mi"
+                          limits:
+                            cpu: "100m"
+                            memory: "128Mi"
+          - list: "spec.template.spec.containers"
+            preconditions:
+              all:
+                - key: "{{element.name}}"
+                  operator: Equals
+                  value: csi-snapshotter
+            patchStrategicMerge:
+              spec:
+                template:
+                  spec:
+                    containers:
+                      - (name): csi-snapshotter
+                        resources:
+                          requests:
+                            cpu: "20m"
+                            memory: "64Mi"
+                          limits:
+                            cpu: "100m"
+                            memory: "128Mi"
+          - list: "spec.template.spec.containers"
+            preconditions:
+              all:
+                - key: "{{element.name}}"
+                  operator: Equals
+                  value: longhorn-driver-deployer
+            patchStrategicMerge:
+              spec:
+                template:
+                  spec:
+                    containers:
+                      - (name): longhorn-driver-deployer
+                        resources:
+                          requests:
+                            cpu: "10m"
+                            memory: "32Mi"
+                          limits:
+                            cpu: "50m"
+                            memory: "64Mi"
+          - list: "spec.template.spec.containers"
+            preconditions:
+              all:
+                - key: "{{element.name}}"
+                  operator: Equals
+                  value: longhorn-ui
+            patchStrategicMerge:
+              spec:
+                template:
+                  spec:
+                    containers:
+                      - (name): longhorn-ui
+                        resources:
+                          requests:
+                            cpu: "5m"
+                            memory: "16Mi"
+                          limits:
+                            cpu: "20m"
+                            memory: "32Mi"
+          - list: "spec.template.spec.containers"
+            preconditions:
+              all:
+                - key: "{{element.name}}"
+                  operator: Equals
+                  value: longhorn-manager
+            patchStrategicMerge:
+              spec:
+                template:
+                  spec:
+                    containers:
+                      - (name): longhorn-manager
+                        resources:
+                          requests:
+                            cpu: "100m"
+                            memory: "300Mi"
+                          limits:
+                            cpu: "300m"
+                            memory: "512Mi"
+          - list: "spec.template.spec.containers"
+            preconditions:
+              all:
+                - key: "{{element.name}}"
+                  operator: Equals
+                  value: longhorn-csi-plugin
+            patchStrategicMerge:
+              spec:
+                template:
+                  spec:
+                    containers:
+                      - (name): longhorn-csi-plugin
+                        resources:
+                          requests:
+                            cpu: "20m"
+                            memory: "64Mi"
+                          limits:
+                            cpu: "100m"
+                            memory: "128Mi"
+          - list: "spec.template.spec.containers"
+            preconditions:
+              all:
+                - key: "{{element.name}}"
+                  operator: Equals
+                  value: engine-image
+            patchStrategicMerge:
+              spec:
+                template:
+                  spec:
+                    containers:
+                      - (name): engine-image
+                        resources:
+                          requests:
+                            cpu: "10m"
+                            memory: "32Mi"
+                          limits:
+                            cpu: "50m"
+                            memory: "64Mi"

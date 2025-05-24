@@ -17,131 +17,54 @@ data:
         app: longhorn-manager
         env: production
         category: storage
-      resources:
-        requests:
-          cpu: 100m
-          memory: 300Mi
-        limits:
-          cpu: 300m
-          memory: 512Mi
     engineImage:
       podLabels:
         app: longhorn-engine-image
         env: production
         category: storage
-      resources:
-        requests:
-          cpu: 10m
-          memory: 32Mi
-        limits:
-          cpu: 50m
-          memory: 64Mi
     instanceManager:
       podLabels:
         app: longhorn-instance-manager
         env: production
         category: storage
-      resources:
-        requests:
-          cpu: 20m
-          memory: 128Mi
-        limits:
-          cpu: 100m
-          memory: 256Mi
     csi:
       attacher:
         podLabels:
           app: longhorn-csi-attacher
           env: production
           category: storage
-        resources:
-          requests:
-            cpu: 20m
-            memory: 64Mi
-          limits:
-            cpu: 100m
-            memory: 128Mi
       provisioner:
         podLabels:
           app: longhorn-csi-provisioner
           env: production
           category: storage
-        resources:
-          requests:
-            cpu: 20m
-            memory: 64Mi
-          limits:
-            cpu: 100m
-            memory: 128Mi
       resizer:
         podLabels:
           app: longhorn-csi-resizer
           env: production
           category: storage
-        resources:
-          requests:
-            cpu: 20m
-            memory: 64Mi
-          limits:
-            cpu: 100m
-            memory: 128Mi
       snapshotter:
         podLabels:
           app: longhorn-csi-snapshotter
           env: production
           category: storage
-        resources:
-          requests:
-            cpu: 20m
-            memory: 64Mi
-          limits:
-            cpu: 100m
-            memory: 128Mi
       plugin:
         podLabels:
           app: longhorn-csi-plugin
           env: production
           category: storage
-        resources:
-          requests:
-            cpu: 20m
-            memory: 64Mi
-          limits:
-            cpu: 100m
-            memory: 128Mi
     driverDeployer:
       podLabels:
         app: longhorn-driver-deployer
         env: production
         category: storage
-      resources:
-        requests:
-          cpu: 10m
-          memory: 32Mi
-        limits:
-          cpu: 50m
-          memory: 64Mi
     ui:
       podLabels:
         app: longhorn-ui
         env: production
         category: storage
-      resources:
-        requests:
-          cpu: 5m
-          memory: 16Mi
-        limits:
-          cpu: 20m
-          memory: 32Mi
     supportBundleKit:
       podLabels:
         app: longhorn-support-bundle-kit
         env: production
         category: storage
-      resources:
-        requests:
-          cpu: 10m
-          memory: 32Mi
-        limits:
-          cpu: 50m
-          memory: 64Mi
