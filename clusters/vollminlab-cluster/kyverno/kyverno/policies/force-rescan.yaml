@@ -25,6 +25,12 @@ spec:
                 - StatefulSet
                 - DaemonSet
       mutate:
+        targets:
+          - apiVersion: apps/v1
+            kinds:
+              - Deployment
+              - StatefulSet
+              - DaemonSet
         patchStrategicMerge:
           metadata:
             annotations:
