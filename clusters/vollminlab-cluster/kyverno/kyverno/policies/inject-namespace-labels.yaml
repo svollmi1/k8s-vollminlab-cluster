@@ -4,7 +4,7 @@ metadata:
   name: inject-namespace-labels
   annotations:
     policies.kyverno.io/title: Inject Namespace Labels
-    policies.kyverno.io/category: Labels
+    policies.kyverno.io/category: Label Injection
     policies.kyverno.io/severity: medium
     policies.kyverno.io/description: >
       Automatically adds `app`, `env`, and `category` labels from the namespace
