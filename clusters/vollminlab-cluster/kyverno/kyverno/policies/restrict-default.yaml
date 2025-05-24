@@ -1,0 +1,27 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: restrict-default-namespace
+  annotations:
+    policies.kyverno.io/title: Restrict default Namespace
+    policies.kyverno.io/category: Best Practices
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/description: >
+      Disallow the creation of resources in the default namespace.
+    kyverno.io/enable-background: "true"
+  labels:
+    app: kyverno
+    env: production
+    category: security
+spec:
+  validationFailureAction: enforce
+  rules:
+    - name: block-default-namespace
+      match:
+        any:
+          - resources:
+              namespaces:
+                - default
+      validate:
+        message: "Do not deploy resources into the 'default' namespace."
+        deny: {}

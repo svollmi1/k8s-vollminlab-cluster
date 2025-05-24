@@ -4,7 +4,7 @@ metadata:
   name: restrict-privileged
   annotations:
     policies.kyverno.io/title: Block Privileged Pods
-    policies.kyverno.io/category: Pod Security Standards (Baseline)
+    policies.kyverno.io/category: Pod Security
     policies.kyverno.io/severity: high
     policies.kyverno.io/description: >
       Prevent pods from running in privileged mode, excluding system namespaces.
