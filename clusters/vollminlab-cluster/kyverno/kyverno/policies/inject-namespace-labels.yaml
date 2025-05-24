@@ -1,4 +1,4 @@
-apiVersion: kyverno.io/v1
+apiVersion: kyverno.io/v2beta1
 kind: ClusterPolicy
 metadata:
   name: inject-namespace-labels
