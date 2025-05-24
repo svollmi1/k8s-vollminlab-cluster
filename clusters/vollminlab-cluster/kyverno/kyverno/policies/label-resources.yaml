@@ -1,0 +1,34 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: inject-namespace-labels
+  annotations:
+    policies.kyverno.io/title: Inject Namespace Labels
+    policies.kyverno.io/category: Labels
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/description: >
+      Automatically adds `app`, `env`, and `category` labels from the namespace
+      to workloads (Deployment, StatefulSet, DaemonSet).
+  labels:
+    app: kyverno
+    env: production
+    category: security
+spec:
+  background: true
+  validationFailureAction: Enforce
+  rules:
+    - name: inject-namespace-labels
+      match:
+        any:
+          - resources:
+              kinds:
+                - Deployment
+                - StatefulSet
+                - DaemonSet
+      mutate:
+        patchStrategicMerge:
+          metadata:
+            labels:
+              app: "{{ request.namespace | lookup('v1', 'Namespace', request.namespace).metadata.labels.app }}"
+              env: "{{ request.namespace | lookup('v1', 'Namespace', request.namespace).metadata.labels.env }}"
+              category: "{{ request.namespace | lookup('v1', 'Namespace', request.namespace).metadata.labels.category }}"
