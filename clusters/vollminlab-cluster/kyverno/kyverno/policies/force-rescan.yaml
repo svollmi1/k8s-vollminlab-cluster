@@ -1,22 +1,22 @@
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
 metadata:
-  name: force-rescan-on-workload-change
+  name: force-rescan-on-rollout
   annotations:
     policies.kyverno.io/title: Force Rescan on Workload Change
     policies.kyverno.io/category: GitOps
     policies.kyverno.io/severity: low
     policies.kyverno.io/description: >
       Automatically annotates workloads with `policy.kyverno.io/kyverno-force-rescan`
-      on any change, so that Kyverno re-evaluates the resource and updates reports.
-    labels:
-      app: kyverno
-      env: production
-      category: security
+      on any change (e.g. rollout), so Kyverno re-evaluates and updates policy reports.
+  labels:
+    app: kyverno
+    env: production
+    category: security
 spec:
-  generateExistingOnPolicyUpdate: true
+  mutateExistingOnPolicyUpdate: true
   rules:
-    - name: force-kyverno-rescan
+    - name: add-force-rescan-annotation
       match:
         any:
           - resources:
@@ -24,9 +24,8 @@ spec:
                 - Deployment
                 - StatefulSet
                 - DaemonSet
-      generate:
-        kind: Annotation
-        synchronize: true
-        metadata:
-          annotations:
-            policy.kyverno.io/kyverno-force-rescan: "{{ time_now_epoch }}"
+      mutate:
+        patchStrategicMerge:
+          metadata:
+            annotations:
+              policy.kyverno.io/kyverno-force-rescan: "{{ time_now_epoch }}"
