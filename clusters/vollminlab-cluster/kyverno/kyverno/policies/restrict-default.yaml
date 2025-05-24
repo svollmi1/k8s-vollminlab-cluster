@@ -15,11 +15,14 @@ metadata:
     category: security
 spec:
   validationFailureAction: enforce
+  background: true
   rules:
     - name: block-default-namespace
       match:
         any:
           - resources:
+              kinds:
+                - "*"
               namespaces:
                 - default
       validate:
