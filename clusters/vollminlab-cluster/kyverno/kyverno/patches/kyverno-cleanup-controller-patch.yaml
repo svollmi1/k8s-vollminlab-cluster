@@ -3,10 +3,7 @@ kind: Deployment
 metadata:
   name: kyverno-cleanup-controller
   namespace: kyverno
-spec:
-  template:
-    metadata:
-      labels:
-        app: kyverno-cleanup-controller
-        env: production
-        category: security
+  labels:
+    app: kyverno-cleanup-controller
+    env: production
+    category: security

@@ -3,10 +3,7 @@ kind: Deployment
 metadata:
   name: metallb-controller
   namespace: metallb-system
-spec:
-  template:
-    metadata:
-      labels:
-        app: metallb
-        env: production
-        category: networking
+  labels:
+    app: metallb
+    env: production
+    category: networking

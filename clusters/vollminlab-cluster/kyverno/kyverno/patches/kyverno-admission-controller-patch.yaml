@@ -3,10 +3,7 @@ kind: Deployment
 metadata:
   name: kyverno-admission-controller
   namespace: kyverno
-spec:
-  template:
-    metadata:
-      labels:
-        app: kyverno-admission-controller
-        env: production
-        category: security
+  labels:
+    app: kyverno-admission-controller
+    env: production
+    category: security

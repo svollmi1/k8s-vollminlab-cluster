@@ -3,10 +3,7 @@ kind: Deployment
 metadata:
   name: kyverno-background-controller
   namespace: kyverno
-spec:
-  template:
-    metadata:
-      labels:
-        app: kyverno-background-controller
-        env: production
-        category: security
+  labels:
+    app: kyverno-background-controller
+    env: production
+    category: security
