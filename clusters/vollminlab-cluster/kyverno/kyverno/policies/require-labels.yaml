@@ -36,7 +36,6 @@ spec:
             - source-controller
           namespaces:
             - kube-system
-            - flux-system
       validate:
         message: "Required labels: app, env, category"
         pattern:

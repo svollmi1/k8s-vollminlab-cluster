@@ -3,7 +3,7 @@ kind: Kustomization
 resources:
   - ../app
 patches:
-  - path: patch.yaml
+  - path: policy-reporter-ui-patch.yaml
     target:
       kind: Deployment
       name: policy-reporter-ui

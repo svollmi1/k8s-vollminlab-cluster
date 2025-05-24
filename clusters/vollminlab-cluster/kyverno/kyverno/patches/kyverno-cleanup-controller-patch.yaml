@@ -1,0 +1,12 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kyverno-cleanup-controller
+  namespace: kyverno
+spec:
+  template:
+    metadata:
+      labels:
+        app: kyverno-cleanup-controller
+        env: production
+        category: security

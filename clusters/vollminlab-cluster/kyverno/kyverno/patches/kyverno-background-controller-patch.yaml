@@ -1,0 +1,12 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kyverno-background-controller
+  namespace: kyverno
+spec:
+  template:
+    metadata:
+      labels:
+        app: kyverno-background-controller
+        env: production
+        category: security

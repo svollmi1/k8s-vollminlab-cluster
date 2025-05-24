@@ -3,4 +3,4 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - ./metallb/crds
-  - ./metallb/app
+  - ./metallb/patches
