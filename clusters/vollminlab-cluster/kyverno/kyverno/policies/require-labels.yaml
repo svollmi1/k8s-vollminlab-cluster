@@ -35,6 +35,7 @@ spec:
           namespaces:
             - kube-system
             - flux-system
+            - default
       validate:
         message: "Required labels: app, env, category"
         pattern:

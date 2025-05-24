@@ -24,6 +24,13 @@ spec:
             - Deployment
             - StatefulSet
             - DaemonSet
+      exclude:
+        resources:
+          kinds:
+            - Deployment
+          selector:
+            matchLabels:
+              app.kubernetes.io/part-of: flux
       skipBackgroundRequests: false
       validate:
         message: "All containers must have CPU and memory requests and limits."
