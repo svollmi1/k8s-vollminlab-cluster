@@ -15,7 +15,7 @@ metadata:
     category: security
 spec:
   validationFailureAction: enforce
-  background: true
+  background: false
   rules:
     - name: block-default-namespace
       match:
