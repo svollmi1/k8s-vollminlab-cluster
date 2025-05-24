@@ -3,7 +3,7 @@ kind: Kustomization
 metadata:
   namespace: flux-system
 resources:
-  - force-rescan.yaml
+  #- force-rescan.yaml
   - inject-namespace-labels.yaml
   - inject-resource-requirements.yaml
   - require-labels.yaml
