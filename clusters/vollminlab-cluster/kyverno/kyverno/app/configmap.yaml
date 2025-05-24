@@ -14,7 +14,7 @@ data:
   values.yaml: |
     rbac:
       create: true
-      clusterPolicyController:
+      backgroundController:
         additionalPermissions:
           - apiGroups: ["apps"]
             resources: ["deployments", "statefulsets", "daemonsets"]
