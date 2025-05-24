@@ -26,8 +26,6 @@ spec:
             - DaemonSet
       exclude:
         resources:
-          kinds:
-            - DaemonSet
           names:
             - kube-proxy
             - helm-controller
