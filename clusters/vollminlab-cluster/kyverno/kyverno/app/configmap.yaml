@@ -16,7 +16,6 @@ data:
       create: true
       backgroundController:
         create: true
-        name: kyverno:background-controller
         additionalPermissions:
           - apiGroups: ["apps"]
             resources: ["deployments", "statefulsets", "daemonsets"]
