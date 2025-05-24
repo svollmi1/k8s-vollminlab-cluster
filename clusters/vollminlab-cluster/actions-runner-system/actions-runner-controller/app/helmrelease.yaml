@@ -3,6 +3,10 @@ kind: HelmRelease
 metadata:
   name: actions-runner-controller
   namespace: actions-runner-system
+  labels:
+    app: actions-runner-controller
+    env: production
+    category: apps
 spec:
   interval: 10m
   chart:
