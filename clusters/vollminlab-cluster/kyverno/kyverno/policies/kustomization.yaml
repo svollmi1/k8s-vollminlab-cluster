@@ -3,9 +3,13 @@ kind: Kustomization
 metadata:
   namespace: flux-system
 resources:
-  - disallow-latest.yaml
+  - force-rescan.yaml
+  - inject-namespace-labels.yaml
+  - inject-resource-requirements.yaml
   - require-labels.yaml
-  - require-limits.yaml
+  - require-resources.yaml
+  - restrict-default.yaml
   - restrict-hostpath.yaml
+  - restrict-latest-tag.yaml
   - restrict-loadbalancer.yaml
   - restrict-privileged.yaml
