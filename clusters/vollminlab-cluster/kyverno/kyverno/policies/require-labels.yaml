@@ -26,6 +26,8 @@ spec:
             - DaemonSet
       exclude:
         resources:
+          kinds:
+            - Deployment
           selector:
             matchLabels:
               app.kubernetes.io/part-of: flux
