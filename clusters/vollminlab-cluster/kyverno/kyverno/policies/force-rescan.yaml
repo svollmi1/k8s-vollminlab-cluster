@@ -28,4 +28,4 @@ spec:
         patchStrategicMerge:
           metadata:
             annotations:
-              policy.kyverno.io/kyverno-force-rescan: "{{ time_now_epoch }}"
+              policy.kyverno.io/kyverno-force-rescan: "{{ time.now.epochTime(@) }}"
