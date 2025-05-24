@@ -9,7 +9,8 @@
       "file:///c%3A/git/k8s-vollminlab-cluster/clusters/vollminlab-cluster/kyverno/kyverno/policies/restrict-privileged.yaml",
       "file:///c%3A/git/k8s-vollminlab-cluster/clusters/vollminlab-cluster/kyverno/kyverno/policies/force-rescan.yaml",
       "file:///c%3A/git/k8s-vollminlab-cluster/clusters/vollminlab-cluster/kyverno/kyverno/policies/restrict-default.yaml",
-      "file:///c%3A/git/k8s-vollminlab-cluster/clusters/vollminlab-cluster/kyverno/kyverno/policies/inject-namespace-labels.yaml"
+      "file:///c%3A/git/k8s-vollminlab-cluster/clusters/vollminlab-cluster/kyverno/kyverno/policies/inject-namespace-labels.yaml",
+      "file:///c%3A/git/k8s-vollminlab-cluster/clusters/vollminlab-cluster/kyverno/kyverno/policies/inject-resource-requirements.yaml"
     ],
     "https://json.schemastore.org/kustomization.json": [
       "file:///c%3A/git/k8s-vollminlab-cluster/clusters/vollminlab-cluster/kyverno/kyverno/policies/kustomization.yaml"
