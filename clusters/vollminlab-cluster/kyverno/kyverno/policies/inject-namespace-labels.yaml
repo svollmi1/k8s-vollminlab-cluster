@@ -32,6 +32,12 @@ spec:
             - key: "{{ request.object.metadata.labels.app || '' }}"
               operator: Equals
               value: ""
+            - key: "{{ request.namespace }}"
+              operator: NotIn
+              value:
+                - longhorn-system
+                - flux-system
+                - monitoring
         patchStrategicMerge:
           metadata:
             labels:
