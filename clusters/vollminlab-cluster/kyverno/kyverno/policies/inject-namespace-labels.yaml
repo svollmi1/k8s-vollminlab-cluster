@@ -8,7 +8,7 @@ metadata:
     policies.kyverno.io/severity: medium
     policies.kyverno.io/description: >
       Automatically adds `app`, `env`, and `category` labels from the namespace
-      to workloads (Deployment, StatefulSet, DaemonSet).
+      to workloads (Deployment, StatefulSet, DaemonSet) and their pods.
   labels:
     app: kyverno
     env: production
@@ -29,12 +29,19 @@ spec:
       mutate:
         preconditions:
           all:
-            - key: "{{ request.object.metadata.labels.app }}"
+            - key: "{{ request.object.metadata.labels.app || '' }}"
               operator: Equals
-              value: null
+              value: ""
         patchStrategicMerge:
           metadata:
             labels:
               app: "{{ request.namespace | lookup('v1', 'Namespace', request.namespace).metadata.labels.app }}"
               env: "{{ request.namespace | lookup('v1', 'Namespace', request.namespace).metadata.labels.env }}"
               category: "{{ request.namespace | lookup('v1', 'Namespace', request.namespace).metadata.labels.category }}"
+          spec:
+            template:
+              metadata:
+                labels:
+                  app: "{{ request.namespace | lookup('v1', 'Namespace', request.namespace).metadata.labels.app }}"
+                  env: "{{ request.namespace | lookup('v1', 'Namespace', request.namespace).metadata.labels.env }}"
+                  category: "{{ request.namespace | lookup('v1', 'Namespace', request.namespace).metadata.labels.category }}"
