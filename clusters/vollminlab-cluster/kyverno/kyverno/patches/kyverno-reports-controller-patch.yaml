@@ -1,9 +1,0 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: kyverno-reports-controller
-  namespace: kyverno
-  labels:
-    app: kyverno-background-controller
-    env: production
-    category: security

@@ -1,9 +1,0 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: kyverno-admission-controller
-  namespace: kyverno
-  labels:
-    app: kyverno-admission-controller
-    env: production
-    category: security
