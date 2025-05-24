@@ -48,66 +48,67 @@ data:
         limits:
           cpu: 100m
           memory: 256Mi
-    csiAttacher:
-      podLabels:
-        app: longhorn-csi-attacher
-        env: production
-        category: storage
-      resources:
-        requests:
-          cpu: 20m
-          memory: 64Mi
-        limits:
-          cpu: 100m
-          memory: 128Mi
-    csiProvisioner:
-      podLabels:
-        app: longhorn-csi-provisioner
-        env: production
-        category: storage
-      resources:
-        requests:
-          cpu: 20m
-          memory: 64Mi
-        limits:
-          cpu: 100m
-          memory: 128Mi
-    csiResizer:
-      podLabels:
-        app: longhorn-csi-resizer
-        env: production
-        category: storage
-      resources:
-        requests:
-          cpu: 20m
-          memory: 64Mi
-        limits:
-          cpu: 100m
-          memory: 128Mi
-    csiSnapshotter:
-      podLabels:
-        app: longhorn-csi-snapshotter
-        env: production
-        category: storage
-      resources:
-        requests:
-          cpu: 20m
-          memory: 64Mi
-        limits:
-          cpu: 100m
-          memory: 128Mi
-    csiPlugin:
-      podLabels:
-        app: longhorn-csi-plugin
-        env: production
-        category: storage
-      resources:
-        requests:
-          cpu: 20m
-          memory: 64Mi
-        limits:
-          cpu: 100m
-          memory: 128Mi
+    csi:
+      attacher:
+        podLabels:
+          app: longhorn-csi-attacher
+          env: production
+          category: storage
+        resources:
+          requests:
+            cpu: 20m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi
+      provisioner:
+        podLabels:
+          app: longhorn-csi-provisioner
+          env: production
+          category: storage
+        resources:
+          requests:
+            cpu: 20m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi
+      resizer:
+        podLabels:
+          app: longhorn-csi-resizer
+          env: production
+          category: storage
+        resources:
+          requests:
+            cpu: 20m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi
+      snapshotter:
+        podLabels:
+          app: longhorn-csi-snapshotter
+          env: production
+          category: storage
+        resources:
+          requests:
+            cpu: 20m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi
+      plugin:
+        podLabels:
+          app: longhorn-csi-plugin
+          env: production
+          category: storage
+        resources:
+          requests:
+            cpu: 20m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi
     driverDeployer:
       podLabels:
         app: longhorn-driver-deployer
