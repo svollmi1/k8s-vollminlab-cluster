@@ -52,7 +52,7 @@ spec:
                   env: "?*"
                   category: "?*"
 
-    - name: require-labels-on-pods-namespaces
+    - name: require-labels-on-pods-and-namespaces
       match:
         resources:
           kinds:

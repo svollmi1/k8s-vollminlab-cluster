@@ -10,6 +10,11 @@ metadata:
 spec:
   replicas: 1
   template:
+    metadata:
+      labels:
+        app: actions-runner-controller
+        env: production
+        category: ci
     spec:
       repository: svollmi1/k8s-vollminlab-cluster
       image: summerwind/actions-runner:ubuntu-22.04
