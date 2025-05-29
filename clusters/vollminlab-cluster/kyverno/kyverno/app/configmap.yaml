@@ -21,6 +21,8 @@ data:
             resources: ["deployments", "statefulsets", "daemonsets"]
             verbs: ["get", "list", "watch", "patch", "update"]
     webhooks:
+      failurePolicy: Ignore
+      timeoutSeconds: 5
       namespaceSelector:
         matchExpressions:
           - key: kubernetes.io/metadata.name
