@@ -21,6 +21,8 @@ data:
             resources: ["deployments", "statefulsets", "daemonsets"]
             verbs: ["get", "list", "watch", "patch", "update"]
     webhooks:
+      policy:
+        failurePolicy: Ignore
       namespaceSelector:
         matchExpressions:
           - key: kubernetes.io/metadata.name
@@ -45,8 +47,6 @@ data:
         cpu: 200m
         memory: 256Mi
     admissionController:
-      failurePolicy: Ignore
-      timeoutSeconds: 5
       labels:
         app: kyverno-admission-controller
         env: production
