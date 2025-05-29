@@ -8,3 +8,18 @@ patches:
       kind: Deployment
       name: policy-reporter-ui
       namespace: kyverno
+  - path: cleanup-webhook-patch.yaml
+    target:
+      kind: ValidatingWebhookConfiguration
+      name: kyverno-cleanup-validating-webhook-cfg
+      namespace: kyverno
+  - path: policy-webhook-patch.yaml
+    target:
+      kind: ValidatingWebhookConfiguration
+      name: kyverno-policy-validating-webhook-cfg
+      namespace: kyverno
+  - path: ttl-webhook-patch.yaml
+    target:
+      kind: ValidatingWebhookConfiguration
+      name: kyverno-ttl-validating-webhook-cfg
+      namespace: kyverno
