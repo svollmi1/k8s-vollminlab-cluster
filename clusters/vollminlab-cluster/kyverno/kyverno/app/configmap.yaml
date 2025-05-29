@@ -45,7 +45,6 @@ data:
         cpu: 200m
         memory: 256Mi
     admissionController:
-      admissionController:
       failurePolicy: Ignore
       timeoutSeconds: 5
       labels:
