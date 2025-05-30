@@ -25,4 +25,25 @@ spec:
       valuesKey: values.yaml
   postRenderers:
     - kustomize:
-        path: ../patches
+        patches:
+          - target:
+              kind: ValidatingWebhookConfiguration
+              name: kyverno-policy-validating-webhook-cfg
+            patch: |
+              - op: replace
+                path: /webhooks/0/failurePolicy
+                value: Ignore
+          - target:
+              kind: ValidatingWebhookConfiguration
+              name: kyverno-cleanup-validating-webhook-cfg
+            patch: |
+              - op: replace
+                path: /webhooks/0/failurePolicy
+                value: Ignore
+          - target:
+              kind: ValidatingWebhookConfiguration
+              name: kyverno-ttl-validating-webhook-cfg
+            patch: |
+              - op: replace
+                path: /webhooks/0/failurePolicy
+                value: Ignore
