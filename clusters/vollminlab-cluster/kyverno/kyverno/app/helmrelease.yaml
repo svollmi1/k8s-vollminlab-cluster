@@ -23,3 +23,6 @@ spec:
     - kind: ConfigMap
       name: kyverno-values
       valuesKey: values.yaml
+  postRenderers:
+    - kustomize:
+        path: ../patches
