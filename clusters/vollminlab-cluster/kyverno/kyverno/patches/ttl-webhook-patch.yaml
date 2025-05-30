@@ -1,7 +1,0 @@
-apiVersion: admissionregistration.k8s.io/v1
-kind: ValidatingWebhookConfiguration
-metadata:
-  name: kyverno-ttl-validating-webhook-cfg
-webhooks:
-  - name: kyverno-ttl-controller.kyverno.svc
-    failurePolicy: Ignore
