@@ -3,5 +3,4 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - ./kyverno/app
-  - ./kyverno/policies
   - ./policyreporter/patches
