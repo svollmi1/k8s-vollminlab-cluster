@@ -22,9 +22,9 @@
       "file:///c%3A/git/k8s-vollminlab-cluster/**/*patch.yaml",
       "file:///c%3A/git/k8s-vollminlab-cluster/actions-runner-system/actions-runner-controller/patches/actions-runner-controller-patch.yaml",
       "file:///c%3A/git/k8s-vollminlab-cluster//kyverno/policyreporter/patches/policyreporter-ui-patch.yaml",
-      "file:///c%3A/git/k8s-vollminlab-cluster//kyverno/policyreporter/patches/cleanup-webhook-patch.yaml",
-      "file:///c%3A/git/k8s-vollminlab-cluster//kyverno/policyreporter/patches/policy-webhook-patch.yaml",
-      "file:///c%3A/git/k8s-vollminlab-cluster//kyverno/policyreporter/patches/ttl-webhook-patch.yaml"
+      "file:///c%3A/git/k8s-vollminlab-cluster//kyverno/kyverno/patches/cleanup-webhook-patch.yaml",
+      "file:///c%3A/git/k8s-vollminlab-cluster//kyverno/kyverno/patches/policy-webhook-patch.yaml",
+      "file:///c%3A/git/k8s-vollminlab-cluster//kyverno/kyverno/patches/ttl-webhook-patch.yaml"
     ]
   },
   "files.associations": {
