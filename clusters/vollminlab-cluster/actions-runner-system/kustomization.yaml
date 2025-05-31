@@ -3,4 +3,4 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - ./actions-runner-controller/secrets
-  - ./actions-runner-controller/patches
+  - ./actions-runner-controller/app

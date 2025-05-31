@@ -28,7 +28,7 @@ metadata:
     category: core
 spec:
   interval: 10m0s
-  path: ./clusters/vollminlab-cluster
+  path: ./clusters/vollminlab-cluster/flux-system
   prune: true
   sourceRef:
     kind: GitRepository

@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - clusterwide-kustomization.yaml
+  - metallb-system-kustomization.yaml
+  - capacitor-kustomization.yaml
+  - kyverno-kustomization.yaml
+  - kyverno-patch-kustomization.yaml
+  - kyverno-policies-kustomization.yaml
+  - policy-reporter-kustomization.yaml
+  - policy-reporter-patch-kustomization.yaml
+  - sealed-secrets-kustomization.yaml
+  - actions-runner-system-kustomization.yaml
+  - actions-runner-system-patch-kustomization.yaml
+  - elastic-system-kustomization.yaml
+  - homepage-kustomization.yaml
+  - longhorn-system-kustomization.yaml
+  - mediastack-kustomization.yaml
+  - monitoring-kustomization.yaml
+  - op-connector-kustomization.yaml

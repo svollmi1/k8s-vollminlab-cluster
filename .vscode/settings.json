@@ -13,7 +13,8 @@
       "file:///c%3A/git/k8s-vollminlab-cluster/clusters/vollminlab-cluster/kyverno/kyverno/policies/require-resources.yaml"
     ],
     "https://json.schemastore.org/kustomization.json": [
-      "file:///c%3A/git/k8s-vollminlab-cluster/clusters/vollminlab-cluster/kyverno/kyverno/policies/kustomization.yaml"
+      "file:///c%3A/git/k8s-vollminlab-cluster/clusters/vollminlab-cluster/kyverno/kyverno/policies/kustomization.yaml",
+      "file:///c%3A/git/k8s-vollminlab-cluster/clusters/vollminlab-cluster/actions-runner-system/actions-runner-controller/patches/kustomization.yaml"
     ],
     "./.vscode/empty-schema.json": [
       "**/patch.yaml",
@@ -21,10 +22,7 @@
       "file:///c%3A/git/k8s-vollminlab-cluster/**/patch.yaml",
       "file:///c%3A/git/k8s-vollminlab-cluster/**/*patch.yaml",
       "file:///c%3A/git/k8s-vollminlab-cluster/actions-runner-system/actions-runner-controller/patches/actions-runner-controller-patch.yaml",
-      "file:///c%3A/git/k8s-vollminlab-cluster//kyverno/policyreporter/patches/policyreporter-ui-patch.yaml",
-      "file:///c%3A/git/k8s-vollminlab-cluster//kyverno/kyverno/patches/cleanup-webhook-patch.yaml",
-      "file:///c%3A/git/k8s-vollminlab-cluster//kyverno/kyverno/patches/policy-webhook-patch.yaml",
-      "file:///c%3A/git/k8s-vollminlab-cluster//kyverno/kyverno/patches/ttl-webhook-patch.yaml"
+      "file:///c%3A/git/k8s-vollminlab-cluster//kyverno/policyreporter/patches/policyreporter-ui-patch.yaml"
     ]
   },
   "files.associations": {
