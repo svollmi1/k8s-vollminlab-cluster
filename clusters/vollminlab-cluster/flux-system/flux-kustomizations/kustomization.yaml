@@ -17,4 +17,4 @@ resources:
   - longhorn-system-kustomization.yaml
   - mediastack-kustomization.yaml
   - monitoring-kustomization.yaml
-  - op-connector-kustomization.yaml
+  - op-connect-kustomization.yaml
