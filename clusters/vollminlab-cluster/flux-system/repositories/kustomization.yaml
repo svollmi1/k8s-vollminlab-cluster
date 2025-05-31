@@ -13,4 +13,7 @@ resources:
   - metrics-server-helmrepository.yaml
   - overseerr-helmrepository.yaml
   - prowlarr-helmrepository.yaml
+  - radarr-helmrepository.yaml
+  - sabnzbd-helmrepository.yaml
+  - sonarr-helmrepository.yaml
   - sealed-secrets-helmrepository.yaml
