@@ -63,6 +63,11 @@ data:
         limits:
           cpu: 200m
           memory: 256Mi
+      service:
+        ports:
+          - name: https
+            port: 443
+            targetPort: 9443
     backgroundController:
       labels:
         app: kyverno-background-controller
