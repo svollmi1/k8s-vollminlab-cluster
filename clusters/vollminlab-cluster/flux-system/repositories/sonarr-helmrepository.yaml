@@ -1,0 +1,14 @@
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: OCIRepository
+metadata:
+  name: sonarr-repo
+  namespace: flux-system
+  labels:
+    app: sonarr
+    env: production
+    category: apps
+spec:
+  url: oci://tccr.io/truecharts/sonarr
+  interval: 5m
+  ref:
+    tag: 23.8.1

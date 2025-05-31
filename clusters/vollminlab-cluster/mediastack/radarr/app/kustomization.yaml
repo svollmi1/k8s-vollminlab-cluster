@@ -4,4 +4,4 @@ resources:
   - configmap.yaml
   - helmrelease.yaml
   - ingress.yaml
-  - pvc-prowlarr-config.yaml
+  - pvc-radarr-config.yaml

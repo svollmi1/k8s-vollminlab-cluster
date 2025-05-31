@@ -1,0 +1,14 @@
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: OCIRepository
+metadata:
+  name: radarr-repo
+  namespace: flux-system
+  labels:
+    app: radarr
+    env: production
+    category: apps
+spec:
+  url: oci://tccr.io/truecharts/radarr
+  interval: 5m
+  ref:
+    tag: 23.26.0

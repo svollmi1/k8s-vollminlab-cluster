@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sonarr-ingress
+  namespace: mediastack
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  labels:
+    app: sonarr
+    env: production
+    category: apps
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: sonarr.vollminlab.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: sonarr
+            port:
+              number: 8989
+  tls:
+  - hosts:
+    - sonarr.vollminlab.com
+    secretName: wildcard-tls

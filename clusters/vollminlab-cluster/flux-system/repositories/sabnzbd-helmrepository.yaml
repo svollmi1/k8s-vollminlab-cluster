@@ -1,0 +1,14 @@
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: OCIRepository
+metadata:
+  name: sabnzbd-repo
+  namespace: flux-system
+  labels:
+    app: sabnzbd
+    env: production
+    category: apps
+spec:
+  url: oci://tccr.io/truecharts/sabnzbd
+  interval: 5m
+  ref:
+    tag: 21.9.4

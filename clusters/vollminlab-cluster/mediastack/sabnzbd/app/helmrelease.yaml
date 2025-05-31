@@ -1,0 +1,19 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: sabnzbd
+  namespace: mediastack
+  labels:
+    app: sabnzbd
+    env: production
+    category: apps
+spec:
+  interval: 5m
+  chartRef:
+    kind: OCIRepository
+    name: sabnzbd-repo
+    namespace: flux-system
+  valuesFrom:
+    - kind: ConfigMap
+      name: sabnzbd-values
+      valuesKey: values.yaml
