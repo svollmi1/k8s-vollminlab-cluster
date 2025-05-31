@@ -9,6 +9,7 @@ resources:
   - kyverno-policies-kustomization.yaml
   - policy-reporter-kustomization.yaml
   - policy-reporter-patch-kustomization.yaml
+  - kube-system-kustomization.yaml
   - sealed-secrets-kustomization.yaml
   - actions-runner-system-kustomization.yaml
   - actions-runner-system-patch-kustomization.yaml
