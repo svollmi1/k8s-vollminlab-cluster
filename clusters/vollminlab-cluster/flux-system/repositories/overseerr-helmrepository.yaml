@@ -11,4 +11,4 @@ spec:
   url: oci://tccr.io/truecharts/overseerr
   interval: 5m
   ref:
-    tag: 15.5.1
+    tag: 15.6.0
