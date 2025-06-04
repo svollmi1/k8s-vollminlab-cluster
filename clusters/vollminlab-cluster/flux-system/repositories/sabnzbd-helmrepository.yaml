@@ -11,4 +11,4 @@ spec:
   url: oci://tccr.io/truecharts/sabnzbd
   interval: 5m
   ref:
-    tag: 21.9.3
+    tag: 21.9.5
