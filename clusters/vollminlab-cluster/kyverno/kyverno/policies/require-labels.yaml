@@ -25,13 +25,6 @@ spec:
                 - Deployment
                 - StatefulSet
                 - DaemonSet
-              namespaces:
-                - flux-system
-          - resources:
-              kinds:
-                - Deployment
-                - StatefulSet
-                - DaemonSet
               namespaceSelector:
                 matchExpressions:
                   - key: kubernetes.io/metadata.name
@@ -39,11 +32,11 @@ spec:
                     values:
                       - kube-system
                       - default
+                      - flux-system
       exclude:
         resources:
-          selector:
-            matchLabels:
-              app.kubernetes.io/part-of: flux
+          namespaces:
+            - flux-system
       validate:
         message: "Required labels: app, env, category"
         pattern:
@@ -59,6 +52,7 @@ spec:
                   app: "?*"
                   env: "?*"
                   category: "?*"
+
     - name: require-labels-on-pods-and-namespaces
       match:
         resources:
