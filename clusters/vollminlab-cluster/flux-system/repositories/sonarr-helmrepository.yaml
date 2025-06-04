@@ -10,3 +10,5 @@ metadata:
 spec:
   url: https://charts.truecharts.org
   interval: 5m
+  ref:
+    tag: 23.8.2
