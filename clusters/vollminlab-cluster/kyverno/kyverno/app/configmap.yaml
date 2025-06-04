@@ -20,33 +20,6 @@ data:
           - apiGroups: ["apps"]
             resources: ["deployments", "statefulsets", "daemonsets"]
             verbs: ["get", "list", "watch", "patch", "update"]
-    webhooks:
-      failurePolicy: Ignore
-      timeoutSeconds: 30
-      namespaceSelector:
-        matchExpressions:
-          - key: kubernetes.io/metadata.name
-            operator: NotIn
-            values:
-              - kyverno
-              - kube-system
-              - flux-system
-    replicaCount: 3
-    podLabels:
-      app: kyverno
-      env: production
-      category: security
-    labels:
-      app: kyverno
-      env: production
-      category: security
-    resources:
-      requests:
-        cpu: 100m
-        memory: 128Mi
-      limits:
-        cpu: 200m
-        memory: 256Mi
     admissionController:
       labels:
         app: kyverno-admission-controller
@@ -58,13 +31,16 @@ data:
         category: security
       replicaCount: 3
       priorityClassName: system-cluster-critical
-      resources:
-        requests:
-          cpu: 500m
-          memory: 512Mi
-        limits:
-          cpu: 1000m
-          memory: 1Gi
+      failurePolicy: Ignore
+      timeoutSeconds: 30
+      namespaceSelector:
+        matchExpressions:
+          - key: kubernetes.io/metadata.name
+            operator: NotIn
+            values:
+              - kyverno
+              - kube-system
+              - flux-system
       service:
         ports:
           - name: https
@@ -118,5 +94,21 @@ data:
         limits:
           cpu: 200m
           memory: 256Mi
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+    replicaCount: 3
+    podLabels:
+      app: kyverno
+      env: production
+      category: security
+    labels:
+      app: kyverno
+      env: production
+      category: security
     serviceMonitor:
       enabled: true
