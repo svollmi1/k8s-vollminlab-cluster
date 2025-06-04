@@ -21,8 +21,8 @@ data:
             resources: ["deployments", "statefulsets", "daemonsets"]
             verbs: ["get", "list", "watch", "patch", "update"]
     webhooks:
-      policy:
-        failurePolicy: Ignore
+      failurePolicy: Ignore
+      timeoutSeconds: 30
       namespaceSelector:
         matchExpressions:
           - key: kubernetes.io/metadata.name
@@ -30,6 +30,7 @@ data:
             values:
               - kyverno
               - kube-system
+              - flux-system
     replicaCount: 3
     podLabels:
       app: kyverno
@@ -56,6 +57,7 @@ data:
         env: production
         category: security
       replicaCount: 3
+      priorityClassName: system-cluster-critical
       resources:
         requests:
           cpu: 500m
