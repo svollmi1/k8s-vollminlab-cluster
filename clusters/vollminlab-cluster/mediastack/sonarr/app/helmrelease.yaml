@@ -9,14 +9,10 @@ metadata:
     category: apps
 spec:
   interval: 5m
-  chart:
-    spec:
-      chart: sonarr
-      version: 23.8.1
-      sourceRef:
-        kind: HelmRepository
-        name: sonarr-repo
-        namespace: flux-system
+  chartRef:
+    kind: OCIRepository
+    name: sonarr-repo
+    namespace: flux-system
   valuesFrom:
     - kind: ConfigMap
       name: sonarr-values
