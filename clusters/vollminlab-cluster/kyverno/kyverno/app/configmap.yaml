@@ -12,6 +12,15 @@ metadata:
     meta.helm.sh/release-namespace: kyverno
 data:
   values.yaml: |
+    replicaCount: 3
+    podLabels:
+      app: kyverno
+      env: production
+      category: security
+    labels:
+      app: kyverno
+      env: production
+      category: security
     rbac:
       create: true
       backgroundController:
@@ -20,6 +29,19 @@ data:
           - apiGroups: ["apps"]
             resources: ["deployments", "statefulsets", "daemonsets"]
             verbs: ["get", "list", "watch", "patch", "update"]
+
+    webhooks:
+      failurePolicy: Ignore
+      timeoutSeconds: 30
+      namespaceSelector:
+        matchExpressions:
+          - key: kubernetes.io/metadata.name
+            operator: NotIn
+            values:
+              - kyverno
+              - kube-system
+              - flux-system
+
     admissionController:
       labels:
         app: kyverno-admission-controller
@@ -53,6 +75,7 @@ data:
           - name: https
             port: 443
             targetPort: 9443
+
     backgroundController:
       labels:
         app: kyverno-background-controller
@@ -69,6 +92,7 @@ data:
         limits:
           cpu: 200m
           memory: 256Mi
+
     cleanupController:
       labels:
         app: kyverno-cleanup-controller
@@ -85,6 +109,7 @@ data:
         limits:
           cpu: 200m
           memory: 256Mi
+
     reportsController:
       labels:
         app: kyverno-reports-controller
@@ -101,6 +126,7 @@ data:
         limits:
           cpu: 200m
           memory: 256Mi
+
     resources:
       requests:
         cpu: 100m
@@ -108,25 +134,6 @@ data:
       limits:
         cpu: 200m
         memory: 256Mi
-    replicaCount: 3
-    podLabels:
-      app: kyverno
-      env: production
-      category: security
-    labels:
-      app: kyverno
-      env: production
-      category: security
-    webhooks:
-      failurePolicy: Ignore
-      timeoutSeconds: 30
-      namespaceSelector:
-        matchExpressions:
-          - key: kubernetes.io/metadata.name
-            operator: NotIn
-            values:
-              - kyverno
-              - kube-system
-              - flux-system
+
     serviceMonitor:
       enabled: true
