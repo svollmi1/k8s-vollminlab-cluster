@@ -1,5 +1,5 @@
 apiVersion: source.toolkit.fluxcd.io/v1beta2
-kind: HelmRepository
+kind: OCIRepository
 metadata:
   name: sonarr-repo
   namespace: flux-system
@@ -8,7 +8,7 @@ metadata:
     env: production
     category: apps
 spec:
-  url: https://charts.truecharts.org
+  url: oci://tccr.io/truecharts/sonarr
   interval: 5m
   ref:
     tag: 23.8.2
