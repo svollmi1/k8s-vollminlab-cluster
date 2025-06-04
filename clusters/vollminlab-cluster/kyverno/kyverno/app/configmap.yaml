@@ -41,6 +41,13 @@ data:
               - kyverno
               - kube-system
               - flux-system
+      resources:
+        requests:
+          cpu: 500m
+          memory: 512Mi
+        limits:
+          cpu: 1000m
+          memory: 1Gi
       service:
         ports:
           - name: https
@@ -110,5 +117,16 @@ data:
       app: kyverno
       env: production
       category: security
+    webhooks:
+      failurePolicy: Ignore
+      timeoutSeconds: 30
+      namespaceSelector:
+        matchExpressions:
+          - key: kubernetes.io/metadata.name
+            operator: NotIn
+            values:
+              - kyverno
+              - kube-system
+              - flux-system
     serviceMonitor:
       enabled: true
