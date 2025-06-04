@@ -58,11 +58,11 @@ data:
       replicaCount: 3
       resources:
         requests:
-          cpu: 100m
-          memory: 128Mi
+          cpu: 500m
+          memory: 512Mi
         limits:
-          cpu: 200m
-          memory: 256Mi
+          cpu: 1000m
+          memory: 1Gi
       service:
         ports:
           - name: https
