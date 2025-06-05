@@ -22,7 +22,7 @@ spec:
               service:
                 name: sabnzbd
                 port:
-                  number: 8080
+                  number: 10097
   tls:
     - hosts:
         - sabnzbd.vollminlab.com
