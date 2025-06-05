@@ -9,8 +9,6 @@ metadata:
     category: apps
 data:
   values.yaml: |
-    config:
-      SABNZBD__HOST_WHITELIST: sabnzbd.vollminlab.com
     persistence:
       config:
         enabled: true
@@ -35,3 +33,6 @@ data:
       limits:
         cpu: 200m
         memory: 256Mi
+    env:
+      - name: HOST_WHITELIST_ENTRIES
+        value: sabnzbd.vollminlab.com,localhost,127.0.0.1

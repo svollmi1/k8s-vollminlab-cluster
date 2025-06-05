@@ -2,6 +2,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+  - flux-exception.yaml
   #- force-rescan.yaml
   - inject-namespace-labels.yaml
   - inject-resource-requirements.yaml

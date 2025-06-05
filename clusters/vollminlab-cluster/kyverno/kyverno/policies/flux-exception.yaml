@@ -1,0 +1,19 @@
+apiVersion: kyverno.io/v1alpha2
+kind: PolicyException
+metadata:
+  name: ignore-flux-core
+  namespace: kyverno
+spec:
+  exceptions:
+    - policyName: '*'
+      ruleNames: ['*']
+      resources:
+        - apiGroups: ["source.toolkit.fluxcd.io"]
+          kinds: ["GitRepository", "OCIRepository", "HelmRepository"]
+          namespaces: ["flux-system"]
+        - apiGroups: ["kustomize.toolkit.fluxcd.io"]
+          kinds: ["Kustomization"]
+          namespaces: ["flux-system"]
+        - apiGroups: ["helm.toolkit.fluxcd.io"]
+          kinds: ["HelmRelease"]
+          namespaces: ["kyverno"]
