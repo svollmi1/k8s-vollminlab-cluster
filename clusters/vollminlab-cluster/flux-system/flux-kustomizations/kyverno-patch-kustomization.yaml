@@ -12,5 +12,4 @@ spec:
     name: flux-system
   dependsOn:
     - name: kyverno
-  targetNamespace: kyverno
   timeout: 2m
