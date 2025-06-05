@@ -8,7 +8,7 @@ spec:
   template:
     spec:
       restartPolicy: OnFailure
-      serviceAccountName: kyverno
+      serviceAccountName: kyverno-webhook-patch
       containers:
         - name: kubectl
           image: bitnami/kubectl:latest
