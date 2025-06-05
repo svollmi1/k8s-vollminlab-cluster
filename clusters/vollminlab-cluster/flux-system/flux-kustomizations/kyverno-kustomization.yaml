@@ -22,7 +22,7 @@ spec:
     name: kyverno-reports-controller
     namespace: kyverno
   interval: 10m
-  path: ./clusters/vollminlab-cluster/kyverno
+  path: ./clusters/vollminlab-cluster/kyverno/kyverno/app
   prune: true
   sourceRef:
     kind: GitRepository

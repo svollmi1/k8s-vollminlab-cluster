@@ -5,7 +5,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m
-  path: ./clusters/vollminlab-cluster/kyverno/kyverno/app/patches
+  path: ./clusters/vollminlab-cluster/kyverno/kyverno/patches
   prune: true
   sourceRef:
     kind: GitRepository
