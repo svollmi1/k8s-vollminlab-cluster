@@ -5,6 +5,7 @@ resources:
   - metallb-system-kustomization.yaml
   - capacitor-kustomization.yaml
   - kyverno-kustomization.yaml
+  - kyverno-webhooks-patch-kustomization.yaml
   - kyverno-policies-kustomization.yaml
   - policy-reporter-kustomization.yaml
   - policy-reporter-patch-kustomization.yaml
