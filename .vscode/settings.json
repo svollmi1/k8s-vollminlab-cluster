@@ -21,9 +21,8 @@
       "**/*.patch.yaml",
       "file:///c%3A/git/k8s-vollminlab-cluster/**/patch.yaml",
       "file:///c%3A/git/k8s-vollminlab-cluster/**/*patch.yaml",
-      "file:///c%3A/git/k8s-vollminlab-cluster/actions-runner-system/actions-runner-controller/patches/actions-runner-controller-patch.yaml",
-      "file:///c%3A/git/k8s-vollminlab-cluster//kyverno/policyreporter/patches/policyreporter-ui-patch.yaml"
-    ]
+      "file:///c%3A/git/k8s-vollminlab-cluster/clusters/vollminlab-cluster/kyverno/kyverno/patches/webhooks-patch.yaml"
+    ],
   },
   "files.associations": {
     "*.patch.yaml": "yaml",
@@ -32,3 +31,4 @@
   },
   "files.eol": "\n"
 }
+// This file is used to configure VSCode settings for YAML schemas and file associations.

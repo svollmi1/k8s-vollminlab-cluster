@@ -9,10 +9,8 @@ webhooks:
     matchExpressions:
     - key: kubernetes.io/metadata.name
       operator: NotIn
-      values:
-      - kyverno
-      - kube-system
-      - flux-system
+      values: ["kyverno", "kube-system", "flux-system"]
+
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
@@ -25,10 +23,8 @@ webhooks:
     matchExpressions:
     - key: kubernetes.io/metadata.name
       operator: NotIn
-      values:
-      - kyverno
-      - kube-system
-      - flux-system
+      values: ["kyverno", "kube-system", "flux-system"]
+
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
@@ -41,10 +37,8 @@ webhooks:
     matchExpressions:
     - key: kubernetes.io/metadata.name
       operator: NotIn
-      values:
-      - kyverno
-      - kube-system
-      - flux-system
+      values: ["kyverno", "kube-system", "flux-system"]
+
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
@@ -57,10 +51,8 @@ webhooks:
     matchExpressions:
     - key: kubernetes.io/metadata.name
       operator: NotIn
-      values:
-      - kyverno
-      - kube-system
-      - flux-system
+      values: ["kyverno", "kube-system", "flux-system"]
+
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
@@ -73,7 +65,4 @@ webhooks:
     matchExpressions:
     - key: kubernetes.io/metadata.name
       operator: NotIn
-      values:
-      - kyverno
-      - kube-system
-      - flux-system
+      values: ["kyverno", "kube-system", "flux-system"]
