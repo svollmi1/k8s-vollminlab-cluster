@@ -33,3 +33,6 @@ data:
       limits:
         cpu: 200m
         memory: 256Mi
+    env:
+      - name: SABNZBD_HOST_WHITELIST
+        value: sabnzbd.vollminlab.com
