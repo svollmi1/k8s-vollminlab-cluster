@@ -34,5 +34,5 @@ data:
         cpu: 200m
         memory: 256Mi
     env:
-      - name: HOST_WHITELIST_ENTRIES
+      - name: SABNZBD__HOST_WHITELIST_ENTRIES
         value: sabnzbd.vollminlab.com,localhost,127.0.0.1
