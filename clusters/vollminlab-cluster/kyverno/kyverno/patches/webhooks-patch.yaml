@@ -1,85 +1,79 @@
-# patches/kyverno-webhook-patch.yaml
-
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   name: kyverno-policy-validating-webhook-cfg
 webhooks:
-  - name: validate-policy.kyverno.svc
-    failurePolicy: Ignore
-    namespaceSelector:
-      matchExpressions:
-        - key: kubernetes.io/metadata.name
-          operator: NotIn
-          values:
-            - kyverno
-            - kube-system
-            - flux-system
-
+- name: validate-policy.kyverno.svc
+  failurePolicy: Ignore
+  namespaceSelector:
+    matchExpressions:
+    - key: kubernetes.io/metadata.name
+      operator: NotIn
+      values:
+      - kyverno
+      - kube-system
+      - flux-system
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   name: kyverno-cleanup-validating-webhook-cfg
 webhooks:
-  - name: kyverno-cleanup-controller.kyverno.svc
-    failurePolicy: Ignore
-    namespaceSelector:
-      matchExpressions:
-        - key: kubernetes.io/metadata.name
-          operator: NotIn
-          values:
-            - kyverno
-            - kube-system
-            - flux-system
-
+- name: kyverno-cleanup-controller.kyverno.svc
+  failurePolicy: Ignore
+  namespaceSelector:
+    matchExpressions:
+    - key: kubernetes.io/metadata.name
+      operator: NotIn
+      values:
+      - kyverno
+      - kube-system
+      - flux-system
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   name: kyverno-ttl-validating-webhook-cfg
 webhooks:
-  - name: kyverno-cleanup-controller.kyverno.svc
-    failurePolicy: Ignore
-    namespaceSelector:
-      matchExpressions:
-        - key: kubernetes.io/metadata.name
-          operator: NotIn
-          values:
-            - kyverno
-            - kube-system
-            - flux-system
-
+- name: kyverno-cleanup-controller.kyverno.svc
+  failurePolicy: Ignore
+  namespaceSelector:
+    matchExpressions:
+    - key: kubernetes.io/metadata.name
+      operator: NotIn
+      values:
+      - kyverno
+      - kube-system
+      - flux-system
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   name: kyverno-resource-validating-webhook-cfg
 webhooks:
-  - name: validate.kyverno.svc-fail
-    failurePolicy: Ignore
-    namespaceSelector:
-      matchExpressions:
-        - key: kubernetes.io/metadata.name
-          operator: NotIn
-          values:
-            - kyverno
-            - kube-system
-            - flux-system
-
+- name: validate.kyverno.svc-fail
+  failurePolicy: Ignore
+  namespaceSelector:
+    matchExpressions:
+    - key: kubernetes.io/metadata.name
+      operator: NotIn
+      values:
+      - kyverno
+      - kube-system
+      - flux-system
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
   name: kyverno-policy-mutating-webhook-cfg
 webhooks:
-  - name: mutate-policy.kyverno.svc
-    failurePolicy: Ignore
-    namespaceSelector:
-      matchExpressions:
-        - key: kubernetes.io/metadata.name
-          operator: NotIn
-          values:
-            - kyverno
-            - kube-system
-            - flux-system
+- name: mutate-policy.kyverno.svc
+  failurePolicy: Ignore
+  namespaceSelector:
+    matchExpressions:
+    - key: kubernetes.io/metadata.name
+      operator: NotIn
+      values:
+      - kyverno
+      - kube-system
+      - flux-system
