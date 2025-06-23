@@ -18,6 +18,7 @@ data:
       env: production
       category: observability
     args:
+      - --secure-port=443
       - --kubelet-insecure-tls=true
       - --kubelet-preferred-address-types=InternalIP,Hostname,InternalDNS
     metrics:
