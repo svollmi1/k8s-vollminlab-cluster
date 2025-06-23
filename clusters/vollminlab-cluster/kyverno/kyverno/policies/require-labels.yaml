@@ -33,10 +33,12 @@ spec:
                       - kube-system
                       - default
                       - flux-system
+                      - kyverno
       exclude:
         resources:
           namespaces:
             - flux-system
+            - kyverno
       validate:
         message: "Required labels: app, env, category"
         pattern:
@@ -64,6 +66,7 @@ spec:
           namespaces:
             - kube-system
             - flux-system
+            - kyverno
       validate:
         message: "Required labels: app, env, category"
         pattern:
