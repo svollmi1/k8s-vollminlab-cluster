@@ -18,7 +18,6 @@ data:
       env: production
       category: observability
     args:
-      - --secure-port=4443
       - --kubelet-port=10250
       - --kubelet-insecure-tls=true
       - --kubelet-preferred-address-types=InternalIP,Hostname,InternalDNS
@@ -40,7 +39,7 @@ data:
         prometheus.io/scrape: "true"
         prometheus.io/port: "443"
       port: 443
-      targetPort: 4443
+      targetPort: 10250
     serviceMonitor:
       enabled: true
       additionalLabels:
