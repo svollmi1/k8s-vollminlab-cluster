@@ -9,6 +9,8 @@ metadata:
     category: observability
 data:
   values.yaml: |
+    args:
+      - --kubelet-insecure-tls=true
     commonLabels:
       app: metrics-server
       env: production
