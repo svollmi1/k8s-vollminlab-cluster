@@ -13,14 +13,17 @@ metadata:
 data:
   values.yaml: |
     replicaCount: 3
+
     podLabels:
       app: kyverno
       env: production
       category: security
+
     labels:
       app: kyverno
       env: production
       category: security
+
     rbac:
       create: true
       backgroundController:
@@ -29,18 +32,6 @@ data:
           - apiGroups: ["apps"]
             resources: ["deployments", "statefulsets", "daemonsets"]
             verbs: ["get", "list", "watch", "patch", "update"]
-
-    webhooks:
-      failurePolicy: Ignore
-      timeoutSeconds: 30
-      namespaceSelector:
-        matchExpressions:
-          - key: kubernetes.io/metadata.name
-            operator: NotIn
-            values:
-              - kyverno
-              - kube-system
-              - flux-system
 
     admissionController:
       labels:
@@ -75,6 +66,31 @@ data:
           - name: https
             port: 443
             targetPort: 9443
+
+    webhooks:
+      validatingWebhookConfigurations:
+        failurePolicy: Ignore
+        timeoutSeconds: 30
+        namespaceSelector:
+          matchExpressions:
+            - key: kubernetes.io/metadata.name
+              operator: NotIn
+              values:
+                - kyverno
+                - kube-system
+                - flux-system
+
+      mutatingWebhookConfigurations:
+        failurePolicy: Ignore
+        timeoutSeconds: 30
+        namespaceSelector:
+          matchExpressions:
+            - key: kubernetes.io/metadata.name
+              operator: NotIn
+              values:
+                - kyverno
+                - kube-system
+                - flux-system
 
     backgroundController:
       labels:
