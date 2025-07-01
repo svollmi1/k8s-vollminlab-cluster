@@ -67,6 +67,30 @@ data:
             port: 443
             targetPort: 9443
 
+    validatingWebhookConfiguration:
+      failurePolicy: Ignore
+      timeoutSeconds: 30
+      namespaceSelector:
+        matchExpressions:
+          - key: kubernetes.io/metadata.name
+            operator: NotIn
+            values:
+              - kyverno
+              - kube-system
+              - flux-system
+
+    mutatingWebhookConfiguration:
+      failurePolicy: Ignore
+      timeoutSeconds: 30
+      namespaceSelector:
+        matchExpressions:
+          - key: kubernetes.io/metadata.name
+            operator: NotIn
+            values:
+              - kyverno
+              - kube-system
+              - flux-system
+
     backgroundController:
       labels:
         app: kyverno-background-controller
