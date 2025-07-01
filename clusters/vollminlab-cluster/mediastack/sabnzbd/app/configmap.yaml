@@ -29,10 +29,10 @@ data:
     resources:
       requests:
         cpu: 200m
-        memory: 512Mi
+        memory: 1Gi
       limits:
         cpu: 500m
-        memory: 1024Mi
+        memory: 2Gi
     env:
       - name: SABNZBD__HOST_WHITELIST_ENTRIES
         value: sabnzbd.vollminlab.com,localhost,127.0.0.1
