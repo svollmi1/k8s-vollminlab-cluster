@@ -14,10 +14,14 @@ data:
         enabled: true
         existingClaim: pvc-sonarr-config
         mountPath: /config
+      downloads:
+        enabled: true
+        existingClaim: pvc-completed-downloads
+        mountPath: /downloads
       tv:
         enabled: true
         existingClaim: pvc-tv
-        mountPath: /downloads/tv
+        mountPath: /tv
     podLabels:
       app: sonarr
       env: production

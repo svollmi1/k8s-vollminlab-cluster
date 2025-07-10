@@ -14,10 +14,14 @@ data:
         enabled: true
         existingClaim: pvc-radarr-config
         mountPath: /config
+      downloads:
+        enabled: true
+        existingClaim: pvc-completed-downloads
+        mountPath: /downloads
       movies:
         enabled: true
         existingClaim: pvc-movies
-        mountPath: /downloads/movies
+        mountPath: /movies
     resources:
       requests:
         cpu: 100m
