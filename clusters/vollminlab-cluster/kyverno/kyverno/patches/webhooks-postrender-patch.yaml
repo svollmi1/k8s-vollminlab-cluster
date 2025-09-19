@@ -5,39 +5,55 @@ metadata:
   namespace: kyverno
 spec:
   schedule: "*/5 * * * *"  # every 5 minutes
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
   jobTemplate:
     spec:
-      backoffLimit: 3
+      backoffLimit: 2
       template:
         spec:
           restartPolicy: OnFailure
           serviceAccountName: kyverno-webhook-patch
+          terminationGracePeriodSeconds: 10
           containers:
             - name: kubectl
-              image: bitnami/kubectl:1.32.3
+              image: bitnami/kubectl:1.33.4
               imagePullPolicy: IfNotPresent
               resources:
                 requests:
+                  cpu: 10m
+                  memory: 32Mi
+                limits:
                   cpu: 100m
                   memory: 128Mi
-                limits:
-                  cpu: 200m
-                  memory: 256Mi
               command:
                 - /bin/sh
                 - -c
                 - |
-                  # Patch kyverno-policy-validating-webhook-cfg
-                  kubectl patch validatingwebhookconfiguration kyverno-policy-validating-webhook-cfg --type='json' -p='[{"op": "replace", "path": "/webhooks/0/failurePolicy", "value": "Ignore"}, {"op": "replace", "path": "/webhooks/0/namespaceSelector", "value": {"matchExpressions":[{"key":"kubernetes.io/metadata.name","operator":"NotIn","values":["kyverno","kube-system","flux-system"]}]}}]'
+                  set -e
                   
-                  # Patch kyverno-cleanup-validating-webhook-cfg
-                  kubectl patch validatingwebhookconfiguration kyverno-cleanup-validating-webhook-cfg --type='json' -p='[{"op": "replace", "path": "/webhooks/0/failurePolicy", "value": "Ignore"}, {"op": "replace", "path": "/webhooks/0/namespaceSelector", "value": {"matchExpressions":[{"key":"kubernetes.io/metadata.name","operator":"NotIn","values":["kyverno","kube-system","flux-system"]}]}}]'
+                  # Function to patch webhook with error handling
+                  patch_webhook() {
+                    local webhook_type=$1
+                    local webhook_name=$2
+                    echo "Patching $webhook_type $webhook_name..."
+                    
+                    kubectl patch "$webhook_type" "$webhook_name" --type='json' -p='[{"op": "replace", "path": "/webhooks/0/failurePolicy", "value": "Ignore"}, {"op": "replace", "path": "/webhooks/0/namespaceSelector", "value": {"matchExpressions":[{"key":"kubernetes.io/metadata.name","operator":"NotIn","values":["kyverno","kube-system","flux-system"]}]}}]'
+                    
+                    if [ $? -eq 0 ]; then
+                      echo "Successfully patched $webhook_name"
+                    else
+                      echo "Failed to patch $webhook_name"
+                      exit 1
+                    fi
+                  }
                   
-                  # Patch kyverno-ttl-validating-webhook-cfg
-                  kubectl patch validatingwebhookconfiguration kyverno-ttl-validating-webhook-cfg --type='json' -p='[{"op": "replace", "path": "/webhooks/0/failurePolicy", "value": "Ignore"}, {"op": "replace", "path": "/webhooks/0/namespaceSelector", "value": {"matchExpressions":[{"key":"kubernetes.io/metadata.name","operator":"NotIn","values":["kyverno","kube-system","flux-system"]}]}}]'
+                  # Patch all webhooks
+                  patch_webhook "validatingwebhookconfiguration" "kyverno-policy-validating-webhook-cfg"
+                  patch_webhook "validatingwebhookconfiguration" "kyverno-cleanup-validating-webhook-cfg"
+                  patch_webhook "validatingwebhookconfiguration" "kyverno-ttl-validating-webhook-cfg"
+                  patch_webhook "validatingwebhookconfiguration" "kyverno-resource-validating-webhook-cfg"
+                  patch_webhook "mutatingwebhookconfiguration" "kyverno-policy-mutating-webhook-cfg"
                   
-                  # Patch kyverno-resource-validating-webhook-cfg
-                  kubectl patch validatingwebhookconfiguration kyverno-resource-validating-webhook-cfg --type='json' -p='[{"op": "replace", "path": "/webhooks/0/failurePolicy", "value": "Ignore"}, {"op": "replace", "path": "/webhooks/0/namespaceSelector", "value": {"matchExpressions":[{"key":"kubernetes.io/metadata.name","operator":"NotIn","values":["kyverno","kube-system","flux-system"]}]}}]'
-                  
-                  # Patch kyverno-policy-mutating-webhook-cfg
-                  kubectl patch mutatingwebhookconfiguration kyverno-policy-mutating-webhook-cfg --type='json' -p='[{"op": "replace", "path": "/webhooks/0/failurePolicy", "value": "Ignore"}, {"op": "replace", "path": "/webhooks/0/namespaceSelector", "value": {"matchExpressions":[{"key":"kubernetes.io/metadata.name","operator":"NotIn","values":["kyverno","kube-system","flux-system"]}]}}]'
+                  echo "All webhooks patched successfully"
