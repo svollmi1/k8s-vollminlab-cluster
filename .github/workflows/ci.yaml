@@ -45,16 +45,16 @@ jobs:
               echo "Skipping $file (CSI StorageClass requires CSI driver)"
               continue
             fi
-                   # Skip custom resources that require CRDs (non-standard API groups)
-                   if grep -q "apiVersion: metallb.io\|apiVersion: kyverno.io\|apiVersion: longhorn.io\|apiVersion: elasticsearch.k8s.elastic.co" "$file"; then
-                     echo "Skipping $file (custom resource requires CRDs)"
-                     continue
-                   fi
-                   # Skip CRD files that require operators to be installed
-                   if grep -q "kind: CustomResourceDefinition" "$file"; then
-                     echo "Skipping $file (CRD requires operator installation)"
-                     continue
-                   fi
+            # Skip custom resources that require CRDs (non-standard API groups)
+            if grep -q "apiVersion: metallb.io\|apiVersion: kyverno.io\|apiVersion: longhorn.io\|apiVersion: elasticsearch.k8s.elastic.co" "$file"; then
+              echo "Skipping $file (custom resource requires CRDs)"
+              continue
+            fi
+            # Skip CRD files that require operators to be installed
+            if grep -q "kind: CustomResourceDefinition" "$file"; then
+              echo "Skipping $file (CRD requires operator installation)"
+              continue
+            fi
             kubectl apply --dry-run=client -f "$file" >/dev/null 2>&1 || {
               echo "❌ Invalid YAML syntax in $file"
               exit 1
@@ -132,11 +132,11 @@ jobs:
         run: |
           echo "🔍 Validating Flux configurations..."
           
-          # Check Kustomizations
+          # Check Kustomizations using kubectl kustomize
           KUSTOMIZATION_COUNT=0
           find clusters -name "kustomization.yaml" | while read file; do
             echo "Validating Kustomization: $file"
-            flux build kustomization --path "$(dirname "$file")" || {
+            kubectl kustomize "$(dirname "$file")" >/dev/null 2>&1 || {
               echo "❌ Failed to validate Kustomization: $file"
               exit 1
             }
