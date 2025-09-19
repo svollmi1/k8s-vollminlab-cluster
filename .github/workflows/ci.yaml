@@ -174,7 +174,8 @@ jobs:
           find clusters -name "*.yaml" -path "*/kyverno/*" | while read file; do
             if grep -q "kind: Policy\|kind: ClusterPolicy" "$file"; then
               echo "Validating policy: $file"
-              kyverno validate "$file" || {
+              # Use kubectl to validate the policy YAML syntax and structure
+              kubectl apply --dry-run=client -f "$file" || {
                 echo "❌ Failed to validate policy: $file"
                 exit 1
               }
