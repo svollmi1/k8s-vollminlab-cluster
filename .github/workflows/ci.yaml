@@ -28,6 +28,8 @@ jobs:
       - name: Validate YAML syntax
         run: |
           echo "🔍 Validating YAML syntax..."
+          # Install PyYAML if not available
+          python3 -c "import yaml" 2>/dev/null || pip3 install PyYAML
           find clusters -name "*.yaml" -o -name "*.yml" | while read file; do
             echo "Validating $file"
             python3 -c "import yaml; yaml.safe_load(open('$file'))" || exit 1
