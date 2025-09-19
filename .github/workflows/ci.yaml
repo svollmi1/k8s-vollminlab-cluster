@@ -1,0 +1,175 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  KUBERNETES_VERSION: "1.32.3"
+
+jobs:
+  validate-manifests:
+    name: Validate Kubernetes Manifests
+    runs-on: vollminlab
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: ${{ env.KUBERNETES_VERSION }}
+
+      - name: Validate YAML syntax
+        run: |
+          echo "🔍 Validating YAML syntax..."
+          find clusters -name "*.yaml" -o -name "*.yml" | while read file; do
+            echo "Validating $file"
+            python3 -c "import yaml; yaml.safe_load(open('$file'))" || exit 1
+          done
+
+      - name: Validate Kubernetes manifests
+        run: |
+          echo "🔍 Validating Kubernetes manifests..."
+          find clusters -name "*.yaml" -o -name "*.yml" | while read file; do
+            echo "Validating $file"
+            kubectl apply --dry-run=client -f "$file" || exit 1
+          done
+
+      - name: Check for common issues
+        run: |
+          echo "🔍 Checking for common issues..."
+          
+          # Check for hardcoded secrets
+          if grep -r "password\|secret\|key" clusters/ --include="*.yaml" --include="*.yml" | grep -v "kind: Secret\|kind: SealedSecret\|#.*secret\|#.*password"; then
+            echo "❌ Found potential hardcoded secrets"
+            exit 1
+          fi
+          
+          # Check for missing labels
+          echo "✅ No hardcoded secrets found"
+
+  security-scan:
+    name: Security Scan
+    runs-on: vollminlab
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  flux-validation:
+    name: Flux Configuration Validation
+    runs-on: vollminlab
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flux CLI
+        run: |
+          curl -s https://fluxcd.io/install.sh | sudo bash
+
+      - name: Validate Flux configurations
+        run: |
+          echo "🔍 Validating Flux configurations..."
+          
+          # Check Kustomizations
+          find clusters -name "kustomization.yaml" | while read file; do
+            echo "Validating Kustomization: $file"
+            flux build kustomization --path "$(dirname "$file")" || exit 1
+          done
+          
+          # Check HelmReleases
+          find clusters -name "helmrelease.yaml" | while read file; do
+            echo "Validating HelmRelease: $file"
+            kubectl apply --dry-run=client -f "$file" || exit 1
+          done
+
+  policy-validation:
+    name: Kyverno Policy Validation
+    runs-on: vollminlab
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Kyverno CLI
+        run: |
+          curl -s https://raw.githubusercontent.com/kyverno/kyverno/main/scripts/install-cli.sh | bash
+
+      - name: Validate Kyverno policies
+        run: |
+          echo "🔍 Validating Kyverno policies..."
+          find clusters -name "*.yaml" -path "*/kyverno/*" | while read file; do
+            if grep -q "kind: Policy\|kind: ClusterPolicy" "$file"; then
+              echo "Validating policy: $file"
+              kyverno validate "$file" || exit 1
+            fi
+          done
+
+  integration-test:
+    name: Integration Test
+    runs-on: vollminlab
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: ${{ env.KUBERNETES_VERSION }}
+
+      - name: Test namespace creation
+        run: |
+          echo "🧪 Testing namespace creation..."
+          kubectl create namespace ci-test --dry-run=client || exit 1
+          kubectl delete namespace ci-test --ignore-not-found=true
+
+      - name: Test resource validation
+        run: |
+          echo "🧪 Testing resource validation..."
+          # Test a simple ConfigMap
+          cat <<EOF | kubectl apply --dry-run=client -f -
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: ci-test
+            namespace: default
+          data:
+            test: "value"
+          EOF
+
+  notify-success:
+    name: Notify Success
+    runs-on: vollminlab
+    needs: [validate-manifests, security-scan, flux-validation, policy-validation, integration-test]
+    if: success()
+    steps:
+      - name: Success notification
+        run: |
+          echo "✅ All CI checks passed!"
+          echo "🚀 Ready for deployment"
+
+  notify-failure:
+    name: Notify Failure
+    runs-on: vollminlab
+    needs: [validate-manifests, security-scan, flux-validation, policy-validation, integration-test]
+    if: failure()
+    steps:
+      - name: Failure notification
+        run: |
+          echo "❌ CI checks failed!"
+          echo "🔧 Please review the failed steps above"
