@@ -36,6 +36,11 @@ jobs:
               continue
             fi
             echo "Validating $file"
+            # Skip CSI-based PersistentVolumes as they require CSI drivers to be available
+            if [[ "$file" == *"pv-"* ]] && grep -q "csi:" "$file"; then
+              echo "Skipping $file (CSI PersistentVolume requires CSI driver)"
+              continue
+            fi
             kubectl apply --dry-run=client -f "$file" >/dev/null 2>&1 || {
               echo "❌ Invalid YAML syntax in $file"
               exit 1
