@@ -24,6 +24,7 @@
       "file:///c%3A/git/k8s-vollminlab-cluster/**/*patch.yaml",
       "file:///c%3A/git/k8s-vollminlab-cluster/clusters/vollminlab-cluster/kyverno/kyverno/patches/webhooks-patch.yaml"
     ],
+    "kubernetes://schema/rbac.authorization.k8s.io/v1%40clusterrolebinding": "file:///c%3A/git/k8s-vollminlab-cluster/clusters/vollminlab-cluster/actions-runner-system/actions-runner-controller/rbac.yaml"
   },
   "files.associations": {
     "*.patch.yaml": "yaml",
