@@ -11,7 +11,7 @@ metadata:
 rules:
 - apiGroups: [""]
   resources: ["nodes", "namespaces", "pods", "services", "configmaps", "secrets"]
-  verbs: ["get", "list", "watch"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 - apiGroups: ["apps"]
   resources: ["deployments", "replicasets", "daemonsets", "statefulsets"]
   verbs: ["get", "list", "watch"]
