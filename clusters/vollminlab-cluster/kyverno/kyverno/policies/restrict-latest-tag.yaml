@@ -8,10 +8,10 @@ metadata:
     policies.kyverno.io/category: Best Practices
     policies.kyverno.io/severity: high
     policies.kyverno.io/description: "Prevents use of the ':latest' image tag in containers, initContainers, and ephemeralContainers."
-    labels:
-      app: kyverno
-      env: production
-      category: security
+  labels:
+    app: kyverno
+    env: production
+    category: security
 spec:
   validationFailureAction: Audit
   background: true
