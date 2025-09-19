@@ -45,11 +45,16 @@ jobs:
               echo "Skipping $file (CSI StorageClass requires CSI driver)"
               continue
             fi
-            # Skip custom resources that require CRDs (non-standard API groups)
-            if grep -q "apiVersion: metallb.io\|apiVersion: kyverno.io\|apiVersion: longhorn.io\|apiVersion: elasticsearch.k8s.elastic.co" "$file"; then
-              echo "Skipping $file (custom resource requires CRDs)"
-              continue
-            fi
+                   # Skip custom resources that require CRDs (non-standard API groups)
+                   if grep -q "apiVersion: metallb.io\|apiVersion: kyverno.io\|apiVersion: longhorn.io\|apiVersion: elasticsearch.k8s.elastic.co" "$file"; then
+                     echo "Skipping $file (custom resource requires CRDs)"
+                     continue
+                   fi
+                   # Skip CRD files that require operators to be installed
+                   if grep -q "kind: CustomResourceDefinition" "$file"; then
+                     echo "Skipping $file (CRD requires operator installation)"
+                     continue
+                   fi
             kubectl apply --dry-run=client -f "$file" >/dev/null 2>&1 || {
               echo "❌ Invalid YAML syntax in $file"
               exit 1
@@ -166,32 +171,32 @@ jobs:
           sudo mv kubectl /usr/local/bin/
           kubectl version --client
 
-             - name: Setup Kyverno CLI
-               run: |
-                 # Install Kyverno CLI using GitHub releases
-                 echo "📦 Installing Kyverno CLI..."
-                 KYVERNO_VERSION=$(curl -s https://api.github.com/repos/kyverno/kyverno/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-                 echo "Installing Kyverno CLI version: $KYVERNO_VERSION"
-                 curl -L "https://github.com/kyverno/kyverno/releases/download/${KYVERNO_VERSION}/kyverno-cli_${KYVERNO_VERSION}_linux_x86_64.tar.gz" | tar -xz
-                 sudo mv kyverno /usr/local/bin/
-                 kyverno version
+      - name: Setup Kyverno CLI
+        run: |
+          # Install Kyverno CLI using GitHub releases
+          echo "📦 Installing Kyverno CLI..."
+          KYVERNO_VERSION=$(curl -s https://api.github.com/repos/kyverno/kyverno/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+          echo "Installing Kyverno CLI version: $KYVERNO_VERSION"
+          curl -L "https://github.com/kyverno/kyverno/releases/download/${KYVERNO_VERSION}/kyverno-cli_${KYVERNO_VERSION}_linux_x86_64.tar.gz" | tar -xz
+          sudo mv kyverno /usr/local/bin/
+          kyverno version
 
-             - name: Install Python YAML support
-               run: |
-                 echo "📦 Installing Python YAML support..."
-                 python3 -c "import yaml" 2>/dev/null || pip3 install PyYAML
+      - name: Install Python YAML support
+        run: |
+          echo "📦 Installing Python YAML support..."
+          python3 -c "import yaml" 2>/dev/null || pip3 install PyYAML
 
-             - name: Validate Kyverno policies
-               run: |
-                 echo "🔍 Validating Kyverno policies..."
-                 POLICY_COUNT=0
-                 find clusters -name "*.yaml" -path "*/kyverno/*" | while read file; do
-                   if grep -q "kind: Policy\|kind: ClusterPolicy" "$file"; then
-                     echo "Skipping Kyverno policy validation: $file (requires CRDs)"
-                     POLICY_COUNT=$((POLICY_COUNT + 1))
-                   fi
-                 done
-                 echo "✅ Found $POLICY_COUNT Kyverno policies (validation skipped - requires CRDs)"
+      - name: Validate Kyverno policies
+        run: |
+          echo "🔍 Validating Kyverno policies..."
+          POLICY_COUNT=0
+          find clusters -name "*.yaml" -path "*/kyverno/*" | while read file; do
+            if grep -q "kind: Policy\|kind: ClusterPolicy" "$file"; then
+              echo "Skipping Kyverno policy validation: $file (requires CRDs)"
+              POLICY_COUNT=$((POLICY_COUNT + 1))
+            fi
+          done
+          echo "✅ Found $POLICY_COUNT Kyverno policies (validation skipped - requires CRDs)"
 
   integration-test:
     name: Integration Test
