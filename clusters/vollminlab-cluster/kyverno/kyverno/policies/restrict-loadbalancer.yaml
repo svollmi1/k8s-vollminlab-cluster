@@ -6,8 +6,7 @@ metadata:
     policies.kyverno.io/title: Restrict LoadBalancer Services
     policies.kyverno.io/category: Network
     policies.kyverno.io/severity: high
-    policies.kyverno.io/description: >
-      Only ingress-nginx-controller in the ingress-nginx namespace may use type LoadBalancer.
+    policies.kyverno.io/description: "Only ingress-nginx-controller in the ingress-nginx namespace may use type LoadBalancer."
     kyverno.io/enable-background: "true"
   labels:
     app: kyverno

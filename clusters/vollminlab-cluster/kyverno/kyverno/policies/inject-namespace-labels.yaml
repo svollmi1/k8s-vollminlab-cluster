@@ -6,9 +6,7 @@ metadata:
     policies.kyverno.io/title: Inject Namespace Labels
     policies.kyverno.io/category: Label Injection
     policies.kyverno.io/severity: medium
-    policies.kyverno.io/description: >
-      Automatically adds `app`, `env`, and `category` labels from the namespace
-      to workloads (Deployment, StatefulSet, DaemonSet) and their pods.
+    policies.kyverno.io/description: "Automatically adds app, env, and category labels from the namespace to workloads (Deployment, StatefulSet, DaemonSet) and their pods."
   labels:
     app: kyverno
     env: production

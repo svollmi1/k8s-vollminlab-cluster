@@ -6,8 +6,7 @@ metadata:
     policies.kyverno.io/title: Require CPU/Memory Requests & Limits
     policies.kyverno.io/category: Best Practices
     policies.kyverno.io/severity: medium
-    policies.kyverno.io/description: >
-      Ensures that all containers define CPU and memory requests and limits.
+    policies.kyverno.io/description: "Ensures that all containers define CPU and memory requests and limits."
     kyverno.io/enable-background: "true"
   labels:
     app: kyverno
