@@ -18,8 +18,8 @@ spec:
           terminationGracePeriodSeconds: 10
           containers:
             - name: kubectl
-              image: bitnami/kubectl:1.33.4
-              imagePullPolicy: IfNotPresent
+              image: registry.k8s.io/kubectl:v1.32.3
+              imagePullPolicy: Always
               resources:
                 requests:
                   cpu: 10m
