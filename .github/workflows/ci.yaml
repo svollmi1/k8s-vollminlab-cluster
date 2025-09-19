@@ -92,6 +92,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install kubectl
+        run: |
+          echo "📦 Installing kubectl..."
+          curl -LO "https://dl.k8s.io/release/v${{ env.KUBERNETES_VERSION }}/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
+          kubectl version --client
+
       - name: Setup Flux CLI
         run: |
           curl -s https://fluxcd.io/install.sh | sudo bash
@@ -118,6 +126,14 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Install kubectl
+        run: |
+          echo "📦 Installing kubectl..."
+          curl -LO "https://dl.k8s.io/release/v${{ env.KUBERNETES_VERSION }}/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
+          kubectl version --client
 
       - name: Setup Kyverno CLI
         run: |
@@ -156,7 +172,7 @@ jobs:
         run: |
           echo "🧪 Testing namespace creation..."
           kubectl create namespace ci-test --dry-run=client || exit 1
-          kubectl delete namespace ci-test --ignore-not-found=true
+          echo "✅ Namespace creation validation passed"
 
       - name: Test resource validation
         run: |
