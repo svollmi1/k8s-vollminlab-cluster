@@ -27,3 +27,8 @@ spec:
         limits:
           cpu: 1000m
           memory: 1Gi
+      env:
+        - name: RUNNER_WAIT_FOR_DOCKERD_SECONDS
+          value: "120"
+        - name: RUNNER_EPHEMERAL
+          value: "false"
