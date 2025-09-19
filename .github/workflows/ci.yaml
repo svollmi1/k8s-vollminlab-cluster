@@ -181,11 +181,6 @@ jobs:
           sudo mv kyverno /usr/local/bin/
           kyverno version
 
-      - name: Install Python YAML support
-        run: |
-          echo "📦 Installing Python YAML support..."
-          python3 -c "import yaml" 2>/dev/null || pip3 install PyYAML
-
       - name: Validate Kyverno policies
         run: |
           echo "🔍 Validating Kyverno policies..."
