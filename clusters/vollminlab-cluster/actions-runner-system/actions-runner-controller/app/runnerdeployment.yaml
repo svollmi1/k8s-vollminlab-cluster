@@ -20,6 +20,7 @@ spec:
       image: summerwind/actions-runner:ubuntu-22.04
       labels:
         - vollminlab
+      serviceAccountName: github-actions-runner
       resources:
         requests:
           cpu: 100m
