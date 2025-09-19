@@ -42,6 +42,11 @@ jobs:
         run: |
           echo "🔍 Validating Kubernetes manifests..."
           find clusters -name "*.yaml" -o -name "*.yml" | while read file; do
+            # Skip kustomization files and other non-Kubernetes resources
+            if [[ "$file" == *"kustomization.yaml" ]] || [[ "$file" == *"helmrelease.yaml" ]]; then
+              echo "Skipping $file (not a Kubernetes resource)"
+              continue
+            fi
             echo "Validating $file"
             kubectl apply --dry-run=client -f "$file" || exit 1
           done
@@ -116,7 +121,11 @@ jobs:
 
       - name: Setup Kyverno CLI
         run: |
-          curl -s https://raw.githubusercontent.com/kyverno/kyverno/main/scripts/install-cli.sh | bash
+          # Install Kyverno CLI using GitHub releases
+          KYVERNO_VERSION=$(curl -s https://api.github.com/repos/kyverno/kyverno/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+          curl -L "https://github.com/kyverno/kyverno/releases/download/${KYVERNO_VERSION}/kyverno-cli_${KYVERNO_VERSION}_linux_x86_64.tar.gz" | tar -xz
+          sudo mv kyverno /usr/local/bin/
+          kyverno version
 
       - name: Validate Kyverno policies
         run: |
