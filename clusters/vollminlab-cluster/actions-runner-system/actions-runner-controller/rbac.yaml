@@ -1,4 +1,4 @@
-# yaml-language-server: disable
+# yaml-language-server: $schema=
 apiVersion: v1
 kind: ServiceAccount
 metadata:

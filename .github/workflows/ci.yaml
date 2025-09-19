@@ -55,8 +55,10 @@ jobs:
               echo "Skipping $file (CRD requires operator installation)"
               continue
             fi
-            kubectl apply --dry-run=client -f "$file" >/dev/null 2>&1 || {
+            kubectl apply --dry-run=client -f "$file" || {
               echo "❌ Invalid YAML syntax in $file"
+              echo "Error details:"
+              kubectl apply --dry-run=client -f "$file" 2>&1 || true
               exit 1
             }
           done
@@ -150,6 +152,8 @@ jobs:
             echo "Validating HelmRelease: $file"
             kubectl apply --dry-run=client -f "$file" || {
               echo "❌ Failed to validate HelmRelease: $file"
+              echo "Error details:"
+              kubectl apply --dry-run=client -f "$file" 2>&1 || true
               exit 1
             }
             HELMRELEASE_COUNT=$((HELMRELEASE_COUNT + 1))
@@ -185,13 +189,19 @@ jobs:
         run: |
           echo "🔍 Validating Kyverno policies..."
           POLICY_COUNT=0
-          find clusters -name "*.yaml" -path "*/kyverno/*" | while read file; do
+          for file in $(find clusters -name "*.yaml" -path "*/kyverno/*"); do
             if grep -q "kind: Policy\|kind: ClusterPolicy" "$file"; then
-              echo "Skipping Kyverno policy validation: $file (requires CRDs)"
+              echo "Validating Kyverno policy syntax: $file"
+              kubectl apply --dry-run=client -f "$file" || {
+                echo "❌ Failed to validate Kyverno policy: $file"
+                echo "Error details:"
+                kubectl apply --dry-run=client -f "$file" 2>&1 || true
+                exit 1
+              }
               POLICY_COUNT=$((POLICY_COUNT + 1))
             fi
           done
-          echo "✅ Found $POLICY_COUNT Kyverno policies (validation skipped - requires CRDs)"
+          echo "✅ Validated $POLICY_COUNT Kyverno policies"
 
   integration-test:
     name: Integration Test
