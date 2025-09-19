@@ -36,9 +36,13 @@ jobs:
               continue
             fi
             echo "Validating $file"
-            # Skip CSI-based PersistentVolumes as they require CSI drivers to be available
+            # Skip CSI-based PersistentVolumes and StorageClasses as they require CSI drivers to be available
             if [[ "$file" == *"pv-"* ]] && grep -q "csi:" "$file"; then
               echo "Skipping $file (CSI PersistentVolume requires CSI driver)"
+              continue
+            fi
+            if [[ "$file" == *"storageclass-"* ]] && grep -q "csi.k8s.io" "$file"; then
+              echo "Skipping $file (CSI StorageClass requires CSI driver)"
               continue
             fi
             # Skip custom resources that require CRDs (non-standard API groups)
