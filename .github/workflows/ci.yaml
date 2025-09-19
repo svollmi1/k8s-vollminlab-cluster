@@ -134,7 +134,7 @@ jobs:
           
           # Check Kustomizations using kubectl kustomize
           KUSTOMIZATION_COUNT=0
-          find clusters -name "kustomization.yaml" | while read file; do
+          for file in $(find clusters -name "kustomization.yaml"); do
             echo "Validating Kustomization: $file"
             kubectl kustomize "$(dirname "$file")" >/dev/null 2>&1 || {
               echo "❌ Failed to validate Kustomization: $file"
@@ -146,7 +146,7 @@ jobs:
           
           # Check HelmReleases
           HELMRELEASE_COUNT=0
-          find clusters -name "helmrelease.yaml" | while read file; do
+          for file in $(find clusters -name "helmrelease.yaml"); do
             echo "Validating HelmRelease: $file"
             kubectl apply --dry-run=client -f "$file" || {
               echo "❌ Failed to validate HelmRelease: $file"
