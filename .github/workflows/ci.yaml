@@ -41,6 +41,11 @@ jobs:
               echo "Skipping $file (CSI PersistentVolume requires CSI driver)"
               continue
             fi
+            # Skip custom resources that require CRDs (non-standard API groups)
+            if grep -q "apiVersion: metallb.io\|apiVersion: kyverno.io\|apiVersion: longhorn.io\|apiVersion: elasticsearch.k8s.elastic.co" "$file"; then
+              echo "Skipping $file (custom resource requires CRDs)"
+              continue
+            fi
             kubectl apply --dry-run=client -f "$file" >/dev/null 2>&1 || {
               echo "❌ Invalid YAML syntax in $file"
               exit 1
