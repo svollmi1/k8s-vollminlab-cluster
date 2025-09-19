@@ -25,18 +25,18 @@ jobs:
           sudo mv kubectl /usr/local/bin/
           kubectl version --client
 
-            - name: Validate YAML syntax
-              run: |
-                echo "🔍 Validating YAML syntax..."
-                # Use kubectl to validate YAML syntax instead of Python
-                find clusters -name "*.yaml" -o -name "*.yml" | while read file; do
-                  echo "Validating $file"
-                  kubectl apply --dry-run=client -f "$file" >/dev/null 2>&1 || {
-                    echo "❌ Invalid YAML syntax in $file"
-                    exit 1
-                  }
-                done
-                echo "✅ All YAML files have valid syntax"
+      - name: Validate YAML syntax
+        run: |
+          echo "🔍 Validating YAML syntax..."
+          # Use kubectl to validate YAML syntax instead of Python
+          find clusters -name "*.yaml" -o -name "*.yml" | while read file; do
+            echo "Validating $file"
+            kubectl apply --dry-run=client -f "$file" >/dev/null 2>&1 || {
+              echo "❌ Invalid YAML syntax in $file"
+              exit 1
+            }
+          done
+          echo "✅ All YAML files have valid syntax"
 
       - name: Validate Kubernetes manifests
         run: |
