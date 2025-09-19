@@ -28,8 +28,13 @@ jobs:
       - name: Validate YAML syntax
         run: |
           echo "🔍 Validating YAML syntax..."
-          # Use kubectl to validate YAML syntax instead of Python
+          # Use kubectl to validate YAML syntax for Kubernetes resources only
           find clusters -name "*.yaml" -o -name "*.yml" | while read file; do
+            # Skip kustomization files and other non-Kubernetes resources
+            if [[ "$file" == *"kustomization.yaml" ]] || [[ "$file" == *"helmrelease.yaml" ]]; then
+              echo "Skipping $file (not a Kubernetes resource)"
+              continue
+            fi
             echo "Validating $file"
             kubectl apply --dry-run=client -f "$file" >/dev/null 2>&1 || {
               echo "❌ Invalid YAML syntax in $file"
