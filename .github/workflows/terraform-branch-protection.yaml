@@ -1,0 +1,109 @@
+name: "Terraform Branch Protection"
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Terraform action to perform'
+        required: true
+        default: 'plan'
+        type: choice
+        options:
+        - plan
+        - apply
+        - destroy
+  push:
+    branches: [main]
+    paths:
+      - 'terraform/github-branch-protection/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'terraform/github-branch-protection/**'
+
+env:
+  TF_VERSION: '1.6.0'
+  TF_WORKING_DIR: './terraform/github-branch-protection'
+
+jobs:
+  terraform:
+    name: "Terraform"
+    runs-on: vollminlab
+    environment: production
+    
+    steps:
+      - name: "📥 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "📦 Setup Terraform"
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: "🔐 Configure GitHub Provider"
+        run: |
+          echo "TF_VAR_github_token=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
+
+      - name: "📁 Change to Terraform Directory"
+        run: |
+          cd ${{ env.TF_WORKING_DIR }}
+          echo "TF_WORKING_DIR=$(pwd)" >> $GITHUB_ENV
+
+      - name: "🔧 Terraform Format Check"
+        run: |
+          cd ${{ env.TF_WORKING_DIR }}
+          terraform fmt -check -recursive
+        continue-on-error: true
+
+      - name: "🔍 Terraform Init"
+        run: |
+          cd ${{ env.TF_WORKING_DIR }}
+          terraform init
+
+      - name: "🔍 Terraform Validate"
+        run: |
+          cd ${{ env.TF_WORKING_DIR }}
+          terraform validate
+
+      - name: "📋 Terraform Plan"
+        if: github.event_name == 'pull_request' || github.event.inputs.action == 'plan'
+        run: |
+          cd ${{ env.TF_WORKING_DIR }}
+          terraform plan -out=tfplan
+        env:
+          TF_VAR_github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "📋 Terraform Plan Status"
+        if: github.event_name == 'pull_request'
+        run: |
+          cd ${{ env.TF_WORKING_DIR }}
+          terraform show -no-color tfplan > tfplan.txt
+          echo "## Terraform Plan Output" >> $GITHUB_STEP_SUMMARY
+          echo '```hcl' >> $GITHUB_STEP_SUMMARY
+          cat tfplan.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: "🚀 Terraform Apply"
+        if: github.event_name == 'push' || github.event.inputs.action == 'apply'
+        run: |
+          cd ${{ env.TF_WORKING_DIR }}
+          terraform apply -auto-approve
+        env:
+          TF_VAR_github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "🗑️ Terraform Destroy"
+        if: github.event.inputs.action == 'destroy'
+        run: |
+          cd ${{ env.TF_WORKING_DIR }}
+          terraform destroy -auto-approve
+        env:
+          TF_VAR_github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "📊 Terraform Output"
+        if: github.event_name == 'push' || github.event.inputs.action == 'apply'
+        run: |
+          cd ${{ env.TF_WORKING_DIR }}
+          echo "## Terraform Output" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          terraform output >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY

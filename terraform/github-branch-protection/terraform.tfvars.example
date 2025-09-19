@@ -1,0 +1,6 @@
+# Copy this file to terraform.tfvars and fill in your values
+# NEVER commit terraform.tfvars to version control!
+
+github_owner     = "svollmi1"
+repository_name  = "k8s-vollminlab-cluster"
+# github_token will be set via environment variable GITHUB_TOKEN
