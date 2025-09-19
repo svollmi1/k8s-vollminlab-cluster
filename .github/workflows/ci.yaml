@@ -114,16 +114,28 @@ jobs:
           echo "🔍 Validating Flux configurations..."
           
           # Check Kustomizations
+          KUSTOMIZATION_COUNT=0
           find clusters -name "kustomization.yaml" | while read file; do
             echo "Validating Kustomization: $file"
-            flux build kustomization --path "$(dirname "$file")" || exit 1
+            flux build kustomization --path "$(dirname "$file")" || {
+              echo "❌ Failed to validate Kustomization: $file"
+              exit 1
+            }
+            KUSTOMIZATION_COUNT=$((KUSTOMIZATION_COUNT + 1))
           done
+          echo "✅ Validated $KUSTOMIZATION_COUNT Kustomizations"
           
           # Check HelmReleases
+          HELMRELEASE_COUNT=0
           find clusters -name "helmrelease.yaml" | while read file; do
             echo "Validating HelmRelease: $file"
-            kubectl apply --dry-run=client -f "$file" || exit 1
+            kubectl apply --dry-run=client -f "$file" || {
+              echo "❌ Failed to validate HelmRelease: $file"
+              exit 1
+            }
+            HELMRELEASE_COUNT=$((HELMRELEASE_COUNT + 1))
           done
+          echo "✅ Validated $HELMRELEASE_COUNT HelmReleases"
 
   policy-validation:
     name: Kyverno Policy Validation
@@ -143,7 +155,9 @@ jobs:
       - name: Setup Kyverno CLI
         run: |
           # Install Kyverno CLI using GitHub releases
+          echo "📦 Installing Kyverno CLI..."
           KYVERNO_VERSION=$(curl -s https://api.github.com/repos/kyverno/kyverno/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+          echo "Installing Kyverno CLI version: $KYVERNO_VERSION"
           curl -L "https://github.com/kyverno/kyverno/releases/download/${KYVERNO_VERSION}/kyverno-cli_${KYVERNO_VERSION}_linux_x86_64.tar.gz" | tar -xz
           sudo mv kyverno /usr/local/bin/
           kyverno version
@@ -151,12 +165,18 @@ jobs:
       - name: Validate Kyverno policies
         run: |
           echo "🔍 Validating Kyverno policies..."
+          POLICY_COUNT=0
           find clusters -name "*.yaml" -path "*/kyverno/*" | while read file; do
             if grep -q "kind: Policy\|kind: ClusterPolicy" "$file"; then
               echo "Validating policy: $file"
-              kyverno validate "$file" || exit 1
+              kyverno validate "$file" || {
+                echo "❌ Failed to validate policy: $file"
+                exit 1
+              }
+              POLICY_COUNT=$((POLICY_COUNT + 1))
             fi
           done
+          echo "✅ Validated $POLICY_COUNT Kyverno policies"
 
   integration-test:
     name: Integration Test
