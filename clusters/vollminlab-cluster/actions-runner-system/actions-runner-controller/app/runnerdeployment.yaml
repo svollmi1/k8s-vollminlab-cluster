@@ -20,3 +20,10 @@ spec:
       image: summerwind/actions-runner:ubuntu-22.04
       labels:
         - vollminlab
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 1000m
+          memory: 1Gi

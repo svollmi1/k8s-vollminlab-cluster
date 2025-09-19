@@ -17,10 +17,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: ${{ env.KUBERNETES_VERSION }}
+      - name: Install kubectl
+        run: |
+          echo "📦 Installing kubectl..."
+          curl -LO "https://dl.k8s.io/release/v${{ env.KUBERNETES_VERSION }}/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
+          kubectl version --client
 
       - name: Validate YAML syntax
         run: |
@@ -127,10 +130,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: ${{ env.KUBERNETES_VERSION }}
+      - name: Install kubectl
+        run: |
+          echo "📦 Installing kubectl..."
+          curl -LO "https://dl.k8s.io/release/v${{ env.KUBERNETES_VERSION }}/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
+          kubectl version --client
 
       - name: Test namespace creation
         run: |
