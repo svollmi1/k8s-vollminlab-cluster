@@ -4,5 +4,6 @@ metadata:
   name: actions-runner-system
 resources:
   - namespace.yaml
+  - ./actions-runner-controller/rbac.yaml
   - ./actions-runner-controller/secrets
   - ./actions-runner-controller/app
