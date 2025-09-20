@@ -153,8 +153,8 @@ data:
       category: apps
     resources:
       requests:
-        cpu: 25m
-        memory: 96Mi
-      limits:
         cpu: 100m
-        memory: 128Mi
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
