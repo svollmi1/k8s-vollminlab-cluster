@@ -16,10 +16,6 @@ on:
     branches: [main]
     paths:
       - 'terraform/github-branch-protection/**'
-  pull_request:
-    branches: [main]
-    paths:
-      - 'terraform/github-branch-protection/**'
 
 env:
   TF_VERSION: '1.6.0'
