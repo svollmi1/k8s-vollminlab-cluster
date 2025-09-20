@@ -11,7 +11,7 @@ metadata:
   name: github-actions-runner
 rules:
 - apiGroups: [""]
-  resources: ["nodes", "namespaces", "pods", "services", "configmaps", "secrets"]
+  resources: ["nodes", "namespaces", "pods", "services", "configmaps", "secrets", "serviceaccounts"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 - apiGroups: ["networking.k8s.io"]
   resources: ["ingresses"]
