@@ -8,3 +8,4 @@ metadata:
     purpose: "ci-validation"
 # RBAC updated for CI validation
 # RBAC updated for PersistentVolume validation
+# Re-applied RBAC permissions
