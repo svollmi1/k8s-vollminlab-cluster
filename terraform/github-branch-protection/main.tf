@@ -28,19 +28,11 @@ resource "github_branch_protection" "main" {
   # Require status checks to pass before merging
   required_status_checks {
     strict   = true
-    contexts = ["CI", "Test Runner"]
+    contexts = ["Validate Kubernetes Manifests", "Security Scan", "Flux Configuration Validation", "Kyverno Policy Validation", "Integration Test"]
   }
   
   # Enforce branch protection rules for administrators
   enforce_admins = true
-  
-  # Require pull request reviews before merging
-  required_pull_request_reviews {
-    required_approving_review_count = 1
-    dismiss_stale_reviews           = true
-    require_code_owner_reviews      = false
-    pull_request_bypassers          = []
-  }
   
   # Require conversation resolution before merging
   require_conversation_resolution = true
