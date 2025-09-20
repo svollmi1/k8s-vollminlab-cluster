@@ -3,5 +3,6 @@ kind: Namespace
 metadata:
   name: ci-test-namespace
   labels:
+    test.ci: "2025-09-19-2205"
     test: "true"
     purpose: "ci-validation"
