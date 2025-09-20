@@ -73,10 +73,19 @@ jobs:
           echo "🔍 Checking for common issues..."
           
           # Check for hardcoded secrets (exclude SealedSecrets and legitimate references)
-          if grep -r "password\s*:\s*[a-zA-Z0-9]" clusters/ --include="*.yaml" --include="*.yml" | grep -v "kind: Secret\|kind: SealedSecret\|#.*secret\|#.*password\|secretName\|releaseName\|name:\|encryptedData:\|spec:"; then
-            echo "❌ Found potential hardcoded secrets"
-            exit 1
-          fi
+          # First, find files with password fields
+          for file in $(find clusters -name "*.yaml" -o -name "*.yml" | xargs grep -l "password\s*:"); do
+            # Skip if it's a SealedSecret or legitimate reference
+            if grep -q "kind: SealedSecret\|encryptedData:" "$file"; then
+              echo "Skipping $file (SealedSecret)"
+              continue
+            fi
+            # Check for actual hardcoded secrets (not in SealedSecret context)
+            if grep "password\s*:\s*[a-zA-Z0-9]" "$file" | grep -v "encryptedData:\|spec:"; then
+              echo "❌ Found potential hardcoded secrets in $file"
+              exit 1
+            fi
+          done
           
           # Check for missing labels
           echo "✅ No hardcoded secrets found"
