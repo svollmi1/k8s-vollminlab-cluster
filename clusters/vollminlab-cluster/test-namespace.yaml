@@ -6,3 +6,4 @@ metadata:
     test.ci: "2025-09-19-2205"
     test: "true"
     purpose: "ci-validation"
+# RBAC updated for CI validation
