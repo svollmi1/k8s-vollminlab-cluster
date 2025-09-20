@@ -46,6 +46,9 @@ rules:
 - apiGroups: ["rbac.authorization.k8s.io"]
   resources: ["clusterroles", "clusterrolebindings", "roles", "rolebindings"]
   verbs: ["get", "list", "watch"]
+- apiGroups: ["actions.summerwind.dev"]
+  resources: ["runnerdeployments", "runners", "runnerreplicasets"]
+  verbs: ["get", "list", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
