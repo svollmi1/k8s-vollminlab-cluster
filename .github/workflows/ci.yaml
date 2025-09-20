@@ -25,6 +25,12 @@ jobs:
           sudo mv kubectl /usr/local/bin/
           kubectl version --client
 
+      - name: Apply RBAC permissions
+        run: |
+          echo "🔧 Applying RBAC permissions for CI validation..."
+          kubectl apply -f clusters/vollminlab-cluster/actions-runner-system/actions-runner-controller/rbac.yaml
+          echo "✅ RBAC permissions applied successfully"
+
       - name: Validate YAML syntax
         run: |
           echo "🔍 Validating YAML syntax..."
