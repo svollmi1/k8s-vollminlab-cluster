@@ -35,11 +35,6 @@ jobs:
               echo "Skipping $file (Kustomization build file)"
               continue
             fi
-            # Skip resources that require special RBAC permissions (temporary workaround)
-            if [[ "$file" == *"metallb"* ]] || [[ "$file" == *"storageclass"* ]] || [[ "$file" == *"pv-"* ]]; then
-              echo "Skipping $file (requires special RBAC permissions)"
-              continue
-            fi
             echo "Validating $file"
             kubectl apply --dry-run=client -f "$file" || {
               echo "❌ Invalid YAML syntax in $file"
@@ -57,11 +52,6 @@ jobs:
             # Skip kustomization files (build files, not Kubernetes resources)
             if [[ "$file" == *"kustomization.yaml" ]]; then
               echo "Skipping $file (Kustomization build file)"
-              continue
-            fi
-            # Skip resources that require special RBAC permissions (temporary workaround)
-            if [[ "$file" == *"metallb"* ]] || [[ "$file" == *"storageclass"* ]] || [[ "$file" == *"pv-"* ]]; then
-              echo "Skipping $file (requires special RBAC permissions)"
               continue
             fi
             echo "Validating $file"
