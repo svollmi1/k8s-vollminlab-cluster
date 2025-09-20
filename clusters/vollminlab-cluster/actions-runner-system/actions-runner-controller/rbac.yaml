@@ -49,6 +49,9 @@ rules:
 - apiGroups: ["actions.summerwind.dev"]
   resources: ["runnerdeployments", "runners", "runnerreplicasets"]
   verbs: ["get", "list", "watch"]
+- apiGroups: ["metallb.io"]
+  resources: ["l2advertisements", "ipaddresspools", "bgpadvertisements", "bgppeers", "bfdprofiles", "communities"]
+  verbs: ["get", "list", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
