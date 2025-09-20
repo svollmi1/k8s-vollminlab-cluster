@@ -9,3 +9,4 @@ metadata:
 # RBAC updated for CI validation
 # RBAC updated for PersistentVolume validation
 # Re-applied RBAC permissions
+# Testing RBAC fix PR - 09/19/2025 23:38:39
