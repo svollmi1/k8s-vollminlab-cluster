@@ -6,8 +6,7 @@ metadata:
     policies.kyverno.io/title: Restrict default Namespace
     policies.kyverno.io/category: Best Practices
     policies.kyverno.io/severity: medium
-    policies.kyverno.io/description: >
-      Disallow the creation of resources in the default namespace.
+    policies.kyverno.io/description: "Disallow the creation of resources in the default namespace."
     kyverno.io/enable-background: "true"
   labels:
     app: kyverno

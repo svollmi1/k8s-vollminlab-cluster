@@ -6,9 +6,7 @@ metadata:
     policies.kyverno.io/title: Inject Manual Resource Limits
     policies.kyverno.io/category: Best Practices
     policies.kyverno.io/severity: medium
-    policies.kyverno.io/description: >
-      Injects CPU and memory requests/limits for workloads that cannot be configured via Helm values,
-      such as Longhorn and other non-standard charts.
+    policies.kyverno.io/description: "Injects CPU and memory requests/limits for workloads that cannot be configured via Helm values, such as Longhorn and other non-standard charts."
 spec:
   rules:
     - name: inject-resource-requirements

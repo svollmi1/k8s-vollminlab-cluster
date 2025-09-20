@@ -6,8 +6,7 @@ metadata:
     policies.kyverno.io/title: Block Privileged Pods
     policies.kyverno.io/category: Pod Security
     policies.kyverno.io/severity: high
-    policies.kyverno.io/description: >
-      Prevent pods from running in privileged mode, excluding system namespaces.
+    policies.kyverno.io/description: "Prevent pods from running in privileged mode, excluding system namespaces."
     kyverno.io/enable-background: "true"
   labels:
     app: kyverno

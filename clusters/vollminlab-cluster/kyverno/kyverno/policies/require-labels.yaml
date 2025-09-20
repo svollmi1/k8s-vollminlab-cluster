@@ -6,8 +6,7 @@ metadata:
     policies.kyverno.io/title: Require Standard Labels
     policies.kyverno.io/category: Best Practices
     policies.kyverno.io/severity: medium
-    policies.kyverno.io/description: >
-      Enforces presence of common labels: app, env, and category for all core workloads and namespaces.
+    policies.kyverno.io/description: "Enforces presence of common labels: app, env, and category for all core workloads and namespaces."
     kyverno.io/enable-background: "true"
   labels:
     app: kyverno

@@ -22,8 +22,9 @@
       "**/*.patch.yaml",
       "file:///c%3A/git/k8s-vollminlab-cluster/**/patch.yaml",
       "file:///c%3A/git/k8s-vollminlab-cluster/**/*patch.yaml",
-      "file:///c%3A/git/k8s-vollminlab-cluster/clusters/vollminlab-cluster/kyverno/kyverno/patches/webhooks-patch.yaml"
-    ],
+      "file:///c%3A/git/k8s-vollminlab-cluster/clusters/vollminlab-cluster/kyverno/kyverno/patches/webhooks-patch.yaml",
+      "file:///c%3A/git/k8s-vollminlab-cluster/clusters/vollminlab-cluster/actions-runner-system/actions-runner-controller/rbac.yaml"
+    ]
   },
   "files.associations": {
     "*.patch.yaml": "yaml",
