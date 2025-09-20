@@ -8,7 +8,7 @@ metadata:
     env: production
     category: ci
 spec:
-  replicas: 1
+  replicas: 3
   template:
     metadata:
       labels:
@@ -23,11 +23,11 @@ spec:
       serviceAccountName: github-actions-runner
       resources:
         requests:
-          cpu: 100m
-          memory: 128Mi
+          cpu: 500m
+          memory: 512Mi
         limits:
-          cpu: 1000m
-          memory: 1Gi
+          cpu: 2000m
+          memory: 2Gi
       env:
         - name: RUNNER_WAIT_FOR_DOCKERD_SECONDS
           value: "120"
