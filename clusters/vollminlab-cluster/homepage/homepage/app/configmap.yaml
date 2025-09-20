@@ -14,22 +14,105 @@ data:
         - Developer:
             - Github:
                 - abbr: GH
-                  href: https://github.com/
+                  href: https://github.com/svollmi1
+        - Infrastructure:
+            - vCenter:
+                - abbr: VC
+                  href: https://vcenter.vollminlab.com
+            - TrueNAS:
+                - abbr: NAS
+                  href: https://truenas.vollminlab.com
+            - Pi-hole Admin:
+                - abbr: PI
+                  href: https://pihole.vollminlab.com/admin
+        - Documentation:
+            - BookStack:
+                - abbr: DOC
+                  href: https://bookstack.vollminlab.com
       kubernetes:
         mode: cluster
       services:
-        - My First Group:
-            - My First Service:
-                description: Homepage is awesome
-                href: http://localhost/
-        - My Second Group:
-            - My Second Service:
-                description: Homepage is the best
-                href: http://localhost/
-        - My Third Group:
-            - My Third Service:
-                description: "Homepage is \U0001F60E"
-                href: http://localhost/
+        - Media Stack:
+            - Plex:
+                description: Media streaming server
+                href: https://plex.vollminlab.com
+                icon: plex.png
+            - Overseerr:
+                description: Media request management
+                href: https://overseerr.vollminlab.com
+                icon: overseerr.png
+            - Sonarr:
+                description: TV show collection manager
+                href: https://sonarr.vollminlab.com
+                icon: sonarr.png
+            - Radarr:
+                description: Movie collection manager
+                href: https://radarr.vollminlab.com
+                icon: radarr.png
+            - Prowlarr:
+                description: Indexer manager
+                href: https://prowlarr.vollminlab.com
+                icon: prowlarr.png
+            - SABnzbd:
+                description: Usenet downloader
+                href: https://sabnzbd.vollminlab.com
+                icon: sabnzbd.png
+        - Infrastructure:
+            - TrueNAS:
+                description: Network attached storage
+                href: https://truenas.vollminlab.com
+                icon: truenas.png
+            - vCenter:
+                description: VMware vCenter Server
+                href: https://vcenter.vollminlab.com
+                icon: vmware.png
+            - Portainer:
+                description: Container management
+                href: https://portainer.vollminlab.com
+                icon: portainer.png
+            - Nginx Proxy Manager:
+                description: Reverse proxy management
+                href: https://npm.vollminlab.com
+                icon: nginx-proxy-manager.png
+            - Pi-hole:
+                description: DNS sinkhole admin
+                href: https://pihole.vollminlab.com/admin
+                icon: pihole.png
+            - UDM:
+                description: UniFi Dream Machine
+                href: https://udm.vollminlab.com
+                icon: unifi.png
+        - Monitoring & Observability:
+            - Grafana:
+                description: Metrics visualization
+                href: https://grafana.vollminlab.com
+                icon: grafana.png
+            - Prometheus:
+                description: Metrics collection
+                href: https://prometheus.vollminlab.com
+                icon: prometheus.png
+            - Policy Reporter:
+                description: Kubernetes policy reporting
+                href: https://policyreporter.vollminlab.com
+                icon: policy-reporter.png
+            - Longhorn:
+                description: Kubernetes storage management
+                href: https://longhorn.vollminlab.com
+                icon: longhorn.png
+        - GitOps & Development:
+            - Capacitor:
+                description: Flux GitOps dashboard
+                href: https://capacitor.vollminlab.com
+                icon: capacitor.png
+        - Documentation & Tools:
+            - BookStack:
+                description: Wiki and documentation
+                href: https://bookstack.vollminlab.com
+                icon: bookstack.png
+            - Homepage:
+                description: This dashboard
+                href: https://homepage.vollminlab.com
+                icon: homepage.png
       settings: null
       widgets:
         - kubernetes:
@@ -47,6 +130,19 @@ data:
         - search:
             provider: duckduckgo
             target: _blank
+        - resources:
+            cpu: true
+            memory: true
+            show: true
+            showLabel: true
+        - system:
+            cpu: true
+            memory: true
+            show: true
+            showLabel: true
+        - welcome:
+            style: bold
+            show: true
       enableRbac: true
     serviceAccount:
       create: true
