@@ -36,15 +36,6 @@ jobs:
               continue
             fi
             echo "Validating $file"
-            # Skip CSI-based PersistentVolumes and StorageClasses as they require CSI drivers to be available
-            if [[ "$file" == *"pv-"* ]] && grep -q "csi:" "$file"; then
-              echo "Skipping $file (CSI PersistentVolume requires CSI driver)"
-              continue
-            fi
-            if [[ "$file" == *"storageclass-"* ]] && grep -q "csi.k8s.io" "$file"; then
-              echo "Skipping $file (CSI StorageClass requires CSI driver)"
-              continue
-            fi
             kubectl apply --dry-run=client -f "$file" || {
               echo "❌ Invalid YAML syntax in $file"
               echo "Error details:"
