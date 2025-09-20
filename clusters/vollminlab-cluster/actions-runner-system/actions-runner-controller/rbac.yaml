@@ -35,7 +35,7 @@ rules:
   resources: ["kustomizations"]
   verbs: ["get", "list", "watch"]
 - apiGroups: ["source.toolkit.fluxcd.io"]
-  resources: ["gitrepositories", "helmrepositories"]
+  resources: ["gitrepositories", "helmrepositories", "ocirepositories"]
   verbs: ["get", "list", "watch"]
 - apiGroups: ["apiextensions.k8s.io"]
   resources: ["customresourcedefinitions"]
