@@ -130,19 +130,6 @@ data:
         - search:
             provider: duckduckgo
             target: _blank
-        - resources:
-            cpu: true
-            memory: true
-            show: true
-            showLabel: true
-        - system:
-            cpu: true
-            memory: true
-            show: true
-            showLabel: true
-        - welcome:
-            style: bold
-            show: true
       enableRbac: true
     serviceAccount:
       create: true
