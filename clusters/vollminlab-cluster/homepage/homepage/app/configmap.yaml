@@ -10,25 +10,6 @@ metadata:
 data:
   values.yaml: |
     config:
-      bookmarks:
-        - Developer:
-            - Github:
-                - abbr: GH
-                  href: https://github.com/svollmi1
-        - Infrastructure:
-            - vCenter:
-                - abbr: VC
-                  href: https://vcenter.vollminlab.com
-            - TrueNAS:
-                - abbr: NAS
-                  href: https://truenas.vollminlab.com
-            - Pi-hole Admin:
-                - abbr: PI
-                  href: https://pihole.vollminlab.com/admin
-        - Documentation:
-            - BookStack:
-                - abbr: DOC
-                  href: https://bookstack.vollminlab.com
       kubernetes:
         mode: cluster
       services:
@@ -75,9 +56,8 @@ data:
                 href: https://npm.vollminlab.com
                 icon: nginx-proxy-manager.png
             - Pi-hole:
-                description: DNS sinkhole admin
+                description: DNS Sinkhole
                 href: https://pihole.vollminlab.com/admin
-                icon: pihole.png
             - UDM:
                 description: UniFi Dream Machine
                 href: https://udm.vollminlab.com
@@ -103,7 +83,7 @@ data:
             - Capacitor:
                 description: Flux GitOps dashboard
                 href: https://capacitor.vollminlab.com
-                icon: capacitor.png
+                icon: flux.png
         - Documentation & Tools:
             - BookStack:
                 description: Wiki and documentation
@@ -113,6 +93,43 @@ data:
                 description: This dashboard
                 href: https://homepage.vollminlab.com
                 icon: homepage.png
+        - Personal/External:
+            - Yahoo Fantasy Football:
+                description: Yahoo Fantasy Football
+                href: https://football.fantasysports.yahoo.com/
+                icon: yahoo.png
+            - ESPN Fantasy Football:
+                description: ESPN Fantasy Football
+                href: https://www.espn.com/fantasy/football/
+                icon: espn.png
+            - ChatGPT:
+                description: AI Assistant
+                href: https://chatgpt.com
+                icon: openai.png
+            - De Shaw Access:
+                description: Work access portal
+                href: https://access-test.deshaw.com
+                icon: briefcase.png
+            - Homelab Repo:
+                description: This Kubernetes cluster repo
+                href: https://github.com/svollmi1/k8s-vollminlab-cluster
+                icon: github.png
+            - Chocolatey:
+                description: Package manager community
+                href: https://community.chocolatey.org
+                icon: chocolatey.png
+            - Reddit:
+                description: Reddit /r/all
+                href: https://www.reddit.com/r/all/
+                icon: reddit.png
+            - GroupMe:
+                description: Group messaging web
+                href: https://web.groupme.com/chats
+                icon: groupme.png
+            - MakerWorld:
+                description: 3D printing community
+                href: https://makerworld.com/en
+                icon: makerworld.png
       settings: null
       widgets:
         - kubernetes:
@@ -130,6 +147,16 @@ data:
         - search:
             provider: duckduckgo
             target: _blank
+        - resources:
+            cpu: true
+            memory: true
+            show: true
+            showLabel: true
+        - system:
+            cpu: true
+            memory: true
+            show: true
+            showLabel: true
       enableRbac: true
     serviceAccount:
       create: true
