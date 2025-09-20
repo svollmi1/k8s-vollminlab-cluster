@@ -72,8 +72,8 @@ jobs:
         run: |
           echo "🔍 Checking for common issues..."
           
-          # Check for hardcoded secrets (only catch actual hardcoded values)
-          if grep -r "password\s*:\s*[a-zA-Z0-9]" clusters/ --include="*.yaml" --include="*.yml" | grep -v "kind: Secret\|kind: SealedSecret\|#.*secret\|#.*password\|secretName\|releaseName\|name:"; then
+          # Check for hardcoded secrets (exclude SealedSecrets and legitimate references)
+          if grep -r "password\s*:\s*[a-zA-Z0-9]" clusters/ --include="*.yaml" --include="*.yml" | grep -v "kind: Secret\|kind: SealedSecret\|#.*secret\|#.*password\|secretName\|releaseName\|name:\|encryptedData:\|spec:"; then
             echo "❌ Found potential hardcoded secrets"
             exit 1
           fi
