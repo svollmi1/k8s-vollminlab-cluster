@@ -30,9 +30,9 @@ jobs:
           echo "🔍 Validating YAML syntax..."
           # Use kubectl to validate YAML syntax for Kubernetes resources only
           find clusters -name "*.yaml" -o -name "*.yml" | while read file; do
-            # Skip kustomization files and other non-Kubernetes resources
-            if [[ "$file" == *"kustomization.yaml" ]] || [[ "$file" == *"helmrelease.yaml" ]]; then
-              echo "Skipping $file (not a Kubernetes resource)"
+            # Skip kustomization files (build files, not Kubernetes resources)
+            if [[ "$file" == *"kustomization.yaml" ]]; then
+              echo "Skipping $file (Kustomization build file)"
               continue
             fi
             echo "Validating $file"
@@ -43,16 +43,6 @@ jobs:
             fi
             if [[ "$file" == *"storageclass-"* ]] && grep -q "csi.k8s.io" "$file"; then
               echo "Skipping $file (CSI StorageClass requires CSI driver)"
-              continue
-            fi
-            # Skip custom resources that require CRDs (non-standard API groups)
-            if grep -q "apiVersion: metallb.io\|apiVersion: kyverno.io\|apiVersion: longhorn.io\|apiVersion: elasticsearch.k8s.elastic.co" "$file"; then
-              echo "Skipping $file (custom resource requires CRDs)"
-              continue
-            fi
-            # Skip CRD files that require operators to be installed
-            if grep -q "kind: CustomResourceDefinition" "$file"; then
-              echo "Skipping $file (CRD requires operator installation)"
               continue
             fi
             kubectl apply --dry-run=client -f "$file" || {
@@ -68,9 +58,9 @@ jobs:
         run: |
           echo "🔍 Validating Kubernetes manifests..."
           find clusters -name "*.yaml" -o -name "*.yml" | while read file; do
-            # Skip kustomization files and other non-Kubernetes resources
-            if [[ "$file" == *"kustomization.yaml" ]] || [[ "$file" == *"helmrelease.yaml" ]]; then
-              echo "Skipping $file (not a Kubernetes resource)"
+            # Skip kustomization files (build files, not Kubernetes resources)
+            if [[ "$file" == *"kustomization.yaml" ]]; then
+              echo "Skipping $file (Kustomization build file)"
               continue
             fi
             echo "Validating $file"
