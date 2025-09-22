@@ -42,26 +42,6 @@ data:
                   type: sonarr
                   url: https://sonarr.vollminlab.com
                   key: ${SONARR_API_KEY}
-            - Radarr:
-                description: Movie collection manager
-                href: https://radarr.vollminlab.com
-                icon: radarr.png
-                widget:
-                  type: radarr
-                  url: https://radarr.vollminlab.com
-                  key: ${RADARR_API_KEY}
-            - Prowlarr:
-                description: Indexer manager
-                href: https://prowlarr.vollminlab.com
-                icon: prowlarr.png
-            - SABnzbd:
-                description: Usenet downloader
-                href: https://sabnzbd.vollminlab.com
-                icon: sabnzbd.png
-                widget:
-                  type: sabnzbd
-                  url: https://sabnzbd.vollminlab.com
-                  key: ${SABNZBD_API_KEY}
         - Infrastructure:
             - TrueNAS:
                 description: Network attached storage
@@ -98,6 +78,32 @@ data:
                 description: Load balancer statistics
                 href: http://haproxy01.vollminlab.com:8404/stats
                 icon: haproxy.png
+            - Radarr:
+                description: Movie collection manager
+                href: https://radarr.vollminlab.com
+                icon: radarr.png
+                widget:
+                  type: radarr
+                  url: https://radarr.vollminlab.com
+                  key: ${RADARR_API_KEY}
+            - Prowlarr:
+                description: Indexer manager
+                href: https://prowlarr.vollminlab.com
+                icon: prowlarr.png
+                namespace: mediastack
+                app: prowlarr
+                widget:
+                  type: prowlarr
+                  url: https://prowlarr.vollminlab.com
+                  key: ${PROWLARR_API_KEY}
+            - SABnzbd:
+                description: Usenet downloader
+                href: https://sabnzbd.vollminlab.com
+                icon: sabnzbd.png
+                widget:
+                  type: sabnzbd
+                  url: https://sabnzbd.vollminlab.com
+                  key: ${SABNZBD_API_KEY}
         - Monitoring & Observability:
             - Grafana:
                 description: Metrics visualization
@@ -129,6 +135,18 @@ data:
                 description: This dashboard
                 href: https://homepage.vollminlab.com
                 icon: homepage.png
+            - Homelab Repo:
+                description: This Kubernetes cluster repo
+                href: https://github.com/svollmi1/k8s-vollminlab-cluster
+                icon: github.png
+            - ChatGPT:
+                description: AI Assistant
+                href: https://chatgpt.com
+                icon: openai.png
+            - Reddit:
+                description: Reddit /r/all
+                href: https://www.reddit.com/r/all/
+                icon: reddit.png
         - Personal/External:
             - Yahoo Fantasy Football:
                 description: Yahoo Fantasy Football
@@ -138,26 +156,14 @@ data:
                 description: ESPN Fantasy Football
                 href: https://www.espn.com/fantasy/football/
                 icon: espn.png
-            - ChatGPT:
-                description: AI Assistant
-                href: https://chatgpt.com
-                icon: openai.png
-            - De Shaw Access:
+            - D.E. Shaw Access:
                 description: Work access portal
                 href: https://access-test.deshaw.com
                 icon: briefcase.png
-            - Homelab Repo:
-                description: This Kubernetes cluster repo
-                href: https://github.com/svollmi1/k8s-vollminlab-cluster
-                icon: github.png
             - Chocolatey:
                 description: Package manager community
                 href: https://community.chocolatey.org
                 icon: chocolatey.png
-            - Reddit:
-                description: Reddit /r/all
-                href: https://www.reddit.com/r/all/
-                icon: reddit.png
             - GroupMe:
                 description: Group messaging web
                 href: https://web.groupme.com/chats
@@ -166,7 +172,13 @@ data:
                 description: 3D printing community
                 href: https://makerworld.com/en
                 icon: makerworld.png
-      settings: null
+      settings:
+        theme: dark
+        favicon: null
+        title: "VollminLab Dashboard"
+        subtitle: "HomeLab Services & Infrastructure"
+        logo: null
+        footer: null
       widgets:
         - search:
             provider: google
@@ -177,11 +189,11 @@ data:
               memory: true
               show: true
               showLabel: true
-            nodes:
-              cpu: true
-              memory: true
-              show: true
-              showLabel: true
+          nodes:
+            cpu: true
+            memory: true
+            show: true
+            showLabel: true
         - resources:
             cpu: true
             memory: true
@@ -253,6 +265,11 @@ data:
           secretKeyRef:
             name: homepage-env-vars
             key: OVERSEERR_API_KEY
+      - name: PROWLARR_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: PROWLARR_API_KEY
     resources:
       requests:
         cpu: 100m
