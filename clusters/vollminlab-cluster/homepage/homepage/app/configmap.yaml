@@ -79,6 +79,7 @@ data:
                   type: pihole
                   url: https://pihole.vollminlab.com
                   key: ${PIHOLE_API_KEY}
+                  version: 6
             - UDM:
                 description: UniFi Dream Machine
                 href: https://udm.vollminlab.com
