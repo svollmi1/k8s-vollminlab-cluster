@@ -236,11 +236,6 @@ data:
           secretKeyRef:
             name: homepage-env-vars
             key: PROWLARR_API_KEY
-      - name: TRUENAS_API_KEY
-        valueFrom:
-          secretKeyRef:
-            name: homepage-env-vars
-            key: TRUENAS_API_KEY
     resources:
       requests:
         cpu: 100m
