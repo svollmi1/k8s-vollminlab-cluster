@@ -53,6 +53,11 @@ data:
                 description: Network attached storage
                 href: https://truenas.vollminlab.com
                 icon: truenas.png
+                widget:
+                  type: truenas
+                  url: https://truenas.vollminlab.com
+                  key: ${TRUENAS_API_KEY}
+                  enablePools: true
             - vCenter:
                 description: VMware vCenter Server
                 href: https://vcenter.vollminlab.com
@@ -231,6 +236,11 @@ data:
           secretKeyRef:
             name: homepage-env-vars
             key: PROWLARR_API_KEY
+      - name: TRUENAS_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: TRUENAS_API_KEY
     resources:
       requests:
         cpu: 100m
