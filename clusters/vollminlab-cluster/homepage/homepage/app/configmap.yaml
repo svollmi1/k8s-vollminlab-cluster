@@ -42,42 +42,6 @@ data:
                   type: sonarr
                   url: https://sonarr.vollminlab.com
                   key: ${SONARR_API_KEY}
-        - Infrastructure:
-            - TrueNAS:
-                description: Network attached storage
-                href: https://truenas.vollminlab.com
-                icon: truenas.png
-                widget:
-                  type: truenas
-                  url: https://truenas.vollminlab.com
-                  username: ${TRUENAS_USERNAME}
-                  password: ${TRUENAS_PASSWORD}
-            - vCenter:
-                description: VMware vCenter Server
-                href: https://vcenter.vollminlab.com
-                icon: vmware.png
-            - Portainer:
-                description: Container management
-                href: https://portainer.vollminlab.com
-                icon: portainer.png
-            - Nginx Proxy Manager:
-                description: Reverse proxy management
-                href: https://npm.vollminlab.com
-                icon: nginx-proxy-manager.png
-            - Pi-hole:
-                description: DNS Sinkhole
-                href: https://pihole.vollminlab.com/admin
-                widget:
-                  type: pihole
-                  url: https://pihole.vollminlab.com
-            - UDM:
-                description: UniFi Dream Machine
-                href: https://udm.vollminlab.com
-                icon: unifi.png
-            - HAProxy Stats:
-                description: Load balancer statistics
-                href: http://haproxy01.vollminlab.com:8404/stats
-                icon: haproxy.png
             - Radarr:
                 description: Movie collection manager
                 href: https://radarr.vollminlab.com
@@ -104,6 +68,44 @@ data:
                   type: sabnzbd
                   url: https://sabnzbd.vollminlab.com
                   key: ${SABNZBD_API_KEY}
+        - Infrastructure:
+            - TrueNAS:
+                description: Network attached storage
+                href: https://truenas.vollminlab.com
+                icon: truenas.png
+                widget:
+                  type: truenas
+                  url: https://truenas.vollminlab.com
+                  username: ${TRUENAS_USERNAME}
+                  password: ${TRUENAS_PASSWORD}
+            - vCenter:
+                description: VMware vCenter Server
+                href: https://vcenter.vollminlab.com
+                icon: vmware.png
+            - Portainer:
+                description: Container management
+                href: https://portainer.vollminlab.com
+                icon: portainer.png
+            - Nginx Proxy Manager:
+                description: Reverse proxy management
+                href: https://npm.vollminlab.com
+                icon: nginx-proxy-manager.png
+            - Pi-hole:
+                description: DNS Sinkhole
+                href: https://pihole.vollminlab.com/admin
+                icon: pihole.png
+            - UDM:
+                description: UniFi Dream Machine
+                href: https://udm.vollminlab.com
+                icon: unifi.png
+            - HAProxy Stats:
+                description: Load balancer statistics
+                href: http://haproxy01.vollminlab.com:8404/stats
+                icon: haproxy.png
+            - Capacitor:
+                description: Flux GitOps dashboard
+                href: https://capacitor.vollminlab.com
+                icon: flux.png
         - Monitoring & Observability:
             - Grafana:
                 description: Metrics visualization
@@ -121,11 +123,6 @@ data:
                 description: Kubernetes storage management
                 href: https://longhorn.vollminlab.com
                 icon: longhorn.png
-        - GitOps & Development:
-            - Capacitor:
-                description: Flux GitOps dashboard
-                href: https://capacitor.vollminlab.com
-                icon: flux.png
         - Documentation & Tools:
             - BookStack:
                 description: Wiki and documentation
@@ -147,6 +144,10 @@ data:
                 description: Reddit /r/all
                 href: https://www.reddit.com/r/all/
                 icon: reddit.png
+            - Chocolatey:
+                description: Package manager community
+                href: https://community.chocolatey.org
+                icon: chocolatey.png
         - Personal/External:
             - Yahoo Fantasy Football:
                 description: Yahoo Fantasy Football
@@ -160,10 +161,6 @@ data:
                 description: Work access portal
                 href: https://access-test.deshaw.com
                 icon: briefcase.png
-            - Chocolatey:
-                description: Package manager community
-                href: https://community.chocolatey.org
-                icon: chocolatey.png
             - GroupMe:
                 description: Group messaging web
                 href: https://web.groupme.com/chats
@@ -183,17 +180,6 @@ data:
         - search:
             provider: google
             target: _blank
-        - kubernetes:
-            cluster:
-              cpu: true
-              memory: true
-              show: true
-              showLabel: true
-          nodes:
-            cpu: true
-            memory: true
-            show: true
-            showLabel: true
         - resources:
             cpu: true
             memory: true
