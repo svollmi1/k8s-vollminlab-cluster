@@ -28,20 +28,26 @@ data:
                 icon: overseerr.png
                 namespace: mediastack
                 app: overseerr
-                widget:
-                  type: overseerr
-                  url: https://overseerr.vollminlab.com
-                  key: ${OVERSEERR_API_KEY}
             - Sonarr:
                 description: TV show collection manager
                 href: https://sonarr.vollminlab.com
                 icon: sonarr.png
                 namespace: mediastack
                 app: sonarr
-                widget:
-                  type: sonarr
-                  url: https://sonarr.vollminlab.com
-                  key: ${SONARR_API_KEY}
+            - Radarr:
+                description: Movie collection manager
+                href: https://radarr.vollminlab.com
+                icon: radarr.png
+            - Prowlarr:
+                description: Indexer manager
+                href: https://prowlarr.vollminlab.com
+                icon: prowlarr.png
+                namespace: mediastack
+                app: prowlarr
+            - SABnzbd:
+                description: Usenet downloader
+                href: https://sabnzbd.vollminlab.com
+                icon: sabnzbd.png
         - Infrastructure:
             - TrueNAS:
                 description: Network attached storage
@@ -50,8 +56,8 @@ data:
                 widget:
                   type: truenas
                   url: https://truenas.vollminlab.com
-                  username: ${TRUENAS_USERNAME}
-                  password: ${TRUENAS_PASSWORD}
+                  key: ${TRUENAS_API_KEY}
+                  enablePools: true
             - vCenter:
                 description: VMware vCenter Server
                 href: https://vcenter.vollminlab.com
@@ -67,9 +73,7 @@ data:
             - Pi-hole:
                 description: DNS Sinkhole
                 href: https://pihole.vollminlab.com/admin
-                widget:
-                  type: pihole
-                  url: https://pihole.vollminlab.com
+                icon: pihole.png
             - UDM:
                 description: UniFi Dream Machine
                 href: https://udm.vollminlab.com
@@ -78,32 +82,10 @@ data:
                 description: Load balancer statistics
                 href: http://haproxy01.vollminlab.com:8404/stats
                 icon: haproxy.png
-            - Radarr:
-                description: Movie collection manager
-                href: https://radarr.vollminlab.com
-                icon: radarr.png
-                widget:
-                  type: radarr
-                  url: https://radarr.vollminlab.com
-                  key: ${RADARR_API_KEY}
-            - Prowlarr:
-                description: Indexer manager
-                href: https://prowlarr.vollminlab.com
-                icon: prowlarr.png
-                namespace: mediastack
-                app: prowlarr
-                widget:
-                  type: prowlarr
-                  url: https://prowlarr.vollminlab.com
-                  key: ${PROWLARR_API_KEY}
-            - SABnzbd:
-                description: Usenet downloader
-                href: https://sabnzbd.vollminlab.com
-                icon: sabnzbd.png
-                widget:
-                  type: sabnzbd
-                  url: https://sabnzbd.vollminlab.com
-                  key: ${SABNZBD_API_KEY}
+            - Capacitor:
+                description: Flux GitOps dashboard
+                href: https://capacitor.vollminlab.com
+                icon: flux.png
         - Monitoring & Observability:
             - Grafana:
                 description: Metrics visualization
@@ -121,11 +103,6 @@ data:
                 description: Kubernetes storage management
                 href: https://longhorn.vollminlab.com
                 icon: longhorn.png
-        - GitOps & Development:
-            - Capacitor:
-                description: Flux GitOps dashboard
-                href: https://capacitor.vollminlab.com
-                icon: flux.png
         - Documentation & Tools:
             - BookStack:
                 description: Wiki and documentation
@@ -147,6 +124,10 @@ data:
                 description: Reddit /r/all
                 href: https://www.reddit.com/r/all/
                 icon: reddit.png
+            - Chocolatey:
+                description: Package manager community
+                href: https://community.chocolatey.org
+                icon: chocolatey.png
         - Personal/External:
             - Yahoo Fantasy Football:
                 description: Yahoo Fantasy Football
@@ -160,10 +141,6 @@ data:
                 description: Work access portal
                 href: https://access-test.deshaw.com
                 icon: briefcase.png
-            - Chocolatey:
-                description: Package manager community
-                href: https://community.chocolatey.org
-                icon: chocolatey.png
             - GroupMe:
                 description: Group messaging web
                 href: https://web.groupme.com/chats
@@ -183,17 +160,6 @@ data:
         - search:
             provider: google
             target: _blank
-        - kubernetes:
-            cluster:
-              cpu: true
-              memory: true
-              show: true
-              showLabel: true
-          nodes:
-            cpu: true
-            memory: true
-            show: true
-            showLabel: true
         - resources:
             cpu: true
             memory: true
@@ -270,6 +236,11 @@ data:
           secretKeyRef:
             name: homepage-env-vars
             key: PROWLARR_API_KEY
+      - name: TRUENAS_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: TRUENAS_API_KEY
     resources:
       requests:
         cpu: 100m
