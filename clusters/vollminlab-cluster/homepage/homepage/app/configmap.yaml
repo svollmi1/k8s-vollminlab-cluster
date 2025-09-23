@@ -75,6 +75,10 @@ data:
                 description: DNS Sinkhole
                 href: https://pihole.vollminlab.com/admin
                 icon: pihole.png
+                widget:
+                  type: pihole
+                  url: https://pihole.vollminlab.com
+                  key: ${PIHOLE_API_KEY}
             - UDM:
                 description: UniFi Dream Machine
                 href: https://udm.vollminlab.com
@@ -236,6 +240,11 @@ data:
           secretKeyRef:
             name: homepage-env-vars
             key: PROWLARR_API_KEY
+      - name: PIHOLE_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: PIHOLE_API_KEY
     resources:
       requests:
         cpu: 100m
