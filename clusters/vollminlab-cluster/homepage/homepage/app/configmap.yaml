@@ -18,6 +18,10 @@ data:
                 description: Media streaming server
                 href: https://plex.vollminlab.com
                 icon: plex.png
+                widget:
+                  type: plex
+                  url: https://plex.vollminlab.com
+                  token: ${PLEX_TOKEN}
             - Overseerr:
                 description: Media request management
                 href: https://overseerr.vollminlab.com
