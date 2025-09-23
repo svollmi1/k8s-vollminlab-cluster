@@ -180,8 +180,7 @@ data:
             apiKey: ${OPENWEATHER_API_KEY}
             city: ${WEATHER_CITY}
             units: imperial
-            show: true
-            showLabel: true
+            cache: 5
       enableRbac: true
     serviceAccount:
       create: true
