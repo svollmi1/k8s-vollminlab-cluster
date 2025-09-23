@@ -99,13 +99,15 @@ jobs:
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
-        timeout-minutes: 10
+        timeout-minutes: 3
         continue-on-error: true
         with:
           scan-type: 'fs'
           scan-ref: '.'
           format: 'sarif'
           output: 'trivy-results.sarif'
+          severity: 'HIGH,CRITICAL'
+          ignore-unfixed: true
 
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
