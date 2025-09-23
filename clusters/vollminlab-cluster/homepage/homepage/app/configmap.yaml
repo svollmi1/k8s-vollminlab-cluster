@@ -56,7 +56,8 @@ data:
                 widget:
                   type: truenas
                   url: https://truenas.vollminlab.com
-                  key: ${TRUENAS_API_KEY}
+                  username: ${TRUENAS_USERNAME}
+                  password: ${TRUENAS_PASSWORD}
                   enablePools: true
             - vCenter:
                 description: VMware vCenter Server
@@ -155,7 +156,6 @@ data:
         title: "VollminLab Dashboard"
         subtitle: "HomeLab Services & Infrastructure"
         logo: null
-        footer: null
       widgets:
         - search:
             provider: google
