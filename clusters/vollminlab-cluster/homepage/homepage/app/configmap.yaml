@@ -94,6 +94,10 @@ data:
                 description: DNS Sinkhole
                 href: https://pihole.vollminlab.com/admin
                 icon: pihole.png
+                widget:
+                  type: pihole
+                  url: https://pihole.vollminlab.com
+                  version: 6
             - UDM:
                 description: UniFi Dream Machine
                 href: https://udm.vollminlab.com
