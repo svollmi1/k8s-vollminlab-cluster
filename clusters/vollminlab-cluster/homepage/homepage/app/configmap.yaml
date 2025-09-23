@@ -178,7 +178,8 @@ data:
             showLabel: true
         - openweathermap:
             apiKey: ${OPENWEATHER_API_KEY}
-            city: ${WEATHER_CITY}
+            latitude: ${WEATHER_LATITUDE}
+            longitude: ${WEATHER_LONGITUDE}
             units: imperial
             cache: 5
       enableRbac: true
@@ -200,11 +201,16 @@ data:
           secretKeyRef:
             name: homepage-env-vars
             key: OPENWEATHER_API_KEY
-      - name: WEATHER_CITY
+      - name: WEATHER_LATITUDE
         valueFrom:
           secretKeyRef:
             name: homepage-env-vars
-            key: WEATHER_CITY
+            key: WEATHER_LATITUDE
+      - name: WEATHER_LONGITUDE
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: WEATHER_LONGITUDE
       - name: TRUENAS_USERNAME
         valueFrom:
           secretKeyRef:
