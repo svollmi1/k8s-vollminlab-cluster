@@ -177,9 +177,9 @@ data:
             show: true
             showLabel: true
         - openweathermap:
-            apiKey: ${OPENWEATHER_API_KEY}
-            latitude: ${WEATHER_LATITUDE}
-            longitude: ${WEATHER_LONGITUDE}
+            apiKey: "{{HOMEPAGE_VAR_OPENWEATHER_API_KEY}}"
+            latitude: "{{HOMEPAGE_VAR_WEATHER_LATITUDE}}"
+            longitude: "{{HOMEPAGE_VAR_WEATHER_LONGITUDE}}"
             units: imperial
             cache: 5
       enableRbac: true
@@ -251,6 +251,21 @@ data:
           secretKeyRef:
             name: homepage-env-vars
             key: PIHOLE_API_KEY
+      - name: HOMEPAGE_VAR_OPENWEATHER_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: OPENWEATHER_API_KEY
+      - name: HOMEPAGE_VAR_WEATHER_LATITUDE
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: WEATHER_LATITUDE
+      - name: HOMEPAGE_VAR_WEATHER_LONGITUDE
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: WEATHER_LONGITUDE
     resources:
       requests:
         cpu: 100m
