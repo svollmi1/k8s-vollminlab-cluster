@@ -202,26 +202,6 @@ data:
             longitude: "{{HOMEPAGE_VAR_WEATHER_LONGITUDE}}"
             units: imperial
             cache: 5
-        - overseerr:
-            url: https://overseerr.vollminlab.com
-            key: "{{HOMEPAGE_VAR_OVERSEERR_API_KEY}}"
-            cache: 30
-        - sonarr:
-            url: https://sonarr.vollminlab.com
-            key: "{{HOMEPAGE_VAR_SONARR_API_KEY}}"
-            cache: 30
-        - radarr:
-            url: https://radarr.vollminlab.com
-            key: "{{HOMEPAGE_VAR_RADARR_API_KEY}}"
-            cache: 30
-        - prowlarr:
-            url: https://prowlarr.vollminlab.com
-            key: "{{HOMEPAGE_VAR_PROWLARR_API_KEY}}"
-            cache: 30
-        - sabnzbd:
-            url: https://sabnzbd.vollminlab.com
-            key: "{{HOMEPAGE_VAR_SABNZBD_API_KEY}}"
-            cache: 30
       enableRbac: true
     serviceAccount:
       create: true
