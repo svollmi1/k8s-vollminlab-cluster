@@ -97,7 +97,7 @@ data:
                 icon: pihole.png
                 widget:
                   type: pihole
-                  url: https://pihole.vollminlab.com/admin
+                  url: https://pihole.vollminlab.com
                   key: "{{HOMEPAGE_VAR_PIHOLE_API_KEY}}"
                   version: 6
             - UDM:
@@ -271,6 +271,8 @@ data:
           secretKeyRef:
             name: homepage-env-vars
             key: SABNZBD_API_KEY
+      - name: HOMEPAGE_ALLOWED_HOSTS
+        value: "homepage.vollminlab.com,localhost,127.0.0.1"
     resources:
       requests:
         cpu: 100m
