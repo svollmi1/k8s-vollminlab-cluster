@@ -11,7 +11,7 @@ spec:
   chart:
     spec:
       chart: homepage
-      version: 2.0.1  # Make sure to use the correct version of the Helm chart you want to deploy
+      version: 2.1.0  # Updated to latest version with Pi-hole v6 API support
       sourceRef:
         kind: HelmRepository
         name: homepage-repo
