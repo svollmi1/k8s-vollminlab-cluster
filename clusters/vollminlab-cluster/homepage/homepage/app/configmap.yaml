@@ -18,10 +18,16 @@ data:
                 description: Media streaming server
                 href: https://plex.vollminlab.com
                 icon: plex.png
+            - Tautulli:
+                description: Plex monitoring and analytics
+                href: https://tautulli.vollminlab.com
+                icon: tautulli.png
+                namespace: mediastack
+                app: tautulli
                 widget:
-                  type: plex
-                  url: https://plex.vollminlab.com
-                  token: "{{HOMEPAGE_VAR_PLEX_TOKEN}}"
+                  type: tautulli
+                  url: https://tautulli.vollminlab.com
+                  key: "{{HOMEPAGE_VAR_TAUTULLI_API_KEY}}"
             - Overseerr:
                 description: Media request management
                 href: https://overseerr.vollminlab.com
@@ -255,6 +261,11 @@ data:
           secretKeyRef:
             name: homepage-env-vars
             key: SABNZBD_API_KEY
+      - name: HOMEPAGE_VAR_TAUTULLI_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: TAUTULLI_API_KEY
       - name: HOMEPAGE_ALLOWED_HOSTS
         value: "homepage.vollminlab.com,localhost,127.0.0.1"
     resources:

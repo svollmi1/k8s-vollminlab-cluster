@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-tautulli-config
+  namespace: mediastack
+  labels:
+    app: tautulli
+    env: production
+    category: apps
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: smb
+  resources:
+    requests:
+      storage: 1Gi

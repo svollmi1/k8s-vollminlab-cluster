@@ -19,3 +19,4 @@ resources:
   - sabnzbd-helmrepository.yaml
   - sonarr-helmrepository.yaml
   - sealed-secrets-helmrepository.yaml
+  - tautulli-helmrepository.yaml
