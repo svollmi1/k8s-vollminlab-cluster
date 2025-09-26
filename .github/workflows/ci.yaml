@@ -127,6 +127,12 @@ jobs:
               continue
             fi
             
+            # Skip Flux CD resources that kubeconform doesn't understand
+            if grep -q "kind: HelmRelease\|kind: OCIRepository\|kind: HelmRepository\|kind: GitRepository\|kind: Kustomization" "$file"; then
+              echo "Skipping $file (Flux CD resource - not supported by kubeconform)"
+              continue
+            fi
+            
             # Check if file contains Kubernetes resources
             if grep -q "kind:" "$file" && grep -q "apiVersion:" "$file"; then
               echo "Validating schema for $file"
