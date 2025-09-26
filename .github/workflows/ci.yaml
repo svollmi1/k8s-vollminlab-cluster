@@ -165,49 +165,50 @@ jobs:
           kubectl create namespace "$TEST_NAMESPACE"
           echo "✅ Created namespace: $TEST_NAMESPACE"
 
-      - name: Identify changed resources
-        run: |
-          echo "🔍 Identifying changed resources for validation..."
-          
-          # Get list of changed files in this PR/push
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            echo "📋 Pull request detected - checking changed files"
-            CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
-          else
-            echo "📋 Push detected - checking recent changes"
-            CHANGED_FILES=$(git diff --name-only HEAD~1...HEAD)
-          fi
-          
-          echo "Changed files:"
-          echo "$CHANGED_FILES"
-          
-          # Find OCI repositories that need validation
-          CHANGED_OCI_REPOS=""
-          for file in $(echo "$CHANGED_FILES" | grep -E ".*helmrepository\.yaml$"); do
-            if grep -q "kind: OCIRepository" "$file"; then
-              CHANGED_OCI_REPOS="$CHANGED_OCI_REPOS $file"
+        - name: Identify changed resources
+          run: |
+            echo "🔍 Identifying changed resources for validation..."
+            
+            # Get list of changed files in this PR/push
+            if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+              echo "📋 Pull request detected - checking changed files"
+              # For PRs, use the base SHA provided by GitHub Actions
+              CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }}...HEAD)
+            else
+              echo "📋 Push detected - checking recent changes"
+              CHANGED_FILES=$(git diff --name-only HEAD~1...HEAD)
             fi
-          done
-          
-          # Find HelmReleases that need validation
-          CHANGED_HELMRELEASES=""
-          for file in $(echo "$CHANGED_FILES" | grep -E "helmrelease\.yaml$"); do
-            CHANGED_HELMRELEASES="$CHANGED_HELMRELEASES $file"
-          done
-          
-          # If no specific changes, fall back to validating everything (for initial setup)
-          if [[ -z "$CHANGED_OCI_REPOS" && -z "$CHANGED_HELMRELEASES" ]]; then
-            echo "⚠️ No specific OCI repos or HelmReleases changed - validating everything"
-            CHANGED_OCI_REPOS=$(find clusters -name "*helmrepository.yaml" -exec grep -l "kind: OCIRepository" {} \;)
-            CHANGED_HELMRELEASES=$(find clusters -name "helmrelease.yaml")
-          fi
-          
-          echo "OCI repositories to validate: $CHANGED_OCI_REPOS"
-          echo "HelmReleases to validate: $CHANGED_HELMRELEASES"
-          
-          # Export for next steps
-          echo "CHANGED_OCI_REPOS='$CHANGED_OCI_REPOS'" >> $GITHUB_ENV
-          echo "CHANGED_HELMRELEASES='$CHANGED_HELMRELEASES'" >> $GITHUB_ENV
+            
+            echo "Changed files:"
+            echo "$CHANGED_FILES"
+            
+            # Find OCI repositories that need validation
+            CHANGED_OCI_REPOS=""
+            for file in $(echo "$CHANGED_FILES" | grep -E ".*helmrepository\.yaml$"); do
+              if grep -q "kind: OCIRepository" "$file"; then
+                CHANGED_OCI_REPOS="$CHANGED_OCI_REPOS $file"
+              fi
+            done
+            
+            # Find HelmReleases that need validation
+            CHANGED_HELMRELEASES=""
+            for file in $(echo "$CHANGED_FILES" | grep -E "helmrelease\.yaml$"); do
+              CHANGED_HELMRELEASES="$CHANGED_HELMRELEASES $file"
+            done
+            
+            # If no specific changes, fall back to validating everything (for initial setup)
+            if [[ -z "$CHANGED_OCI_REPOS" && -z "$CHANGED_HELMRELEASES" ]]; then
+              echo "⚠️ No specific OCI repos or HelmReleases changed - validating everything"
+              CHANGED_OCI_REPOS=$(find clusters -name "*helmrepository.yaml" -exec grep -l "kind: OCIRepository" {} \;)
+              CHANGED_HELMRELEASES=$(find clusters -name "helmrelease.yaml")
+            fi
+            
+            echo "OCI repositories to validate: $CHANGED_OCI_REPOS"
+            echo "HelmReleases to validate: $CHANGED_HELMRELEASES"
+            
+            # Export for next steps
+            echo "CHANGED_OCI_REPOS='$CHANGED_OCI_REPOS'" >> $GITHUB_ENV
+            echo "CHANGED_HELMRELEASES='$CHANGED_HELMRELEASES'" >> $GITHUB_ENV
 
       - name: Deploy and validate changed OCI repositories
         run: |
