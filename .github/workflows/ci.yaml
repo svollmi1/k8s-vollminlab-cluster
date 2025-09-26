@@ -128,7 +128,7 @@ jobs:
             fi
             
             # Skip all CRDs and custom resources that kubeconform doesn't understand
-            if grep -q "kind: CustomResourceDefinition\|kind: HelmRelease\|kind: OCIRepository\|kind: HelmRepository\|kind: GitRepository\|kind: Kustomization\|kind: L2Advertisement\|kind: IPAddressPool\|kind: BGPPeer\|kind: BGPAdvertisement" "$file"; then
+            if grep -q "kind: CustomResourceDefinition\|kind: HelmRelease\|kind: OCIRepository\|kind: HelmRepository\|kind: GitRepository\|kind: Kustomization\|kind: L2Advertisement\|kind: IPAddressPool\|kind: BGPPeer\|kind: BGPAdvertisement\|kind: SealedSecret" "$file"; then
               echo "Skipping $file (CRD or custom resource - not supported by kubeconform)"
               continue
             fi
