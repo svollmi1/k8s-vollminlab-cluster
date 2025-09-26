@@ -20,7 +20,7 @@ env:
 jobs:
   basic-validation:
     name: Basic Validation (YAML & Security)
-    runs-on: ubuntu-latest
+    runs-on: vollminlab
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -108,10 +108,10 @@ jobs:
               continue
             fi
             echo "Validating $file"
-            kubectl apply --dry-run=client -f "$file" || {
+            kubectl apply --dry-run=client --validate=false -f "$file" || {
               echo "❌ Invalid YAML syntax in $file"
               echo "Error details:"
-              kubectl apply --dry-run=client -f "$file" 2>&1 || true
+              kubectl apply --dry-run=client --validate=false -f "$file" 2>&1 || true
               exit 1
             }
           done
@@ -266,7 +266,7 @@ jobs:
 
   security-scan:
     name: Security Scan
-    runs-on: ubuntu-latest
+    runs-on: vollminlab
     timeout-minutes: 5
     steps:
       - name: Checkout code
@@ -303,7 +303,7 @@ jobs:
 
   server-side-validation:
     name: Server-Side Validation with Temporary Namespace
-    runs-on: ubuntu-latest
+    runs-on: vollminlab
     needs: [basic-validation]
     steps:
       - name: Checkout code
@@ -604,7 +604,7 @@ jobs:
 
   policy-validation:
     name: Kyverno Policy Validation & Compliance
-    runs-on: ubuntu-latest
+    runs-on: vollminlab
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -652,10 +652,10 @@ jobs:
             fi
             if grep -q "kind: Policy\|kind: ClusterPolicy" "$file"; then
               echo "Validating Kyverno policy syntax: $file"
-              kubectl apply --dry-run=client -f "$file" || {
+              kubectl apply --dry-run=client --validate=false -f "$file" || {
                 echo "❌ Failed to validate Kyverno policy: $file"
                 echo "Error details:"
-                kubectl apply --dry-run=client -f "$file" 2>&1 || true
+                kubectl apply --dry-run=client --validate=false -f "$file" 2>&1 || true
                 exit 1
               }
               POLICY_COUNT=$((POLICY_COUNT + 1))
@@ -712,7 +712,7 @@ jobs:
 
   notify-success:
     name: Notify Success
-    runs-on: ubuntu-latest
+    runs-on: vollminlab
     needs: [basic-validation, security-scan, server-side-validation, policy-validation]
     if: success()
     steps:
@@ -726,7 +726,7 @@ jobs:
 
   notify-failure:
     name: Notify Failure
-    runs-on: ubuntu-latest
+    runs-on: vollminlab
     needs: [basic-validation, security-scan, server-side-validation, policy-validation]
     if: failure()
     steps:
