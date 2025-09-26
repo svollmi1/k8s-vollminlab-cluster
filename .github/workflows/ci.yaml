@@ -78,6 +78,37 @@ jobs:
           sudo mv kubeconform /usr/local/bin/
           kubeconform -v
 
+      - name: Install Python and dependencies for CRD schema conversion
+        run: |
+          set -euo pipefail
+          echo "📦 Installing Python and dependencies for CRD schema conversion..."
+          sudo apt-get update
+          sudo apt-get install -y python3 python3-pip
+          pip3 install pyyaml
+
+      - name: Convert CRDs to JSON schemas
+        run: |
+          set -euo pipefail
+          echo "🔧 Converting CRDs to JSON schemas for validation..."
+          
+          # Create schemas directory
+          mkdir -p /tmp/crd-schemas
+          
+          # Download the openapi2jsonschema script
+          curl -L "https://raw.githubusercontent.com/yannh/kubeconform/master/scripts/openapi2jsonschema.py" -o /tmp/openapi2jsonschema.py
+          chmod +x /tmp/openapi2jsonschema.py
+          
+          # Find and convert all CRD files
+          for crd_file in $(find clusters -name "*.yaml" -exec grep -l "kind: CustomResourceDefinition" {} \;); do
+            echo "Converting CRD: $crd_file"
+            python3 /tmp/openapi2jsonschema.py "$crd_file" /tmp/crd-schemas/ || {
+              echo "⚠️ Failed to convert CRD: $crd_file (this is expected for some CRDs)"
+              continue
+            }
+          done
+          
+          echo "✅ CRD schema conversion completed"
+
 
       - name: Validate YAML syntax and linting
         run: |
@@ -151,11 +182,13 @@ jobs:
             # Check if file contains Kubernetes resources
             if grep -q "kind:" "$file" && grep -q "apiVersion:" "$file"; then
               echo "Validating schema for $file"
-              # Use default schema location for standard Kubernetes resources
-              # and datreeio catalog for custom resources
+              # Use default schema location for standard Kubernetes resources,
+              # datreeio catalog for external custom resources,
+              # and converted CRD schemas for local CRDs
               kubeconform -strict -summary \
                 -schema-location "default" \
                 -schema-location "https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json" \
+                -schema-location "/tmp/crd-schemas/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json" \
                 "$file" || {
                 echo "❌ Schema validation failed for $file"
                 exit 1
