@@ -171,12 +171,23 @@ jobs:
           HELMRELEASE_COUNT=0
           for file in $(find clusters -name "helmrelease.yaml"); do
             echo "Validating HelmRelease: $file"
+            
+            # Client-side validation
             kubectl apply --dry-run=client -f "$file" || {
               echo "❌ Failed to validate HelmRelease: $file"
               echo "Error details:"
               kubectl apply --dry-run=client -f "$file" 2>&1 || true
               exit 1
             }
+            
+            # Check if HelmRelease references a specific chart version
+            CHART_VERSION=$(yq eval '.spec.chart.spec.version // .spec.chartRef.version' "$file" 2>/dev/null || echo "")
+            if [[ -n "$CHART_VERSION" ]]; then
+              echo "🔍 HelmRelease references specific chart version: $CHART_VERSION"
+              echo "⚠️  Note: Specific chart version validation would require repository access"
+              echo "   Please verify that version $CHART_VERSION exists in the referenced repository"
+            fi
+            
             HELMRELEASE_COUNT=$((HELMRELEASE_COUNT + 1))
           done
           echo "✅ Validated $HELMRELEASE_COUNT HelmReleases"
@@ -186,18 +197,178 @@ jobs:
           for file in $(find clusters -name "*helmrepository.yaml"); do
             if grep -q "kind: OCIRepository" "$file"; then
               echo "Validating OCIRepository: $file"
+              
+              # Client-side validation
+              kubectl apply --dry-run=client -f "$file" || {
+                echo "❌ Failed to validate OCIRepository: $file"
+                echo "Error details:"
+                kubectl apply --dry-run=client -f "$file" 2>&1 || true
+                exit 1
+              }
+              
+              # Server-side validation to check if OCI tag actually exists
+              echo "🔍 Checking if OCI repository tag exists..."
+              OCI_URL=$(yq eval '.spec.url' "$file")
+              OCI_TAG=$(yq eval '.spec.ref.tag' "$file")
+              
+              if [[ -n "$OCI_URL" && -n "$OCI_TAG" ]]; then
+                # Convert oci:// to https:// for registry API
+                REGISTRY_URL="${OCI_URL#oci://}"
+                MANIFEST_URL="https://${REGISTRY_URL}/manifests/${OCI_TAG}"
+                
+                echo "Checking manifest at: $MANIFEST_URL"
+                HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -H "Accept: application/vnd.docker.distribution.manifest.v2+json" "$MANIFEST_URL")
+                
+                if [[ "$HTTP_STATUS" == "200" ]]; then
+                  echo "✅ OCI tag $OCI_TAG exists in repository"
+                elif [[ "$HTTP_STATUS" == "404" ]]; then
+                  echo "❌ OCI tag $OCI_TAG does not exist in repository $OCI_URL"
+                  echo "Available tags may be different. Please check the repository documentation."
+                  exit 1
+                else
+                  echo "⚠️  Could not verify OCI tag $OCI_TAG (HTTP $HTTP_STATUS). Repository may require authentication or have different access patterns."
+                  echo "Continuing with validation, but please verify manually."
+                fi
+              fi
             else
               echo "Validating HelmRepository: $file"
+              
+              # Client-side validation
+              kubectl apply --dry-run=client -f "$file" || {
+                echo "❌ Failed to validate HelmRepository: $file"
+                echo "Error details:"
+                kubectl apply --dry-run=client -f "$file" 2>&1 || true
+                exit 1
+              }
+              
+              # Check if this HelmRepository uses OCI URLs (some do)
+              REPO_URL=$(yq eval '.spec.url' "$file")
+              if [[ "$REPO_URL" == oci://* ]]; then
+                echo "🔍 HelmRepository uses OCI URL - checking if repository is accessible..."
+                # For OCI Helm repositories, we can't easily validate specific tags without knowing the chart structure
+                # But we can at least check if the repository is accessible
+                REGISTRY_URL="${REPO_URL#oci://}"
+                CATALOG_URL="https://${REGISTRY_URL}/v2/_catalog"
+                
+                echo "Checking catalog at: $CATALOG_URL"
+                HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$CATALOG_URL")
+                
+                if [[ "$HTTP_STATUS" == "200" ]]; then
+                  echo "✅ OCI HelmRepository is accessible"
+                elif [[ "$HTTP_STATUS" == "404" ]]; then
+                  echo "❌ OCI HelmRepository $REPO_URL is not accessible"
+                  exit 1
+                else
+                  echo "⚠️  Could not verify OCI HelmRepository $REPO_URL (HTTP $HTTP_STATUS). Repository may require authentication."
+                  echo "Continuing with validation, but please verify manually."
+                fi
+              fi
+              
+              # For regular Helm repositories, check if the repository is accessible
+              if [[ "$REPO_URL" != oci://* ]]; then
+                echo "🔍 Checking if Helm repository is accessible..."
+                echo "Repository URL: $REPO_URL"
+                # For HTTP/HTTPS repositories, we can check if they're accessible
+                if [[ "$REPO_URL" == http* ]]; then
+                  HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$REPO_URL")
+                  if [[ "$HTTP_STATUS" == "200" ]]; then
+                    echo "✅ HelmRepository is accessible"
+                  elif [[ "$HTTP_STATUS" == "404" ]]; then
+                    echo "❌ HelmRepository $REPO_URL is not accessible"
+                    exit 1
+                  else
+                    echo "⚠️  Could not verify HelmRepository $REPO_URL (HTTP $HTTP_STATUS)"
+                    echo "Continuing with validation, but please verify manually."
+                  fi
+                fi
+              fi
             fi
-            kubectl apply --dry-run=client -f "$file" || {
-              echo "❌ Failed to validate repository: $file"
-              echo "Error details:"
-              kubectl apply --dry-run=client -f "$file" 2>&1 || true
-              exit 1
-            }
             REPO_COUNT=$((REPO_COUNT + 1))
           done
           echo "✅ Validated $REPO_COUNT Repository manifests"
+          
+          # Check all container image tags in Kubernetes resources
+          echo "🔍 Validating container image tags..."
+          IMAGE_VALIDATION_COUNT=0
+          for file in $(find clusters -name "*.yaml" -exec grep -l "image:" {} \;); do
+            echo "Checking image tags in: $file"
+            
+            # Extract all image references
+            IMAGES=$(yq eval '.. | select(has("image")) | .image' "$file" 2>/dev/null | grep -v "null" | sort -u)
+            
+            for IMAGE in $IMAGES; do
+              if [[ -n "$IMAGE" && "$IMAGE" != "null" ]]; then
+                echo "  Checking image: $IMAGE"
+                
+                # Parse image name and tag
+                if [[ "$IMAGE" == *":"* ]]; then
+                  IMAGE_NAME="${IMAGE%:*}"
+                  IMAGE_TAG="${IMAGE##*:}"
+                else
+                  IMAGE_NAME="$IMAGE"
+                  IMAGE_TAG="latest"
+                fi
+                
+                # Skip if it's a local image or doesn't look like a registry image
+                if [[ "$IMAGE_NAME" == *"localhost"* ]] || [[ "$IMAGE_NAME" == *"127.0.0.1"* ]] || [[ ! "$IMAGE_NAME" == *"."* ]]; then
+                  echo "    ⏭️  Skipping local/unqualified image: $IMAGE"
+                  continue
+                fi
+                
+                # For Docker Hub images
+                if [[ "$IMAGE_NAME" == *"docker.io"* ]] || [[ "$IMAGE_NAME" != *"/"* ]] || [[ "$IMAGE_NAME" == *"library"* ]]; then
+                  # Convert to Docker Hub format
+                  if [[ "$IMAGE_NAME" == *"docker.io"* ]]; then
+                    DOCKER_IMAGE="$IMAGE_NAME"
+                  elif [[ "$IMAGE_NAME" != *"/"* ]]; then
+                    DOCKER_IMAGE="docker.io/library/$IMAGE_NAME"
+                  else
+                    DOCKER_IMAGE="docker.io/$IMAGE_NAME"
+                  fi
+                  
+                  MANIFEST_URL="https://registry-1.docker.io/v2/${DOCKER_IMAGE#docker.io/}/manifests/${IMAGE_TAG}"
+                  
+                  echo "    Checking Docker Hub manifest: $MANIFEST_URL"
+                  HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -H "Accept: application/vnd.docker.distribution.manifest.v2+json" "$MANIFEST_URL")
+                  
+                  if [[ "$HTTP_STATUS" == "200" ]]; then
+                    echo "    ✅ Image tag $IMAGE_TAG exists"
+                  elif [[ "$HTTP_STATUS" == "404" ]]; then
+                    echo "    ❌ Image tag $IMAGE_TAG does not exist for $IMAGE_NAME"
+                    echo "    Please verify the image tag exists in the registry"
+                    exit 1
+                  else
+                    echo "    ⚠️  Could not verify image tag $IMAGE_TAG (HTTP $HTTP_STATUS)"
+                    echo "    Continuing with validation, but please verify manually"
+                  fi
+                else
+                  # For other registries (GHCR, Quay, etc.)
+                  REGISTRY_DOMAIN=$(echo "$IMAGE_NAME" | cut -d'/' -f1)
+                  IMAGE_PATH="${IMAGE_NAME#*/}"
+                  
+                  MANIFEST_URL="https://$REGISTRY_DOMAIN/v2/$IMAGE_PATH/manifests/$IMAGE_TAG"
+                  
+                  echo "    Checking registry manifest: $MANIFEST_URL"
+                  HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -H "Accept: application/vnd.docker.distribution.manifest.v2+json" "$MANIFEST_URL")
+                  
+                  if [[ "$HTTP_STATUS" == "200" ]]; then
+                    echo "    ✅ Image tag $IMAGE_TAG exists"
+                  elif [[ "$HTTP_STATUS" == "404" ]]; then
+                    echo "    ❌ Image tag $IMAGE_TAG does not exist for $IMAGE_NAME"
+                    echo "    Please verify the image tag exists in the registry"
+                    exit 1
+                  else
+                    echo "    ⚠️  Could not verify image tag $IMAGE_TAG (HTTP $HTTP_STATUS)"
+                    echo "    Registry may require authentication or have different access patterns"
+                    echo "    Continuing with validation, but please verify manually"
+                  fi
+                fi
+                
+                IMAGE_VALIDATION_COUNT=$((IMAGE_VALIDATION_COUNT + 1))
+              fi
+            done
+          done
+          echo "✅ Validated $IMAGE_VALIDATION_COUNT container image tags"
           
           # Check Flux CD Kustomizations
           FLUX_KUSTOMIZATION_COUNT=0
