@@ -192,12 +192,28 @@ jobs:
                   CHANGED_FILES=$(git diff --name-only "$BASE_SHA" HEAD)
                 else
                   echo "⚠️ Base SHA not found in history, using alternative approach"
-                  # Fall back to comparing with the merge base
-                  CHANGED_FILES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }} HEAD)
+                  # Fall back to comparing with the merge base using a different approach
+                  # Try to find the merge base between the current branch and the target branch
+                  MERGE_BASE=$(git merge-base HEAD ${{ github.event.pull_request.base.ref }} 2>/dev/null || echo "")
+                  if [[ -n "$MERGE_BASE" ]]; then
+                    CHANGED_FILES=$(git diff --name-only "$MERGE_BASE" HEAD)
+                  else
+                    echo "⚠️ Could not find merge base, using all files in current commit"
+                    # Last resort: get all files in the current commit
+                    CHANGED_FILES=$(git diff --name-only --cached HEAD)
+                  fi
                 fi
               else
                 echo "⚠️ No base SHA available, using alternative approach"
-                CHANGED_FILES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }} HEAD)
+                # Try to find the merge base between the current branch and the target branch
+                MERGE_BASE=$(git merge-base HEAD ${{ github.event.pull_request.base.ref }} 2>/dev/null || echo "")
+                if [[ -n "$MERGE_BASE" ]]; then
+                  CHANGED_FILES=$(git diff --name-only "$MERGE_BASE" HEAD)
+                else
+                  echo "⚠️ Could not find merge base, using all files in current commit"
+                  # Last resort: get all files in the current commit
+                  CHANGED_FILES=$(git diff --name-only --cached HEAD)
+                fi
               fi
             else
               echo "📋 Push detected - checking recent changes"
