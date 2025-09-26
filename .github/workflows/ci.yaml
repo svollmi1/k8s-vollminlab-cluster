@@ -301,10 +301,11 @@ jobs:
             EXPECTED_ENV="staging"
           fi
           
-          for file in $(find clusters -name "*.yaml" -exec grep -l "kind: HelmRelease\|kind: OCIRepository\|kind: HelmRepository" {} \;); do
+          for file in $(find clusters -name "*.yaml" -exec grep -l "^kind: HelmRelease\|^kind: OCIRepository\|^kind: HelmRepository" {} \;); do
             # Check each document in multi-doc YAML files using yq -d
             yq eval -d '*' '.kind' "$file" 2>/dev/null | while read -r kind; do
-              if [[ "$kind" != "HelmRelease" && "$kind" != "OCIRepository" && "$kind" != "HelmRepository" ]]; then
+              # Skip if kind is empty or not a Flux CD resource
+              if [[ -z "$kind" || "$kind" != "HelmRelease" && "$kind" != "OCIRepository" && "$kind" != "HelmRepository" ]]; then
                 continue
               fi
               
