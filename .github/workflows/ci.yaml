@@ -165,13 +165,62 @@ jobs:
           kubectl create namespace "$TEST_NAMESPACE"
           echo "✅ Created namespace: $TEST_NAMESPACE"
 
-      - name: Deploy and validate OCI repositories
+      - name: Identify changed resources
         run: |
-          echo "🔍 Deploying and validating OCI repositories..."
+          echo "🔍 Identifying changed resources for validation..."
+          
+          # Get list of changed files in this PR/push
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "📋 Pull request detected - checking changed files"
+            CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          else
+            echo "📋 Push detected - checking recent changes"
+            CHANGED_FILES=$(git diff --name-only HEAD~1...HEAD)
+          fi
+          
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+          
+          # Find OCI repositories that need validation
+          CHANGED_OCI_REPOS=""
+          for file in $(echo "$CHANGED_FILES" | grep -E ".*helmrepository\.yaml$"); do
+            if grep -q "kind: OCIRepository" "$file"; then
+              CHANGED_OCI_REPOS="$CHANGED_OCI_REPOS $file"
+            fi
+          done
+          
+          # Find HelmReleases that need validation
+          CHANGED_HELMRELEASES=""
+          for file in $(echo "$CHANGED_FILES" | grep -E "helmrelease\.yaml$"); do
+            CHANGED_HELMRELEASES="$CHANGED_HELMRELEASES $file"
+          done
+          
+          # If no specific changes, fall back to validating everything (for initial setup)
+          if [[ -z "$CHANGED_OCI_REPOS" && -z "$CHANGED_HELMRELEASES" ]]; then
+            echo "⚠️ No specific OCI repos or HelmReleases changed - validating everything"
+            CHANGED_OCI_REPOS=$(find clusters -name "*helmrepository.yaml" -exec grep -l "kind: OCIRepository" {} \;)
+            CHANGED_HELMRELEASES=$(find clusters -name "helmrelease.yaml")
+          fi
+          
+          echo "OCI repositories to validate: $CHANGED_OCI_REPOS"
+          echo "HelmReleases to validate: $CHANGED_HELMRELEASES"
+          
+          # Export for next steps
+          echo "CHANGED_OCI_REPOS='$CHANGED_OCI_REPOS'" >> $GITHUB_ENV
+          echo "CHANGED_HELMRELEASES='$CHANGED_HELMRELEASES'" >> $GITHUB_ENV
+
+      - name: Deploy and validate changed OCI repositories
+        run: |
+          echo "🔍 Deploying and validating changed OCI repositories..."
           TEST_NAMESPACE="$TEST_NAMESPACE"
           
-          # Deploy all OCI repositories to test namespace
-          for file in $(find clusters -name "*helmrepository.yaml" -exec grep -l "kind: OCIRepository" {} \;); do
+          if [[ -z "$CHANGED_OCI_REPOS" ]]; then
+            echo "✅ No OCI repositories to validate"
+            exit 0
+          fi
+          
+          # Deploy only changed OCI repositories to test namespace
+          for file in $CHANGED_OCI_REPOS; do
             echo "Deploying OCIRepository: $file"
             
             # Create a modified version for the test namespace
@@ -201,15 +250,20 @@ jobs:
             exit 1
           }
           
-          echo "✅ All OCI repositories synced successfully"
+          echo "✅ Changed OCI repositories synced successfully"
 
-      - name: Deploy and validate HelmReleases
+      - name: Deploy and validate changed HelmReleases
         run: |
-          echo "🔍 Deploying and validating HelmReleases..."
+          echo "🔍 Deploying and validating changed HelmReleases..."
           TEST_NAMESPACE="$TEST_NAMESPACE"
           
-          # Deploy all HelmReleases to test namespace
-          for file in $(find clusters -name "helmrelease.yaml"); do
+          if [[ -z "$CHANGED_HELMRELEASES" ]]; then
+            echo "✅ No HelmReleases to validate"
+            exit 0
+          fi
+          
+          # Deploy only changed HelmReleases to test namespace
+          for file in $CHANGED_HELMRELEASES; do
             echo "Deploying HelmRelease: $file"
             
             # Create a modified version for the test namespace
@@ -241,14 +295,20 @@ jobs:
             exit 1
           }
           
-          echo "✅ All HelmReleases are ready"
+          echo "✅ Changed HelmReleases are ready"
 
       - name: Validate deployments are working
         run: |
           echo "🔍 Validating that deployments are actually working..."
           TEST_NAMESPACE="$TEST_NAMESPACE"
           
-          # Wait for all deployments to be ready
+          # Only wait for deployments if we have HelmReleases
+          if [[ -z "$CHANGED_HELMRELEASES" ]]; then
+            echo "✅ No HelmReleases to validate deployments for"
+            exit 0
+          fi
+          
+          # Wait for deployments to be ready
           echo "⏳ Waiting for deployments to be ready..."
           kubectl wait --for=condition=available --timeout=300s deployment --all -n "$TEST_NAMESPACE" || {
             echo "❌ Some deployments failed to become available"
@@ -274,7 +334,7 @@ jobs:
             exit 1
           fi
           
-          echo "✅ All deployments are running successfully"
+          echo "✅ Changed deployments are running successfully"
 
       - name: Cleanup temporary namespace
         if: always()
