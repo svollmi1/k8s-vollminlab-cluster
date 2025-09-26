@@ -604,7 +604,32 @@ jobs:
           
           # Wait for OCI repositories to sync (this validates if versions exist)
           echo "⏳ Waiting for OCI repositories to sync..."
-          kubectl wait --for=condition=Ready --timeout=300s ocirepositories.source.toolkit.fluxcd.io --all -n "$TEST_NAMESPACE" || {
+          echo "This may take 1-5 minutes depending on network conditions and registry response time"
+          echo "The sync process downloads chart metadata from remote OCI registries"
+          
+          # Show initial status
+          echo "Current OCI Repository Status:"
+          kubectl get ocirepository -n "$TEST_NAMESPACE" -o wide || true
+          
+          # Use a more verbose approach to show progress
+          echo "Starting OCI repository sync with progress monitoring..."
+          
+          # Start the wait in background and monitor progress
+          kubectl wait --for=condition=Ready --timeout=300s ocirepositories.source.toolkit.fluxcd.io --all -n "$TEST_NAMESPACE" &
+          WAIT_PID=$!
+          
+          # Monitor progress every 30 seconds
+          while kill -0 $WAIT_PID 2>/dev/null; do
+            echo "⏳ Still syncing... (checking every 30s)"
+            kubectl get ocirepository -n "$TEST_NAMESPACE" -o custom-columns="NAME:.metadata.name,READY:.status.conditions[?(@.type=='Ready')].status,REASON:.status.conditions[?(@.type=='Ready')].reason" || true
+            sleep 30
+          done
+          
+          # Wait for the background process to complete
+          wait $WAIT_PID
+          WAIT_EXIT_CODE=$?
+          
+          if [[ $WAIT_EXIT_CODE -ne 0 ]]; then
             echo "❌ OCI repositories failed to sync"
             echo "This indicates that chart versions may not exist or repositories are inaccessible"
             
