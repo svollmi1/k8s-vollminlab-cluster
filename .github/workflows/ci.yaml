@@ -368,7 +368,7 @@ jobs:
           echo "🔍 Running policy compliance validation..."
           
           # Use kyverno CLI to validate all resources against all policies
-          kyverno validate /tmp/kyverno-policies/*.yaml --resource clusters/ || {
+          kyverno apply /tmp/kyverno-policies/ --resource clusters/ || {
             echo "❌ Policy compliance validation failed"
             echo "Some resources do not comply with Kyverno policies"
             echo ""
