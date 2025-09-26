@@ -144,6 +144,13 @@ jobs:
         run: |
           curl -s https://fluxcd.io/install.sh | sudo bash
 
+      - name: Install yq
+        run: |
+          echo "📦 Installing yq for YAML validation..."
+          sudo curl -L -o /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          yq --version
+
       - name: Validate Flux configurations
         run: |
           echo "🔍 Validating Flux configurations..."
@@ -173,6 +180,149 @@ jobs:
             HELMRELEASE_COUNT=$((HELMRELEASE_COUNT + 1))
           done
           echo "✅ Validated $HELMRELEASE_COUNT HelmReleases"
+          
+          # Check all Flux CD Repository types
+          REPO_COUNT=0
+          for file in $(find clusters -name "*helmrepository.yaml"); do
+            if grep -q "kind: OCIRepository" "$file"; then
+              echo "Validating OCIRepository: $file"
+            else
+              echo "Validating HelmRepository: $file"
+            fi
+            kubectl apply --dry-run=client -f "$file" || {
+              echo "❌ Failed to validate repository: $file"
+              echo "Error details:"
+              kubectl apply --dry-run=client -f "$file" 2>&1 || true
+              exit 1
+            }
+            REPO_COUNT=$((REPO_COUNT + 1))
+          done
+          echo "✅ Validated $REPO_COUNT Repository manifests"
+          
+          # Check Flux CD Kustomizations
+          FLUX_KUSTOMIZATION_COUNT=0
+          for file in $(find clusters -name "*-kustomization.yaml"); do
+            echo "Validating Flux Kustomization: $file"
+            kubectl apply --dry-run=client -f "$file" || {
+              echo "❌ Failed to validate Flux Kustomization: $file"
+              echo "Error details:"
+              kubectl apply --dry-run=client -f "$file" 2>&1 || true
+              exit 1
+            }
+            FLUX_KUSTOMIZATION_COUNT=$((FLUX_KUSTOMIZATION_COUNT + 1))
+          done
+          echo "✅ Validated $FLUX_KUSTOMIZATION_COUNT Flux Kustomizations"
+          
+          # Check SealedSecrets
+          SEALEDSECRET_COUNT=0
+          for file in $(find clusters -name "*sealedsecret*.yaml"); do
+            echo "Validating SealedSecret: $file"
+            kubectl apply --dry-run=client -f "$file" || {
+              echo "❌ Failed to validate SealedSecret: $file"
+              echo "Error details:"
+              kubectl apply --dry-run=client -f "$file" 2>&1 || true
+              exit 1
+            }
+            SEALEDSECRET_COUNT=$((SEALEDSECRET_COUNT + 1))
+          done
+          echo "✅ Validated $SEALEDSECRET_COUNT SealedSecrets"
+          
+          # Check GitRepositories
+          GITREPO_COUNT=0
+          for file in $(find clusters -name "*.yaml" -exec grep -l "kind: GitRepository" {} \;); do
+            echo "Validating GitRepository: $file"
+            kubectl apply --dry-run=client -f "$file" || {
+              echo "❌ Failed to validate GitRepository: $file"
+              echo "Error details:"
+              kubectl apply --dry-run=client -f "$file" 2>&1 || true
+              exit 1
+            }
+            GITREPO_COUNT=$((GITREPO_COUNT + 1))
+          done
+          echo "✅ Validated $GITREPO_COUNT GitRepositories"
+          
+          # Check RunnerDeployments (Actions Runner Controller)
+          RUNNERDEPLOYMENT_COUNT=0
+          for file in $(find clusters -name "*.yaml" -exec grep -l "kind: RunnerDeployment" {} \;); do
+            echo "Validating RunnerDeployment: $file"
+            kubectl apply --dry-run=client -f "$file" || {
+              echo "❌ Failed to validate RunnerDeployment: $file"
+              echo "Error details:"
+              kubectl apply --dry-run=client -f "$file" 2>&1 || true
+              exit 1
+            }
+            RUNNERDEPLOYMENT_COUNT=$((RUNNERDEPLOYMENT_COUNT + 1))
+          done
+          echo "✅ Validated $RUNNERDEPLOYMENT_COUNT RunnerDeployments"
+          
+          # Check Kyverno Policies (pure YAML validation - no kubectl server interaction)
+          KYVERNO_POLICY_COUNT=0
+          for file in $(find clusters -name "*.yaml" -exec grep -l "kind: ClusterPolicy\|kind: PolicyException" {} \;); do
+            echo "Validating Kyverno Policy YAML syntax: $file"
+            # Use yq or python to validate YAML syntax without kubectl
+            if command -v yq >/dev/null 2>&1; then
+              yq eval '.' "$file" >/dev/null || {
+                echo "❌ Failed to validate Kyverno Policy YAML syntax: $file"
+                exit 1
+              }
+            else
+              # Fallback to python for YAML validation
+              python3 -c "import yaml; yaml.safe_load_all(open('$file'))" || {
+                echo "❌ Failed to validate Kyverno Policy YAML syntax: $file"
+                exit 1
+              }
+            fi
+            KYVERNO_POLICY_COUNT=$((KYVERNO_POLICY_COUNT + 1))
+          done
+          echo "✅ Validated $KYVERNO_POLICY_COUNT Kyverno Policies (YAML syntax)"
+          
+          # Check Kubernetes native resources
+          NATIVE_RESOURCE_COUNT=0
+          for file in $(find clusters -name "*.yaml" -exec grep -l "kind: ConfigMap\|kind: Ingress\|kind: PersistentVolumeClaim\|kind: ServiceAccount\|kind: ClusterRole\|kind: ClusterRoleBinding" {} \;); do
+            echo "Validating Kubernetes native resource: $file"
+            kubectl apply --dry-run=client -f "$file" || {
+              echo "❌ Failed to validate Kubernetes resource: $file"
+              echo "Error details:"
+              kubectl apply --dry-run=client -f "$file" 2>&1 || true
+              exit 1
+            }
+            NATIVE_RESOURCE_COUNT=$((NATIVE_RESOURCE_COUNT + 1))
+          done
+          echo "✅ Validated $NATIVE_RESOURCE_COUNT Kubernetes native resources"
+          
+          # Validate metadata consistency
+          echo "🔍 Validating metadata consistency..."
+          
+          # Check for consistent labels in Flux CD resources
+          for file in $(find clusters -name "*.yaml" -exec grep -l "kind: HelmRelease\|kind: OCIRepository\|kind: HelmRepository" {} \;); do
+            if ! grep -q "app:" "$file" || ! grep -q "env: production" "$file" || ! grep -q "category:" "$file"; then
+              echo "❌ Missing required labels in Flux CD resource: $file"
+              echo "Required labels: app, env: production, category"
+              exit 1
+            fi
+          done
+          
+          # Check for consistent namespace usage
+          echo "🔍 Validating namespace consistency..."
+          for file in $(find clusters -name "*.yaml" -exec grep -l "kind: HelmRelease" {} \;); do
+            namespace=$(grep "namespace:" "$file" | head -1 | awk '{print $2}')
+            app_name=$(grep "name:" "$file" | head -1 | awk '{print $2}')
+            if [[ "$namespace" != "$app_name" ]]; then
+              echo "⚠️  Namespace mismatch in HelmRelease: $file (namespace: $namespace, name: $app_name)"
+              echo "Consider if this is intentional"
+            fi
+          done
+          
+          # Check for consistent storage class usage
+          echo "🔍 Validating storage class consistency..."
+          for file in $(find clusters -name "*pvc*.yaml"); do
+            if ! grep -q "storageClassName: smb" "$file"; then
+              echo "⚠️  PVC not using SMB storage class: $file"
+              echo "Consider using 'storageClassName: smb' for consistency"
+            fi
+          done
+          
+          echo "✅ Metadata consistency validation completed"
 
   policy-validation:
     name: Kyverno Policy Validation
