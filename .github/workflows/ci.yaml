@@ -301,40 +301,60 @@ jobs:
             EXPECTED_ENV="staging"
           fi
           
-          for file in $(find clusters -name "*.yaml" -exec grep -l "^kind: HelmRelease\|^kind: OCIRepository\|^kind: HelmRepository" {} \;); do
-            # Check each document in multi-doc YAML files using yq -d
-            yq eval -d '*' '.kind' "$file" 2>/dev/null | while read -r kind; do
-              # Skip if kind is empty or not a Flux CD resource
-              if [[ -z "$kind" || "$kind" != "HelmRelease" && "$kind" != "OCIRepository" && "$kind" != "HelmRepository" ]]; then
+          # Find all Flux CD resource files
+          FLUX_FILES=$(find clusters -name "*.yaml" -exec grep -l "^kind: HelmRelease\|^kind: OCIRepository\|^kind: HelmRepository" {} \;)
+          
+          if [[ -z "$FLUX_FILES" ]]; then
+            echo "✅ No Flux CD resources found to validate"
+          else
+            echo "Found Flux CD resources to validate:"
+            echo "$FLUX_FILES"
+            echo ""
+            
+            for file in $FLUX_FILES; do
+              echo "Checking Flux CD resource: $file"
+              
+              # Get the kind of the resource with error handling
+              KIND=$(yq eval '.kind' "$file" 2>/dev/null || echo "ERROR")
+              
+              if [[ "$KIND" == "ERROR" ]]; then
+                echo "❌ Failed to parse $file with yq"
+                echo "File content (first 10 lines):"
+                head -10 "$file"
+                exit 1
+              fi
+              
+              # Skip if not a Flux CD resource
+              if [[ "$KIND" != "HelmRelease" && "$KIND" != "OCIRepository" && "$KIND" != "HelmRepository" ]]; then
+                echo "Skipping $file (kind: $KIND)"
                 continue
               fi
               
-              # Get document index for this kind
-              DOC_INDEX=$(yq eval -d '*' 'select(.kind == "'"$kind"'") | key' "$file" 2>/dev/null | head -1)
-              
-              # Check if required labels exist using yq with document index
-              APP_LABEL=$(yq eval -d "$DOC_INDEX" '.metadata.labels.app' "$file" 2>/dev/null)
-              ENV_LABEL=$(yq eval -d "$DOC_INDEX" '.metadata.labels.env' "$file" 2>/dev/null)
-              CATEGORY_LABEL=$(yq eval -d "$DOC_INDEX" '.metadata.labels.category' "$file" 2>/dev/null)
+              # Check if required labels exist with error handling
+              APP_LABEL=$(yq eval '.metadata.labels.app' "$file" 2>/dev/null || echo "")
+              ENV_LABEL=$(yq eval '.metadata.labels.env' "$file" 2>/dev/null || echo "")
+              CATEGORY_LABEL=$(yq eval '.metadata.labels.category' "$file" 2>/dev/null || echo "")
               
               if [[ -z "$APP_LABEL" || -z "$CATEGORY_LABEL" ]]; then
-                echo "❌ Missing required labels in Flux CD resource: $file (document $DOC_INDEX)"
+                echo "❌ Missing required labels in Flux CD resource: $file"
                 echo "Required labels: app, category"
                 echo "Current labels:"
-                yq eval -d "$DOC_INDEX" '.metadata.labels' "$file" 2>/dev/null || echo "No labels found"
+                yq eval '.metadata.labels' "$file" 2>/dev/null || echo "No labels found"
                 exit 1
               fi
               
               # Check env label matches expected environment
               if [[ "$ENV_LABEL" != "$EXPECTED_ENV" ]]; then
-                echo "❌ Incorrect env label in Flux CD resource: $file (document $DOC_INDEX)"
+                echo "❌ Incorrect env label in Flux CD resource: $file"
                 echo "Expected env: $EXPECTED_ENV, found: $ENV_LABEL"
                 echo "Current labels:"
-                yq eval -d "$DOC_INDEX" '.metadata.labels' "$file" 2>/dev/null || echo "No labels found"
+                yq eval '.metadata.labels' "$file" 2>/dev/null || echo "No labels found"
                 exit 1
               fi
+              
+              echo "✅ $file has correct labels (app: $APP_LABEL, env: $ENV_LABEL, category: $CATEGORY_LABEL)"
             done
-          done
+          fi
           
           echo "✅ No hardcoded secrets found and metadata is consistent"
 
