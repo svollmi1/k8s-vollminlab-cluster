@@ -656,7 +656,7 @@ jobs:
           timeout 300s bash -c '
             while true; do
               echo "⏳ Checking OCI repository status..."
-              kubectl get ocirepository -n "$TEST_NAMESPACE" -o custom-columns="NAME:.metadata.name,READY:.status.conditions[?(@.type==\"Ready\")].status,REASON:.status.conditions[?(@.type==\"Ready\")].reason" || true
+              kubectl get ocirepository -n "$TEST_NAMESPACE" -o custom-columns="NAME:.metadata.name,READY:.status.conditions[?(@.type==Ready)].status,REASON:.status.conditions[?(@.type==Ready)].reason" || true
               
               # Check if all repositories are ready
               if kubectl wait --for=condition=Ready --timeout=10s ocirepositories.source.toolkit.fluxcd.io --all -n "$TEST_NAMESPACE" 2>/dev/null; then
@@ -668,8 +668,8 @@ jobs:
               FAILED_REPOS=""
               for repo in $(kubectl get ocirepository -n "$TEST_NAMESPACE" -o name | cut -d/ -f2); do
                 # Check if repository has Ready=False condition
-                READY_STATUS=$(kubectl get ocirepository "$repo" -n "$TEST_NAMESPACE" -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}' 2>/dev/null || echo "")
-                READY_REASON=$(kubectl get ocirepository "$repo" -n "$TEST_NAMESPACE" -o jsonpath='{.status.conditions[?(@.type=="Ready")].reason}' 2>/dev/null || echo "")
+                READY_STATUS=$(kubectl get ocirepository "$repo" -n "$TEST_NAMESPACE" -o jsonpath='{.status.conditions[?(@.type==Ready)].status}' 2>/dev/null || echo "")
+                READY_REASON=$(kubectl get ocirepository "$repo" -n "$TEST_NAMESPACE" -o jsonpath='{.status.conditions[?(@.type==Ready)].reason}' 2>/dev/null || echo "")
                 
                 if [[ "$READY_STATUS" == "False" ]] || [[ "$READY_REASON" == *"Failed"* ]] || [[ "$READY_REASON" == *"Error"* ]]; then
                   FAILED_REPOS="$FAILED_REPOS $repo"
