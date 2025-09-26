@@ -609,9 +609,24 @@ jobs:
           TEST_NAMESPACE="$TEST_NAMESPACE"
           RUN_SUFFIX="${{ env.RUN_SUFFIX }}"
           
-          # Find OCI repositories directly in this step to avoid variable passing issues
+          # Get list of changed files from git
+          CHANGED_FILES=""
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep -E '\.(yaml|yml)$' | grep '^clusters/' || echo "")
+          else
+            CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD | grep -E '\.(yaml|yml)$' | grep '^clusters/' || echo "")
+          fi
+          
+          if [[ -z "$CHANGED_FILES" ]]; then
+            echo "✅ No YAML files changed in clusters directory"
+            exit 0
+          fi
+          
+          echo "Changed files: $CHANGED_FILES"
+          
+          # Find OCI repositories in changed files only
           CHANGED_OCI_REPOS=""
-          for file in $(find clusters -name "*.yaml" -o -name "*.yml" 2>/dev/null); do
+          for file in $CHANGED_FILES; do
             if [[ -f "$file" ]] && grep -q "kind: OCIRepository" "$file"; then
               CHANGED_OCI_REPOS="$CHANGED_OCI_REPOS $file"
             fi
@@ -745,20 +760,35 @@ jobs:
             touch "$OCI_MAPPING_FILE"
           fi
           
-          # Find HelmReleases directly in this step to avoid variable passing issues
+          # Get list of changed files from git
+          CHANGED_FILES=""
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep -E '\.(yaml|yml)$' | grep '^clusters/' || echo "")
+          else
+            CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD | grep -E '\.(yaml|yml)$' | grep '^clusters/' || echo "")
+          fi
+          
+          if [[ -z "$CHANGED_FILES" ]]; then
+            echo "✅ No YAML files changed in clusters directory"
+            exit 0
+          fi
+          
+          echo "Changed files: $CHANGED_FILES"
+          
+          # Find HelmReleases in changed files only
           CHANGED_HELMRELEASES=""
-          for file in $(find clusters -name "*.yaml" -o -name "*.yml" 2>/dev/null); do
+          for file in $CHANGED_FILES; do
             if [[ -f "$file" ]] && grep -q "kind: HelmRelease" "$file"; then
               CHANGED_HELMRELEASES="$CHANGED_HELMRELEASES $file"
             fi
           done
           
           if [[ -z "$CHANGED_HELMRELEASES" ]]; then
-            echo "✅ No HelmReleases found to validate"
+            echo "✅ No HelmReleases found in changed files"
             exit 0
           fi
           
-          echo "Found HelmReleases: $CHANGED_HELMRELEASES"
+          echo "Found HelmReleases in changed files: $CHANGED_HELMRELEASES"
           
           # Deploy HelmReleases to test namespace
           for file in $CHANGED_HELMRELEASES; do
@@ -816,9 +846,22 @@ jobs:
           echo "🔍 Validating that deployments are actually working..."
           TEST_NAMESPACE="$TEST_NAMESPACE"
           
-          # Find HelmReleases directly in this step to avoid variable passing issues
+          # Get list of changed files from git
+          CHANGED_FILES=""
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep -E '\.(yaml|yml)$' | grep '^clusters/' || echo "")
+          else
+            CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD | grep -E '\.(yaml|yml)$' | grep '^clusters/' || echo "")
+          fi
+          
+          if [[ -z "$CHANGED_FILES" ]]; then
+            echo "✅ No YAML files changed in clusters directory"
+            exit 0
+          fi
+          
+          # Find HelmReleases in changed files only
           CHANGED_HELMRELEASES=""
-          for file in $(find clusters -name "*.yaml" -o -name "*.yml" 2>/dev/null); do
+          for file in $CHANGED_FILES; do
             if [[ -f "$file" ]] && grep -q "kind: HelmRelease" "$file"; then
               CHANGED_HELMRELEASES="$CHANGED_HELMRELEASES $file"
             fi
@@ -826,7 +869,7 @@ jobs:
           
           # Only wait for deployments if we have HelmReleases
           if [[ -z "$CHANGED_HELMRELEASES" ]]; then
-            echo "✅ No HelmReleases to validate deployments for"
+            echo "✅ No HelmReleases found in changed files to validate deployments for"
             exit 0
           fi
           
