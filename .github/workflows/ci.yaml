@@ -30,11 +30,9 @@ jobs:
       - name: Install kubectl
         run: |
           echo "📦 Installing kubectl..."
-          # Use apt-get for faster, more reliable installation
-          curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.31/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-          echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
-          sudo apt-get update
-          sudo apt-get install -y kubectl
+          curl -LO "https://dl.k8s.io/release/v${{ env.KUBERNETES_VERSION }}/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
           kubectl version --client
         timeout-minutes: 5
 
@@ -313,11 +311,9 @@ jobs:
       - name: Install kubectl
         run: |
           echo "📦 Installing kubectl..."
-          # Use apt-get for faster, more reliable installation
-          curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.31/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-          echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
-          sudo apt-get update
-          sudo apt-get install -y kubectl
+          curl -LO "https://dl.k8s.io/release/v${{ env.KUBERNETES_VERSION }}/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
           kubectl version --client
         timeout-minutes: 5
 
@@ -612,11 +608,9 @@ jobs:
       - name: Install kubectl
         run: |
           echo "📦 Installing kubectl..."
-          # Use apt-get for faster, more reliable installation
-          curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.31/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-          echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
-          sudo apt-get update
-          sudo apt-get install -y kubectl
+          curl -LO "https://dl.k8s.io/release/v${{ env.KUBERNETES_VERSION }}/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
           kubectl version --client
         timeout-minutes: 5
 
