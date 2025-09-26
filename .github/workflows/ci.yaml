@@ -173,10 +173,12 @@ jobs:
             if [[ "${{ github.event_name }}" == "pull_request" ]]; then
               echo "📋 Pull request detected - checking changed files"
               # For PRs, use the base SHA provided by GitHub Actions
-              CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }}...HEAD)
+              BASE_SHA="${{ github.event.pull_request.base.sha }}"
+              echo "Base SHA: $BASE_SHA"
+              CHANGED_FILES=$(git diff --name-only "$BASE_SHA" HEAD)
             else
               echo "📋 Push detected - checking recent changes"
-              CHANGED_FILES=$(git diff --name-only HEAD~1...HEAD)
+              CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
             fi
             
             echo "Changed files:"
