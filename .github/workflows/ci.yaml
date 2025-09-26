@@ -78,22 +78,6 @@ jobs:
           sudo mv kubeconform /usr/local/bin/
           kubeconform -v
 
-      - name: Download CRD schemas
-        run: |
-          set -euo pipefail
-          echo "📦 Downloading CRD schemas for Flux, Kyverno, and cert-manager..."
-          mkdir -p /tmp/crd-schemas
-          
-          # Download Flux CRDs
-          curl -L "https://github.com/fluxcd/flux2/releases/latest/download/crds.yaml" -o /tmp/crd-schemas/flux-crds.yaml
-          
-          # Download Kyverno CRDs
-          curl -L "https://github.com/kyverno/kyverno/releases/latest/download/install.yaml" -o /tmp/crd-schemas/kyverno-install.yaml
-          
-          # Download cert-manager CRDs
-          curl -L "https://github.com/cert-manager/cert-manager/releases/latest/download/cert-manager.yaml" -o /tmp/crd-schemas/cert-manager.yaml
-          
-          echo "✅ CRD schemas downloaded"
 
       - name: Validate YAML syntax and linting
         run: |
@@ -169,9 +153,6 @@ jobs:
               echo "Validating schema for $file"
               kubeconform -strict -summary \
                 -schema-location "https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json" \
-                -schema-location "/tmp/crd-schemas/flux-crds.yaml" \
-                -schema-location "/tmp/crd-schemas/kyverno-install.yaml" \
-                -schema-location "/tmp/crd-schemas/cert-manager.yaml" \
                 "$file" || {
                 echo "❌ Schema validation failed for $file"
                 exit 1
