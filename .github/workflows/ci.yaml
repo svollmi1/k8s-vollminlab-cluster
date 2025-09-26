@@ -127,10 +127,28 @@ jobs:
               continue
             fi
             
-            # Skip all CRDs and custom resources that kubeconform doesn't understand
-            if grep -q "kind: CustomResourceDefinition\|kind: HelmRelease\|kind: OCIRepository\|kind: HelmRepository\|kind: GitRepository\|kind: Kustomization\|kind: L2Advertisement\|kind: IPAddressPool\|kind: BGPPeer\|kind: BGPAdvertisement\|kind: SealedSecret" "$file"; then
-              echo "Skipping $file (CRD or custom resource - not supported by kubeconform)"
-              continue
+            # Skip custom resources that kubeconform doesn't understand
+            # Standard Kubernetes resources that kubeconform supports
+            STANDARD_KINDS="Deployment|Service|ConfigMap|Secret|Ingress|PersistentVolume|PersistentVolumeClaim|Namespace|Pod|ReplicaSet|StatefulSet|DaemonSet|Job|CronJob|NetworkPolicy|Role|RoleBinding|ClusterRole|ClusterRoleBinding|ServiceAccount|LimitRange|ResourceQuota|HorizontalPodAutoscaler|PodDisruptionBudget|StorageClass|VolumeSnapshot|VolumeSnapshotClass|CSIDriver|CSINode|VolumeAttachment|PriorityClass|RuntimeClass|PodSecurityPolicy|ValidatingAdmissionWebhook|MutatingAdmissionWebhook|ControllerRevision|Lease|EndpointSlice|FlowSchema|PriorityLevelConfiguration|IngressClass|NetworkPolicy|PodSecurityPolicy"
+            
+            # Check if the file contains only standard Kubernetes resources
+            if grep -q "kind:" "$file"; then
+              # Get all resource kinds in the file
+              FILE_KINDS=$(grep "kind:" "$file" | sed 's/.*kind: *//' | sort -u)
+              
+              # Check if any kind is not in the standard list
+              CUSTOM_RESOURCE=false
+              for kind in $FILE_KINDS; do
+                if ! echo "$STANDARD_KINDS" | grep -q "\b$kind\b"; then
+                  CUSTOM_RESOURCE=true
+                  break
+                fi
+              done
+              
+              if [[ "$CUSTOM_RESOURCE" == "true" ]]; then
+                echo "Skipping $file (contains custom resources - not supported by kubeconform)"
+                continue
+              fi
             fi
             
             # Check if file contains Kubernetes resources
