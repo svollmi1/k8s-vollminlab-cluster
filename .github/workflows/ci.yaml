@@ -3,8 +3,16 @@ name: CI Pipeline
 on:
   push:
     branches: [ main, develop ]
+    paths:
+      - 'clusters/**'
+      - '.github/workflows/**'
+      - 'terraform/**'
   pull_request:
     branches: [ main ]
+    paths:
+      - 'clusters/**'
+      - '.github/workflows/**'
+      - 'terraform/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -391,13 +399,21 @@ jobs:
           output: 'trivy-config-results.sarif'
           severity: 'HIGH,CRITICAL'
 
-      - name: Upload Trivy scan results to GitHub Security tab
+      - name: Upload Trivy FS scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
         if: always() && !cancelled()
         timeout-minutes: 1
         continue-on-error: true
         with:
-          sarif_file: 'trivy-results.sarif,trivy-config-results.sarif'
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Upload Trivy IaC scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always() && !cancelled()
+        timeout-minutes: 1
+        continue-on-error: true
+        with:
+          sarif_file: 'trivy-config-results.sarif'
           
       - name: Display Trivy results if upload fails
         if: failure()
@@ -447,7 +463,22 @@ jobs:
 
       - name: Setup Flux CLI
         run: |
-          curl -s https://fluxcd.io/install.sh | sudo bash
+          set -euo pipefail
+          echo "📦 Installing Flux CLI..."
+          FLUX_VERSION="2.2.2"
+          FLUX_CHECKSUM="sha256:8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b"
+          
+          # Download Flux CLI
+          curl -L "https://github.com/fluxcd/flux2/releases/download/v${FLUX_VERSION}/flux_${FLUX_VERSION}_linux_amd64.tar.gz" -o flux.tar.gz
+          
+          # Verify checksum (using actual checksum from GitHub releases)
+          curl -L "https://github.com/fluxcd/flux2/releases/download/v${FLUX_VERSION}/checksums.txt" -o checksums.txt
+          grep "flux_${FLUX_VERSION}_linux_amd64.tar.gz" checksums.txt | sha256sum --check
+          
+          # Extract and install
+          tar -xzf flux.tar.gz
+          sudo mv flux /usr/local/bin/
+          flux version
 
       - name: Preflight check for Flux CRDs
         run: |
@@ -528,7 +559,7 @@ jobs:
             if [[ -n "$CHANGED_FILES" ]]; then
               for file in $CHANGED_FILES; do
                 # Only process YAML files in the clusters directory
-                if [[ -f "$file" ]] && [[ "$file" =~ ^clusters/.*\.yaml$ ]] && grep -q "^kind: OCIRepository" "$file"; then
+                if [[ -f "$file" ]] && [[ "$file" =~ ^clusters/.*\.(yaml|yml)$ ]] && grep -E '^\s*kind:\s*OCIRepository' "$file"; then
                   CHANGED_OCI_REPOS="$CHANGED_OCI_REPOS $file"
                 fi
               done
@@ -539,7 +570,7 @@ jobs:
             if [[ -n "$CHANGED_FILES" ]]; then
               for file in $CHANGED_FILES; do
                 # Only process YAML files in the clusters directory
-                if [[ -f "$file" ]] && [[ "$file" =~ ^clusters/.*\.yaml$ ]] && grep -q "^kind: HelmRelease" "$file"; then
+                if [[ -f "$file" ]] && [[ "$file" =~ ^clusters/.*\.(yaml|yml)$ ]] && grep -E '^\s*kind:\s*HelmRelease' "$file"; then
                   CHANGED_HELMRELEASES="$CHANGED_HELMRELEASES $file"
                 fi
               done
@@ -626,8 +657,18 @@ jobs:
                 exit 0
               fi
               
-              # Check for failed conditions
-              FAILED_REPOS=$(kubectl get ocirepository -n "$TEST_NAMESPACE" -o jsonpath="{.items[?(@.status.conditions[?(@.type==\"Ready\")].status==\"False\")].metadata.name}" 2>/dev/null || echo "")
+              # Check for failed conditions - look for any repository with Ready=False or error conditions
+              FAILED_REPOS=""
+              for repo in $(kubectl get ocirepository -n "$TEST_NAMESPACE" -o name | cut -d/ -f2); do
+                # Check if repository has Ready=False condition
+                READY_STATUS=$(kubectl get ocirepository "$repo" -n "$TEST_NAMESPACE" -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}' 2>/dev/null || echo "")
+                READY_REASON=$(kubectl get ocirepository "$repo" -n "$TEST_NAMESPACE" -o jsonpath='{.status.conditions[?(@.type=="Ready")].reason}' 2>/dev/null || echo "")
+                
+                if [[ "$READY_STATUS" == "False" ]] || [[ "$READY_REASON" == *"Failed"* ]] || [[ "$READY_REASON" == *"Error"* ]]; then
+                  FAILED_REPOS="$FAILED_REPOS $repo"
+                fi
+              done
+              
               if [[ -n "$FAILED_REPOS" ]]; then
                 echo "❌ Some OCI repositories have failed: $FAILED_REPOS"
                 for repo in $FAILED_REPOS; do
