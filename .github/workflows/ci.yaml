@@ -178,8 +178,8 @@ jobs:
             # Get list of changed files in this PR/push
             if [[ "${{ github.event_name }}" == "pull_request" ]]; then
               echo "📋 Pull request detected - checking changed files"
-              # For PRs, use GitHub API to get changed files
-              CHANGED_FILES=$(gh pr view ${{ github.event.pull_request.number }} --json files --jq '.files[].path' | tr '\n' ' ')
+              # For PRs, use git diff with the merge base
+              CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
             else
               echo "📋 Push detected - checking recent changes"
               CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
@@ -190,17 +190,23 @@ jobs:
             
             # Find OCI repositories that need validation
             CHANGED_OCI_REPOS=""
-            for file in $(echo "$CHANGED_FILES" | grep -E ".*helmrepository\.yaml$"); do
-              if grep -q "kind: OCIRepository" "$file"; then
-                CHANGED_OCI_REPOS="$CHANGED_OCI_REPOS $file"
-              fi
-            done
+            if [[ -n "$CHANGED_FILES" ]]; then
+              for file in $(echo "$CHANGED_FILES" | grep -E ".*helmrepository\.yaml$"); do
+                if [[ -f "$file" ]] && grep -q "kind: OCIRepository" "$file"; then
+                  CHANGED_OCI_REPOS="$CHANGED_OCI_REPOS $file"
+                fi
+              done
+            fi
             
             # Find HelmReleases that need validation
             CHANGED_HELMRELEASES=""
-            for file in $(echo "$CHANGED_FILES" | grep -E "helmrelease\.yaml$"); do
-              CHANGED_HELMRELEASES="$CHANGED_HELMRELEASES $file"
-            done
+            if [[ -n "$CHANGED_FILES" ]]; then
+              for file in $(echo "$CHANGED_FILES" | grep -E "helmrelease\.yaml$"); do
+                if [[ -f "$file" ]]; then
+                  CHANGED_HELMRELEASES="$CHANGED_HELMRELEASES $file"
+                fi
+              done
+            fi
             
             # If no specific changes, fall back to validating everything (for initial setup)
             if [[ -z "$CHANGED_OCI_REPOS" && -z "$CHANGED_HELMRELEASES" ]]; then
