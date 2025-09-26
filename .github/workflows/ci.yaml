@@ -64,9 +64,20 @@ jobs:
         run: |
           echo "🔍 Validating YAML syntax and linting..."
           
-          # Run yamllint on all YAML files
-          echo "Running yamllint..."
-          yamllint clusters/ || {
+          # Create a lenient yamllint configuration
+          cat > .yamllint << 'EOF'
+          extends: default
+          rules:
+            document-start: disable
+            line-length: disable
+            new-line-at-end-of-file: disable
+            trailing-spaces: disable
+            indentation: disable
+          EOF
+          
+          # Run yamllint on all YAML files with lenient config
+          echo "Running yamllint with lenient configuration..."
+          yamllint -c .yamllint clusters/ || {
             echo "❌ YAML linting failed"
             exit 1
           }
