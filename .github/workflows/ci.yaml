@@ -179,6 +179,12 @@ jobs:
               continue
             fi
             
+            # Skip CRD definition files - they define the schema, not use it
+            if grep -q "kind: CustomResourceDefinition" "$file"; then
+              echo "Skipping CRD definition file: $file (CRDs define schemas, not use them)"
+              continue
+            fi
+            
             # Check if file contains Kubernetes resources
             if grep -q "kind:" "$file" && grep -q "apiVersion:" "$file"; then
               echo "Validating schema for $file"
