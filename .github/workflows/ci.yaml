@@ -29,7 +29,7 @@ env:
 jobs:
   basic-validation:
     name: Basic Validation (YAML & Security)
-    runs-on: vollminlab-1
+    runs-on: vollminlab
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -368,7 +368,7 @@ jobs:
 
   security-scan:
     name: Security Scan
-    runs-on: vollminlab-2
+    runs-on: vollminlab
     timeout-minutes: 5
     steps:
       - name: Checkout code
@@ -424,7 +424,7 @@ jobs:
 
   server-side-validation:
     name: Server-Side Validation with Temporary Namespace
-    runs-on: vollminlab-3
+    runs-on: vollminlab
     needs: [basic-validation]
     steps:
       - name: Checkout code
@@ -851,7 +851,7 @@ jobs:
 
   policy-validation:
     name: Kyverno Policy Validation & Compliance
-    runs-on: vollminlab-1
+    runs-on: vollminlab
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -983,7 +983,7 @@ jobs:
 
   notify-success:
     name: Notify Success
-    runs-on: vollminlab-1
+    runs-on: vollminlab
     needs: [basic-validation, security-scan, server-side-validation, policy-validation]
     if: success()
     steps:
@@ -998,7 +998,7 @@ jobs:
 
   notify-failure:
     name: Notify Failure
-    runs-on: vollminlab-1
+    runs-on: vollminlab
     needs: [basic-validation, security-scan, server-side-validation, policy-validation]
     if: failure()
     steps:
