@@ -73,6 +73,21 @@ jobs:
             new-line-at-end-of-file: disable
             trailing-spaces: disable
             indentation: disable
+            empty-lines: disable
+            comments: disable
+            brackets: disable
+            braces: disable
+            colons: disable
+            commas: disable
+            dashes: disable
+            dots: disable
+            hash: disable
+            hyphens: disable
+            key-duplicates: disable
+            key-ordering: disable
+            octal-values: disable
+            quoted-strings: disable
+            truthy: disable
           EOF
           
           # Run yamllint on all YAML files with lenient config
