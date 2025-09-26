@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: disk-cleanup
+  namespace: kube-system
+  labels:
+    app: disk-cleanup
+    env: production
+    category: maintenance
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: disk-cleanup
+  labels:
+    app: disk-cleanup
+    env: production
+    category: maintenance
+rules:
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["get", "list"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "delete"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "daemonsets", "replicasets"]
+  verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: disk-cleanup
+  labels:
+    app: disk-cleanup
+    env: production
+    category: maintenance
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: disk-cleanup
+subjects:
+- kind: ServiceAccount
+  name: disk-cleanup
+  namespace: kube-system
