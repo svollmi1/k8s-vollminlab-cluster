@@ -738,7 +738,12 @@ jobs:
           echo "🔍 Deploying and validating changed HelmReleases..."
           TEST_NAMESPACE="$TEST_NAMESPACE"
           RUN_SUFFIX="${{ env.RUN_SUFFIX }}"
-          OCI_MAPPING_FILE="$OCI_MAPPING_FILE"
+          
+          # Create mapping file if it doesn't exist
+          OCI_MAPPING_FILE="/tmp/oci-mapping-$RUN_SUFFIX.txt"
+          if [[ ! -f "$OCI_MAPPING_FILE" ]]; then
+            touch "$OCI_MAPPING_FILE"
+          fi
           
           # Find HelmReleases directly in this step to avoid variable passing issues
           CHANGED_HELMRELEASES=""
