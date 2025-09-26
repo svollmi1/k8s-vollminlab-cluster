@@ -66,7 +66,7 @@ jobs:
           
           # Run yamllint on all YAML files
           echo "Running yamllint..."
-          yamllint -c /dev/null clusters/ || {
+          yamllint clusters/ || {
             echo "❌ YAML linting failed"
             exit 1
           }
