@@ -611,7 +611,7 @@ jobs:
           
           # Find OCI repositories directly in this step to avoid variable passing issues
           CHANGED_OCI_REPOS=""
-          for file in $(find clusters -name "*.yaml" -o -name "*.yml" | head -10); do
+          for file in $(find clusters -name "*.yaml" -o -name "*.yml" 2>/dev/null); do
             if [[ -f "$file" ]] && grep -q "kind: OCIRepository" "$file"; then
               CHANGED_OCI_REPOS="$CHANGED_OCI_REPOS $file"
             fi
@@ -747,7 +747,7 @@ jobs:
           
           # Find HelmReleases directly in this step to avoid variable passing issues
           CHANGED_HELMRELEASES=""
-          for file in $(find clusters -name "*.yaml" -o -name "*.yml" | head -10); do
+          for file in $(find clusters -name "*.yaml" -o -name "*.yml" 2>/dev/null); do
             if [[ -f "$file" ]] && grep -q "kind: HelmRelease" "$file"; then
               CHANGED_HELMRELEASES="$CHANGED_HELMRELEASES $file"
             fi
@@ -818,7 +818,7 @@ jobs:
           
           # Find HelmReleases directly in this step to avoid variable passing issues
           CHANGED_HELMRELEASES=""
-          for file in $(find clusters -name "*.yaml" -o -name "*.yml" | head -10); do
+          for file in $(find clusters -name "*.yaml" -o -name "*.yml" 2>/dev/null); do
             if [[ -f "$file" ]] && grep -q "kind: HelmRelease" "$file"; then
               CHANGED_HELMRELEASES="$CHANGED_HELMRELEASES $file"
             fi
