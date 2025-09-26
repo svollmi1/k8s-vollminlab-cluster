@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tautulli-ingress
+  namespace: mediastack
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  labels:
+    app: tautulli
+    env: production
+    category: apps
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: tautulli.vollminlab.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: tautulli
+            port:
+              number: 8181
+  tls:
+  - hosts:
+    - tautulli.vollminlab.com
+    secretName: wildcard-tls
