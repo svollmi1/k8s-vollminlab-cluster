@@ -1,0 +1,74 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: disk-cleanup-cronjob
+  namespace: kube-system
+  labels:
+    app: disk-cleanup
+    env: production
+    category: maintenance
+spec:
+  schedule: "0 2 * * *"  # Run daily at 2 AM
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: disk-cleanup
+            env: production
+            category: maintenance
+        spec:
+          serviceAccountName: disk-cleanup
+          containers:
+          - name: disk-cleanup
+            image: bitnami/kubectl:latest
+            command:
+            - /bin/bash
+            - -c
+            - |
+              #!/bin/bash
+              set -e
+              
+              echo "Starting scheduled disk cleanup"
+              
+              # Clean up evicted pods
+              echo "Cleaning up evicted pods..."
+              kubectl get pods --all-namespaces --field-selector=status.phase=Evicted -o name | xargs -r kubectl delete || true
+              
+              # Clean up completed pods older than 1 hour
+              echo "Cleaning up old completed pods..."
+              kubectl get pods --all-namespaces --field-selector=status.phase=Succeeded -o json | \
+              jq -r '.items[] | select((.status.startTime | strptime("%Y-%m-%dT%H:%M:%SZ") | mktime) < (now - 3600)) | "\(.metadata.namespace) \(.metadata.name)"' | \
+              while read namespace name; do
+                kubectl delete pod -n "$namespace" "$name" || true
+              done
+              
+              # Clean up failed pods older than 1 hour
+              echo "Cleaning up old failed pods..."
+              kubectl get pods --all-namespaces --field-selector=status.phase=Failed -o json | \
+              jq -r '.items[] | select((.status.startTime | strptime("%Y-%m-%dT%H:%M:%SZ") | mktime) < (now - 3600)) | "\(.metadata.namespace) \(.metadata.name)"' | \
+              while read namespace name; do
+                kubectl delete pod -n "$namespace" "$name" || true
+              done
+              
+              # Show current pod status
+              echo "Current pod status:"
+              kubectl get pods --all-namespaces | grep -E "(Evicted|Completed|Failed)" || echo "No problematic pods found"
+              
+              echo "Scheduled disk cleanup completed"
+            securityContext:
+              runAsNonRoot: true
+              runAsUser: 1000
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+            resources:
+              requests:
+                cpu: 50m
+                memory: 64Mi
+              limits:
+                cpu: 200m
+                memory: 128Mi
+          restartPolicy: OnFailure
+      backoffLimit: 3
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1

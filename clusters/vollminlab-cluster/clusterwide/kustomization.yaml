@@ -11,3 +11,5 @@ resources:
   - pv-movies.yaml
   - pv-tv.yaml
   - storageclass-smb.yaml
+  - disk-cleanup-rbac.yaml
+  - disk-cleanup-cronjob.yaml
