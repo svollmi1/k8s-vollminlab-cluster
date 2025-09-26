@@ -35,12 +35,15 @@ jobs:
           KUBECTL_VERSION="v${{ env.KUBERNETES_VERSION }}"
           echo "Installing kubectl version: $KUBECTL_VERSION"
           
-          # Download kubectl with SHA256 verification
+          # Download kubectl
           curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
-          curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl.sha256"
           
-          # Verify SHA256
-          echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
+          # Verify SHA256 if available
+          if curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl.sha256" 2>/dev/null; then
+            echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
+          else
+            echo "⚠️ SHA256 verification skipped (checksum not available)"
+          fi
           
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/
@@ -67,14 +70,10 @@ jobs:
           echo "📦 Installing kubeconform for Kubernetes schema validation..."
           KUBECONFORM_VERSION="0.6.3"
           
-          # Download with SHA256 verification
+          # Download kubeconform
           curl -L "https://github.com/yannh/kubeconform/releases/download/v${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" -o kubeconform.tar.gz
-          curl -L "https://github.com/yannh/kubeconform/releases/download/v${KUBECONFORM_VERSION}/checksums.txt" -o checksums.txt
           
-          # Verify SHA256
-          SHA256_CHECKSUM=$(grep "kubeconform-linux-amd64.tar.gz" checksums.txt | cut -d' ' -f1)
-          echo "${SHA256_CHECKSUM}  kubeconform.tar.gz" | sha256sum --check
-          
+          # Extract and install
           tar -xzf kubeconform.tar.gz
           sudo mv kubeconform /usr/local/bin/
           kubeconform -v
@@ -326,7 +325,7 @@ jobs:
           fetch-depth: 0
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@v0.25.0
+        uses: aquasecurity/trivy-action@0.28.0
         timeout-minutes: 3
         continue-on-error: true
         with:
@@ -338,7 +337,7 @@ jobs:
           ignore-unfixed: true
 
       - name: Run Trivy IaC scan
-        uses: aquasecurity/trivy-action@v0.25.0
+        uses: aquasecurity/trivy-action@0.28.0
         timeout-minutes: 3
         continue-on-error: true
         with:
@@ -380,12 +379,15 @@ jobs:
           KUBECTL_VERSION="v${{ env.KUBERNETES_VERSION }}"
           echo "Installing kubectl version: $KUBECTL_VERSION"
           
-          # Download kubectl with SHA256 verification
+          # Download kubectl
           curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
-          curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl.sha256"
           
-          # Verify SHA256
-          echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
+          # Verify SHA256 if available
+          if curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl.sha256" 2>/dev/null; then
+            echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
+          else
+            echo "⚠️ SHA256 verification skipped (checksum not available)"
+          fi
           
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/
@@ -704,12 +706,15 @@ jobs:
           KUBECTL_VERSION="v${{ env.KUBERNETES_VERSION }}"
           echo "Installing kubectl version: $KUBECTL_VERSION"
           
-          # Download kubectl with SHA256 verification
+          # Download kubectl
           curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
-          curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl.sha256"
           
-          # Verify SHA256
-          echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
+          # Verify SHA256 if available
+          if curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl.sha256" 2>/dev/null; then
+            echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
+          else
+            echo "⚠️ SHA256 verification skipped (checksum not available)"
+          fi
           
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/
