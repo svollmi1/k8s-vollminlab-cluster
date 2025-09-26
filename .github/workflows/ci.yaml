@@ -90,6 +90,161 @@ jobs:
           # Check for missing labels
           echo "✅ No hardcoded secrets found"
 
+  server-side-validation:
+    name: Server-Side Validation with Temporary Namespace
+    runs-on: vollminlab
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install kubectl
+        run: |
+          echo "📦 Installing kubectl..."
+          curl -LO "https://dl.k8s.io/release/v${{ env.KUBERNETES_VERSION }}/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
+          kubectl version --client
+
+      - name: Setup Flux CLI
+        run: |
+          curl -s https://fluxcd.io/install.sh | sudo bash
+
+      - name: Install yq
+        run: |
+          echo "📦 Installing yq for YAML validation..."
+          sudo curl -L -o /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          yq --version
+
+      - name: Create temporary testing namespace
+        run: |
+          echo "🧪 Creating temporary testing namespace..."
+          TEST_NAMESPACE="ci-test-$(date +%s)-${GITHUB_RUN_ID:-$(whoami)}"
+          echo "TEST_NAMESPACE=$TEST_NAMESPACE" >> $GITHUB_ENV
+          kubectl create namespace "$TEST_NAMESPACE"
+          echo "✅ Created namespace: $TEST_NAMESPACE"
+
+      - name: Deploy and validate OCI repositories
+        run: |
+          echo "🔍 Deploying and validating OCI repositories..."
+          TEST_NAMESPACE="$TEST_NAMESPACE"
+          
+          # Deploy all OCI repositories to test namespace
+          for file in $(find clusters -name "*helmrepository.yaml" -exec grep -l "kind: OCIRepository" {} \;); do
+            echo "Deploying OCIRepository: $file"
+            
+            # Create a modified version for the test namespace
+            sed "s/namespace: flux-system/namespace: $TEST_NAMESPACE/g" "$file" | \
+            sed "s/name: .*/name: test-$(basename "$file" .yaml)-$(date +%s)/g" | \
+            kubectl apply -f - || {
+              echo "❌ Failed to deploy OCIRepository: $file"
+              exit 1
+            }
+          done
+          
+          # Wait for OCI repositories to sync (this validates if versions exist)
+          echo "⏳ Waiting for OCI repositories to sync..."
+          kubectl wait --for=condition=Ready --timeout=300s ocirepository --all -n "$TEST_NAMESPACE" || {
+            echo "❌ OCI repositories failed to sync"
+            echo "This indicates that chart versions may not exist or repositories are inaccessible"
+            
+            # Show detailed status
+            echo "OCI Repository Status:"
+            kubectl get ocirepository -n "$TEST_NAMESPACE" -o wide
+            echo ""
+            echo "OCI Repository Details:"
+            for repo in $(kubectl get ocirepository -n "$TEST_NAMESPACE" -o name); do
+              echo "--- $repo ---"
+              kubectl describe "$repo" -n "$TEST_NAMESPACE" | tail -20
+            done
+            exit 1
+          }
+          
+          echo "✅ All OCI repositories synced successfully"
+
+      - name: Deploy and validate HelmReleases
+        run: |
+          echo "🔍 Deploying and validating HelmReleases..."
+          TEST_NAMESPACE="$TEST_NAMESPACE"
+          
+          # Deploy all HelmReleases to test namespace
+          for file in $(find clusters -name "helmrelease.yaml"); do
+            echo "Deploying HelmRelease: $file"
+            
+            # Create a modified version for the test namespace
+            # Replace namespace and update chart references to use test repositories
+            sed "s/namespace: [a-zA-Z0-9-]*/namespace: $TEST_NAMESPACE/g" "$file" | \
+            sed "s/name: [a-zA-Z0-9-]*/name: test-$(basename "$(dirname "$file")")-$(date +%s)/g" | \
+            sed "s/name: [a-zA-Z0-9-]*-helmrepository/name: test-\1-helmrepository/g" | \
+            kubectl apply -f - || {
+              echo "❌ Failed to deploy HelmRelease: $file"
+              exit 1
+            }
+          done
+          
+          # Wait for HelmReleases to be ready (this validates if charts can be deployed)
+          echo "⏳ Waiting for HelmReleases to be ready..."
+          kubectl wait --for=condition=Ready --timeout=600s helmrelease --all -n "$TEST_NAMESPACE" || {
+            echo "❌ HelmReleases failed to become ready"
+            echo "This indicates that chart deployments are failing"
+            
+            # Show detailed status
+            echo "HelmRelease Status:"
+            kubectl get helmrelease -n "$TEST_NAMESPACE" -o wide
+            echo ""
+            echo "HelmRelease Details:"
+            for hr in $(kubectl get helmrelease -n "$TEST_NAMESPACE" -o name); do
+              echo "--- $hr ---"
+              kubectl describe "$hr" -n "$TEST_NAMESPACE" | tail -20
+            done
+            exit 1
+          }
+          
+          echo "✅ All HelmReleases are ready"
+
+      - name: Validate deployments are working
+        run: |
+          echo "🔍 Validating that deployments are actually working..."
+          TEST_NAMESPACE="$TEST_NAMESPACE"
+          
+          # Wait for all deployments to be ready
+          echo "⏳ Waiting for deployments to be ready..."
+          kubectl wait --for=condition=available --timeout=300s deployment --all -n "$TEST_NAMESPACE" || {
+            echo "❌ Some deployments failed to become available"
+            echo "Deployment Status:"
+            kubectl get deployments -n "$TEST_NAMESPACE"
+            echo ""
+            echo "Pod Status:"
+            kubectl get pods -n "$TEST_NAMESPACE"
+            echo ""
+            echo "Pod Details (failed pods):"
+            for pod in $(kubectl get pods -n "$TEST_NAMESPACE" --field-selector=status.phase!=Running -o name); do
+              echo "--- $pod ---"
+              kubectl describe "$pod" -n "$TEST_NAMESPACE" | tail -20
+            done
+            exit 1
+          }
+          
+          # Check that all pods are running
+          FAILED_PODS=$(kubectl get pods -n "$TEST_NAMESPACE" --field-selector=status.phase!=Running --no-headers | wc -l)
+          if [[ "$FAILED_PODS" -gt 0 ]]; then
+            echo "❌ Found $FAILED_PODS pods that are not running"
+            kubectl get pods -n "$TEST_NAMESPACE"
+            exit 1
+          fi
+          
+          echo "✅ All deployments are running successfully"
+
+      - name: Cleanup temporary namespace
+        if: always()
+        run: |
+          echo "🧹 Cleaning up temporary namespace..."
+          TEST_NAMESPACE="$TEST_NAMESPACE"
+          if [[ -n "$TEST_NAMESPACE" ]]; then
+            kubectl delete namespace "$TEST_NAMESPACE" --ignore-not-found=true
+            echo "✅ Cleaned up namespace: $TEST_NAMESPACE"
+          fi
+
   security-scan:
     name: Security Scan
     runs-on: vollminlab
@@ -184,8 +339,7 @@ jobs:
             CHART_VERSION=$(yq eval '.spec.chart.spec.version // .spec.chartRef.version' "$file" 2>/dev/null || echo "")
             if [[ -n "$CHART_VERSION" ]]; then
               echo "🔍 HelmRelease references specific chart version: $CHART_VERSION"
-              echo "⚠️  Note: Specific chart version validation would require repository access"
-              echo "   Please verify that version $CHART_VERSION exists in the referenced repository"
+              echo "ℹ️  Chart version will be validated by server-side validation"
             fi
             
             HELMRELEASE_COUNT=$((HELMRELEASE_COUNT + 1))
@@ -206,30 +360,7 @@ jobs:
                 exit 1
               }
               
-              # Server-side validation to check if OCI tag actually exists
-              echo "🔍 Checking if OCI repository tag exists..."
-              OCI_URL=$(yq eval '.spec.url' "$file")
-              OCI_TAG=$(yq eval '.spec.ref.tag' "$file")
-              
-              if [[ -n "$OCI_URL" && -n "$OCI_TAG" ]]; then
-                # Convert oci:// to https:// for registry API
-                REGISTRY_URL="${OCI_URL#oci://}"
-                MANIFEST_URL="https://${REGISTRY_URL}/manifests/${OCI_TAG}"
-                
-                echo "Checking manifest at: $MANIFEST_URL"
-                HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -H "Accept: application/vnd.docker.distribution.manifest.v2+json" "$MANIFEST_URL")
-                
-                if [[ "$HTTP_STATUS" == "200" ]]; then
-                  echo "✅ OCI tag $OCI_TAG exists in repository"
-                elif [[ "$HTTP_STATUS" == "404" ]]; then
-                  echo "❌ OCI tag $OCI_TAG does not exist in repository $OCI_URL"
-                  echo "Available tags may be different. Please check the repository documentation."
-                  exit 1
-                else
-                  echo "⚠️  Could not verify OCI tag $OCI_TAG (HTTP $HTTP_STATUS). Repository may require authentication or have different access patterns."
-                  echo "Continuing with validation, but please verify manually."
-                fi
-              fi
+              echo "ℹ️  OCI repository will be validated by server-side validation"
             else
               echo "Validating HelmRepository: $file"
               
@@ -543,59 +674,26 @@ jobs:
           done
           echo "✅ Validated $POLICY_COUNT Kyverno policies"
 
-  integration-test:
-    name: Integration Test
-    runs-on: vollminlab
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install kubectl
-        run: |
-          echo "📦 Installing kubectl..."
-          curl -LO "https://dl.k8s.io/release/v${{ env.KUBERNETES_VERSION }}/bin/linux/amd64/kubectl"
-          chmod +x kubectl
-          sudo mv kubectl /usr/local/bin/
-          kubectl version --client
-
-      - name: Test namespace creation
-        run: |
-          echo "🧪 Testing namespace creation..."
-          kubectl create namespace ci-test --dry-run=client || exit 1
-          echo "✅ Namespace creation validation passed"
-
-      - name: Test resource validation
-        run: |
-          echo "🧪 Testing resource validation..."
-          # Test a simple ConfigMap
-          cat <<EOF | kubectl apply --dry-run=client -f -
-          apiVersion: v1
-          kind: ConfigMap
-          metadata:
-            name: ci-test
-            namespace: default
-          data:
-            test: "value"
-          EOF
-
   notify-success:
     name: Notify Success
     runs-on: vollminlab
-    needs: [validate-manifests, security-scan, flux-validation, policy-validation, integration-test]
+    needs: [validate-manifests, server-side-validation, security-scan, flux-validation, policy-validation]
     if: success()
     steps:
       - name: Success notification
         run: |
           echo "✅ All CI checks passed!"
           echo "🚀 Ready for deployment"
+          echo "📊 Server-side validation confirmed all OCI repositories and HelmReleases work correctly"
 
   notify-failure:
     name: Notify Failure
     runs-on: vollminlab
-    needs: [validate-manifests, security-scan, flux-validation, policy-validation, integration-test]
+    needs: [validate-manifests, server-side-validation, security-scan, flux-validation, policy-validation]
     if: failure()
     steps:
       - name: Failure notification
         run: |
           echo "❌ CI checks failed!"
           echo "🔧 Please review the failed steps above"
+          echo "💡 Server-side validation provides detailed error information for debugging"
