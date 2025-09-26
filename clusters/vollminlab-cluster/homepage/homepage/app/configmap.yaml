@@ -26,12 +26,6 @@ data:
                 description: Media request management
                 href: https://overseerr.vollminlab.com
                 icon: overseerr.png
-                namespace: mediastack
-                app: overseerr
-                widget:
-                  type: overseerr
-                  url: https://overseerr.vollminlab.com
-                  key: "{{HOMEPAGE_VAR_OVERSEERR_API_KEY}}"
             - Sonarr:
                 description: TV show collection manager
                 href: https://sonarr.vollminlab.com
