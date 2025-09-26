@@ -27,8 +27,8 @@ jobs:
           echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
           sudo apt-get update
           sudo apt-get install -y kubectl
-        timeout-minutes: 5
           kubectl version --client
+        timeout-minutes: 5
 
       - name: Install yq
         run: |
@@ -162,8 +162,8 @@ jobs:
           echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
           sudo apt-get update
           sudo apt-get install -y kubectl
-        timeout-minutes: 5
           kubectl version --client
+        timeout-minutes: 5
 
       - name: Setup Flux CLI
         run: |
@@ -194,6 +194,21 @@ jobs:
             echo "Changed files:"
             echo "$CHANGED_FILES"
             
+            # Find services that need validation (service-level detection)
+            CHANGED_SERVICES=""
+            if [[ -n "$CHANGED_FILES" ]]; then
+              # For each changed file, find the service it belongs to
+              for file in $CHANGED_FILES; do
+                # Extract service path (e.g., mediastack/tautulli from mediastack/tautulli/app/helmrelease.yaml)
+                if [[ "$file" =~ ^clusters/[^/]+/([^/]+/[^/]+)/ ]]; then
+                  SERVICE_PATH="clusters/vollminlab-cluster/${BASH_REMATCH[1]}"
+                  if [[ ! " $CHANGED_SERVICES " =~ " $SERVICE_PATH " ]]; then
+                    CHANGED_SERVICES="$CHANGED_SERVICES $SERVICE_PATH"
+                  fi
+                fi
+              done
+            fi
+            
             # Find OCI repositories that need validation
             CHANGED_OCI_REPOS=""
             if [[ -n "$CHANGED_FILES" ]]; then
@@ -204,12 +219,17 @@ jobs:
               done
             fi
             
-            # Find HelmReleases that need validation
+            # Find HelmReleases that need validation (from changed services)
             CHANGED_HELMRELEASES=""
-            if [[ -n "$CHANGED_FILES" ]]; then
-              for file in $(echo "$CHANGED_FILES" | grep -E "helmrelease\.yaml$"); do
-                if [[ -f "$file" ]]; then
-                  CHANGED_HELMRELEASES="$CHANGED_HELMRELEASES $file"
+            if [[ -n "$CHANGED_SERVICES" ]]; then
+              for service in $CHANGED_SERVICES; do
+                if [[ -d "$service" ]]; then
+                  # Find all helmrelease.yaml files in this service
+                  for helmrelease in $(find "$service" -name "helmrelease.yaml" 2>/dev/null); do
+                    if [[ -f "$helmrelease" ]]; then
+                      CHANGED_HELMRELEASES="$CHANGED_HELMRELEASES $helmrelease"
+                    fi
+                  done
                 fi
               done
             fi
@@ -221,6 +241,7 @@ jobs:
               CHANGED_HELMRELEASES=$(find clusters -name "helmrelease.yaml")
             fi
             
+            echo "Changed services: $CHANGED_SERVICES"
             echo "OCI repositories to validate: $CHANGED_OCI_REPOS"
             echo "HelmReleases to validate: $CHANGED_HELMRELEASES"
             
@@ -382,8 +403,8 @@ jobs:
           echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
           sudo apt-get update
           sudo apt-get install -y kubectl
-        timeout-minutes: 5
           kubectl version --client
+        timeout-minutes: 5
 
       - name: Install yq
         run: |
