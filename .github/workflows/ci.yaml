@@ -165,8 +165,8 @@ jobs:
           kubectl create namespace "$TEST_NAMESPACE"
           echo "✅ Created namespace: $TEST_NAMESPACE"
 
-        - name: Identify changed resources
-          run: |
+      - name: Identify changed resources
+        run: |
             echo "🔍 Identifying changed resources for validation..."
             
             # Get list of changed files in this PR/push
