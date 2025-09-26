@@ -79,7 +79,6 @@ jobs:
             braces: disable
             colons: disable
             commas: disable
-            dots: disable
             hash: disable
             hyphens: disable
             key-duplicates: disable
