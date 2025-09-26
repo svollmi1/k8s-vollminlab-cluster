@@ -816,6 +816,14 @@ jobs:
           echo "🔍 Validating that deployments are actually working..."
           TEST_NAMESPACE="$TEST_NAMESPACE"
           
+          # Find HelmReleases directly in this step to avoid variable passing issues
+          CHANGED_HELMRELEASES=""
+          for file in $(find clusters -name "*.yaml" -o -name "*.yml" | head -10); do
+            if [[ -f "$file" ]] && grep -q "kind: HelmRelease" "$file"; then
+              CHANGED_HELMRELEASES="$CHANGED_HELMRELEASES $file"
+            fi
+          done
+          
           # Only wait for deployments if we have HelmReleases
           if [[ -z "$CHANGED_HELMRELEASES" ]]; then
             echo "✅ No HelmReleases to validate deployments for"
