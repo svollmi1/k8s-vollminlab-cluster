@@ -184,10 +184,11 @@ jobs:
             # Get list of changed files in this PR/push
             if [[ "${{ github.event_name }}" == "pull_request" ]]; then
               echo "📋 Pull request detected - checking changed files"
-              # For PRs, use git diff with the merge base
-              CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
+              # For PRs, use the merge base provided by GitHub Actions
+              CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }}...HEAD)
             else
               echo "📋 Push detected - checking recent changes"
+              # For pushes, use the previous commit
               CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
             fi
             
