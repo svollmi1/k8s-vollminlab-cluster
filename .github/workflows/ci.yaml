@@ -611,26 +611,36 @@ jobs:
           echo "Current OCI Repository Status:"
           kubectl get ocirepository -n "$TEST_NAMESPACE" -o wide || true
           
-          # Use a more verbose approach to show progress
-          echo "Starting OCI repository sync with progress monitoring..."
+          # Wait for OCI repositories to sync with timeout
+          echo "Starting OCI repository sync..."
           
-          # Start the wait in background and monitor progress
-          kubectl wait --for=condition=Ready --timeout=300s ocirepositories.source.toolkit.fluxcd.io --all -n "$TEST_NAMESPACE" &
-          WAIT_PID=$!
-          
-          # Monitor progress every 30 seconds
-          while kill -0 $WAIT_PID 2>/dev/null; do
-            echo "⏳ Still syncing... (checking every 30s)"
-            kubectl get ocirepository -n "$TEST_NAMESPACE" -o custom-columns="NAME:.metadata.name,READY:.status.conditions[?(@.type=='Ready')].status,REASON:.status.conditions[?(@.type=='Ready')].reason" || true
-            sleep 30
-          done
-          
-          # Wait for the background process to complete
-          wait $WAIT_PID
-          WAIT_EXIT_CODE=$?
-          
-          if [[ $WAIT_EXIT_CODE -ne 0 ]]; then
-            echo "❌ OCI repositories failed to sync"
+          # Use timeout command to ensure we don't wait forever
+          timeout 300s bash -c '
+            while true; do
+              echo "⏳ Checking OCI repository status..."
+              kubectl get ocirepository -n "$TEST_NAMESPACE" -o custom-columns="NAME:.metadata.name,READY:.status.conditions[?(@.type==\"Ready\")].status,REASON:.status.conditions[?(@.type==\"Ready\")].reason" || true
+              
+              # Check if all repositories are ready
+              if kubectl wait --for=condition=Ready --timeout=10s ocirepositories.source.toolkit.fluxcd.io --all -n "$TEST_NAMESPACE" 2>/dev/null; then
+                echo "✅ All OCI repositories are ready"
+                exit 0
+              fi
+              
+              # Check for failed conditions
+              FAILED_REPOS=$(kubectl get ocirepository -n "$TEST_NAMESPACE" -o jsonpath="{.items[?(@.status.conditions[?(@.type==\"Ready\")].status==\"False\")].metadata.name}" 2>/dev/null || echo "")
+              if [[ -n "$FAILED_REPOS" ]]; then
+                echo "❌ Some OCI repositories have failed: $FAILED_REPOS"
+                for repo in $FAILED_REPOS; do
+                  echo "--- $repo failure details ---"
+                  kubectl describe ocirepository "$repo" -n "$TEST_NAMESPACE" | grep -A 5 -B 5 "Ready\|Failed\|Error" || true
+                done
+                exit 1
+              fi
+              
+              sleep 30
+            done
+          ' || {
+            echo "❌ OCI repositories failed to sync within 5 minutes"
             echo "This indicates that chart versions may not exist or repositories are inaccessible"
             
             # Show detailed status
@@ -642,6 +652,21 @@ jobs:
               echo "--- $repo ---"
               kubectl describe "$repo" -n "$TEST_NAMESPACE" | tail -20
             done
+            
+            echo ""
+            echo "🔍 Troubleshooting OCI Repository Issues:"
+            echo "Common causes:"
+            echo "1. Registry temporarily unavailable (tccr.io, ghcr.io, etc.)"
+            echo "2. Chart version/tag does not exist"
+            echo "3. Network connectivity issues"
+            echo "4. Registry authentication required"
+            echo ""
+            echo "To resolve:"
+            echo "- Check if the registry is accessible: curl -I https://tccr.io"
+            echo "- Verify the chart version exists in the registry"
+            echo "- Check if authentication is required"
+            echo "- Consider using a different registry or chart version"
+            
             exit 1
           }
           
