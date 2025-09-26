@@ -184,8 +184,21 @@ jobs:
             # Get list of changed files in this PR/push
             if [[ "${{ github.event_name }}" == "pull_request" ]]; then
               echo "📋 Pull request detected - checking changed files"
-              # For PRs, use the merge base provided by GitHub Actions
-              CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} HEAD)
+              # For PRs, try to get the base SHA, but fall back to a safe approach
+              BASE_SHA="${{ github.event.pull_request.base.sha }}"
+              if [[ -n "$BASE_SHA" ]]; then
+                # Try to use the base SHA if it exists in our history
+                if git cat-file -e "$BASE_SHA" 2>/dev/null; then
+                  CHANGED_FILES=$(git diff --name-only "$BASE_SHA" HEAD)
+                else
+                  echo "⚠️ Base SHA not found in history, using alternative approach"
+                  # Fall back to comparing with the merge base
+                  CHANGED_FILES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }} HEAD)
+                fi
+              else
+                echo "⚠️ No base SHA available, using alternative approach"
+                CHANGED_FILES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }} HEAD)
+              fi
             else
               echo "📋 Push detected - checking recent changes"
               # For pushes, use the previous commit
