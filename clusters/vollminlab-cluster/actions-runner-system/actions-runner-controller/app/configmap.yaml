@@ -11,7 +11,7 @@ data:
   values.yaml: |
     authSecret:
       create: false
-      name: arc-githubapp-sealedsecret
+      name: arc-githubapp-secret
     githubWebhookServer:
       enabled: false
     syncPeriod: 1m
