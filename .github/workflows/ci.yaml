@@ -151,7 +151,10 @@ jobs:
             # Check if file contains Kubernetes resources
             if grep -q "kind:" "$file" && grep -q "apiVersion:" "$file"; then
               echo "Validating schema for $file"
+              # Use default schema location for standard Kubernetes resources
+              # and datreeio catalog for custom resources
               kubeconform -strict -summary \
+                -schema-location "default" \
                 -schema-location "https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json" \
                 "$file" || {
                 echo "❌ Schema validation failed for $file"
