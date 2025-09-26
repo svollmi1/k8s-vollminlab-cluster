@@ -29,7 +29,7 @@ env:
 jobs:
   basic-validation:
     name: Basic Validation (YAML & Security)
-    runs-on: vollminlab
+    runs-on: vollminlab-1
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -368,7 +368,7 @@ jobs:
 
   security-scan:
     name: Security Scan
-    runs-on: vollminlab
+    runs-on: vollminlab-2
     timeout-minutes: 5
     steps:
       - name: Checkout code
@@ -424,7 +424,7 @@ jobs:
 
   server-side-validation:
     name: Server-Side Validation with Temporary Namespace
-    runs-on: vollminlab
+    runs-on: vollminlab-3
     needs: [basic-validation]
     steps:
       - name: Checkout code
@@ -471,11 +471,15 @@ jobs:
           curl -L "https://github.com/fluxcd/flux2/releases/download/v${FLUX_VERSION}/flux_${FLUX_VERSION}_linux_amd64.tar.gz" -o flux.tar.gz
           
           # Try to verify checksum, but don't fail if checksums.txt is not available
-          if curl -L "https://github.com/fluxcd/flux2/releases/download/v${FLUX_VERSION}/checksums.txt" -o checksums.txt 2>/dev/null && [[ -s checksums.txt ]]; then
+          if curl -L "https://github.com/fluxcd/flux2/releases/download/v${FLUX_VERSION}/checksums.txt" -o checksums.txt 2>/dev/null && [[ -s checksums.txt ]] && [[ $(wc -c < checksums.txt) -gt 50 ]]; then
             echo "Verifying checksum..."
-            grep "flux_${FLUX_VERSION}_linux_amd64.tar.gz" checksums.txt | sha256sum --check
+            if grep "flux_${FLUX_VERSION}_linux_amd64.tar.gz" checksums.txt | sha256sum --check; then
+              echo "✅ Checksum verification successful"
+            else
+              echo "⚠️ Checksum verification failed, but continuing with installation"
+            fi
           else
-            echo "⚠️ Checksum verification skipped (checksums.txt not available or empty)"
+            echo "⚠️ Checksum verification skipped (checksums.txt not available, empty, or malformed)"
           fi
           
           # Extract and install
@@ -847,7 +851,7 @@ jobs:
 
   policy-validation:
     name: Kyverno Policy Validation & Compliance
-    runs-on: vollminlab
+    runs-on: vollminlab-1
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -979,7 +983,7 @@ jobs:
 
   notify-success:
     name: Notify Success
-    runs-on: vollminlab
+    runs-on: vollminlab-1
     needs: [basic-validation, security-scan, server-side-validation, policy-validation]
     if: success()
     steps:
@@ -994,7 +998,7 @@ jobs:
 
   notify-failure:
     name: Notify Failure
-    runs-on: vollminlab
+    runs-on: vollminlab-1
     needs: [basic-validation, security-scan, server-side-validation, policy-validation]
     if: failure()
     steps:

@@ -1,25 +1,103 @@
 apiVersion: actions.summerwind.dev/v1alpha1
 kind: RunnerDeployment
 metadata:
-  name: github-actions-runner
+  name: github-actions-runner-pool-1
   namespace: actions-runner-system
   labels:
     app: actions-runner-controller
     env: production
     category: ci
+    pool: "1"
 spec:
-  replicas: 3
+  replicas: 1
   template:
     metadata:
       labels:
         app: actions-runner-controller
         env: production
         category: ci
+        pool: "1"
     spec:
       repository: svollmi1/k8s-vollminlab-cluster
       image: summerwind/actions-runner:ubuntu-22.04
       labels:
-        - vollminlab
+        - vollminlab-1
+      serviceAccountName: github-actions-runner
+      resources:
+        requests:
+          cpu: 500m
+          memory: 512Mi
+        limits:
+          cpu: 2000m
+          memory: 2Gi
+      env:
+        - name: RUNNER_WAIT_FOR_DOCKERD_SECONDS
+          value: "120"
+        - name: RUNNER_EPHEMERAL
+          value: "false"
+---
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: RunnerDeployment
+metadata:
+  name: github-actions-runner-pool-2
+  namespace: actions-runner-system
+  labels:
+    app: actions-runner-controller
+    env: production
+    category: ci
+    pool: "2"
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: actions-runner-controller
+        env: production
+        category: ci
+        pool: "2"
+    spec:
+      repository: svollmi1/k8s-vollminlab-cluster
+      image: summerwind/actions-runner:ubuntu-22.04
+      labels:
+        - vollminlab-2
+      serviceAccountName: github-actions-runner
+      resources:
+        requests:
+          cpu: 500m
+          memory: 512Mi
+        limits:
+          cpu: 2000m
+          memory: 2Gi
+      env:
+        - name: RUNNER_WAIT_FOR_DOCKERD_SECONDS
+          value: "120"
+        - name: RUNNER_EPHEMERAL
+          value: "false"
+---
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: RunnerDeployment
+metadata:
+  name: github-actions-runner-pool-3
+  namespace: actions-runner-system
+  labels:
+    app: actions-runner-controller
+    env: production
+    category: ci
+    pool: "3"
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: actions-runner-controller
+        env: production
+        category: ci
+        pool: "3"
+    spec:
+      repository: svollmi1/k8s-vollminlab-cluster
+      image: summerwind/actions-runner:ubuntu-22.04
+      labels:
+        - vollminlab-3
       serviceAccountName: github-actions-runner
       resources:
         requests:
