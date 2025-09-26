@@ -122,8 +122,8 @@ jobs:
           
           # Run kubeconform on all Kubernetes manifests
           find clusters -name "*.yaml" -o -name "*.yml" | while read file; do
-            # Skip kustomization files and non-Kubernetes files
-            if [[ "$file" == *"kustomization.yaml" ]] || [[ "$file" == *"flux-exception.yaml" ]]; then
+            # Skip kustomization files, patch files, and non-Kubernetes files
+            if [[ "$file" == *"kustomization.yaml" ]] || [[ "$file" == *"flux-exception.yaml" ]] || [[ "$file" == *"-patch.yaml" ]] || [[ "$file" == *"patch-"* ]]; then
               continue
             fi
             
