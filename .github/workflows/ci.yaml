@@ -193,7 +193,7 @@ jobs:
           fetch-depth: 0
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@v0.50.0
+        uses: aquasecurity/trivy-action@v0.49.0
         timeout-minutes: 3
         continue-on-error: true
         with:
