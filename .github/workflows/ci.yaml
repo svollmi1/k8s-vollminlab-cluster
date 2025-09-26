@@ -248,19 +248,20 @@ jobs:
           done
           echo "✅ Validated $RUNNERDEPLOYMENT_COUNT RunnerDeployments"
           
-          # Check Kyverno Policies
+          # Check Kyverno Policies (YAML syntax validation only due to CI permissions)
           KYVERNO_POLICY_COUNT=0
           for file in $(find clusters -name "*.yaml" -exec grep -l "kind: ClusterPolicy\|kind: PolicyException" {} \;); do
-            echo "Validating Kyverno Policy: $file"
+            echo "Validating Kyverno Policy YAML syntax: $file"
+            # Use client-side validation only (no server permissions required)
             kubectl apply --dry-run=client -f "$file" || {
-              echo "❌ Failed to validate Kyverno Policy: $file"
+              echo "❌ Failed to validate Kyverno Policy YAML syntax: $file"
               echo "Error details:"
               kubectl apply --dry-run=client -f "$file" 2>&1 || true
               exit 1
             }
             KYVERNO_POLICY_COUNT=$((KYVERNO_POLICY_COUNT + 1))
           done
-          echo "✅ Validated $KYVERNO_POLICY_COUNT Kyverno Policies"
+          echo "✅ Validated $KYVERNO_POLICY_COUNT Kyverno Policies (YAML syntax)"
           
           # Check Kubernetes native resources
           NATIVE_RESOURCE_COUNT=0
