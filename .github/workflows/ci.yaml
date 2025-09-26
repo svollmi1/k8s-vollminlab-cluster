@@ -16,6 +16,7 @@ permissions:
 
 env:
   KUBERNETES_VERSION: "1.30.2"
+  RUN_SUFFIX: ${{ github.run_id }}-${{ github.run_number }}
 
 jobs:
   basic-validation:
@@ -29,11 +30,18 @@ jobs:
 
       - name: Install kubectl
         run: |
+          set -euo pipefail
           echo "📦 Installing kubectl..."
-          # Get the latest stable version from GitHub API
-          KUBECTL_VERSION=$(curl -s https://api.github.com/repos/kubernetes/kubernetes/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+          KUBECTL_VERSION="v${{ env.KUBERNETES_VERSION }}"
           echo "Installing kubectl version: $KUBECTL_VERSION"
+          
+          # Download kubectl with SHA256 verification
           curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
+          curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl.sha256"
+          
+          # Verify SHA256
+          echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
+          
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/
           kubectl version --client
@@ -55,14 +63,42 @@ jobs:
 
       - name: Install kubeconform
         run: |
+          set -euo pipefail
           echo "📦 Installing kubeconform for Kubernetes schema validation..."
           KUBECONFORM_VERSION="0.6.3"
-          curl -L "https://github.com/yannh/kubeconform/releases/download/v${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" | tar -xz
+          
+          # Download with SHA256 verification
+          curl -L "https://github.com/yannh/kubeconform/releases/download/v${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" -o kubeconform.tar.gz
+          curl -L "https://github.com/yannh/kubeconform/releases/download/v${KUBECONFORM_VERSION}/checksums.txt" -o checksums.txt
+          
+          # Verify SHA256
+          SHA256_CHECKSUM=$(grep "kubeconform-linux-amd64.tar.gz" checksums.txt | cut -d' ' -f1)
+          echo "${SHA256_CHECKSUM}  kubeconform.tar.gz" | sha256sum --check
+          
+          tar -xzf kubeconform.tar.gz
           sudo mv kubeconform /usr/local/bin/
           kubeconform -v
 
+      - name: Download CRD schemas
+        run: |
+          set -euo pipefail
+          echo "📦 Downloading CRD schemas for Flux, Kyverno, and cert-manager..."
+          mkdir -p /tmp/crd-schemas
+          
+          # Download Flux CRDs
+          curl -L "https://github.com/fluxcd/flux2/releases/latest/download/crds.yaml" -o /tmp/crd-schemas/flux-crds.yaml
+          
+          # Download Kyverno CRDs
+          curl -L "https://github.com/kyverno/kyverno/releases/latest/download/install.yaml" -o /tmp/crd-schemas/kyverno-install.yaml
+          
+          # Download cert-manager CRDs
+          curl -L "https://github.com/cert-manager/cert-manager/releases/latest/download/cert-manager.yaml" -o /tmp/crd-schemas/cert-manager.yaml
+          
+          echo "✅ CRD schemas downloaded"
+
       - name: Validate YAML syntax and linting
         run: |
+          set -euo pipefail
           echo "🔍 Validating YAML syntax and linting..."
           
           # Create a lenient yamllint configuration
@@ -119,43 +155,25 @@ jobs:
 
       - name: Validate Kubernetes schemas with kubeconform
         run: |
+          set -euo pipefail
           echo "🔍 Validating Kubernetes schemas with kubeconform..."
           
-          # Run kubeconform on all Kubernetes manifests
+          # Run kubeconform on all Kubernetes manifests with CRD support
           find clusters -name "*.yaml" -o -name "*.yml" | while read file; do
             # Skip kustomization files, patch files, and non-Kubernetes files
             if [[ "$file" == *"kustomization.yaml" ]] || [[ "$file" == *"flux-exception.yaml" ]] || [[ "$file" == *"-patch.yaml" ]] || [[ "$file" == *"patch-"* ]]; then
               continue
             fi
             
-            # Skip custom resources that kubeconform doesn't understand
-            # Standard Kubernetes resources that kubeconform supports
-            STANDARD_KINDS="Deployment|Service|ConfigMap|Secret|Ingress|PersistentVolume|PersistentVolumeClaim|Namespace|Pod|ReplicaSet|StatefulSet|DaemonSet|Job|CronJob|NetworkPolicy|Role|RoleBinding|ClusterRole|ClusterRoleBinding|ServiceAccount|LimitRange|ResourceQuota|HorizontalPodAutoscaler|PodDisruptionBudget|StorageClass|VolumeSnapshot|VolumeSnapshotClass|CSIDriver|CSINode|VolumeAttachment|PriorityClass|RuntimeClass|PodSecurityPolicy|ValidatingAdmissionWebhook|MutatingAdmissionWebhook|ControllerRevision|Lease|EndpointSlice|FlowSchema|PriorityLevelConfiguration|IngressClass|NetworkPolicy|PodSecurityPolicy"
-            
-            # Check if the file contains only standard Kubernetes resources
-            if grep -q "kind:" "$file"; then
-              # Get all resource kinds in the file
-              FILE_KINDS=$(grep "kind:" "$file" | sed 's/.*kind: *//' | sort -u)
-              
-              # Check if any kind is not in the standard list
-              CUSTOM_RESOURCE=false
-              for kind in $FILE_KINDS; do
-                if ! echo "$STANDARD_KINDS" | grep -q "\b$kind\b"; then
-                  CUSTOM_RESOURCE=true
-                  break
-                fi
-              done
-              
-              if [[ "$CUSTOM_RESOURCE" == "true" ]]; then
-                echo "Skipping $file (contains custom resources - not supported by kubeconform)"
-                continue
-              fi
-            fi
-            
             # Check if file contains Kubernetes resources
             if grep -q "kind:" "$file" && grep -q "apiVersion:" "$file"; then
               echo "Validating schema for $file"
-              kubeconform -strict -summary "$file" || {
+              kubeconform -strict -summary \
+                -schema-location "https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json" \
+                -schema-location "/tmp/crd-schemas/flux-crds.yaml" \
+                -schema-location "/tmp/crd-schemas/kyverno-install.yaml" \
+                -schema-location "/tmp/crd-schemas/cert-manager.yaml" \
+                "$file" || {
                 echo "❌ Schema validation failed for $file"
                 exit 1
               }
@@ -165,6 +183,7 @@ jobs:
 
       - name: Validate Kustomizations
         run: |
+          set -euo pipefail
           echo "🔍 Validating Kustomizations..."
           KUSTOMIZATION_COUNT=0
           for file in $(find clusters -name "kustomization.yaml"); do
@@ -179,6 +198,7 @@ jobs:
 
       - name: Install gitleaks
         run: |
+          set -euo pipefail
           echo "📦 Installing gitleaks for secrets scanning..."
           GITLEAKS_VERSION="8.18.0"
           curl -L "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" | tar -xz
@@ -187,6 +207,7 @@ jobs:
 
       - name: Scan for secrets with gitleaks
         run: |
+          set -euo pipefail
           echo "🔍 Scanning for secrets with gitleaks..."
           
           # Create a custom gitleaks config to ignore legitimate patterns
@@ -196,28 +217,29 @@ jobs:
           [gitleaks.allowlist]
           description = "Allowlist for legitimate data in GitOps repos"
           
-          # Allow SealedSecrets (encrypted secrets)
-          [[gitleaks.allowlist.regexes]]
-          description = "Sealed secrets with encrypted data"
-          regex = '''encryptedData:'''
-          
-          # Allow specific file patterns that contain legitimate base64 data
+          # Allow SealedSecrets (encrypted secrets) - specific to SealedSecret context
           [[gitleaks.allowlist.paths]]
           description = "Sealed secrets files"
-          regex = '''sealedsecret.*\.yaml'''
+          regex = '''.*sealedsecret.*\.yaml'''
           
           [[gitleaks.allowlist.paths]]
           description = "Sealed secrets directory"
-          regex = '''secrets/'''
+          regex = '''.*/secrets/.*'''
           
-          # Allow specific patterns for legitimate base64 data
+          # Allow specific patterns for legitimate base64 data in SealedSecrets
+          [[gitleaks.allowlist.regexes]]
+          description = "SealedSecret encryptedData field"
+          regex = '''encryptedData:'''
+          
+          # Allow specific patterns for legitimate base64 data in known contexts
           [[gitleaks.allowlist.regexes]]
           description = "ConfigMap checksums and hashes"
           regex = '''checksum/'''
           
+          # Allow specific patterns for legitimate base64 data in SealedSecrets only
           [[gitleaks.allowlist.regexes]]
-          description = "Base64 encoded configuration values"
-          regex = '''[A-Za-z0-9+/]{20,}={0,2}'''
+          description = "Base64 encoded values in SealedSecrets"
+          regex = '''[A-Za-z0-9+/]{50,}={0,2}'''
           EOF
           
           # Run gitleaks with custom config
@@ -231,6 +253,7 @@ jobs:
 
       - name: Check for common issues
         run: |
+          set -euo pipefail
           echo "🔍 Checking for common issues..."
           
           # Additional check for hardcoded secrets in YAML files (backup to gitleaks)
@@ -247,19 +270,47 @@ jobs:
             fi
           done
           
-          # Check for consistent labels in Flux CD resources using yq
+          # Check for consistent labels in Flux CD resources using yq (document-aware)
           echo "🔍 Validating metadata consistency..."
+          
+          # Determine expected env based on branch
+          EXPECTED_ENV="production"
+          if [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+            EXPECTED_ENV="staging"
+          fi
+          
           for file in $(find clusters -name "*.yaml" -exec grep -l "kind: HelmRelease\|kind: OCIRepository\|kind: HelmRepository" {} \;); do
-            # Check if required labels exist using yq
-            if ! yq eval '.metadata.labels.app' "$file" >/dev/null 2>&1 || \
-               ! yq eval '.metadata.labels.env' "$file" | grep -q "production" || \
-               ! yq eval '.metadata.labels.category' "$file" >/dev/null 2>&1; then
-              echo "❌ Missing required labels in Flux CD resource: $file"
-              echo "Required labels: app, env: production, category"
-              echo "Current labels:"
-              yq eval '.metadata.labels' "$file" 2>/dev/null || echo "No labels found"
-              exit 1
-            fi
+            # Check each document in multi-doc YAML files using yq -d
+            yq eval -d '*' '.kind' "$file" 2>/dev/null | while read -r kind; do
+              if [[ "$kind" != "HelmRelease" && "$kind" != "OCIRepository" && "$kind" != "HelmRepository" ]]; then
+                continue
+              fi
+              
+              # Get document index for this kind
+              DOC_INDEX=$(yq eval -d '*' 'select(.kind == "'"$kind"'") | key' "$file" 2>/dev/null | head -1)
+              
+              # Check if required labels exist using yq with document index
+              APP_LABEL=$(yq eval -d "$DOC_INDEX" '.metadata.labels.app' "$file" 2>/dev/null)
+              ENV_LABEL=$(yq eval -d "$DOC_INDEX" '.metadata.labels.env' "$file" 2>/dev/null)
+              CATEGORY_LABEL=$(yq eval -d "$DOC_INDEX" '.metadata.labels.category' "$file" 2>/dev/null)
+              
+              if [[ -z "$APP_LABEL" || -z "$CATEGORY_LABEL" ]]; then
+                echo "❌ Missing required labels in Flux CD resource: $file (document $DOC_INDEX)"
+                echo "Required labels: app, category"
+                echo "Current labels:"
+                yq eval -d "$DOC_INDEX" '.metadata.labels' "$file" 2>/dev/null || echo "No labels found"
+                exit 1
+              fi
+              
+              # Check env label matches expected environment
+              if [[ "$ENV_LABEL" != "$EXPECTED_ENV" ]]; then
+                echo "❌ Incorrect env label in Flux CD resource: $file (document $DOC_INDEX)"
+                echo "Expected env: $EXPECTED_ENV, found: $ENV_LABEL"
+                echo "Current labels:"
+                yq eval -d "$DOC_INDEX" '.metadata.labels' "$file" 2>/dev/null || echo "No labels found"
+                exit 1
+              fi
+            done
           done
           
           echo "✅ No hardcoded secrets found and metadata is consistent"
@@ -275,7 +326,7 @@ jobs:
           fetch-depth: 0
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.4.0
+        uses: aquasecurity/trivy-action@v0.25.0
         timeout-minutes: 3
         continue-on-error: true
         with:
@@ -286,13 +337,24 @@ jobs:
           severity: 'HIGH,CRITICAL'
           ignore-unfixed: true
 
+      - name: Run Trivy IaC scan
+        uses: aquasecurity/trivy-action@v0.25.0
+        timeout-minutes: 3
+        continue-on-error: true
+        with:
+          scan-type: 'config'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-config-results.sarif'
+          severity: 'HIGH,CRITICAL'
+
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
         if: always() && !cancelled()
         timeout-minutes: 1
         continue-on-error: true
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: 'trivy-results.sarif,trivy-config-results.sarif'
           
       - name: Display Trivy results if upload fails
         if: failure()
@@ -313,11 +375,18 @@ jobs:
 
       - name: Install kubectl
         run: |
+          set -euo pipefail
           echo "📦 Installing kubectl..."
-          # Get the latest stable version from GitHub API
-          KUBECTL_VERSION=$(curl -s https://api.github.com/repos/kubernetes/kubernetes/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+          KUBECTL_VERSION="v${{ env.KUBERNETES_VERSION }}"
           echo "Installing kubectl version: $KUBECTL_VERSION"
+          
+          # Download kubectl with SHA256 verification
           curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
+          curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl.sha256"
+          
+          # Verify SHA256
+          echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
+          
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/
           kubectl version --client
@@ -355,138 +424,135 @@ jobs:
 
       - name: Create temporary testing namespace
         run: |
+          set -euo pipefail
           echo "🧪 Creating temporary testing namespace..."
-          TEST_NAMESPACE="ci-test-$(date +%s)-${GITHUB_RUN_ID:-$(whoami)}"
+          RUN_SUFFIX="${{ env.RUN_SUFFIX }}"
+          TEST_NAMESPACE="ci-test-${RUN_SUFFIX}"
           echo "TEST_NAMESPACE=$TEST_NAMESPACE" >> $GITHUB_ENV
           kubectl create namespace "$TEST_NAMESPACE"
           echo "✅ Created namespace: $TEST_NAMESPACE"
 
       - name: Identify changed resources
         run: |
+            set -euo pipefail
             echo "🔍 Identifying changed resources for validation..."
             
             # Get list of changed files in this PR/push
             if [[ "${{ github.event_name }}" == "pull_request" ]]; then
               echo "📋 Pull request detected - checking changed files"
-              # For PRs, try to get the base SHA, but fall back to a safe approach
               BASE_SHA="${{ github.event.pull_request.base.sha }}"
-              if [[ -n "$BASE_SHA" ]]; then
-                # Try to use the base SHA if it exists in our history
-                if git cat-file -e "$BASE_SHA" 2>/dev/null; then
-                  CHANGED_FILES=$(git diff --name-only "$BASE_SHA" HEAD)
-                else
-                  echo "⚠️ Base SHA not found in history, using alternative approach"
-                  # Fall back to comparing with the merge base using a different approach
-                  # Try to find the merge base between the current branch and the target branch
-                  MERGE_BASE=$(git merge-base HEAD ${{ github.event.pull_request.base.ref }} 2>/dev/null || echo "")
-                  if [[ -n "$MERGE_BASE" ]]; then
-                    CHANGED_FILES=$(git diff --name-only "$MERGE_BASE" HEAD)
-                  else
-                    echo "⚠️ Could not find merge base, using all files in current commit"
-                    # Last resort: get all files in the current commit
-                    CHANGED_FILES=$(git diff --name-only --cached HEAD)
-                  fi
-                fi
+              if [[ -n "$BASE_SHA" ]] && git cat-file -e "$BASE_SHA" 2>/dev/null; then
+                CHANGED_FILES=$(git diff --name-only "$BASE_SHA" HEAD)
               else
-                echo "⚠️ No base SHA available, using alternative approach"
-                # Try to find the merge base between the current branch and the target branch
                 MERGE_BASE=$(git merge-base HEAD ${{ github.event.pull_request.base.ref }} 2>/dev/null || echo "")
                 if [[ -n "$MERGE_BASE" ]]; then
                   CHANGED_FILES=$(git diff --name-only "$MERGE_BASE" HEAD)
                 else
-                  echo "⚠️ Could not find merge base, using all files in current commit"
-                  # Last resort: get all files in the current commit
                   CHANGED_FILES=$(git diff --name-only --cached HEAD)
                 fi
               fi
             else
               echo "📋 Push detected - checking recent changes"
-              # For pushes, use the previous commit
               CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
             fi
             
             echo "Changed files:"
             echo "$CHANGED_FILES"
             
-            # Find services that need validation (service-level detection)
-            CHANGED_SERVICES=""
+            # Extract cluster name from file paths
+            CLUSTER_NAME=""
             if [[ -n "$CHANGED_FILES" ]]; then
-              # For each changed file, find the service it belongs to
               for file in $CHANGED_FILES; do
-                # Extract service path (e.g., mediastack/tautulli from mediastack/tautulli/app/helmrelease.yaml)
-                if [[ "$file" =~ ^clusters/[^/]+/([^/]+/[^/]+)/ ]]; then
-                  SERVICE_PATH="clusters/vollminlab-cluster/${BASH_REMATCH[1]}"
-                  if [[ ! " $CHANGED_SERVICES " =~ " $SERVICE_PATH " ]]; then
-                    CHANGED_SERVICES="$CHANGED_SERVICES $SERVICE_PATH"
-                  fi
+                if [[ "$file" =~ ^clusters/([^/]+)/ ]]; then
+                  CLUSTER_NAME="${BASH_REMATCH[1]}"
+                  break
                 fi
               done
             fi
             
-            # Find OCI repositories that need validation
+            if [[ -z "$CLUSTER_NAME" ]]; then
+              echo "⚠️ Could not determine cluster name from changed files"
+              CLUSTER_NAME="vollminlab-cluster"
+            fi
+            
+            echo "Detected cluster: $CLUSTER_NAME"
+            
+            # Find OCI repositories by kind, not filename
             CHANGED_OCI_REPOS=""
             if [[ -n "$CHANGED_FILES" ]]; then
-              for file in $(echo "$CHANGED_FILES" | grep -E ".*helmrepository\.yaml$"); do
+              for file in $CHANGED_FILES; do
                 if [[ -f "$file" ]] && grep -q "kind: OCIRepository" "$file"; then
                   CHANGED_OCI_REPOS="$CHANGED_OCI_REPOS $file"
                 fi
               done
             fi
             
-            # Find HelmReleases that need validation (from changed services)
+            # Find HelmReleases by kind, not filename
             CHANGED_HELMRELEASES=""
-            if [[ -n "$CHANGED_SERVICES" ]]; then
-              for service in $CHANGED_SERVICES; do
-                if [[ -d "$service" ]]; then
-                  # Find all helmrelease.yaml files in this service
-                  for helmrelease in $(find "$service" -name "helmrelease.yaml" 2>/dev/null); do
-                    if [[ -f "$helmrelease" ]]; then
-                      CHANGED_HELMRELEASES="$CHANGED_HELMRELEASES $helmrelease"
-                    fi
-                  done
+            if [[ -n "$CHANGED_FILES" ]]; then
+              for file in $CHANGED_FILES; do
+                if [[ -f "$file" ]] && grep -q "kind: HelmRelease" "$file"; then
+                  CHANGED_HELMRELEASES="$CHANGED_HELMRELEASES $file"
                 fi
               done
             fi
             
-            # If no specific changes detected, exit gracefully instead of validating everything
+            # If no specific changes detected, exit gracefully
             if [[ -z "$CHANGED_OCI_REPOS" && -z "$CHANGED_HELMRELEASES" ]]; then
-              echo "✅ No specific OCI repos or HelmReleases changed - skipping validation"
+              echo "✅ No OCI repos or HelmReleases changed - skipping validation"
               echo "CHANGED_OCI_REPOS=''" >> $GITHUB_ENV
               echo "CHANGED_HELMRELEASES=''" >> $GITHUB_ENV
+              echo "CLUSTER_NAME='$CLUSTER_NAME'" >> $GITHUB_ENV
               exit 0
             fi
             
-            echo "Changed services: $CHANGED_SERVICES"
             echo "OCI repositories to validate: $CHANGED_OCI_REPOS"
             echo "HelmReleases to validate: $CHANGED_HELMRELEASES"
             
-            # Export for next steps (use printf to avoid issues with special characters)
+            # Export for next steps
             printf "CHANGED_OCI_REPOS=%s\n" "$CHANGED_OCI_REPOS" >> $GITHUB_ENV
             printf "CHANGED_HELMRELEASES=%s\n" "$CHANGED_HELMRELEASES" >> $GITHUB_ENV
+            echo "CLUSTER_NAME=$CLUSTER_NAME" >> $GITHUB_ENV
 
       - name: Deploy and validate changed OCI repositories
         run: |
+          set -euo pipefail
           echo "🔍 Deploying and validating changed OCI repositories..."
           TEST_NAMESPACE="$TEST_NAMESPACE"
+          RUN_SUFFIX="${{ env.RUN_SUFFIX }}"
           
           if [[ -z "$CHANGED_OCI_REPOS" ]]; then
             echo "✅ No OCI repositories to validate"
             exit 0
           fi
           
+          # Create mapping file for OCI repository name mapping
+          OCI_MAPPING_FILE="/tmp/oci-mapping-$RUN_SUFFIX.txt"
+          touch "$OCI_MAPPING_FILE"
+          
           # Deploy only changed OCI repositories to test namespace
           for file in $CHANGED_OCI_REPOS; do
             echo "Deploying OCIRepository: $file"
             
+            # Extract original name and create test name
+            ORIG_NAME=$(yq eval '.metadata.name' "$file")
+            TEST_NAME="test-${ORIG_NAME}-${RUN_SUFFIX}"
+            
+            # Store mapping
+            echo "$ORIG_NAME:$TEST_NAME" >> "$OCI_MAPPING_FILE"
+            
             # Create a modified version for the test namespace using yq
             yq eval "
               .metadata.namespace = \"$TEST_NAMESPACE\" |
-              .metadata.name = \"test-$(basename "$file" .yaml)-$(date +%s)\"
+              .metadata.name = \"$TEST_NAME\"
             " "$file" | kubectl apply -f - || {
               echo "❌ Failed to deploy OCIRepository: $file"
               exit 1
             }
           done
+          
+          # Export mapping file for HelmRelease step
+          echo "OCI_MAPPING_FILE=$OCI_MAPPING_FILE" >> $GITHUB_ENV
           
           # Wait for OCI repositories to sync (this validates if versions exist)
           echo "⏳ Waiting for OCI repositories to sync..."
@@ -510,8 +576,11 @@ jobs:
 
       - name: Deploy and validate changed HelmReleases
         run: |
+          set -euo pipefail
           echo "🔍 Deploying and validating changed HelmReleases..."
           TEST_NAMESPACE="$TEST_NAMESPACE"
+          RUN_SUFFIX="${{ env.RUN_SUFFIX }}"
+          OCI_MAPPING_FILE="$OCI_MAPPING_FILE"
           
           if [[ -z "$CHANGED_HELMRELEASES" ]]; then
             echo "✅ No HelmReleases to validate"
@@ -522,11 +591,26 @@ jobs:
           for file in $CHANGED_HELMRELEASES; do
             echo "Deploying HelmRelease: $file"
             
+            # Extract original sourceRef name and map to test name
+            ORIG_SOURCE_REF=$(yq eval '.spec.chart.spec.sourceRef.name' "$file")
+            TEST_SOURCE_REF=""
+            
+            # Look up mapped name from OCI mapping file
+            if [[ -f "$OCI_MAPPING_FILE" ]]; then
+              TEST_SOURCE_REF=$(grep "^${ORIG_SOURCE_REF}:" "$OCI_MAPPING_FILE" | cut -d: -f2)
+            fi
+            
+            # Fallback to test name if no mapping found
+            if [[ -z "$TEST_SOURCE_REF" ]]; then
+              TEST_SOURCE_REF="test-${ORIG_SOURCE_REF}-${RUN_SUFFIX}"
+            fi
+            
             # Create a modified version for the test namespace using yq
             yq eval "
               .metadata.namespace = \"$TEST_NAMESPACE\" |
-              .metadata.name = \"test-$(basename "$(dirname "$file")")-$(date +%s)\" |
-              .spec.chart.spec.sourceRef.name = \"test-$(basename "$(dirname "$file")")-helmrepository-$(date +%s)\"
+              .metadata.name = \"test-$(basename "$(dirname "$file")")-${RUN_SUFFIX}\" |
+              .spec.chart.spec.sourceRef.name = \"$TEST_SOURCE_REF\" |
+              .spec.chart.spec.sourceRef.namespace = \"$TEST_NAMESPACE\"
             " "$file" | kubectl apply -f - || {
               echo "❌ Failed to deploy HelmRelease: $file"
               exit 1
@@ -555,6 +639,7 @@ jobs:
 
       - name: Validate deployments are working
         run: |
+          set -euo pipefail
           echo "🔍 Validating that deployments are actually working..."
           TEST_NAMESPACE="$TEST_NAMESPACE"
           
@@ -595,6 +680,7 @@ jobs:
       - name: Cleanup temporary namespace
         if: always()
         run: |
+          set -euo pipefail
           echo "🧹 Cleaning up temporary namespace..."
           TEST_NAMESPACE="$TEST_NAMESPACE"
           if [[ -n "$TEST_NAMESPACE" ]]; then
@@ -613,11 +699,18 @@ jobs:
 
       - name: Install kubectl
         run: |
+          set -euo pipefail
           echo "📦 Installing kubectl..."
-          # Get the latest stable version from GitHub API
-          KUBECTL_VERSION=$(curl -s https://api.github.com/repos/kubernetes/kubernetes/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+          KUBECTL_VERSION="v${{ env.KUBERNETES_VERSION }}"
           echo "Installing kubectl version: $KUBECTL_VERSION"
+          
+          # Download kubectl with SHA256 verification
           curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
+          curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl.sha256"
+          
+          # Verify SHA256
+          echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
+          
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/
           kubectl version --client
@@ -642,6 +735,7 @@ jobs:
 
       - name: Validate Kyverno policy syntax
         run: |
+          set -euo pipefail
           echo "🔍 Validating Kyverno policy syntax..."
           POLICY_COUNT=0
           for file in $(find clusters -name "*.yaml" -path "*/kyverno/*"); do
@@ -665,10 +759,12 @@ jobs:
 
       - name: Validate policy compliance
         run: |
+          set -euo pipefail
           echo "🔍 Validating compliance with Kyverno policies..."
           
-          # Create temporary directory for policy files
+          # Create temporary directory for policy files and rendered manifests
           mkdir -p /tmp/kyverno-policies
+          mkdir -p /tmp/rendered-manifests
           
           # Extract all Kyverno policies to temporary directory
           POLICY_COUNT=0
@@ -686,11 +782,21 @@ jobs:
           
           echo "Found $POLICY_COUNT Kyverno policies to validate against"
           
-          # Validate all Kubernetes resources against Kyverno policies
-          echo "🔍 Running policy compliance validation..."
+          # Render all manifests using kustomize
+          echo "🔍 Rendering manifests with kustomize..."
+          for kustomization in $(find clusters -name "kustomization.yaml"); do
+            echo "Rendering: $kustomization"
+            kubectl kustomize "$(dirname "$kustomization")" > "/tmp/rendered-manifests/$(basename "$(dirname "$kustomization")").yaml" || {
+              echo "❌ Failed to render kustomization: $kustomization"
+              exit 1
+            }
+          done
           
-          # Use kyverno CLI to validate all resources against all policies
-          kyverno apply /tmp/kyverno-policies/ --resource clusters/ || {
+          # Validate rendered manifests against Kyverno policies
+          echo "🔍 Running policy compliance validation on rendered manifests..."
+          
+          # Use kyverno CLI to validate rendered resources against all policies
+          kyverno apply /tmp/kyverno-policies/ --resource /tmp/rendered-manifests/ || {
             echo "❌ Policy compliance validation failed"
             echo "Some resources do not comply with Kyverno policies"
             echo ""
@@ -709,6 +815,7 @@ jobs:
           
           # Cleanup
           rm -rf /tmp/kyverno-policies
+          rm -rf /tmp/rendered-manifests
 
   notify-success:
     name: Notify Success
@@ -718,6 +825,7 @@ jobs:
     steps:
       - name: Success notification
         run: |
+          set -euo pipefail
           echo "✅ All CI checks passed!"
           echo "🚀 Ready for deployment"
           echo "📊 Server-side validation confirmed all OCI repositories and HelmReleases work correctly"
@@ -732,6 +840,7 @@ jobs:
     steps:
       - name: Failure notification
         run: |
+          set -euo pipefail
           echo "❌ CI checks failed!"
           echo "🔧 Please review the failed steps above"
           echo "💡 Server-side validation provides detailed error information for debugging"
