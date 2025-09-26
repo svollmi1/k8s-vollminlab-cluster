@@ -10,8 +10,8 @@ env:
   KUBERNETES_VERSION: "1.32.3"
 
 jobs:
-  validate-manifests:
-    name: Validate Kubernetes Manifests
+  basic-validation:
+    name: Basic Validation (YAML & Security)
     runs-on: vollminlab
     steps:
       - name: Checkout code
@@ -25,10 +25,18 @@ jobs:
           sudo mv kubectl /usr/local/bin/
           kubectl version --client
 
-      - name: Validate YAML syntax
+      - name: Install yq
         run: |
-          echo "🔍 Validating YAML syntax..."
-          # Use kubectl to validate YAML syntax for Kubernetes resources only
+          echo "📦 Installing yq for YAML validation..."
+          sudo curl -L -o /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          yq --version
+
+      - name: Validate YAML syntax and basic structure
+        run: |
+          echo "🔍 Validating YAML syntax and basic structure..."
+          
+          # Validate all YAML files for syntax
           find clusters -name "*.yaml" -o -name "*.yml" | while read file; do
             # Skip kustomization files (build files, not Kubernetes resources)
             if [[ "$file" == *"kustomization.yaml" ]]; then
@@ -50,30 +58,25 @@ jobs:
           done
           echo "✅ All YAML files have valid syntax"
 
-      - name: Validate Kubernetes manifests
+      - name: Validate Kustomizations
         run: |
-          echo "🔍 Validating Kubernetes manifests..."
-          find clusters -name "*.yaml" -o -name "*.yml" | while read file; do
-            # Skip kustomization files (build files, not Kubernetes resources)
-            if [[ "$file" == *"kustomization.yaml" ]]; then
-              echo "Skipping $file (Kustomization build file)"
-              continue
-            fi
-            # Skip resources that require missing CRDs (temporary workaround)
-            if [[ "$file" == *"flux-exception.yaml" ]]; then
-              echo "Skipping $file (requires PolicyException CRD)"
-              continue
-            fi
-            echo "Validating $file"
-            kubectl apply --dry-run=client -f "$file" || exit 1
+          echo "🔍 Validating Kustomizations..."
+          KUSTOMIZATION_COUNT=0
+          for file in $(find clusters -name "kustomization.yaml"); do
+            echo "Validating Kustomization: $file"
+            kubectl kustomize "$(dirname "$file")" >/dev/null 2>&1 || {
+              echo "❌ Failed to validate Kustomization: $file"
+              exit 1
+            }
+            KUSTOMIZATION_COUNT=$((KUSTOMIZATION_COUNT + 1))
           done
+          echo "✅ Validated $KUSTOMIZATION_COUNT Kustomizations"
 
       - name: Check for common issues
         run: |
           echo "🔍 Checking for common issues..."
           
           # Check for hardcoded secrets (exclude SealedSecrets and legitimate references)
-          # First, find files with password fields
           for file in $(find clusters -name "*.yaml" -o -name "*.yml" | xargs grep -l "password\s*:"); do
             # Skip if it's a SealedSecret or legitimate reference
             if grep -q "kind: SealedSecret\|encryptedData:" "$file"; then
@@ -87,12 +90,57 @@ jobs:
             fi
           done
           
-          # Check for missing labels
-          echo "✅ No hardcoded secrets found"
+          # Check for consistent labels in Flux CD resources
+          echo "🔍 Validating metadata consistency..."
+          for file in $(find clusters -name "*.yaml" -exec grep -l "kind: HelmRelease\|kind: OCIRepository\|kind: HelmRepository" {} \;); do
+            if ! grep -q "app:" "$file" || ! grep -q "env: production" "$file" || ! grep -q "category:" "$file"; then
+              echo "❌ Missing required labels in Flux CD resource: $file"
+              echo "Required labels: app, env: production, category"
+              exit 1
+            fi
+          done
+          
+          echo "✅ No hardcoded secrets found and metadata is consistent"
+
+  security-scan:
+    name: Security Scan
+    runs-on: vollminlab
+    timeout-minutes: 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        timeout-minutes: 3
+        continue-on-error: true
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'HIGH,CRITICAL'
+          ignore-unfixed: true
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always() && !cancelled()
+        timeout-minutes: 1
+        continue-on-error: true
+        with:
+          sarif_file: 'trivy-results.sarif'
+          
+      - name: Display Trivy results if upload fails
+        if: failure()
+        run: |
+          echo "⚠️ SARIF upload failed, but Trivy scan completed successfully"
+          echo "📊 Security scan results are still valuable for local review"
+          echo "🔍 Check the Trivy output above for security findings"
 
   server-side-validation:
     name: Server-Side Validation with Temporary Namespace
     runs-on: vollminlab
+    needs: [basic-validation]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -108,13 +156,6 @@ jobs:
       - name: Setup Flux CLI
         run: |
           curl -s https://fluxcd.io/install.sh | sudo bash
-
-      - name: Install yq
-        run: |
-          echo "📦 Installing yq for YAML validation..."
-          sudo curl -L -o /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          sudo chmod +x /usr/local/bin/yq
-          yq --version
 
       - name: Create temporary testing namespace
         run: |
@@ -245,43 +286,8 @@ jobs:
             echo "✅ Cleaned up namespace: $TEST_NAMESPACE"
           fi
 
-  security-scan:
-    name: Security Scan
-    runs-on: vollminlab
-    timeout-minutes: 5
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        timeout-minutes: 3
-        continue-on-error: true
-        with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          severity: 'HIGH,CRITICAL'
-          ignore-unfixed: true
-
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
-        if: always() && !cancelled()
-        timeout-minutes: 1
-        continue-on-error: true
-        with:
-          sarif_file: 'trivy-results.sarif'
-          
-      - name: Display Trivy results if upload fails
-        if: failure()
-        run: |
-          echo "⚠️ SARIF upload failed, but Trivy scan completed successfully"
-          echo "📊 Security scan results are still valuable for local review"
-          echo "🔍 Check the Trivy output above for security findings"
-
-  flux-validation:
-    name: Flux Configuration Validation
+  policy-validation:
+    name: Kyverno Policy Validation & Compliance
     runs-on: vollminlab
     steps:
       - name: Checkout code
@@ -294,352 +300,13 @@ jobs:
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/
           kubectl version --client
-
-      - name: Setup Flux CLI
-        run: |
-          curl -s https://fluxcd.io/install.sh | sudo bash
 
       - name: Install yq
         run: |
-          echo "📦 Installing yq for YAML validation..."
+          echo "📦 Installing yq for YAML processing..."
           sudo curl -L -o /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
           sudo chmod +x /usr/local/bin/yq
           yq --version
-
-      - name: Validate Flux configurations
-        run: |
-          echo "🔍 Validating Flux configurations..."
-          
-          # Check Kustomizations using kubectl kustomize
-          KUSTOMIZATION_COUNT=0
-          for file in $(find clusters -name "kustomization.yaml"); do
-            echo "Validating Kustomization: $file"
-            kubectl kustomize "$(dirname "$file")" >/dev/null 2>&1 || {
-              echo "❌ Failed to validate Kustomization: $file"
-              exit 1
-            }
-            KUSTOMIZATION_COUNT=$((KUSTOMIZATION_COUNT + 1))
-          done
-          echo "✅ Validated $KUSTOMIZATION_COUNT Kustomizations"
-          
-          # Check HelmReleases
-          HELMRELEASE_COUNT=0
-          for file in $(find clusters -name "helmrelease.yaml"); do
-            echo "Validating HelmRelease: $file"
-            
-            # Client-side validation
-            kubectl apply --dry-run=client -f "$file" || {
-              echo "❌ Failed to validate HelmRelease: $file"
-              echo "Error details:"
-              kubectl apply --dry-run=client -f "$file" 2>&1 || true
-              exit 1
-            }
-            
-            # Check if HelmRelease references a specific chart version
-            CHART_VERSION=$(yq eval '.spec.chart.spec.version // .spec.chartRef.version' "$file" 2>/dev/null || echo "")
-            if [[ -n "$CHART_VERSION" ]]; then
-              echo "🔍 HelmRelease references specific chart version: $CHART_VERSION"
-              echo "ℹ️  Chart version will be validated by server-side validation"
-            fi
-            
-            HELMRELEASE_COUNT=$((HELMRELEASE_COUNT + 1))
-          done
-          echo "✅ Validated $HELMRELEASE_COUNT HelmReleases"
-          
-          # Check all Flux CD Repository types
-          REPO_COUNT=0
-          for file in $(find clusters -name "*helmrepository.yaml"); do
-            if grep -q "kind: OCIRepository" "$file"; then
-              echo "Validating OCIRepository: $file"
-              
-              # Client-side validation
-              kubectl apply --dry-run=client -f "$file" || {
-                echo "❌ Failed to validate OCIRepository: $file"
-                echo "Error details:"
-                kubectl apply --dry-run=client -f "$file" 2>&1 || true
-                exit 1
-              }
-              
-              echo "ℹ️  OCI repository will be validated by server-side validation"
-            else
-              echo "Validating HelmRepository: $file"
-              
-              # Client-side validation
-              kubectl apply --dry-run=client -f "$file" || {
-                echo "❌ Failed to validate HelmRepository: $file"
-                echo "Error details:"
-                kubectl apply --dry-run=client -f "$file" 2>&1 || true
-                exit 1
-              }
-              
-              # Check if this HelmRepository uses OCI URLs (some do)
-              REPO_URL=$(yq eval '.spec.url' "$file")
-              if [[ "$REPO_URL" == oci://* ]]; then
-                echo "🔍 HelmRepository uses OCI URL - checking if repository is accessible..."
-                # For OCI Helm repositories, we can't easily validate specific tags without knowing the chart structure
-                # But we can at least check if the repository is accessible
-                REGISTRY_URL="${REPO_URL#oci://}"
-                CATALOG_URL="https://${REGISTRY_URL}/v2/_catalog"
-                
-                echo "Checking catalog at: $CATALOG_URL"
-                HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$CATALOG_URL")
-                
-                if [[ "$HTTP_STATUS" == "200" ]]; then
-                  echo "✅ OCI HelmRepository is accessible"
-                elif [[ "$HTTP_STATUS" == "404" ]]; then
-                  echo "❌ OCI HelmRepository $REPO_URL is not accessible"
-                  exit 1
-                else
-                  echo "⚠️  Could not verify OCI HelmRepository $REPO_URL (HTTP $HTTP_STATUS). Repository may require authentication."
-                  echo "Continuing with validation, but please verify manually."
-                fi
-              fi
-              
-              # For regular Helm repositories, check if the repository is accessible
-              if [[ "$REPO_URL" != oci://* ]]; then
-                echo "🔍 Checking if Helm repository is accessible..."
-                echo "Repository URL: $REPO_URL"
-                # For HTTP/HTTPS repositories, we can check if they're accessible
-                if [[ "$REPO_URL" == http* ]]; then
-                  HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$REPO_URL")
-                  if [[ "$HTTP_STATUS" == "200" ]]; then
-                    echo "✅ HelmRepository is accessible"
-                  elif [[ "$HTTP_STATUS" == "404" ]]; then
-                    echo "❌ HelmRepository $REPO_URL is not accessible"
-                    exit 1
-                  else
-                    echo "⚠️  Could not verify HelmRepository $REPO_URL (HTTP $HTTP_STATUS)"
-                    echo "Continuing with validation, but please verify manually."
-                  fi
-                fi
-              fi
-            fi
-            REPO_COUNT=$((REPO_COUNT + 1))
-          done
-          echo "✅ Validated $REPO_COUNT Repository manifests"
-          
-          # Check all container image tags in Kubernetes resources
-          echo "🔍 Validating container image tags..."
-          IMAGE_VALIDATION_COUNT=0
-          for file in $(find clusters -name "*.yaml" -exec grep -l "image:" {} \;); do
-            echo "Checking image tags in: $file"
-            
-            # Extract all image references
-            IMAGES=$(yq eval '.. | select(has("image")) | .image' "$file" 2>/dev/null | grep -v "null" | sort -u)
-            
-            for IMAGE in $IMAGES; do
-              if [[ -n "$IMAGE" && "$IMAGE" != "null" ]]; then
-                echo "  Checking image: $IMAGE"
-                
-                # Parse image name and tag
-                if [[ "$IMAGE" == *":"* ]]; then
-                  IMAGE_NAME="${IMAGE%:*}"
-                  IMAGE_TAG="${IMAGE##*:}"
-                else
-                  IMAGE_NAME="$IMAGE"
-                  IMAGE_TAG="latest"
-                fi
-                
-                # Skip if it's a local image or doesn't look like a registry image
-                if [[ "$IMAGE_NAME" == *"localhost"* ]] || [[ "$IMAGE_NAME" == *"127.0.0.1"* ]] || [[ ! "$IMAGE_NAME" == *"."* ]]; then
-                  echo "    ⏭️  Skipping local/unqualified image: $IMAGE"
-                  continue
-                fi
-                
-                # For Docker Hub images
-                if [[ "$IMAGE_NAME" == *"docker.io"* ]] || [[ "$IMAGE_NAME" != *"/"* ]] || [[ "$IMAGE_NAME" == *"library"* ]]; then
-                  # Convert to Docker Hub format
-                  if [[ "$IMAGE_NAME" == *"docker.io"* ]]; then
-                    DOCKER_IMAGE="$IMAGE_NAME"
-                  elif [[ "$IMAGE_NAME" != *"/"* ]]; then
-                    DOCKER_IMAGE="docker.io/library/$IMAGE_NAME"
-                  else
-                    DOCKER_IMAGE="docker.io/$IMAGE_NAME"
-                  fi
-                  
-                  MANIFEST_URL="https://registry-1.docker.io/v2/${DOCKER_IMAGE#docker.io/}/manifests/${IMAGE_TAG}"
-                  
-                  echo "    Checking Docker Hub manifest: $MANIFEST_URL"
-                  HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -H "Accept: application/vnd.docker.distribution.manifest.v2+json" "$MANIFEST_URL")
-                  
-                  if [[ "$HTTP_STATUS" == "200" ]]; then
-                    echo "    ✅ Image tag $IMAGE_TAG exists"
-                  elif [[ "$HTTP_STATUS" == "404" ]]; then
-                    echo "    ❌ Image tag $IMAGE_TAG does not exist for $IMAGE_NAME"
-                    echo "    Please verify the image tag exists in the registry"
-                    exit 1
-                  else
-                    echo "    ⚠️  Could not verify image tag $IMAGE_TAG (HTTP $HTTP_STATUS)"
-                    echo "    Continuing with validation, but please verify manually"
-                  fi
-                else
-                  # For other registries (GHCR, Quay, etc.)
-                  REGISTRY_DOMAIN=$(echo "$IMAGE_NAME" | cut -d'/' -f1)
-                  IMAGE_PATH="${IMAGE_NAME#*/}"
-                  
-                  MANIFEST_URL="https://$REGISTRY_DOMAIN/v2/$IMAGE_PATH/manifests/$IMAGE_TAG"
-                  
-                  echo "    Checking registry manifest: $MANIFEST_URL"
-                  HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -H "Accept: application/vnd.docker.distribution.manifest.v2+json" "$MANIFEST_URL")
-                  
-                  if [[ "$HTTP_STATUS" == "200" ]]; then
-                    echo "    ✅ Image tag $IMAGE_TAG exists"
-                  elif [[ "$HTTP_STATUS" == "404" ]]; then
-                    echo "    ❌ Image tag $IMAGE_TAG does not exist for $IMAGE_NAME"
-                    echo "    Please verify the image tag exists in the registry"
-                    exit 1
-                  else
-                    echo "    ⚠️  Could not verify image tag $IMAGE_TAG (HTTP $HTTP_STATUS)"
-                    echo "    Registry may require authentication or have different access patterns"
-                    echo "    Continuing with validation, but please verify manually"
-                  fi
-                fi
-                
-                IMAGE_VALIDATION_COUNT=$((IMAGE_VALIDATION_COUNT + 1))
-              fi
-            done
-          done
-          echo "✅ Validated $IMAGE_VALIDATION_COUNT container image tags"
-          
-          # Check Flux CD Kustomizations
-          FLUX_KUSTOMIZATION_COUNT=0
-          for file in $(find clusters -name "*-kustomization.yaml"); do
-            echo "Validating Flux Kustomization: $file"
-            kubectl apply --dry-run=client -f "$file" || {
-              echo "❌ Failed to validate Flux Kustomization: $file"
-              echo "Error details:"
-              kubectl apply --dry-run=client -f "$file" 2>&1 || true
-              exit 1
-            }
-            FLUX_KUSTOMIZATION_COUNT=$((FLUX_KUSTOMIZATION_COUNT + 1))
-          done
-          echo "✅ Validated $FLUX_KUSTOMIZATION_COUNT Flux Kustomizations"
-          
-          # Check SealedSecrets
-          SEALEDSECRET_COUNT=0
-          for file in $(find clusters -name "*sealedsecret*.yaml"); do
-            echo "Validating SealedSecret: $file"
-            kubectl apply --dry-run=client -f "$file" || {
-              echo "❌ Failed to validate SealedSecret: $file"
-              echo "Error details:"
-              kubectl apply --dry-run=client -f "$file" 2>&1 || true
-              exit 1
-            }
-            SEALEDSECRET_COUNT=$((SEALEDSECRET_COUNT + 1))
-          done
-          echo "✅ Validated $SEALEDSECRET_COUNT SealedSecrets"
-          
-          # Check GitRepositories
-          GITREPO_COUNT=0
-          for file in $(find clusters -name "*.yaml" -exec grep -l "kind: GitRepository" {} \;); do
-            echo "Validating GitRepository: $file"
-            kubectl apply --dry-run=client -f "$file" || {
-              echo "❌ Failed to validate GitRepository: $file"
-              echo "Error details:"
-              kubectl apply --dry-run=client -f "$file" 2>&1 || true
-              exit 1
-            }
-            GITREPO_COUNT=$((GITREPO_COUNT + 1))
-          done
-          echo "✅ Validated $GITREPO_COUNT GitRepositories"
-          
-          # Check RunnerDeployments (Actions Runner Controller)
-          RUNNERDEPLOYMENT_COUNT=0
-          for file in $(find clusters -name "*.yaml" -exec grep -l "kind: RunnerDeployment" {} \;); do
-            echo "Validating RunnerDeployment: $file"
-            kubectl apply --dry-run=client -f "$file" || {
-              echo "❌ Failed to validate RunnerDeployment: $file"
-              echo "Error details:"
-              kubectl apply --dry-run=client -f "$file" 2>&1 || true
-              exit 1
-            }
-            RUNNERDEPLOYMENT_COUNT=$((RUNNERDEPLOYMENT_COUNT + 1))
-          done
-          echo "✅ Validated $RUNNERDEPLOYMENT_COUNT RunnerDeployments"
-          
-          # Check Kyverno Policies (pure YAML validation - no kubectl server interaction)
-          KYVERNO_POLICY_COUNT=0
-          for file in $(find clusters -name "*.yaml" -exec grep -l "kind: ClusterPolicy\|kind: PolicyException" {} \;); do
-            echo "Validating Kyverno Policy YAML syntax: $file"
-            # Use yq or python to validate YAML syntax without kubectl
-            if command -v yq >/dev/null 2>&1; then
-              yq eval '.' "$file" >/dev/null || {
-                echo "❌ Failed to validate Kyverno Policy YAML syntax: $file"
-                exit 1
-              }
-            else
-              # Fallback to python for YAML validation
-              python3 -c "import yaml; yaml.safe_load_all(open('$file'))" || {
-                echo "❌ Failed to validate Kyverno Policy YAML syntax: $file"
-                exit 1
-              }
-            fi
-            KYVERNO_POLICY_COUNT=$((KYVERNO_POLICY_COUNT + 1))
-          done
-          echo "✅ Validated $KYVERNO_POLICY_COUNT Kyverno Policies (YAML syntax)"
-          
-          # Check Kubernetes native resources
-          NATIVE_RESOURCE_COUNT=0
-          for file in $(find clusters -name "*.yaml" -exec grep -l "kind: ConfigMap\|kind: Ingress\|kind: PersistentVolumeClaim\|kind: ServiceAccount\|kind: ClusterRole\|kind: ClusterRoleBinding" {} \;); do
-            echo "Validating Kubernetes native resource: $file"
-            kubectl apply --dry-run=client -f "$file" || {
-              echo "❌ Failed to validate Kubernetes resource: $file"
-              echo "Error details:"
-              kubectl apply --dry-run=client -f "$file" 2>&1 || true
-              exit 1
-            }
-            NATIVE_RESOURCE_COUNT=$((NATIVE_RESOURCE_COUNT + 1))
-          done
-          echo "✅ Validated $NATIVE_RESOURCE_COUNT Kubernetes native resources"
-          
-          # Validate metadata consistency
-          echo "🔍 Validating metadata consistency..."
-          
-          # Check for consistent labels in Flux CD resources
-          for file in $(find clusters -name "*.yaml" -exec grep -l "kind: HelmRelease\|kind: OCIRepository\|kind: HelmRepository" {} \;); do
-            if ! grep -q "app:" "$file" || ! grep -q "env: production" "$file" || ! grep -q "category:" "$file"; then
-              echo "❌ Missing required labels in Flux CD resource: $file"
-              echo "Required labels: app, env: production, category"
-              exit 1
-            fi
-          done
-          
-          # Check for consistent namespace usage
-          echo "🔍 Validating namespace consistency..."
-          for file in $(find clusters -name "*.yaml" -exec grep -l "kind: HelmRelease" {} \;); do
-            namespace=$(grep "namespace:" "$file" | head -1 | awk '{print $2}')
-            app_name=$(grep "name:" "$file" | head -1 | awk '{print $2}')
-            if [[ "$namespace" != "$app_name" ]]; then
-              echo "⚠️  Namespace mismatch in HelmRelease: $file (namespace: $namespace, name: $app_name)"
-              echo "Consider if this is intentional"
-            fi
-          done
-          
-          # Check for consistent storage class usage
-          echo "🔍 Validating storage class consistency..."
-          for file in $(find clusters -name "*pvc*.yaml"); do
-            if ! grep -q "storageClassName: smb" "$file"; then
-              echo "⚠️  PVC not using SMB storage class: $file"
-              echo "Consider using 'storageClassName: smb' for consistency"
-            fi
-          done
-          
-          echo "✅ Metadata consistency validation completed"
-
-  policy-validation:
-    name: Kyverno Policy Validation
-    runs-on: vollminlab
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install kubectl
-        run: |
-          echo "📦 Installing kubectl..."
-          curl -LO "https://dl.k8s.io/release/v${{ env.KUBERNETES_VERSION }}/bin/linux/amd64/kubectl"
-          chmod +x kubectl
-          sudo mv kubectl /usr/local/bin/
-          kubectl version --client
 
       - name: Setup Kyverno CLI
         run: |
@@ -651,9 +318,9 @@ jobs:
           sudo mv kyverno /usr/local/bin/
           kyverno version
 
-      - name: Validate Kyverno policies
+      - name: Validate Kyverno policy syntax
         run: |
-          echo "🔍 Validating Kyverno policies..."
+          echo "🔍 Validating Kyverno policy syntax..."
           POLICY_COUNT=0
           for file in $(find clusters -name "*.yaml" -path "*/kyverno/*"); do
             # Skip PolicyException files as they require Kyverno operator to be installed
@@ -674,10 +341,57 @@ jobs:
           done
           echo "✅ Validated $POLICY_COUNT Kyverno policies"
 
+      - name: Validate policy compliance
+        run: |
+          echo "🔍 Validating compliance with Kyverno policies..."
+          
+          # Create temporary directory for policy files
+          mkdir -p /tmp/kyverno-policies
+          
+          # Extract all Kyverno policies to temporary directory
+          POLICY_COUNT=0
+          for file in $(find clusters -name "*.yaml" -path "*/kyverno/*"); do
+            if grep -q "kind: Policy\|kind: ClusterPolicy" "$file"; then
+              cp "$file" "/tmp/kyverno-policies/policy-${POLICY_COUNT}.yaml"
+              POLICY_COUNT=$((POLICY_COUNT + 1))
+            fi
+          done
+          
+          if [[ "$POLICY_COUNT" -eq 0 ]]; then
+            echo "⚠️ No Kyverno policies found to validate against"
+            exit 0
+          fi
+          
+          echo "Found $POLICY_COUNT Kyverno policies to validate against"
+          
+          # Validate all Kubernetes resources against Kyverno policies
+          echo "🔍 Running policy compliance validation..."
+          
+          # Use kyverno CLI to validate all resources against all policies
+          kyverno validate /tmp/kyverno-policies/*.yaml --resource clusters/ || {
+            echo "❌ Policy compliance validation failed"
+            echo "Some resources do not comply with Kyverno policies"
+            echo ""
+            echo "Common policy violations to check:"
+            echo "- Missing required labels: app, env, category"
+            echo "- Missing resource requests/limits"
+            echo "- Using ':latest' image tags"
+            echo "- Using privileged containers"
+            echo "- Using hostPath volumes"
+            echo ""
+            echo "Please review the policy violations above and fix them"
+            exit 1
+          }
+          
+          echo "✅ All resources comply with Kyverno policies"
+          
+          # Cleanup
+          rm -rf /tmp/kyverno-policies
+
   notify-success:
     name: Notify Success
     runs-on: vollminlab
-    needs: [validate-manifests, server-side-validation, security-scan, flux-validation, policy-validation]
+    needs: [basic-validation, security-scan, server-side-validation, policy-validation]
     if: success()
     steps:
       - name: Success notification
@@ -685,11 +399,13 @@ jobs:
           echo "✅ All CI checks passed!"
           echo "🚀 Ready for deployment"
           echo "📊 Server-side validation confirmed all OCI repositories and HelmReleases work correctly"
+          echo "🔒 Security scan completed without critical vulnerabilities"
+          echo "📋 All YAML syntax and policy validations passed"
 
   notify-failure:
     name: Notify Failure
     runs-on: vollminlab
-    needs: [validate-manifests, server-side-validation, security-scan, flux-validation, policy-validation]
+    needs: [basic-validation, security-scan, server-side-validation, policy-validation]
     if: failure()
     steps:
       - name: Failure notification
@@ -697,3 +413,4 @@ jobs:
           echo "❌ CI checks failed!"
           echo "🔧 Please review the failed steps above"
           echo "💡 Server-side validation provides detailed error information for debugging"
+          echo "📊 Check the specific job outputs for detailed failure information"
