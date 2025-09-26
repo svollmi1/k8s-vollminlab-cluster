@@ -6,8 +6,16 @@ on:
   pull_request:
     branches: [ main ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  security-events: write
+
 env:
-  KUBERNETES_VERSION: "1.32.3"
+  KUBERNETES_VERSION: "1.31"
 
 jobs:
   basic-validation:
@@ -17,7 +25,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: Install kubectl
         run: |
@@ -37,9 +45,31 @@ jobs:
           sudo chmod +x /usr/local/bin/yq
           yq --version
 
-      - name: Validate YAML syntax and basic structure
+      - name: Install yamllint
         run: |
-          echo "🔍 Validating YAML syntax and basic structure..."
+          echo "📦 Installing yamllint for YAML linting..."
+          sudo apt-get update
+          sudo apt-get install -y yamllint
+          yamllint --version
+
+      - name: Install kubeconform
+        run: |
+          echo "📦 Installing kubeconform for Kubernetes schema validation..."
+          KUBECONFORM_VERSION="0.6.3"
+          curl -L "https://github.com/yannh/kubeconform/releases/download/v${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" | tar -xz
+          sudo mv kubeconform /usr/local/bin/
+          kubeconform -v
+
+      - name: Validate YAML syntax and linting
+        run: |
+          echo "🔍 Validating YAML syntax and linting..."
+          
+          # Run yamllint on all YAML files
+          echo "Running yamllint..."
+          yamllint -c /dev/null clusters/ || {
+            echo "❌ YAML linting failed"
+            exit 1
+          }
           
           # Validate all YAML files for syntax
           find clusters -name "*.yaml" -o -name "*.yml" | while read file; do
@@ -63,6 +93,28 @@ jobs:
           done
           echo "✅ All YAML files have valid syntax"
 
+      - name: Validate Kubernetes schemas with kubeconform
+        run: |
+          echo "🔍 Validating Kubernetes schemas with kubeconform..."
+          
+          # Run kubeconform on all Kubernetes manifests
+          find clusters -name "*.yaml" -o -name "*.yml" | while read file; do
+            # Skip kustomization files and non-Kubernetes files
+            if [[ "$file" == *"kustomization.yaml" ]] || [[ "$file" == *"flux-exception.yaml" ]]; then
+              continue
+            fi
+            
+            # Check if file contains Kubernetes resources
+            if grep -q "kind:" "$file" && grep -q "apiVersion:" "$file"; then
+              echo "Validating schema for $file"
+              kubeconform -strict -summary "$file" || {
+                echo "❌ Schema validation failed for $file"
+                exit 1
+              }
+            fi
+          done
+          echo "✅ All Kubernetes manifests have valid schemas"
+
       - name: Validate Kustomizations
         run: |
           echo "🔍 Validating Kustomizations..."
@@ -77,11 +129,29 @@ jobs:
           done
           echo "✅ Validated $KUSTOMIZATION_COUNT Kustomizations"
 
+      - name: Install gitleaks
+        run: |
+          echo "📦 Installing gitleaks for secrets scanning..."
+          GITLEAKS_VERSION="8.18.0"
+          curl -L "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" | tar -xz
+          sudo mv gitleaks /usr/local/bin/
+          gitleaks version
+
+      - name: Scan for secrets with gitleaks
+        run: |
+          echo "🔍 Scanning for secrets with gitleaks..."
+          gitleaks detect --source . --verbose || {
+            echo "❌ Secrets detected in repository"
+            echo "Please review the findings above and remove any hardcoded secrets"
+            exit 1
+          }
+          echo "✅ No secrets detected"
+
       - name: Check for common issues
         run: |
           echo "🔍 Checking for common issues..."
           
-          # Check for hardcoded secrets (exclude SealedSecrets and legitimate references)
+          # Additional check for hardcoded secrets in YAML files (backup to gitleaks)
           for file in $(find clusters -name "*.yaml" -o -name "*.yml" | xargs grep -l "password\s*:"); do
             # Skip if it's a SealedSecret or legitimate reference
             if grep -q "kind: SealedSecret\|encryptedData:" "$file"; then
@@ -95,12 +165,17 @@ jobs:
             fi
           done
           
-          # Check for consistent labels in Flux CD resources
+          # Check for consistent labels in Flux CD resources using yq
           echo "🔍 Validating metadata consistency..."
           for file in $(find clusters -name "*.yaml" -exec grep -l "kind: HelmRelease\|kind: OCIRepository\|kind: HelmRepository" {} \;); do
-            if ! grep -q "app:" "$file" || ! grep -q "env: production" "$file" || ! grep -q "category:" "$file"; then
+            # Check if required labels exist using yq
+            if ! yq eval '.metadata.labels.app' "$file" >/dev/null 2>&1 || \
+               ! yq eval '.metadata.labels.env' "$file" | grep -q "production" || \
+               ! yq eval '.metadata.labels.category' "$file" >/dev/null 2>&1; then
               echo "❌ Missing required labels in Flux CD resource: $file"
               echo "Required labels: app, env: production, category"
+              echo "Current labels:"
+              yq eval '.metadata.labels' "$file" 2>/dev/null || echo "No labels found"
               exit 1
             fi
           done
@@ -115,10 +190,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.50.0
         timeout-minutes: 3
         continue-on-error: true
         with:
@@ -152,7 +227,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: Install kubectl
         run: |
@@ -168,6 +243,25 @@ jobs:
       - name: Setup Flux CLI
         run: |
           curl -s https://fluxcd.io/install.sh | sudo bash
+
+      - name: Preflight check for Flux CRDs
+        run: |
+          echo "🔍 Checking for required Flux CRDs..."
+          
+          # Check if Flux CRDs are available
+          if ! kubectl get crd ocirepositories.source.toolkit.fluxcd.io >/dev/null 2>&1; then
+            echo "❌ OCIRepository CRD not found"
+            echo "Please ensure Flux is installed in the cluster"
+            exit 1
+          fi
+          
+          if ! kubectl get crd helmreleases.helm.toolkit.fluxcd.io >/dev/null 2>&1; then
+            echo "❌ HelmRelease CRD not found"
+            echo "Please ensure Flux is installed in the cluster"
+            exit 1
+          fi
+          
+          echo "✅ Required Flux CRDs are available"
 
       - name: Create temporary testing namespace
         run: |
@@ -294,10 +388,11 @@ jobs:
           for file in $CHANGED_OCI_REPOS; do
             echo "Deploying OCIRepository: $file"
             
-            # Create a modified version for the test namespace
-            sed "s/namespace: flux-system/namespace: $TEST_NAMESPACE/g" "$file" | \
-            sed "s/name: .*/name: test-$(basename "$file" .yaml)-$(date +%s)/g" | \
-            kubectl apply -f - || {
+            # Create a modified version for the test namespace using yq
+            yq eval "
+              .metadata.namespace = \"$TEST_NAMESPACE\" |
+              .metadata.name = \"test-$(basename "$file" .yaml)-$(date +%s)\"
+            " "$file" | kubectl apply -f - || {
               echo "❌ Failed to deploy OCIRepository: $file"
               exit 1
             }
@@ -305,7 +400,7 @@ jobs:
           
           # Wait for OCI repositories to sync (this validates if versions exist)
           echo "⏳ Waiting for OCI repositories to sync..."
-          kubectl wait --for=condition=Ready --timeout=300s ocirepository --all -n "$TEST_NAMESPACE" || {
+          kubectl wait --for=condition=Ready --timeout=300s ocirepositories.source.toolkit.fluxcd.io --all -n "$TEST_NAMESPACE" || {
             echo "❌ OCI repositories failed to sync"
             echo "This indicates that chart versions may not exist or repositories are inaccessible"
             
@@ -337,12 +432,12 @@ jobs:
           for file in $CHANGED_HELMRELEASES; do
             echo "Deploying HelmRelease: $file"
             
-            # Create a modified version for the test namespace
-            # Replace namespace and update chart references to use test repositories
-            sed "s/namespace: [a-zA-Z0-9-]*/namespace: $TEST_NAMESPACE/g" "$file" | \
-            sed "s/name: [a-zA-Z0-9-]*/name: test-$(basename "$(dirname "$file")")-$(date +%s)/g" | \
-            sed "s/name: [a-zA-Z0-9-]*-helmrepository/name: test-\1-helmrepository/g" | \
-            kubectl apply -f - || {
+            # Create a modified version for the test namespace using yq
+            yq eval "
+              .metadata.namespace = \"$TEST_NAMESPACE\" |
+              .metadata.name = \"test-$(basename "$(dirname "$file")")-$(date +%s)\" |
+              .spec.chart.spec.sourceRef.name = \"test-$(basename "$(dirname "$file")")-helmrepository-$(date +%s)\"
+            " "$file" | kubectl apply -f - || {
               echo "❌ Failed to deploy HelmRelease: $file"
               exit 1
             }
@@ -350,7 +445,7 @@ jobs:
           
           # Wait for HelmReleases to be ready (this validates if charts can be deployed)
           echo "⏳ Waiting for HelmReleases to be ready..."
-          kubectl wait --for=condition=Ready --timeout=600s helmrelease --all -n "$TEST_NAMESPACE" || {
+          kubectl wait --for=condition=Ready --timeout=600s helmreleases.helm.toolkit.fluxcd.io --all -n "$TEST_NAMESPACE" || {
             echo "❌ HelmReleases failed to become ready"
             echo "This indicates that chart deployments are failing"
             
@@ -424,7 +519,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: Install kubectl
         run: |
