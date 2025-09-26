@@ -609,42 +609,45 @@ jobs:
           TEST_NAMESPACE="$TEST_NAMESPACE"
           RUN_SUFFIX="${{ env.RUN_SUFFIX }}"
           
-          echo "DEBUG: CHANGED_OCI_REPOS='$CHANGED_OCI_REPOS'"
-          echo "DEBUG: Length of CHANGED_OCI_REPOS: ${#CHANGED_OCI_REPOS}"
+          # Find OCI repositories directly in this step to avoid variable passing issues
+          CHANGED_OCI_REPOS=""
+          for file in $(find clusters -name "*.yaml" -o -name "*.yml" | head -10); do
+            if [[ -f "$file" ]] && grep -q "kind: OCIRepository" "$file"; then
+              CHANGED_OCI_REPOS="$CHANGED_OCI_REPOS $file"
+            fi
+          done
           
           if [[ -z "$CHANGED_OCI_REPOS" ]]; then
-            echo "✅ No OCI repositories to validate"
+            echo "✅ No OCI repositories found to validate"
             exit 0
           fi
+          
+          echo "Found OCI repositories: $CHANGED_OCI_REPOS"
           
           # Create mapping file for OCI repository name mapping
           OCI_MAPPING_FILE="/tmp/oci-mapping-$RUN_SUFFIX.txt"
           touch "$OCI_MAPPING_FILE"
           
-          # Deploy only changed OCI repositories to test namespace
-          if [[ -n "$CHANGED_OCI_REPOS" ]] && [[ "$CHANGED_OCI_REPOS" != "" ]]; then
-            for file in $CHANGED_OCI_REPOS; do
-              echo "Deploying OCIRepository: $file"
-              
-              # Extract original name and create test name
-              ORIG_NAME=$(yq eval '.metadata.name' "$file")
-              TEST_NAME="test-${ORIG_NAME}-${RUN_SUFFIX}"
-              
-              # Store mapping
-              echo "$ORIG_NAME:$TEST_NAME" >> "$OCI_MAPPING_FILE"
-              
-              # Create a modified version for the test namespace using yq
-              yq eval "
-                .metadata.namespace = \"$TEST_NAMESPACE\" |
-                .metadata.name = \"$TEST_NAME\"
-              " "$file" | kubectl apply -f - || {
-                echo "❌ Failed to deploy OCIRepository: $file"
-                exit 1
-              }
-            done
-          else
-            echo "✅ No OCI repositories to deploy"
-          fi
+          # Deploy OCI repositories to test namespace
+          for file in $CHANGED_OCI_REPOS; do
+            echo "Deploying OCIRepository: $file"
+            
+            # Extract original name and create test name
+            ORIG_NAME=$(yq eval '.metadata.name' "$file")
+            TEST_NAME="test-${ORIG_NAME}-${RUN_SUFFIX}"
+            
+            # Store mapping
+            echo "$ORIG_NAME:$TEST_NAME" >> "$OCI_MAPPING_FILE"
+            
+            # Create a modified version for the test namespace using yq
+            yq eval "
+              .metadata.namespace = \"$TEST_NAMESPACE\" |
+              .metadata.name = \"$TEST_NAME\"
+            " "$file" | kubectl apply -f - || {
+              echo "❌ Failed to deploy OCIRepository: $file"
+              exit 1
+            }
+          done
           
           # Export mapping file for HelmRelease step
           echo "OCI_MAPPING_FILE=$OCI_MAPPING_FILE" >> $GITHUB_ENV
@@ -737,44 +740,50 @@ jobs:
           RUN_SUFFIX="${{ env.RUN_SUFFIX }}"
           OCI_MAPPING_FILE="$OCI_MAPPING_FILE"
           
+          # Find HelmReleases directly in this step to avoid variable passing issues
+          CHANGED_HELMRELEASES=""
+          for file in $(find clusters -name "*.yaml" -o -name "*.yml" | head -10); do
+            if [[ -f "$file" ]] && grep -q "kind: HelmRelease" "$file"; then
+              CHANGED_HELMRELEASES="$CHANGED_HELMRELEASES $file"
+            fi
+          done
+          
           if [[ -z "$CHANGED_HELMRELEASES" ]]; then
-            echo "✅ No HelmReleases to validate"
+            echo "✅ No HelmReleases found to validate"
             exit 0
           fi
           
-          # Deploy only changed HelmReleases to test namespace
-          if [[ -n "$CHANGED_HELMRELEASES" ]] && [[ "$CHANGED_HELMRELEASES" != "" ]]; then
-            for file in $CHANGED_HELMRELEASES; do
-              echo "Deploying HelmRelease: $file"
-              
-              # Extract original sourceRef name and map to test name
-              ORIG_SOURCE_REF=$(yq eval '.spec.chart.spec.sourceRef.name' "$file")
-              TEST_SOURCE_REF=""
-              
-              # Look up mapped name from OCI mapping file
-              if [[ -f "$OCI_MAPPING_FILE" ]]; then
-                TEST_SOURCE_REF=$(grep "^${ORIG_SOURCE_REF}:" "$OCI_MAPPING_FILE" | cut -d: -f2)
-              fi
-              
-              # Fallback to test name if no mapping found
-              if [[ -z "$TEST_SOURCE_REF" ]]; then
-                TEST_SOURCE_REF="test-${ORIG_SOURCE_REF}-${RUN_SUFFIX}"
-              fi
-              
-              # Create a modified version for the test namespace using yq
-              yq eval "
-                .metadata.namespace = \"$TEST_NAMESPACE\" |
-                .metadata.name = \"test-$(basename "$(dirname "$file")")-${RUN_SUFFIX}\" |
-                .spec.chart.spec.sourceRef.name = \"$TEST_SOURCE_REF\" |
-                .spec.chart.spec.sourceRef.namespace = \"$TEST_NAMESPACE\"
-              " "$file" | kubectl apply -f - || {
-                echo "❌ Failed to deploy HelmRelease: $file"
-                exit 1
-              }
-            done
-          else
-            echo "✅ No HelmReleases to deploy"
-          fi
+          echo "Found HelmReleases: $CHANGED_HELMRELEASES"
+          
+          # Deploy HelmReleases to test namespace
+          for file in $CHANGED_HELMRELEASES; do
+            echo "Deploying HelmRelease: $file"
+            
+            # Extract original sourceRef name and map to test name
+            ORIG_SOURCE_REF=$(yq eval '.spec.chart.spec.sourceRef.name' "$file")
+            TEST_SOURCE_REF=""
+            
+            # Look up mapped name from OCI mapping file
+            if [[ -f "$OCI_MAPPING_FILE" ]]; then
+              TEST_SOURCE_REF=$(grep "^${ORIG_SOURCE_REF}:" "$OCI_MAPPING_FILE" | cut -d: -f2)
+            fi
+            
+            # Fallback to test name if no mapping found
+            if [[ -z "$TEST_SOURCE_REF" ]]; then
+              TEST_SOURCE_REF="test-${ORIG_SOURCE_REF}-${RUN_SUFFIX}"
+            fi
+            
+            # Create a modified version for the test namespace using yq
+            yq eval "
+              .metadata.namespace = \"$TEST_NAMESPACE\" |
+              .metadata.name = \"test-$(basename "$(dirname "$file")")-${RUN_SUFFIX}\" |
+              .spec.chart.spec.sourceRef.name = \"$TEST_SOURCE_REF\" |
+              .spec.chart.spec.sourceRef.namespace = \"$TEST_NAMESPACE\"
+            " "$file" | kubectl apply -f - || {
+              echo "❌ Failed to deploy HelmRelease: $file"
+              exit 1
+            }
+          done
           
           # Wait for HelmReleases to be ready (this validates if charts can be deployed)
           echo "⏳ Waiting for HelmReleases to be ready..."
