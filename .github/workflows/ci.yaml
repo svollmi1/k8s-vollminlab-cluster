@@ -321,6 +321,13 @@ jobs:
           kubectl version --client
         timeout-minutes: 5
 
+      - name: Install yq
+        run: |
+          echo "📦 Installing yq for YAML processing..."
+          sudo curl -L -o /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          yq --version
+
       - name: Setup Flux CLI
         run: |
           curl -s https://fluxcd.io/install.sh | sudo bash
