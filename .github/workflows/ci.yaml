@@ -264,20 +264,21 @@ jobs:
               done
             fi
             
-            # If no specific changes, fall back to validating everything (for initial setup)
+            # If no specific changes detected, exit gracefully instead of validating everything
             if [[ -z "$CHANGED_OCI_REPOS" && -z "$CHANGED_HELMRELEASES" ]]; then
-              echo "⚠️ No specific OCI repos or HelmReleases changed - validating everything"
-              CHANGED_OCI_REPOS=$(find clusters -name "*helmrepository.yaml" -exec grep -l "kind: OCIRepository" {} \;)
-              CHANGED_HELMRELEASES=$(find clusters -name "helmrelease.yaml")
+              echo "✅ No specific OCI repos or HelmReleases changed - skipping validation"
+              echo "CHANGED_OCI_REPOS=''" >> $GITHUB_ENV
+              echo "CHANGED_HELMRELEASES=''" >> $GITHUB_ENV
+              exit 0
             fi
             
             echo "Changed services: $CHANGED_SERVICES"
             echo "OCI repositories to validate: $CHANGED_OCI_REPOS"
             echo "HelmReleases to validate: $CHANGED_HELMRELEASES"
             
-            # Export for next steps
-            echo "CHANGED_OCI_REPOS='$CHANGED_OCI_REPOS'" >> $GITHUB_ENV
-            echo "CHANGED_HELMRELEASES='$CHANGED_HELMRELEASES'" >> $GITHUB_ENV
+            # Export for next steps (use printf to avoid issues with special characters)
+            printf "CHANGED_OCI_REPOS=%s\n" "$CHANGED_OCI_REPOS" >> $GITHUB_ENV
+            printf "CHANGED_HELMRELEASES=%s\n" "$CHANGED_HELMRELEASES" >> $GITHUB_ENV
 
       - name: Deploy and validate changed OCI repositories
         run: |
