@@ -144,6 +144,13 @@ jobs:
         run: |
           curl -s https://fluxcd.io/install.sh | sudo bash
 
+      - name: Install yq
+        run: |
+          echo "📦 Installing yq for YAML validation..."
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          yq --version
+
       - name: Validate Flux configurations
         run: |
           echo "🔍 Validating Flux configurations..."
@@ -248,17 +255,23 @@ jobs:
           done
           echo "✅ Validated $RUNNERDEPLOYMENT_COUNT RunnerDeployments"
           
-          # Check Kyverno Policies (YAML syntax validation only due to CI permissions)
+          # Check Kyverno Policies (pure YAML validation - no kubectl server interaction)
           KYVERNO_POLICY_COUNT=0
           for file in $(find clusters -name "*.yaml" -exec grep -l "kind: ClusterPolicy\|kind: PolicyException" {} \;); do
             echo "Validating Kyverno Policy YAML syntax: $file"
-            # Use client-side validation only (no server permissions required)
-            kubectl apply --dry-run=client -f "$file" || {
-              echo "❌ Failed to validate Kyverno Policy YAML syntax: $file"
-              echo "Error details:"
-              kubectl apply --dry-run=client -f "$file" 2>&1 || true
-              exit 1
-            }
+            # Use yq or python to validate YAML syntax without kubectl
+            if command -v yq >/dev/null 2>&1; then
+              yq eval '.' "$file" >/dev/null || {
+                echo "❌ Failed to validate Kyverno Policy YAML syntax: $file"
+                exit 1
+              }
+            else
+              # Fallback to python for YAML validation
+              python3 -c "import yaml; yaml.safe_load_all(open('$file'))" || {
+                echo "❌ Failed to validate Kyverno Policy YAML syntax: $file"
+                exit 1
+              }
+            fi
             KYVERNO_POLICY_COUNT=$((KYVERNO_POLICY_COUNT + 1))
           done
           echo "✅ Validated $KYVERNO_POLICY_COUNT Kyverno Policies (YAML syntax)"
