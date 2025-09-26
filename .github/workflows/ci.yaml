@@ -15,7 +15,7 @@ permissions:
   security-events: write
 
 env:
-  KUBERNETES_VERSION: "1.31"
+  KUBERNETES_VERSION: "1.30.2"
 
 jobs:
   basic-validation:
@@ -30,7 +30,7 @@ jobs:
       - name: Install kubectl
         run: |
           echo "📦 Installing kubectl..."
-          curl -LO "https://dl.k8s.io/release/v${{ env.KUBERNETES_VERSION }}/bin/linux/amd64/kubectl"
+          curl -LO "https://dl.k8s.io/release/stable/bin/linux/amd64/kubectl"
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/
           kubectl version --client
@@ -311,7 +311,7 @@ jobs:
       - name: Install kubectl
         run: |
           echo "📦 Installing kubectl..."
-          curl -LO "https://dl.k8s.io/release/v${{ env.KUBERNETES_VERSION }}/bin/linux/amd64/kubectl"
+          curl -LO "https://dl.k8s.io/release/stable/bin/linux/amd64/kubectl"
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/
           kubectl version --client
@@ -608,7 +608,7 @@ jobs:
       - name: Install kubectl
         run: |
           echo "📦 Installing kubectl..."
-          curl -LO "https://dl.k8s.io/release/v${{ env.KUBERNETES_VERSION }}/bin/linux/amd64/kubectl"
+          curl -LO "https://dl.k8s.io/release/stable/bin/linux/amd64/kubectl"
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/
           kubectl version --client
