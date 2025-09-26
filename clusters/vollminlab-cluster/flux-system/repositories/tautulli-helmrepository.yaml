@@ -11,4 +11,4 @@ spec:
   url: oci://tccr.io/truecharts/tautulli
   interval: 5m
   ref:
-    tag: 2.13.0
+    tag: 2.12.3
