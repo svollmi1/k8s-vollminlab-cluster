@@ -527,7 +527,8 @@ jobs:
             CHANGED_OCI_REPOS=""
             if [[ -n "$CHANGED_FILES" ]]; then
               for file in $CHANGED_FILES; do
-                if [[ -f "$file" ]] && grep -q "kind: OCIRepository" "$file"; then
+                # Only process YAML files in the clusters directory
+                if [[ -f "$file" ]] && [[ "$file" =~ ^clusters/.*\.yaml$ ]] && grep -q "^kind: OCIRepository" "$file"; then
                   CHANGED_OCI_REPOS="$CHANGED_OCI_REPOS $file"
                 fi
               done
@@ -537,7 +538,8 @@ jobs:
             CHANGED_HELMRELEASES=""
             if [[ -n "$CHANGED_FILES" ]]; then
               for file in $CHANGED_FILES; do
-                if [[ -f "$file" ]] && grep -q "kind: HelmRelease" "$file"; then
+                # Only process YAML files in the clusters directory
+                if [[ -f "$file" ]] && [[ "$file" =~ ^clusters/.*\.yaml$ ]] && grep -q "^kind: HelmRelease" "$file"; then
                   CHANGED_HELMRELEASES="$CHANGED_HELMRELEASES $file"
                 fi
               done
