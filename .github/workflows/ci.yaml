@@ -249,7 +249,17 @@ jobs:
             RANGE="$BASE_SHA..HEAD"
           fi
           
-          # Create gitleaks config with SealedSecrets allowlist
+          # Create temporary directory and copy changed files
+          TEMP_DIR=$(mktemp -d)
+          git diff --name-only -z "$RANGE" | grep -zE '\.(yaml|yml)$' | grep -z '^clusters/' | while IFS= read -r -d '' file; do
+            if [[ -f "$file" ]]; then
+              cp "$file" "$TEMP_DIR/"
+            fi
+          done
+          
+          cd "$TEMP_DIR"
+          
+          # Create gitleaks config in temp directory
           cat > gitleaks.toml << 'EOF'
           [extend]
           useDefault = true
@@ -262,15 +272,6 @@ jobs:
           ]
           EOF
           
-          # Create temporary directory and copy changed files
-          TEMP_DIR=$(mktemp -d)
-          git diff --name-only -z "$RANGE" | grep -zE '\.(yaml|yml)$' | grep -z '^clusters/' | while IFS= read -r -d '' file; do
-            if [[ -f "$file" ]]; then
-              cp "$file" "$TEMP_DIR/"
-            fi
-          done
-          
-          cd "$TEMP_DIR"
           git init
           git config user.email "ci@example.com"
           git config user.name "CI"
@@ -279,7 +280,7 @@ jobs:
           
           # Run gitleaks with custom config
           set +e
-          gitleaks detect --source . --config ../gitleaks.toml --no-banner --exit-code 1
+          gitleaks detect --source . --config gitleaks.toml --no-banner --exit-code 1
           rc=$?
           set -e
           if [ $rc -ne 0 ]; then
