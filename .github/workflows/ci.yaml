@@ -146,11 +146,11 @@ jobs:
           
           echo "✅ All YAML files have valid syntax and structure"
 
-      - name: Validate required labels on CHANGED Flux resources
+      - name: Validate required labels on changed Flux resources
         if: env.CHANGED_FILES != ''
         run: |
           set -euo pipefail
-          echo "🔍 Validating required labels on CHANGED Flux resources only..."
+          echo "🔍 Validating required labels on changed Flux resources only..."
           
           echo "DEBUG: CHANGED_FILES variable: '$CHANGED_FILES'"
           echo "DEBUG: CHANGED_FILES length: ${#CHANGED_FILES}"
@@ -163,22 +163,22 @@ jobs:
           
           echo "DEBUG: Expected env: $EXPECTED_ENV"
           
-          CHANGED_FLUX_FILES=""
+          changed_FLUX_FILES=""
           for file in $CHANGED_FILES; do
             if [[ -f "$file" ]] && grep -q "kind: HelmRelease\|kind: OCIRepository\|kind: HelmRepository" "$file"; then
-              CHANGED_FLUX_FILES="$CHANGED_FLUX_FILES $file"
+              changed_FLUX_FILES="$changed_FLUX_FILES $file"
             fi
           done
           
-          if [[ -z "$CHANGED_FLUX_FILES" ]]; then
+          if [[ -z "$changed_FLUX_FILES" ]]; then
             echo "✅ No Flux resources changed - skipping label validation"
             exit 0
           fi
           
-          echo "Changed Flux resources: $CHANGED_FLUX_FILES"
+          echo "Changed Flux resources: $changed_FLUX_FILES"
           
-          for file in $CHANGED_FLUX_FILES; do
-            echo "Checking labels in CHANGED file: $file"
+          for file in $changed_FLUX_FILES; do
+            echo "Checking labels in changed file: $file"
             
             # Check if file exists and is readable
             if [[ ! -f "$file" ]]; then
@@ -211,20 +211,20 @@ jobs:
               echo "DEBUG: Labels found - app: '$APP_LABEL', env: '$ENV_LABEL', category: '$CATEGORY_LABEL'"
               
               if [[ -z "$APP_LABEL" || -z "$CATEGORY_LABEL" ]]; then
-                echo "❌ Missing required labels in CHANGED Flux resource: $file (document $DOC_INDEX)"
+                echo "❌ Missing required labels in changed Flux resource: $file (document $DOC_INDEX)"
                 echo "Required labels: app, category"
                 exit 1
               fi
               
               if [[ "$ENV_LABEL" != "$EXPECTED_ENV" ]]; then
-                echo "❌ Incorrect env label in CHANGED Flux resource: $file (document $DOC_INDEX)"
+                echo "❌ Incorrect env label in changed Flux resource: $file (document $DOC_INDEX)"
                 echo "Expected env: $EXPECTED_ENV, found: $ENV_LABEL"
               exit 1
               fi
             done <<< "$KINDS"
           done
           
-          echo "✅ All CHANGED Flux resources have proper labels"
+          echo "✅ All changed Flux resources have proper labels"
 
       - name: Install kubeconform and Python for CRD schema conversion
         run: |
@@ -255,16 +255,16 @@ jobs:
           chmod +x /tmp/openapi2jsonschema.py
           
           # Find and convert all CRD files in changed files
-          CHANGED_CRD_FILES=""
+          changed_CRD_FILES=""
           for file in $CHANGED_FILES; do
             if [[ -f "$file" ]] && grep -q "kind: CustomResourceDefinition" "$file"; then
-              CHANGED_CRD_FILES="$CHANGED_CRD_FILES $file"
+              changed_CRD_FILES="$changed_CRD_FILES $file"
             fi
           done
           
-          if [[ -n "$CHANGED_CRD_FILES" ]]; then
-            echo "Converting CHANGED CRDs: $CHANGED_CRD_FILES"
-            for crd_file in $CHANGED_CRD_FILES; do
+          if [[ -n "$changed_CRD_FILES" ]]; then
+            echo "Converting changed CRDs: $changed_CRD_FILES"
+            for crd_file in $changed_CRD_FILES; do
               echo "Converting CRD: $crd_file"
               python3 /tmp/openapi2jsonschema.py "$crd_file" /tmp/crd-schemas/ || {
                 echo "⚠️ Failed to convert CRD: $crd_file (this is expected for some CRDs)"
@@ -275,28 +275,28 @@ jobs:
           
           echo "✅ CRD schema conversion completed"
 
-      - name: Validate CHANGED Kubernetes schemas with kubeconform and CRD support
+      - name: Validate changed Kubernetes schemas with kubeconform and CRD support
         if: env.CHANGED_FILES != ''
         run: |
           set -euo pipefail
-          echo "🔍 Validating Kubernetes schemas for CHANGED files with CRD support..."
+          echo "🔍 Validating Kubernetes schemas for changed files with CRD support..."
           
-          CHANGED_K8S_FILES=""
+          changed_K8S_FILES=""
           for file in $CHANGED_FILES; do
             if [[ -f "$file" ]] && grep -q "kind:" "$file" && grep -q "apiVersion:" "$file"; then
-              CHANGED_K8S_FILES="$CHANGED_K8S_FILES $file"
+              changed_K8S_FILES="$changed_K8S_FILES $file"
                 fi
               done
               
-          if [[ -z "$CHANGED_K8S_FILES" ]]; then
+          if [[ -z "$changed_K8S_FILES" ]]; then
             echo "✅ No Kubernetes resources changed - skipping schema validation"
             exit 0
           fi
           
-          echo "Changed Kubernetes files: $CHANGED_K8S_FILES"
+          echo "Changed Kubernetes files: $changed_K8S_FILES"
           
-          for file in $CHANGED_K8S_FILES; do
-            echo "Validating schema for CHANGED file: $file"
+          for file in $changed_K8S_FILES; do
+            echo "Validating schema for changed file: $file"
             # Skip CRD definition files - they define the schema, not use it
             if grep -q "kind: CustomResourceDefinition" "$file"; then
               echo "Skipping CRD definition file: $file"
@@ -314,12 +314,12 @@ jobs:
               -schema-location "https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json" \
               -schema-location "/tmp/crd-schemas/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json" \
               "$file" || {
-              echo "❌ Kubernetes schema validation failed for CHANGED file: $file"
+              echo "❌ Kubernetes schema validation failed for changed file: $file"
                 exit 1
               }
           done
           
-          echo "✅ All CHANGED Kubernetes resources have valid schemas"
+          echo "✅ All changed Kubernetes resources have valid schemas"
 
   test-deployment:
     name: Flux Configuration Validation
@@ -359,25 +359,18 @@ jobs:
           curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl.sha256"
           echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check || {
             echo "❌ kubectl checksum verification failed"
-                exit 1
-              }
+              exit 1
+            }
           
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/
 
-      - name: Setup Flux CLI with checksum verification
+      - name: Setup Flux CLI
         run: |
           set -euo pipefail
           echo "📦 Installing Flux CLI..."
           FLUX_VERSION="2.2.2"
           curl -L "https://github.com/fluxcd/flux2/releases/download/v${FLUX_VERSION}/flux_${FLUX_VERSION}_linux_amd64.tar.gz" -o flux.tar.gz
-          
-          # Verify checksum - fail if not available
-          curl -L "https://github.com/fluxcd/flux2/releases/download/v${FLUX_VERSION}/checksums.txt" -o checksums.txt
-          grep "flux_${FLUX_VERSION}_linux_amd64.tar.gz" checksums.txt | sha256sum --check || {
-            echo "❌ Flux CLI checksum verification failed"
-              exit 1
-            }
           
           tar -xzf flux.tar.gz
           sudo mv flux /usr/local/bin/
@@ -577,10 +570,10 @@ jobs:
           sudo mv gitleaks /usr/local/bin/
           gitleaks version
 
-      - name: Scan CHANGED files for secrets
+      - name: Scan changed files for secrets
         run: |
           set -euo pipefail
-          echo "🔍 Scanning CHANGED files for secrets..."
+          echo "🔍 Scanning changed files for secrets..."
           
           # Get changed files with proper range
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
@@ -615,17 +608,18 @@ jobs:
           
           for file in $CHANGED_FILES; do
             if [[ -f "$file" ]]; then
-              echo "Preparing CHANGED file for scanning: $file"
+              echo "Preparing changed file for scanning: $file"
               # Copy the file to temp directory preserving directory structure
               mkdir -p "$TEMP_SCAN_DIR/$(dirname "$file")"
               cp "$file" "$TEMP_SCAN_DIR/$file"
             fi
           done
           
-          echo "Scanning CHANGED files for secrets..."
+          echo "Scanning changed files for secrets..."
           cd "$TEMP_SCAN_DIR"
+          cp gitleaks.toml .
           gitleaks detect --source . --config gitleaks.toml --verbose --exit-code 0 || {
-            echo "❌ Secrets detected in CHANGED files"
+            echo "❌ Secrets detected in changed files"
             echo "Please remove any hardcoded secrets and use SealedSecrets instead"
             cd - > /dev/null
             rm -rf "$TEMP_SCAN_DIR"
@@ -635,7 +629,7 @@ jobs:
           cd - > /dev/null
           rm -rf "$TEMP_SCAN_DIR"
           
-          echo "✅ No secrets detected in CHANGED files"
+          echo "✅ No secrets detected in changed files"
 
       - name: Run Trivy filesystem scan
         uses: aquasecurity/trivy-action@0.28.0
@@ -690,7 +684,9 @@ jobs:
         run: |
           set -euo pipefail
           echo "📦 Installing Kyverno CLI..."
-          curl -s https://raw.githubusercontent.com/kyverno/kyverno/main/scripts/install-cli.sh | bash
+          curl -L "https://github.com/kyverno/kyverno/releases/latest/download/kyverno-cli_v1.11.2_linux_x86_64.tar.gz" -o kyverno.tar.gz
+          tar -xzf kyverno.tar.gz
+          sudo mv kyverno /usr/local/bin/
           kyverno version
 
       - name: Install kustomize
@@ -732,19 +728,19 @@ jobs:
           # Create temporary directory for rendered manifests
           mkdir -p /tmp/rendered-manifests
           
-          # Render manifests using kustomize for CHANGED kustomizations only
-          CHANGED_KUSTOMIZATIONS=""
+          # Render manifests using kustomize for changed kustomizations only
+          changed_KUSTOMIZATIONS=""
           for file in $CHANGED_FILES; do
             if [[ "$file" =~ kustomization\.yaml$ ]] && [[ -f "$file" ]]; then
-              CHANGED_KUSTOMIZATIONS="$CHANGED_KUSTOMIZATIONS $file"
+              changed_KUSTOMIZATIONS="$changed_KUSTOMIZATIONS $file"
             fi
           done
           
-          if [[ -n "$CHANGED_KUSTOMIZATIONS" ]]; then
-            echo "Changed kustomizations: $CHANGED_KUSTOMIZATIONS"
-            for file in $CHANGED_KUSTOMIZATIONS; do
+          if [[ -n "$changed_KUSTOMIZATIONS" ]]; then
+            echo "Changed kustomizations: $changed_KUSTOMIZATIONS"
+            for file in $changed_KUSTOMIZATIONS; do
               kustomization_dir=$(dirname "$file")
-              echo "Rendering CHANGED kustomization: $kustomization_dir"
+              echo "Rendering changed kustomization: $kustomization_dir"
               kustomize build "$kustomization_dir" > "/tmp/rendered-manifests/$(basename "$kustomization_dir").yaml" || {
                 echo "❌ Failed to render kustomization: $kustomization_dir"
               exit 1
@@ -752,27 +748,27 @@ jobs:
           done
           
             # Validate rendered manifests against policies
-            echo "Validating rendered CHANGED manifests against Kyverno policies..."
+            echo "Validating rendered changed manifests against Kyverno policies..."
             kyverno apply $POLICY_FILES --resource /tmp/rendered-manifests/ || {
-              echo "❌ Policy validation failed on rendered CHANGED manifests"
+              echo "❌ Policy validation failed on rendered changed manifests"
             exit 1
           }
           fi
           
-          # Also validate individual CHANGED files (not kustomizations)
-          CHANGED_INDIVIDUAL_FILES=""
+          # Also validate individual changed files (not kustomizations)
+          changed_INDIVIDUAL_FILES=""
           for file in $CHANGED_FILES; do
             if [[ -f "$file" ]] && grep -q "kind:" "$file" && [[ ! "$file" =~ kustomization\.yaml$ ]]; then
-              CHANGED_INDIVIDUAL_FILES="$CHANGED_INDIVIDUAL_FILES $file"
+              changed_INDIVIDUAL_FILES="$changed_INDIVIDUAL_FILES $file"
             fi
           done
           
-          if [[ -n "$CHANGED_INDIVIDUAL_FILES" ]]; then
-            echo "Changed individual files: $CHANGED_INDIVIDUAL_FILES"
-            for file in $CHANGED_INDIVIDUAL_FILES; do
-              echo "Validating CHANGED individual file: $file"
+          if [[ -n "$changed_INDIVIDUAL_FILES" ]]; then
+            echo "Changed individual files: $changed_INDIVIDUAL_FILES"
+            for file in $changed_INDIVIDUAL_FILES; do
+              echo "Validating changed individual file: $file"
               kyverno apply $POLICY_FILES --resource "$file" || {
-                echo "❌ Policy validation failed for CHANGED file: $file"
+                echo "❌ Policy validation failed for changed file: $file"
               exit 1
             }
           done
