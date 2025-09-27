@@ -311,6 +311,14 @@ jobs:
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/
 
+      - name: Install yq
+        run: |
+          set -euo pipefail
+          echo "📦 Installing yq..."
+          sudo curl -L -o /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          yq --version
+
       - name: Setup Flux CLI
         run: |
           set -euo pipefail
