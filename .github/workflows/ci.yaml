@@ -623,12 +623,22 @@ jobs:
           fi
           
           echo "Changed files: $CHANGED_FILES"
+          echo "DEBUG: All changed files in this PR: $(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }})"
           
           # Find OCI repositories in changed files only (must be actual OCIRepository resources, not HelmReleases that reference them)
           CHANGED_OCI_REPOS=""
           for file in $CHANGED_FILES; do
-            if [[ -f "$file" ]] && grep -E '^\s*kind:\s*OCIRepository' "$file"; then
-              CHANGED_OCI_REPOS="$CHANGED_OCI_REPOS $file"
+            echo "DEBUG: Checking file: $file"
+            if [[ -f "$file" ]]; then
+              echo "DEBUG: File exists, checking for OCIRepository kind..."
+              if grep -E '^\s*kind:\s*OCIRepository' "$file"; then
+                echo "DEBUG: Found OCIRepository in $file"
+                CHANGED_OCI_REPOS="$CHANGED_OCI_REPOS $file"
+              else
+                echo "DEBUG: No OCIRepository kind found in $file"
+              fi
+            else
+              echo "DEBUG: File does not exist: $file"
             fi
           done
           
