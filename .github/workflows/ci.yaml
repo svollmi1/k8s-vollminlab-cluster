@@ -2,7 +2,7 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [ main, develop, merge/tautulli-ci-validation ]
+    branches: [ main, develop ]
     paths:
       - 'clusters/**'
       - '.github/workflows/**'
@@ -29,7 +29,7 @@ env:
 jobs:
   basic-validation:
     name: Validate Kubernetes Manifests
-    runs-on: vollminlab-2-1
+    runs-on: vollminlab-1
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
