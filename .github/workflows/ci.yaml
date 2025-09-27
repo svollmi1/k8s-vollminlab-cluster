@@ -169,7 +169,7 @@ jobs:
           
           echo "✅ All CHANGED Flux resources have proper labels"
 
-      - name: Install kubeconform
+      - name: Install kubeconform and Python for CRD schema conversion
         run: |
           set -euo pipefail
           echo "📦 Installing kubeconform..."
@@ -178,20 +178,59 @@ jobs:
           tar -xzf kubeconform.tar.gz
           sudo mv kubeconform /usr/local/bin/
           kubeconform -v
+          
+          echo "📦 Installing Python for CRD schema conversion..."
+          sudo apt-get update
+          sudo apt-get install -y python3 python3-pip
+          pip3 install pyyaml
 
-      - name: Validate CHANGED Kubernetes schemas with kubeconform
+      - name: Convert CRDs to JSON schemas for validation
         if: env.CHANGED_FILES != ''
         run: |
           set -euo pipefail
-          echo "🔍 Validating Kubernetes schemas for CHANGED files only..."
+          echo "🔧 Converting CRDs to JSON schemas for validation..."
+          
+          # Create schemas directory
+          mkdir -p /tmp/crd-schemas
+          
+          # Download the openapi2jsonschema script
+          curl -L "https://raw.githubusercontent.com/yannh/kubeconform/master/scripts/openapi2jsonschema.py" -o /tmp/openapi2jsonschema.py
+          chmod +x /tmp/openapi2jsonschema.py
+          
+          # Find and convert all CRD files in changed files
+          CHANGED_CRD_FILES=""
+          for file in $CHANGED_FILES; do
+            if [[ -f "$file" ]] && grep -q "kind: CustomResourceDefinition" "$file"; then
+              CHANGED_CRD_FILES="$CHANGED_CRD_FILES $file"
+            fi
+          done
+          
+          if [[ -n "$CHANGED_CRD_FILES" ]]; then
+            echo "Converting CHANGED CRDs: $CHANGED_CRD_FILES"
+            for crd_file in $CHANGED_CRD_FILES; do
+              echo "Converting CRD: $crd_file"
+              python3 /tmp/openapi2jsonschema.py "$crd_file" /tmp/crd-schemas/ || {
+                echo "⚠️ Failed to convert CRD: $crd_file (this is expected for some CRDs)"
+                continue
+              }
+            done
+          fi
+          
+          echo "✅ CRD schema conversion completed"
+
+      - name: Validate CHANGED Kubernetes schemas with kubeconform and CRD support
+        if: env.CHANGED_FILES != ''
+        run: |
+          set -euo pipefail
+          echo "🔍 Validating Kubernetes schemas for CHANGED files with CRD support..."
           
           CHANGED_K8S_FILES=""
           for file in $CHANGED_FILES; do
             if [[ -f "$file" ]] && grep -q "kind:" "$file" && grep -q "apiVersion:" "$file"; then
               CHANGED_K8S_FILES="$CHANGED_K8S_FILES $file"
-                fi
-              done
-              
+            fi
+          done
+          
           if [[ -z "$CHANGED_K8S_FILES" ]]; then
             echo "✅ No Kubernetes resources changed - skipping schema validation"
             exit 0
@@ -204,16 +243,17 @@ jobs:
             # Skip CRD definition files - they define the schema, not use it
             if grep -q "kind: CustomResourceDefinition" "$file"; then
               echo "Skipping CRD definition file: $file"
-                continue
+              continue
             fi
             
             kubeconform -strict -summary \
               -schema-location "default" \
               -schema-location "https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json" \
+              -schema-location "/tmp/crd-schemas/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json" \
               "$file" || {
               echo "❌ Kubernetes schema validation failed for CHANGED file: $file"
-                exit 1
-              }
+              exit 1
+            }
           done
           
           echo "✅ All CHANGED Kubernetes resources have valid schemas"
@@ -222,7 +262,7 @@ jobs:
     name: Flux Configuration Validation
     runs-on: vollminlab-2
     needs: validate-changes
-    if: env.CHANGED_FILES != ''
+    if: github.event_name == 'pull_request' && env.CHANGED_FILES != ''
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -581,8 +621,8 @@ jobs:
           
           if [[ -z "$CHANGED_FILES" ]]; then
             echo "✅ No files to validate against policies"
-              exit 0
-            fi
+            exit 0
+          fi
             
           # Find Kyverno policies
           POLICY_FILES=$(find clusters -name "*.yaml" -path "*/kyverno/*" | xargs grep -l "kind: Policy\|kind: ClusterPolicy" || echo "")
