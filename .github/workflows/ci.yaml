@@ -177,19 +177,25 @@ jobs:
             
             # Check each document in multi-doc YAML files
             KINDS=$(yq eval -d '*' '.kind' "$file" 2>/dev/null)
+            echo "DEBUG: Found kinds: $KINDS"
             
             while IFS= read -r kind; do
+              echo "DEBUG: Processing kind: $kind"
               if [[ "$kind" != "HelmRelease" && "$kind" != "OCIRepository" && "$kind" != "HelmRepository" ]]; then
-              continue
-            fi
+                echo "DEBUG: Skipping non-Flux kind: $kind"
+                continue
+              fi
               
               # Get document index for this kind
               DOC_INDEX=$(yq eval -d '*' 'select(.kind == "'"$kind"'") | key' "$file" 2>/dev/null | head -1)
+              echo "DEBUG: Document index for $kind: $DOC_INDEX"
               
               # Check required labels
               APP_LABEL=$(yq eval -d "$DOC_INDEX" '.metadata.labels.app' "$file" 2>/dev/null)
               ENV_LABEL=$(yq eval -d "$DOC_INDEX" '.metadata.labels.env' "$file" 2>/dev/null)
               CATEGORY_LABEL=$(yq eval -d "$DOC_INDEX" '.metadata.labels.category' "$file" 2>/dev/null)
+              
+              echo "DEBUG: Labels found - app: '$APP_LABEL', env: '$ENV_LABEL', category: '$CATEGORY_LABEL'"
               
               if [[ -z "$APP_LABEL" || -z "$CATEGORY_LABEL" ]]; then
                 echo "❌ Missing required labels in CHANGED Flux resource: $file (document $DOC_INDEX)"
@@ -200,7 +206,7 @@ jobs:
               if [[ "$ENV_LABEL" != "$EXPECTED_ENV" ]]; then
                 echo "❌ Incorrect env label in CHANGED Flux resource: $file (document $DOC_INDEX)"
                 echo "Expected env: $EXPECTED_ENV, found: $ENV_LABEL"
-              exit 1
+                exit 1
               fi
             done <<< "$KINDS"
           done
