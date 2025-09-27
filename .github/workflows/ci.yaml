@@ -106,17 +106,37 @@ jobs:
           set -euo pipefail
           echo "🔍 Validating YAML syntax and structure..."
           
+          # Create yamllint config for Kubernetes files
+          cat > .yamllint << 'EOF'
+          extends: default
+          
+          rules:
+            document-start:
+              present: false  # Don't require --- at start
+            new-line-at-end-of-file:
+              level: warning  # Make it a warning, not error
+            line-length:
+              max: 120  # Allow longer lines for Kubernetes
+            indentation:
+              spaces: 2
+              indent-sequences: true
+            truthy:
+              allowed-values: ['true', 'false', 'yes', 'no']
+            comments:
+              min-spaces-from-content: 1
+          EOF
+          
           for file in $CHANGED_FILES; do
             if [[ -f "$file" ]]; then
               echo "Validating: $file"
-              yamllint "$file" || {
+              yamllint -c .yamllint "$file" || {
                 echo "❌ YAML lint error in $file"
-            exit 1
-          }
+                exit 1
+              }
               yq eval '.' "$file" > /dev/null || {
                 echo "❌ YAML syntax error in $file"
-              exit 1
-            }
+                exit 1
+              }
             fi
           done
           
