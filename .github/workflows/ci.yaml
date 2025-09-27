@@ -152,11 +152,16 @@ jobs:
           set -euo pipefail
           echo "🔍 Validating required labels on CHANGED Flux resources only..."
           
+          echo "DEBUG: CHANGED_FILES variable: '$CHANGED_FILES'"
+          echo "DEBUG: CHANGED_FILES length: ${#CHANGED_FILES}"
+          
           # Determine expected env based on branch
           EXPECTED_ENV="production"
           if [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
             EXPECTED_ENV="staging"
           fi
+          
+          echo "DEBUG: Expected env: $EXPECTED_ENV"
           
           CHANGED_FLUX_FILES=""
           for file in $CHANGED_FILES; do
@@ -175,16 +180,24 @@ jobs:
           for file in $CHANGED_FLUX_FILES; do
             echo "Checking labels in CHANGED file: $file"
             
+            # Check if file exists and is readable
+            if [[ ! -f "$file" ]]; then
+              echo "❌ File not found: $file"
+              exit 1
+            fi
+            
+            echo "DEBUG: File exists, checking with yq..."
+            
             # Check each document in multi-doc YAML files
-            KINDS=$(yq eval -d '*' '.kind' "$file" 2>/dev/null)
+            KINDS=$(yq eval -d '*' '.kind' "$file" 2>/dev/null || echo "yq_failed")
             echo "DEBUG: Found kinds: $KINDS"
             
             while IFS= read -r kind; do
               echo "DEBUG: Processing kind: $kind"
               if [[ "$kind" != "HelmRelease" && "$kind" != "OCIRepository" && "$kind" != "HelmRepository" ]]; then
                 echo "DEBUG: Skipping non-Flux kind: $kind"
-                continue
-              fi
+              continue
+            fi
               
               # Get document index for this kind
               DOC_INDEX=$(yq eval -d '*' 'select(.kind == "'"$kind"'") | key' "$file" 2>/dev/null | head -1)
@@ -206,7 +219,7 @@ jobs:
               if [[ "$ENV_LABEL" != "$EXPECTED_ENV" ]]; then
                 echo "❌ Incorrect env label in CHANGED Flux resource: $file (document $DOC_INDEX)"
                 echo "Expected env: $EXPECTED_ENV, found: $ENV_LABEL"
-                exit 1
+              exit 1
               fi
             done <<< "$KINDS"
           done
