@@ -43,4 +43,4 @@ spec:
                 limits:
                   cpu: "?*"
                   memory: "?*"
-        allowExistingViolations: false
+        # allowExistingViolations: false  # Not supported in current Kyverno CLI version
