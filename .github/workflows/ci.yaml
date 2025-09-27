@@ -332,6 +332,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install yq
+        run: |
+          set -euo pipefail
+          echo "📦 Installing yq..."
+          sudo curl -L -o /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          yq --version
+
       - name: Decode changed files
         run: |
           set -euo pipefail
@@ -617,7 +625,7 @@ jobs:
           
           echo "Scanning changed files for secrets..."
           cd "$TEMP_SCAN_DIR"
-          cp gitleaks.toml .
+          cp ../gitleaks.toml .
           gitleaks detect --source . --config gitleaks.toml --verbose --exit-code 0 || {
             echo "❌ Secrets detected in changed files"
             echo "Please remove any hardcoded secrets and use SealedSecrets instead"
@@ -684,7 +692,7 @@ jobs:
         run: |
           set -euo pipefail
           echo "📦 Installing Kyverno CLI..."
-          curl -L "https://github.com/kyverno/kyverno/releases/latest/download/kyverno-cli_v1.11.2_linux_x86_64.tar.gz" -o kyverno.tar.gz
+          curl -L "https://github.com/kyverno/kyverno/releases/download/v1.11.2/kyverno-cli_v1.11.2_linux_x86_64.tar.gz" -o kyverno.tar.gz
           tar -xzf kyverno.tar.gz
           sudo mv kyverno /usr/local/bin/
           kyverno version
