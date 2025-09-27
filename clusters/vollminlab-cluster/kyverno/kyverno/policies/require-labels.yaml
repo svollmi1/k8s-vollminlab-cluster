@@ -33,11 +33,31 @@ spec:
                       - default
                       - flux-system
                       - kyverno
+                      - longhorn-system
+                      - mediastack
+                      - metallb-system
+                      - sealed-secrets
+                      - actions-runner-system
+                      - cert-manager
+                      - ingress-nginx
+                      - portainer
+                      - homepage
+                      - elastic-system
       exclude:
         resources:
           namespaces:
             - flux-system
             - kyverno
+            - longhorn-system
+            - mediastack
+            - metallb-system
+            - sealed-secrets
+            - actions-runner-system
+            - cert-manager
+            - ingress-nginx
+            - portainer
+            - homepage
+            - elastic-system
       validate:
         message: "Required labels: app, env, category"
         pattern:
@@ -66,6 +86,16 @@ spec:
             - kube-system
             - flux-system
             - kyverno
+            - longhorn-system
+            - mediastack
+            - metallb-system
+            - sealed-secrets
+            - actions-runner-system
+            - cert-manager
+            - ingress-nginx
+            - portainer
+            - homepage
+            - elastic-system
       validate:
         message: "Required labels: app, env, category"
         pattern:
