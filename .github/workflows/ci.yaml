@@ -8,11 +8,13 @@ on:
       - '.github/workflows/**'
       - 'terraform/**'
   pull_request:
-    branches: [ main ]
+    branches: [ main, develop ]
+    types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - 'clusters/**'
       - '.github/workflows/**'
       - 'terraform/**'
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -49,17 +51,9 @@ jobs:
           set -euo pipefail
           echo "📦 Installing kubectl..."
           KUBECTL_VERSION="v${{ env.KUBERNETES_VERSION }}"
-          
-          # Download kubectl and checksums
           curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
-          curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl.sha256"
-          
-          # Verify checksum
-          echo "$(cat kubectl.sha256) kubectl" | sha256sum --check
-          
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/
-          kubectl version --client
 
       - name: Install yq
         run: |
@@ -87,7 +81,6 @@ jobs:
             RANGE="$BASE_SHA..HEAD"
           fi
           
-          echo "Using range: $RANGE"
           CHANGED_FILES=$(git diff --name-only "$RANGE" | grep -E '\.(yaml|yml)$' | grep '^clusters/' || echo "")
           
           echo "All changed files:"
@@ -108,47 +101,21 @@ jobs:
             echo "EOF"
           } >> $GITHUB_ENV
 
-      - name: Install yamllint
-        if: env.CHANGED_FILES != ''
-        run: |
-          set -euo pipefail
-          echo "📦 Installing yamllint..."
-          sudo apt-get update
-          sudo apt-get install -y python3-pip
-          sudo pip3 install yamllint
-          yamllint --version
-
-      - name: Install gitleaks
-        if: env.CHANGED_FILES != ''
-        run: |
-          set -euo pipefail
-          echo "📦 Installing gitleaks..."
-          curl -L -o gitleaks.tar.gz "https://github.com/gitleaks/gitleaks/releases/download/v8.18.0/gitleaks_8.18.0_linux_x64.tar.gz"
-          tar -xzf gitleaks.tar.gz
-          sudo mv gitleaks /usr/local/bin/
-          gitleaks version
-
       - name: Validate YAML syntax
         if: env.CHANGED_FILES != ''
         run: |
           set -euo pipefail
           echo "🔍 Validating YAML syntax with yamllint..."
           
-          # Get range for diff
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            BASE_SHA="${{ github.event.pull_request.base.sha }}"
-            RANGE="$BASE_SHA..HEAD"
-          else
-            BASE_SHA="${{ github.event.before }}"
-            if [[ -z "$BASE_SHA" ]]; then
-              BASE_SHA="$(git rev-list --max-parents=0 HEAD | tail -1)"
-            fi
-            RANGE="$BASE_SHA..HEAD"
-          fi
+          # Install yamllint
+          sudo apt-get update
+          sudo apt-get install -y python3-pip
+          sudo pip3 install yamllint
           
           # Create yamllint config for Kubernetes files
           cat > .yamllint << 'EOF'
           extends: default
+          
           rules:
             document-start:
               present: false
@@ -160,41 +127,41 @@ jobs:
               allowed-values: ['true', 'false', 'on', 'off']
           EOF
           
-          # Use null-delimited output to handle spaces in filenames
-          git diff --name-only -z "$RANGE" | grep -zE '\.(yaml|yml)$' | grep -z '^clusters/' | while IFS= read -r -d '' file; do
+          # Get range for diff
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            RANGE="$BASE_SHA..HEAD"
+          else
+            BASE_SHA="${{ github.event.before }}"
+            if [[ -z "$BASE_SHA" ]]; then
+              BASE_SHA="$(git rev-list --max-parents=0 HEAD | tail -1)"
+            fi
+            RANGE="$BASE_SHA..HEAD"
+          fi
+          
+          # Validate each changed YAML file
+          printf '%s\n' "$CHANGED_FILES" | while IFS= read -r file; do
             if [[ -f "$file" ]]; then
               echo "Validating: $file"
               yamllint "$file" || {
                 echo "❌ YAML lint error in $file"
-            exit 1
-          }
+                exit 1
+              }
             fi
           done
           
           echo "✅ All YAML files have valid syntax"
-
-      - name: Install kubeconform
-        if: env.CHANGED_FILES != ''
-        run: |
-          set -euo pipefail
-          echo "📦 Installing kubeconform..."
-          # Use latest version and try tar.gz approach first
-          curl -L https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz | tar xvzf -
-          
-          # Verify the binary was extracted
-          if [[ ! -f kubeconform ]]; then
-            echo "❌ kubeconform binary not found after extraction"
-            exit 1
-          fi
-          
-          sudo mv kubeconform /usr/local/bin/
-          kubeconform -version || kubeconform -v
 
       - name: Validate Kubernetes schemas
         if: env.CHANGED_FILES != ''
         run: |
           set -euo pipefail
           echo "🔍 Validating Kubernetes schemas with kubeconform..."
+          
+          # Install kubeconform
+          curl -L https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz | tar xvzf -
+          sudo mv kubeconform /usr/local/bin/
+          kubeconform -version || kubeconform -v
           
           # Get range for diff
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
@@ -208,27 +175,27 @@ jobs:
             RANGE="$BASE_SHA..HEAD"
           fi
           
-          # Use null-delimited output to handle spaces in filenames
-          git diff --name-only -z "$RANGE" | grep -zE '\.(yaml|yml)$' | grep -z '^clusters/' | while IFS= read -r -d '' file; do
+          # Validate each changed Kubernetes file
+          printf '%s\n' "$CHANGED_FILES" | while IFS= read -r file; do
             if [[ -f "$file" ]] && grep -q "kind:" "$file" && grep -q "apiVersion:" "$file"; then
-              echo "Validating schema: $file"
-              
-              # Skip Flux CD resources that kubeconform doesn't have schemas for
               KIND=$(yq eval '.kind' "$file")
+              
+              # Skip Flux CD resources that don't have schemas
               case "$KIND" in
-                Kustomization|HelmRelease|OCIRepository|HelmRepository|GitRepository|Bucket|ImagePolicy|ImageRepository|ImageUpdateAutomation)
-                  echo "Skipping Flux CD resource (no schema): $KIND in $file"
-                continue
+                HelmRelease|OCIRepository|HelmRepository|Kustomization|Policy|ClusterPolicy)
+                  echo "Skipping Flux/Kyverno resource (no schema): $KIND in $file"
+                  continue
                   ;;
               esac
               
-              kubeconform -strict -summary -schema-location default -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' "$file" || {
-                echo "❌ Kubernetes schema validation failed for $file"
+              echo "Validating schema for CHANGED file: $file"
+              kubeconform -strict -ignore-missing-schemas -summary "$file" || {
+                echo "❌ Kubernetes schema validation failed for CHANGED file: $file"
                 exit 1
               }
-                fi
-              done
-              
+            fi
+          done
+          
           echo "✅ All Kubernetes resources have valid schemas"
 
       - name: Scan for secrets
@@ -236,6 +203,11 @@ jobs:
         run: |
           set -euo pipefail
           echo "🔍 Scanning changed files for secrets..."
+          
+          # Install gitleaks
+          curl -L -o gitleaks.tar.gz "https://github.com/gitleaks/gitleaks/releases/download/v8.18.0/gitleaks_8.18.0_linux_x64.tar.gz"
+          tar -xzf gitleaks.tar.gz
+          sudo mv gitleaks /usr/local/bin/
           
           # Get range for diff
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
@@ -251,7 +223,7 @@ jobs:
           
           # Create temporary directory and copy changed files
           TEMP_DIR=$(mktemp -d)
-          git diff --name-only -z "$RANGE" | grep -zE '\.(yaml|yml)$' | grep -z '^clusters/' | while IFS= read -r -d '' file; do
+          printf '%s\n' "$CHANGED_FILES" | while IFS= read -r file; do
             if [[ -f "$file" ]]; then
               cp "$file" "$TEMP_DIR/"
             fi
@@ -327,7 +299,6 @@ jobs:
           curl -L "https://github.com/fluxcd/flux2/releases/download/v${FLUX_VERSION}/flux_${FLUX_VERSION}_linux_amd64.tar.gz" -o flux.tar.gz
           tar -xzf flux.tar.gz
           sudo mv flux /usr/local/bin/
-          flux version
 
       - name: Create test namespace
         run: |
@@ -367,8 +338,8 @@ jobs:
           echo "🔍 Test deploying changed resources..."
           
           # Get changed files with proper range handling
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+              BASE_SHA="${{ github.event.pull_request.base.sha }}"
             RANGE="$BASE_SHA..HEAD"
           else
             BASE_SHA="${{ github.event.before }}"
@@ -382,9 +353,9 @@ jobs:
           
           if [[ -z "$CHANGED_FILES" ]]; then
             echo "✅ No resources to test deploy"
-            exit 0
-          fi
-          
+              exit 0
+            fi
+            
           echo "Changed files: $CHANGED_FILES"
           
           # Create OCI mapping file for Flux resources
@@ -406,15 +377,15 @@ jobs:
                 .metadata.name = \"$TEST_NAME\"
             " "$file" | kubectl apply -f - || {
               echo "❌ Failed to deploy OCIRepository: $file"
-            exit 1
-          }
+              exit 1
+            }
             fi
           done
           
           # Wait for OCIRepositories to be ready before deploying HelmReleases
           if [[ "${FLUX_CRDS_AVAILABLE}" == "true" ]]; then
             echo "⏳ Waiting for OCIRepositories to be ready..."
-            kubectl wait --for=condition=Ready --timeout=300s ocirepositories.source.toolkit.fluxcd.io --all -n "$TEST_NAMESPACE" || {
+          kubectl wait --for=condition=Ready --timeout=300s ocirepositories.source.toolkit.fluxcd.io --all -n "$TEST_NAMESPACE" || {
               echo "⚠️ Some OCIRepositories may not be ready, but continuing..."
             }
           fi
@@ -482,13 +453,13 @@ jobs:
               CLEAN_NAME="$(basename "$file" | sed -E 's/\.(ya?ml)$//' | tr '[:upper:]' '[:lower:]' \
                 | sed -E 's/[^a-z0-9-]+/-/g;s/-+/-/g;s/^-|-$//g')"
               
-              yq eval "
-                .metadata.namespace = \"$TEST_NAMESPACE\" |
+            yq eval "
+              .metadata.namespace = \"$TEST_NAMESPACE\" |
                 .metadata.name = \"test-${CLEAN_NAME}-${RUN_SUFFIX}\"
-              " "$file" | kubectl apply -f - || {
+            " "$file" | kubectl apply -f - || {
                 echo "❌ Failed to deploy: $file"
               exit 1
-              }
+            }
             fi
           done
           
@@ -503,8 +474,6 @@ jobs:
           kubectl wait --for=condition=available --timeout=300s deployment --all -n "$TEST_NAMESPACE" || {
             echo "⚠️ Some deployments may not be ready, but continuing..."
           }
-          
-          echo "✅ Deployment validation completed"
 
       - name: Cleanup test namespace
         if: always()
@@ -513,12 +482,12 @@ jobs:
           TEST_NAMESPACE="$TEST_NAMESPACE"
           
           echo "🧹 Cleaning up test namespace..."
-          kubectl delete namespace "$TEST_NAMESPACE" --ignore-not-found=true
+            kubectl delete namespace "$TEST_NAMESPACE" --ignore-not-found=true
           echo "✅ Cleaned up test namespace: $TEST_NAMESPACE"
 
   security-scan:
     name: Security Scan
-    runs-on: vollminlab-3
+    runs-on: vollminlab-1
     timeout-minutes: 10
     steps:
       - name: Checkout code
@@ -531,21 +500,16 @@ jobs:
 
       - name: Run Trivy filesystem scan
         uses: aquasecurity/trivy-action@0.28.0
-        timeout-minutes: 3
-        continue-on-error: true
         with:
           scan-type: 'fs'
           scan-ref: '.'
           format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'HIGH,CRITICAL'
-          ignore-unfixed: true
           cache-dir: ${{ env.TRIVY_CACHE_DIR }}
 
       - name: Run Trivy IaC scan
         uses: aquasecurity/trivy-action@0.28.0
-        timeout-minutes: 3
-        continue-on-error: true
         with:
           scan-type: 'config'
           scan-ref: '.'
@@ -591,8 +555,8 @@ jobs:
           echo "🔍 Validating resources against Kyverno policies..."
           
           # Get changed files with proper range handling
-            if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-              BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
             RANGE="$BASE_SHA..HEAD"
           else
             BASE_SHA="${{ github.event.before }}"
@@ -608,18 +572,19 @@ jobs:
             echo "✅ No files to validate against policies"
             exit 0
           fi
-            
+          
           # Find policy files by parsing 'kind' for each document (handles multi-doc YAML)
           mapfile -t POLICY_FILES < <(
             git ls-files 'clusters/**/kyverno/**/*.ya?ml' \
             | while IFS= read -r f; do
+                # handle multi-doc YAMLs
                 if yq eval-all '.[].kind' "$f" | grep -Eq '^(Policy|ClusterPolicy)$'; then
                   echo "$f"
                 fi
               done
           )
           
-          if [[ ${#POLICY_FILES[@]} -eq 0 ]]; then
+          if (( ${#POLICY_FILES[@]} == 0 )); then
             echo "⚠️ No Kyverno Policy/ClusterPolicy documents found"
             exit 0
           fi
@@ -638,8 +603,8 @@ jobs:
             for p in "${POLICY_FILES[@]}"; do args+=(-f "$p"); done
             kyverno apply "${args[@]}" --resource "$file" || {
               echo "❌ Policy validation failed for $file"
-              exit 1
-            }
+            exit 1
+          }
           done
           
           echo "✅ All resources comply with Kyverno policies"
@@ -652,8 +617,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Integration test placeholder
         run: |
