@@ -609,16 +609,31 @@ jobs:
           EOF
           
           # Scan only the changed files
+          # Create a temporary directory with only the changed files
+          TEMP_SCAN_DIR="/tmp/scan-$(date +%s)"
+          mkdir -p "$TEMP_SCAN_DIR"
+          
           for file in $CHANGED_FILES; do
             if [[ -f "$file" ]]; then
-              echo "Scanning CHANGED file for secrets: $file"
-              gitleaks detect --source "$file" --config gitleaks.toml --verbose || {
-                echo "❌ Secrets detected in CHANGED file: $file"
-                echo "Please remove any hardcoded secrets and use SealedSecrets instead"
-                exit 1
-              }
+              echo "Preparing CHANGED file for scanning: $file"
+              # Copy the file to temp directory preserving directory structure
+              mkdir -p "$TEMP_SCAN_DIR/$(dirname "$file")"
+              cp "$file" "$TEMP_SCAN_DIR/$file"
             fi
           done
+          
+          echo "Scanning CHANGED files for secrets..."
+          cd "$TEMP_SCAN_DIR"
+          gitleaks detect --source . --config gitleaks.toml --verbose --exit-code 0 || {
+            echo "❌ Secrets detected in CHANGED files"
+            echo "Please remove any hardcoded secrets and use SealedSecrets instead"
+            cd - > /dev/null
+            rm -rf "$TEMP_SCAN_DIR"
+            exit 1
+          }
+          
+          cd - > /dev/null
+          rm -rf "$TEMP_SCAN_DIR"
           
           echo "✅ No secrets detected in CHANGED files"
 
