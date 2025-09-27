@@ -462,29 +462,35 @@ jobs:
                 if [[ -f "$file" ]] && grep -qE '^kind:\s*HelmRelease' "$file"; then
               echo "Test deploying HelmRelease: $file"
               
-              # Extract original sourceRef name and map to test name
-              ORIG_SOURCE_REF=$(yq eval '.spec.chart.spec.sourceRef.name' "$file")
-              TEST_SOURCE_REF=""
+              # Extract original chartRef name and map to test name
+              ORIG_CHART_REF=$(yq eval '.spec.chartRef.name' "$file")
+              TEST_CHART_REF=""
+              
+              echo "DEBUG: Original chartRef: $ORIG_CHART_REF"
               
               # Look up mapped name from OCI mapping file
               if [[ -f "$OCI_MAPPING_FILE" ]]; then
-                TEST_SOURCE_REF=$(grep "^${ORIG_SOURCE_REF}:" "$OCI_MAPPING_FILE" | cut -d: -f2)
+                TEST_CHART_REF=$(grep "^${ORIG_CHART_REF}:" "$OCI_MAPPING_FILE" | cut -d: -f2)
               fi
               
               # Fallback to test name if no mapping found
-              if [[ -z "$TEST_SOURCE_REF" ]]; then
-                TEST_SOURCE_REF="test-${ORIG_SOURCE_REF}-${RUN_SUFFIX}"
+              if [[ -z "$TEST_CHART_REF" ]]; then
+                TEST_CHART_REF="test-${ORIG_CHART_REF}-${RUN_SUFFIX}"
               fi
               
-              # Deploy with mapped sourceRef
+              echo "DEBUG: Test chartRef: $TEST_CHART_REF"
+              
+              # Deploy with mapped chartRef
               yq eval "
                 .metadata.namespace = \"$TEST_NAMESPACE\" |
                 .metadata.name = \"test-$(basename "$(dirname "$file")")-${RUN_SUFFIX}\" |
-                .spec.chart.spec.sourceRef.name = \"$TEST_SOURCE_REF\" |
-                .spec.chart.spec.sourceRef.namespace = \"$TEST_NAMESPACE\"
+                .spec.chartRef.name = \"$TEST_CHART_REF\" |
+                .spec.chartRef.namespace = \"$TEST_NAMESPACE\"
               " "$file" | kubectl apply -f - || {
                 echo "❌ Failed to deploy HelmRelease: $file"
-              exit 1
+                echo "DEBUG: Original file content:"
+                cat "$file"
+                exit 1
               }
             fi
           done
@@ -690,12 +696,14 @@ jobs:
         if: always()
         with:
           sarif_file: 'trivy-results.sarif'
+          category: 'trivy-fs'
           
       - name: Upload Trivy IaC SARIF results
         uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
           sarif_file: 'trivy-config-results.sarif'
+          category: 'trivy-config'
 
   policy-validation:
     name: Kyverno Policy Validation
@@ -711,7 +719,7 @@ jobs:
         run: |
           set -euo pipefail
           echo "📦 Installing Kyverno CLI..."
-          curl -L "https://github.com/kyverno/kyverno/releases/download/v1.12.0/kyverno-cli_v1.12.0_linux_x86_64.tar.gz" -o kyverno.tar.gz
+          curl -L "https://github.com/kyverno/kyverno/releases/download/v1.12.1/kyverno-cli_v1.12.1_linux_x86_64.tar.gz" -o kyverno.tar.gz
           tar -xzf kyverno.tar.gz
           sudo mv kyverno /usr/local/bin/
           kyverno version
