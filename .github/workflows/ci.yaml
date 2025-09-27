@@ -178,16 +178,15 @@ jobs:
         run: |
           set -euo pipefail
           echo "📦 Installing kubeconform..."
-          # Download the binary directly (no tar.gz issues)
-          curl -L -o kubeconform "https://github.com/yannh/kubeconform/releases/download/v0.6.8/kubeconform_0.6.8_linux_amd64"
+          # Use latest version and try tar.gz approach first
+          curl -L https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz | tar xvzf -
           
-          # Verify the download was successful
-          if [[ ! -s kubeconform ]]; then
-            echo "❌ kubeconform download failed or file is empty"
+          # Verify the binary was extracted
+          if [[ ! -f kubeconform ]]; then
+            echo "❌ kubeconform binary not found after extraction"
             exit 1
           fi
           
-          chmod +x kubeconform
           sudo mv kubeconform /usr/local/bin/
           kubeconform -version || kubeconform -v
 
