@@ -84,7 +84,7 @@ jobs:
               }
             fi
           done
-          
+              
           echo "✅ All YAML files have valid syntax"
 
       - name: Validate Kubernetes schemas
@@ -109,7 +109,6 @@ jobs:
     name: Flux Configuration Validation
     runs-on: vollminlab-2
     needs: validate-changes
-    if: env.CHANGED_FILES != ''
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -234,11 +233,19 @@ jobs:
           output: 'trivy-config-results.sarif'
           severity: 'HIGH,CRITICAL'
 
-      - name: Upload SARIF results
+      - name: Upload Trivy filesystem SARIF results
         uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
-          sarif_file: 'trivy-results.sarif,trivy-config-results.sarif'
+          sarif_file: 'trivy-results.sarif'
+          category: 'trivy-fs'
+          
+      - name: Upload Trivy IaC SARIF results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-config-results.sarif'
+          category: 'trivy-config'
 
   policy-validation:
     name: Kyverno Policy Validation
@@ -253,7 +260,9 @@ jobs:
         run: |
           set -euo pipefail
           echo "📦 Installing Kyverno CLI..."
-          curl -s https://raw.githubusercontent.com/kyverno/kyverno/main/scripts/install-cli.sh | bash
+          curl -L "https://github.com/kyverno/kyverno/releases/download/v1.12.1/kyverno-cli_v1.12.1_linux_x86_64.tar.gz" -o kyverno.tar.gz
+          tar -xzf kyverno.tar.gz
+          sudo mv kyverno /usr/local/bin/
           kyverno version
 
       - name: Validate against Kyverno policies
@@ -269,7 +278,7 @@ jobs:
             echo "✅ No files to validate against policies"
             exit 0
           fi
-          
+            
           # Find Kyverno policies
           POLICY_FILES=$(find clusters -name "*.yaml" -path "*/kyverno/*" | xargs grep -l "kind: Policy\|kind: ClusterPolicy" || echo "")
           
