@@ -1062,7 +1062,7 @@ jobs:
   integration-test:
     name: Integration Test
     runs-on: vollminlab-1
-    needs: [basic-validation, security-scan, server-side-validation, policy-validation, integration-test]
+    needs: [basic-validation, security-scan, server-side-validation, policy-validation]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
