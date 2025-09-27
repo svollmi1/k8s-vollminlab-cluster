@@ -9,7 +9,7 @@ metadata:
     category: ci
     pool: "1"
 spec:
-  replicas: 1
+  replicas: 2
   template:
     metadata:
       labels:
@@ -47,7 +47,7 @@ metadata:
     category: ci
     pool: "2"
 spec:
-  replicas: 1
+  replicas: 2
   template:
     metadata:
       labels:
@@ -85,7 +85,7 @@ metadata:
     category: ci
     pool: "3"
 spec:
-  replicas: 1
+  replicas: 2
   template:
     metadata:
       labels:
