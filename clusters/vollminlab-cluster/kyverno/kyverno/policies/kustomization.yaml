@@ -6,7 +6,6 @@ metadata:
 resources:
   - flux-exception.yaml
   - force-rescan.yaml
-  - inject-missing-labels.yaml
   - inject-namespace-labels.yaml
   - inject-resource-requirements.yaml
   - require-labels.yaml

@@ -31,5 +31,5 @@ spec:
               spec:
                 containers:
                   - image: "!*:latest"
-        allowExistingViolations: false
+        # allowExistingViolations: false  # Not supported in current Kyverno CLI version
       skipBackgroundRequests: false
