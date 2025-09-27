@@ -139,8 +139,8 @@ jobs:
               # Only fail on actual syntax errors
               yq eval '.' "$file" > /dev/null || {
                 echo "❌ YAML syntax error in $file"
-                exit 1
-              }
+            exit 1
+          }
             fi
           done
           
@@ -176,11 +176,13 @@ jobs:
             echo "Checking labels in CHANGED file: $file"
             
             # Check each document in multi-doc YAML files
-            yq eval -d '*' '.kind' "$file" 2>/dev/null | while read -r kind; do
+            KINDS=$(yq eval -d '*' '.kind' "$file" 2>/dev/null)
+            
+            while IFS= read -r kind; do
               if [[ "$kind" != "HelmRelease" && "$kind" != "OCIRepository" && "$kind" != "HelmRepository" ]]; then
               continue
             fi
-            
+              
               # Get document index for this kind
               DOC_INDEX=$(yq eval -d '*' 'select(.kind == "'"$kind"'") | key' "$file" 2>/dev/null | head -1)
               
@@ -200,7 +202,7 @@ jobs:
                 echo "Expected env: $EXPECTED_ENV, found: $ENV_LABEL"
               exit 1
               fi
-            done
+            done <<< "$KINDS"
           done
           
           echo "✅ All CHANGED Flux resources have proper labels"
