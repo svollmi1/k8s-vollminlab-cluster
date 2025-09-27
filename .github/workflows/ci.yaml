@@ -437,7 +437,7 @@ jobs:
           
               # First pass: Deploy OCIRepositories
               for file in $CHANGED_FILES; do
-                if [[ -f "$file" ]] && grep -qE '^\s*kind:\s*OCIRepository' "$file"; then
+                if [[ -f "$file" ]] && grep -qE '^kind:\s*OCIRepository' "$file"; then
               echo "Test deploying OCIRepository: $file"
               
               ORIG_NAME=$(yq eval '.metadata.name' "$file")
@@ -459,7 +459,7 @@ jobs:
           
               # Second pass: Deploy HelmReleases with sourceRef mapping
               for file in $CHANGED_FILES; do
-                if [[ -f "$file" ]] && grep -qE '^\s*kind:\s*HelmRelease' "$file"; then
+                if [[ -f "$file" ]] && grep -qE '^kind:\s*HelmRelease' "$file"; then
               echo "Test deploying HelmRelease: $file"
               
               # Extract original sourceRef name and map to test name
@@ -491,7 +491,7 @@ jobs:
           
               # Third pass: Deploy other resources
               for file in $CHANGED_FILES; do
-                if [[ -f "$file" ]] && grep -q "kind:" "$file" && ! grep -qE '^\s*kind:\s*OCIRepository' "$file" && ! grep -qE '^\s*kind:\s*HelmRelease' "$file"; then
+                if [[ -f "$file" ]] && grep -q "kind:" "$file" && ! grep -qE '^kind:\s*OCIRepository' "$file" && ! grep -qE '^kind:\s*HelmRelease' "$file"; then
               echo "Test deploying other resource: $file"
               
               yq eval "
@@ -626,6 +626,11 @@ jobs:
           echo "Scanning changed files for secrets..."
           cd "$TEMP_SCAN_DIR"
           
+          # Initialize git repo for gitleaks
+          git init
+          git config user.email "ci@example.com"
+          git config user.name "CI"
+          
           # Create gitleaks config in temp directory
           cat > gitleaks.toml << 'EOF'
           [gitleaks]
@@ -635,6 +640,10 @@ jobs:
           description = "Base64 encoded values in SealedSecrets"
           regex = '''[A-Za-z0-9+/]{50,}={0,2}'''
           EOF
+          
+          # Add files to git and commit
+          git add .
+          git commit -m "temp commit for gitleaks"
           
           gitleaks detect --source . --config gitleaks.toml --verbose --exit-code 0 || {
             echo "❌ Secrets detected in changed files"
@@ -702,7 +711,7 @@ jobs:
         run: |
           set -euo pipefail
           echo "📦 Installing Kyverno CLI..."
-          curl -L "https://github.com/kyverno/kyverno/releases/download/v1.11.4/kyverno-cli_v1.11.4_linux_x86_64.tar.gz" -o kyverno.tar.gz
+          curl -L "https://github.com/kyverno/kyverno/releases/download/v1.12.0/kyverno-cli_v1.12.0_linux_x86_64.tar.gz" -o kyverno.tar.gz
           tar -xzf kyverno.tar.gz
           sudo mv kyverno /usr/local/bin/
           kyverno version
