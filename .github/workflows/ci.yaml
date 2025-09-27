@@ -624,10 +624,10 @@ jobs:
           
           echo "Changed files: $CHANGED_FILES"
           
-          # Find OCI repositories in changed files only
+          # Find OCI repositories in changed files only (must be actual OCIRepository resources, not HelmReleases that reference them)
           CHANGED_OCI_REPOS=""
           for file in $CHANGED_FILES; do
-            if [[ -f "$file" ]] && grep -q "kind: OCIRepository" "$file"; then
+            if [[ -f "$file" ]] && grep -E '^\s*kind:\s*OCIRepository' "$file"; then
               CHANGED_OCI_REPOS="$CHANGED_OCI_REPOS $file"
             fi
           done
