@@ -481,15 +481,23 @@ jobs:
               echo "DEBUG: Test chartRef: $TEST_CHART_REF"
               
               # Deploy with mapped chartRef
-              yq eval "
+              echo "DEBUG: About to deploy with yq transformation..."
+              TRANSFORMED_YAML=$(yq eval "
                 .metadata.namespace = \"$TEST_NAMESPACE\" |
                 .metadata.name = \"test-$(basename "$(dirname "$file")")-${RUN_SUFFIX}\" |
                 .spec.chartRef.name = \"$TEST_CHART_REF\" |
                 .spec.chartRef.namespace = \"$TEST_NAMESPACE\"
-              " "$file" | kubectl apply -f - || {
+              " "$file")
+              
+              echo "DEBUG: Transformed YAML:"
+              echo "$TRANSFORMED_YAML"
+              
+              echo "$TRANSFORMED_YAML" | kubectl apply -f - || {
                 echo "❌ Failed to deploy HelmRelease: $file"
                 echo "DEBUG: Original file content:"
                 cat "$file"
+                echo "DEBUG: kubectl error details:"
+                echo "$TRANSFORMED_YAML" | kubectl apply -f - --dry-run=client
                 exit 1
               }
             fi
