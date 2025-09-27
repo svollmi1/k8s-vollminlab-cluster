@@ -384,7 +384,7 @@ jobs:
             echo "✅ No resources to test deploy"
             exit 0
           fi
-            
+          
           echo "Changed files: $CHANGED_FILES"
           
           # Create OCI mapping file for Flux resources
@@ -424,8 +424,8 @@ jobs:
             if [[ -f "$file" ]] && yq eval '.kind' "$file" | grep -qi '^HelmRelease$'; then
               if [[ "${FLUX_CRDS_AVAILABLE}" != "true" ]]; then
                 echo "Skipping HelmRelease deploy (Flux CRDs unavailable): $file"
-              continue
-            fi
+                continue
+              fi
               echo "Test deploying HelmRelease: $file"
 
               if [[ "$(yq eval '.spec.chartRef // ""' "$file")" != "" ]]; then
@@ -608,8 +608,8 @@ jobs:
           
           if [[ -z "$CHANGED_FILES" ]]; then
             echo "✅ No files to validate against policies"
-              exit 0
-            fi
+            exit 0
+          fi
             
           # Find policy files by parsing 'kind' for each document (handles multi-doc YAML)
           mapfile -t POLICY_FILES < <(
