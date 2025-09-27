@@ -25,11 +25,11 @@ resource "github_branch_protection" "main" {
   
   pattern = "main"
   
-      # Require status checks to pass before merging (temporarily disabled)
-      # required_status_checks {
-      #   strict   = true
-      #   contexts = ["Validate Kubernetes Manifests", "Security Scan", "Flux Configuration Validation", "Kyverno Policy Validation", "Integration Test"]
-      # }
+      # Require status checks to pass before merging
+      required_status_checks {
+        strict   = true
+        contexts = ["Validate Kubernetes Manifests", "Security Scan", "Flux Configuration Validation", "Kyverno Policy Validation", "Integration Test"]
+      }
   
   # Enforce branch protection rules for administrators
   enforce_admins = true
