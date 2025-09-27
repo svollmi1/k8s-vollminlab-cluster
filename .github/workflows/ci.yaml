@@ -166,8 +166,8 @@ jobs:
               echo "Validating: $file"
               yamllint "$file" || {
                 echo "❌ YAML lint error in $file"
-                exit 1
-              }
+            exit 1
+          }
             fi
           done
           
@@ -178,7 +178,12 @@ jobs:
         run: |
           set -euo pipefail
           echo "📦 Installing kubeconform..."
-          curl -L -o kubeconform.tar.gz "https://github.com/yannh/kubeconform/releases/download/v0.6.8/kubeconform-linux-amd64.tar.gz"
+          curl -L -o kubeconform.tar.gz "https://github.com/yannh/kubeconform/releases/download/v0.6.8/kubeconform_0.6.8_linux_amd64.tar.gz"
+          curl -L -o kubeconform.sha256 "https://github.com/yannh/kubeconform/releases/download/v0.6.8/kubeconform_0.6.8_linux_amd64.tar.gz.sha256"
+          
+          # Verify checksum
+          sha256sum -c kubeconform.sha256
+          
           tar -xzf kubeconform.tar.gz
           sudo mv kubeconform /usr/local/bin/
           kubeconform -version || kubeconform -v
@@ -390,8 +395,8 @@ jobs:
                 .metadata.name = \"$TEST_NAME\"
             " "$file" | kubectl apply -f - || {
               echo "❌ Failed to deploy OCIRepository: $file"
-              exit 1
-            }
+            exit 1
+          }
             fi
           done
           
@@ -465,7 +470,7 @@ jobs:
                 .metadata.name = \"test-${CLEAN_NAME}-${RUN_SUFFIX}\"
               " "$file" | kubectl apply -f - || {
                 echo "❌ Failed to deploy: $file"
-                exit 1
+              exit 1
               }
             fi
           done
@@ -571,8 +576,8 @@ jobs:
           echo "🔍 Validating resources against Kyverno policies..."
           
           # Get changed files with proper range handling
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+              BASE_SHA="${{ github.event.pull_request.base.sha }}"
             RANGE="$BASE_SHA..HEAD"
           else
             BASE_SHA="${{ github.event.before }}"
@@ -586,9 +591,9 @@ jobs:
           
           if [[ -z "$CHANGED_FILES" ]]; then
             echo "✅ No files to validate against policies"
-            exit 0
-          fi
-          
+              exit 0
+            fi
+            
           # Find policy files by parsing 'kind' for each document (handles multi-doc YAML)
           mapfile -t POLICY_FILES < <(
             git ls-files 'clusters/**/kyverno/**/*.ya?ml' \
