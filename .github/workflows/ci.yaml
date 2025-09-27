@@ -303,6 +303,12 @@ jobs:
                 continue
               fi
             
+            # Skip Flux CD resources - they don't have standard Kubernetes schemas
+            if grep -q "kind: Kustomization\|kind: HelmRelease\|kind: OCIRepository\|kind: HelmRepository" "$file"; then
+              echo "Skipping Flux CD resource (no standard schema available): $file"
+              continue
+            fi
+            
             kubeconform -strict -summary \
               -schema-location "default" \
               -schema-location "https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json" \
