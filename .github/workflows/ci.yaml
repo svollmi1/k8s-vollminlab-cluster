@@ -382,8 +382,8 @@ jobs:
           
           if [[ -z "$CHANGED_FILES" ]]; then
             echo "✅ No resources to test deploy"
-              exit 0
-            fi
+            exit 0
+          fi
             
           echo "Changed files: $CHANGED_FILES"
           
@@ -393,7 +393,7 @@ jobs:
           
           # First pass: Deploy OCIRepositories
           for file in $CHANGED_FILES; do
-            if [[ -f "$file" ]] && grep -qiE '^\s*kind:\s*OCIRepository\s*$' "$file"; then
+            if [[ -f "$file" ]] && yq eval '.kind' "$file" | grep -qi '^OCIRepository$'; then
               echo "Test deploying OCIRepository: $file"
               
               ORIG_NAME=$(yq eval '.metadata.name' "$file")
@@ -421,7 +421,7 @@ jobs:
           
           # Second pass: Deploy HelmReleases with sourceRef mapping
           for file in $CHANGED_FILES; do
-            if [[ -f "$file" ]] && grep -qiE '^\s*kind:\s*HelmRelease\s*$' "$file"; then
+            if [[ -f "$file" ]] && yq eval '.kind' "$file" | grep -qi '^HelmRelease$'; then
               if [[ "${FLUX_CRDS_AVAILABLE}" != "true" ]]; then
                 echo "Skipping HelmRelease deploy (Flux CRDs unavailable): $file"
               continue
@@ -458,14 +458,20 @@ jobs:
             fi
           done
           
-          # Third pass: Deploy other namespaced resources (skip cluster-scoped)
+          # Third pass: Deploy other namespaced resources (skip cluster-scoped and Flux resources)
           for file in $CHANGED_FILES; do
-            if [[ -f "$file" ]] && grep -q "kind:" "$file" && ! grep -qiE '^\s*kind:\s*OCIRepository\s*$' "$file" && ! grep -qiE '^\s*kind:\s*HelmRelease\s*$' "$file"; then
-              # Skip cluster-scoped resources
+            if [[ -f "$file" ]] && yq eval '.kind' "$file" | grep -q .; then
               KIND=$(yq eval '.kind' "$file")
+              
+              # Skip Flux resources (already handled above)
+              if [[ "$KIND" == "OCIRepository" || "$KIND" == "HelmRelease" ]]; then
+                continue
+              fi
+              
+              # Skip cluster-scoped resources and Kustomization (CRD not available in test namespace)
               case "$KIND" in
-                ClusterRole|ClusterRoleBinding|ClusterPolicy|ClusterPolicyReport|CustomResourceDefinition|Namespace|Node|PersistentVolume|StorageClass|ValidatingAdmissionWebhook|MutatingAdmissionWebhook)
-                  echo "Skipping cluster-scoped resource: $KIND in $file"
+                ClusterRole|ClusterRoleBinding|ClusterPolicy|ClusterPolicyReport|CustomResourceDefinition|Namespace|Node|PersistentVolume|StorageClass|ValidatingAdmissionWebhook|MutatingAdmissionWebhook|Kustomization)
+                  echo "Skipping $KIND resource: $file"
                   continue
                   ;;
               esac
