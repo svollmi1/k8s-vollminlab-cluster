@@ -102,7 +102,11 @@ jobs:
           
           echo "Changed YAML files in clusters/: $CHANGED_FILES"
           echo "changed=true" >> $GITHUB_OUTPUT
-          echo "CHANGED_FILES=$CHANGED_FILES" >> $GITHUB_ENV
+          {
+            echo "CHANGED_FILES<<EOF"
+            printf '%s\n' "$CHANGED_FILES"
+            echo "EOF"
+          } >> $GITHUB_ENV
 
       - name: Install yamllint
         if: env.CHANGED_FILES != ''
@@ -567,8 +571,8 @@ jobs:
           echo "🔍 Validating resources against Kyverno policies..."
           
           # Get changed files with proper range handling
-            if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-              BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
             RANGE="$BASE_SHA..HEAD"
           else
             BASE_SHA="${{ github.event.before }}"
@@ -582,32 +586,40 @@ jobs:
           
           if [[ -z "$CHANGED_FILES" ]]; then
             echo "✅ No files to validate against policies"
-              exit 0
-            fi
-            
-          # Find Kyverno policies
-          POLICY_FILES=$(find clusters -name "*.yaml" -path "*/kyverno/*" | xargs grep -l "kind: Policy\|kind: ClusterPolicy" || echo "")
-          
-          if [[ -z "$POLICY_FILES" ]]; then
-            echo "⚠️ No Kyverno policies found"
             exit 0
           fi
           
-          # Validate changed files against policies
+          # Find policy files by parsing 'kind' for each document (handles multi-doc YAML)
+          mapfile -t POLICY_FILES < <(
+            git ls-files 'clusters/**/kyverno/**/*.ya?ml' \
+            | while IFS= read -r f; do
+                if yq eval-all '.[].kind' "$f" | grep -Eq '^(Policy|ClusterPolicy)$'; then
+                  echo "$f"
+                fi
+              done
+          )
+          
+          if [[ ${#POLICY_FILES[@]} -eq 0 ]]; then
+            echo "⚠️ No Kyverno Policy/ClusterPolicy documents found"
+            exit 0
+          fi
+          
+          # Validate only the changed resource files
           for file in $CHANGED_FILES; do
-            if [[ -f "$file" ]] && grep -q "kind:" "$file"; then
-              # Skip Flux kinds if policies don't target them
-              if grep -qE '^\s*kind:\s*(HelmRelease|OCIRepository)\s*$' "$file"; then
-                echo "Skipping Flux resource (not targeted by policies): $file"
-                continue
-              fi
-              
-              echo "Validating: $file"
-              kyverno apply $POLICY_FILES --resource "$file" || {
-                echo "❌ Policy validation failed for $file"
-                exit 1
-              }
+            [[ -f "$file" ]] || continue
+            # Skip Flux kinds if policies don't target them
+            if yq eval '.kind' "$file" | grep -Eq '^(HelmRelease|OCIRepository)$'; then
+              echo "Skipping Flux resource (not targeted by policies): $file"
+              continue
             fi
+            
+            echo "Validating: $file"
+            args=()
+            for p in "${POLICY_FILES[@]}"; do args+=(-f "$p"); done
+            kyverno apply "${args[@]}" --resource "$file" || {
+              echo "❌ Policy validation failed for $file"
+              exit 1
+            }
           done
           
           echo "✅ All resources comply with Kyverno policies"
