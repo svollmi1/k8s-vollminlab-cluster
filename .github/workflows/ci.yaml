@@ -32,7 +32,7 @@ jobs:
     name: Validate Kubernetes Manifests
     runs-on: vollminlab-1
     outputs:
-      changed-files: ${{ steps.get-changed-files.outputs.changed-files }}
+      changed-files-b64: ${{ steps.get-changed-files.outputs.changed-files-b64 }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -82,8 +82,15 @@ jobs:
           fi
           
           echo "Changed YAML files in clusters/: $CHANGED_FILES"
-          echo "changed-files=$CHANGED_FILES" >> $GITHUB_OUTPUT
-          echo "CHANGED_FILES=$CHANGED_FILES" >> $GITHUB_ENV
+          
+          # Use base64 encoding to safely pass multi-line data
+          CHANGED_FILES_B64=$(echo "$CHANGED_FILES" | base64 -w 0)
+          echo "changed-files-b64=$CHANGED_FILES_B64" >> $GITHUB_OUTPUT
+          
+          # Also set as environment variable for current job
+          echo "CHANGED_FILES<<EOF" >> $GITHUB_ENV
+          echo "$CHANGED_FILES" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       - name: Install yamllint
         run: |
@@ -249,7 +256,7 @@ jobs:
             if grep -q "kind: CustomResourceDefinition" "$file"; then
               echo "Skipping CRD definition file: $file"
                 continue
-            fi
+              fi
             
             kubeconform -strict -summary \
               -schema-location "default" \
@@ -267,12 +274,29 @@ jobs:
     name: Flux Configuration Validation
     runs-on: vollminlab-2
     needs: validate-changes
-    if: github.event_name == 'pull_request' && needs.validate-changes.outputs.changed-files != ''
+    if: github.event_name == 'pull_request' && needs.validate-changes.outputs.changed-files-b64 != ''
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Decode changed files
+        run: |
+          set -euo pipefail
+          echo "🔍 Decoding changed files..."
+          
+          if [[ -n "${{ needs.validate-changes.outputs.changed-files-b64 }}" ]]; then
+            echo "${{ needs.validate-changes.outputs.changed-files-b64 }}" | base64 -d > /tmp/changed-files.txt
+            CHANGED_FILES=$(cat /tmp/changed-files.txt)
+            echo "CHANGED_FILES<<EOF" >> $GITHUB_ENV
+            echo "$CHANGED_FILES" >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+            echo "Changed files: $CHANGED_FILES"
+          else
+            echo "CHANGED_FILES=" >> $GITHUB_ENV
+            echo "No files changed"
+          fi
 
       - name: Setup kubectl with checksum verification
         run: |
@@ -284,8 +308,8 @@ jobs:
           curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl.sha256"
           echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check || {
             echo "❌ kubectl checksum verification failed"
-            exit 1
-          }
+                exit 1
+              }
           
           chmod +x kubectl
           sudo mv kubectl /usr/local/bin/
