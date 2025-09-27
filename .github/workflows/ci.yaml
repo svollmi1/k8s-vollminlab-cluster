@@ -31,6 +31,8 @@ jobs:
   validate-changes:
     name: Validate Kubernetes Manifests
     runs-on: vollminlab-1
+    outputs:
+      changed-files: ${{ steps.get-changed-files.outputs.changed-files }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -55,6 +57,7 @@ jobs:
           yq --version
 
       - name: Get changed files
+        id: get-changed-files
         run: |
           set -euo pipefail
           echo "🔍 Finding changed files..."
@@ -73,11 +76,13 @@ jobs:
           
           if [[ -z "$CHANGED_FILES" ]]; then
             echo "✅ No YAML files changed in clusters directory"
+            echo "changed-files=" >> $GITHUB_OUTPUT
             echo "CHANGED_FILES=" >> $GITHUB_ENV
             exit 0
           fi
           
           echo "Changed YAML files in clusters/: $CHANGED_FILES"
+          echo "changed-files=$CHANGED_FILES" >> $GITHUB_OUTPUT
           echo "CHANGED_FILES=$CHANGED_FILES" >> $GITHUB_ENV
 
       - name: Install yamllint
@@ -178,7 +183,7 @@ jobs:
           tar -xzf kubeconform.tar.gz
           sudo mv kubeconform /usr/local/bin/
           kubeconform -v
-          
+
           echo "📦 Installing Python for CRD schema conversion..."
           sudo apt-get update
           sudo apt-get install -y python3 python3-pip
@@ -211,9 +216,9 @@ jobs:
               echo "Converting CRD: $crd_file"
               python3 /tmp/openapi2jsonschema.py "$crd_file" /tmp/crd-schemas/ || {
                 echo "⚠️ Failed to convert CRD: $crd_file (this is expected for some CRDs)"
-                continue
-              }
-            done
+              continue
+            }
+          done
           fi
           
           echo "✅ CRD schema conversion completed"
@@ -228,9 +233,9 @@ jobs:
           for file in $CHANGED_FILES; do
             if [[ -f "$file" ]] && grep -q "kind:" "$file" && grep -q "apiVersion:" "$file"; then
               CHANGED_K8S_FILES="$CHANGED_K8S_FILES $file"
-            fi
-          done
-          
+                fi
+              done
+              
           if [[ -z "$CHANGED_K8S_FILES" ]]; then
             echo "✅ No Kubernetes resources changed - skipping schema validation"
             exit 0
@@ -243,7 +248,7 @@ jobs:
             # Skip CRD definition files - they define the schema, not use it
             if grep -q "kind: CustomResourceDefinition" "$file"; then
               echo "Skipping CRD definition file: $file"
-              continue
+                continue
             fi
             
             kubeconform -strict -summary \
@@ -252,8 +257,8 @@ jobs:
               -schema-location "/tmp/crd-schemas/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json" \
               "$file" || {
               echo "❌ Kubernetes schema validation failed for CHANGED file: $file"
-              exit 1
-            }
+                exit 1
+              }
           done
           
           echo "✅ All CHANGED Kubernetes resources have valid schemas"
@@ -262,7 +267,7 @@ jobs:
     name: Flux Configuration Validation
     runs-on: vollminlab-2
     needs: validate-changes
-    if: github.event_name == 'pull_request' && env.CHANGED_FILES != ''
+    if: github.event_name == 'pull_request' && needs.validate-changes.outputs.changed-files != ''
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -473,6 +478,7 @@ jobs:
   security-scan:
     name: Security Scan
     runs-on: vollminlab-3
+    needs: validate-changes
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -583,6 +589,7 @@ jobs:
   policy-validation:
     name: Kyverno Policy Validation
     runs-on: vollminlab-1
+    needs: validate-changes
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -621,8 +628,8 @@ jobs:
           
           if [[ -z "$CHANGED_FILES" ]]; then
             echo "✅ No files to validate against policies"
-            exit 0
-          fi
+              exit 0
+            fi
             
           # Find Kyverno policies
           POLICY_FILES=$(find clusters -name "*.yaml" -path "*/kyverno/*" | xargs grep -l "kind: Policy\|kind: ClusterPolicy" || echo "")
@@ -689,7 +696,8 @@ jobs:
   integration-test:
     name: Integration Test
     runs-on: vollminlab-2
-    needs: [validate-changes, test-deployment, security-scan, policy-validation]
+    needs: [validate-changes, security-scan, policy-validation]
+    if: always() && (needs.validate-changes.result == 'success' || needs.validate-changes.result == 'skipped') && needs.security-scan.result == 'success' && needs.policy-validation.result == 'success'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -706,7 +714,7 @@ jobs:
   notify-success:
     name: Notify Success
     runs-on: vollminlab-3
-    needs: [validate-changes, test-deployment, security-scan, policy-validation, integration-test]
+    needs: [validate-changes, security-scan, policy-validation, integration-test]
     if: success()
     steps:
       - name: Success notification
@@ -718,7 +726,7 @@ jobs:
   notify-failure:
     name: Notify Failure
     runs-on: vollminlab-3
-    needs: [validate-changes, test-deployment, security-scan, policy-validation, integration-test]
+    needs: [validate-changes, security-scan, policy-validation, integration-test]
     if: failure()
     steps:
       - name: Failure notification
