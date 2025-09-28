@@ -87,6 +87,8 @@ jobs:
           echo "Files changed in latest commit:"
           git show --name-only --pretty=format: HEAD
           
+          echo "🔍 DEBUG: CHANGED_FILES variable: '$CHANGED_FILES'"
+          echo "🔍 DEBUG: CHANGED_FILES length: ${#CHANGED_FILES}"
           echo "Changed YAML files in clusters/: $CHANGED_FILES"
           
           if [[ -z "$CHANGED_FILES" ]]; then
