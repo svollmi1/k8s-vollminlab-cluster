@@ -733,7 +733,7 @@ jobs:
     name: Integration Test
     runs-on: vollminlab-2
     needs: [validate-changes, test-deployment, security-scan, policy-validation]
-    if: always() && (needs.validate-changes.result == 'success' || needs.validate-changes.result == 'skipped') && (needs.test-deployment.result == 'success' || needs.test-deployment.result == 'skipped') && needs.security-scan.result == 'success' && needs.policy-validation.result == 'success'
+    if: always() && needs.security-scan.result == 'success' && needs.policy-validation.result == 'success'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
