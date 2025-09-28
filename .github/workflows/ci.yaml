@@ -271,6 +271,12 @@ jobs:
     if: needs.validate-changes.outputs.changed == 'true'
     timeout-minutes: 15
     steps:
+      - name: Debug job condition
+        run: |
+          echo "🔍 Debug: validate-changes.outputs.changed = '${{ needs.validate-changes.outputs.changed }}'"
+          echo "🔍 Debug: This job should only run when changed == 'true'"
+          echo "🔍 Debug: If you see this, the condition is evaluating to true"
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
