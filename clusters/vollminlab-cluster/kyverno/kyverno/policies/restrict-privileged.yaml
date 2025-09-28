@@ -48,4 +48,4 @@ spec:
                 spec:
                   containers:
                     - X(securityContext): null
-        allowExistingViolations: false
+        # allowExistingViolations: false  # Not supported in current Kyverno CLI version
