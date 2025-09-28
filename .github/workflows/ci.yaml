@@ -86,24 +86,20 @@ jobs:
           echo "All changed files:"
           git diff --name-only "$RANGE"
           
+          echo "Changed YAML files in clusters/: $CHANGED_FILES"
+          
           if [[ -z "$CHANGED_FILES" ]]; then
             echo "✅ No YAML files changed in clusters directory"
             echo "changed=false" >> $GITHUB_OUTPUT
             echo "CHANGED_FILES=" >> $GITHUB_ENV
-            exit 0
-          fi
-          
-          echo "Changed YAML files in clusters/: $CHANGED_FILES"
-          if [[ -n "$CHANGED_FILES" ]]; then
+          else
+            echo "📋 Found changed cluster files - will run deployment validation"
             echo "changed=true" >> $GITHUB_OUTPUT
             {
               echo "CHANGED_FILES<<EOF"
               printf '%s\n' "$CHANGED_FILES"
               echo "EOF"
             } >> $GITHUB_ENV
-          else
-            echo "changed=false" >> $GITHUB_OUTPUT
-            echo "CHANGED_FILES=" >> $GITHUB_ENV
           fi
 
       - name: Validate YAML syntax
