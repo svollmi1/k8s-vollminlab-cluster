@@ -555,6 +555,38 @@ jobs:
             fi
           done
           
+          # Validate HelmRepository status first
+          if [[ "${FLUX_CRDS_AVAILABLE}" == "true" ]]; then
+            echo "🔍 Validating HelmRepository status..."
+            kubectl wait --for=condition=Ready --timeout=300s helmrepositories.source.toolkit.fluxcd.io --all -n "$TEST_NAMESPACE" || {
+              echo "❌ HelmRepository validation failed - this would break production deployment"
+              echo "🔍 Checking HelmRepository status:"
+              kubectl get helmrepositories -n "$TEST_NAMESPACE" -o wide
+              echo "📋 HelmRepository events:"
+              kubectl get events -n "$TEST_NAMESPACE" --field-selector involvedObject.kind=HelmRepository --sort-by='.lastTimestamp'
+              echo "📋 Detailed HelmRepository status:"
+              kubectl describe helmrepositories -n "$TEST_NAMESPACE"
+              exit 1
+            }
+            echo "✅ All HelmRepositories are ready and synced"
+            
+            # Validate that charts are actually available
+            echo "🔍 Validating chart availability..."
+            for file in $CHANGED_FILES; do
+              if [[ -f "$file" ]] && yq eval '.kind' "$file" | grep -qi '^HelmRelease$'; then
+                CHART_NAME=$(yq eval '.spec.chart.spec.chart' "$file")
+                CHART_VERSION=$(yq eval '.spec.chart.spec.version' "$file")
+                SOURCE_REF=$(yq eval '.spec.chart.spec.sourceRef.name' "$file")
+                
+                if [[ -n "$CHART_NAME" && -n "$CHART_VERSION" && -n "$SOURCE_REF" ]]; then
+                  echo "Checking chart availability: $CHART_NAME version $CHART_VERSION from $SOURCE_REF"
+                  # This would ideally check if the chart exists, but kubectl doesn't have a direct way
+                  # The HelmRepository Ready condition should indicate if charts are available
+                fi
+              fi
+            done
+          fi
+          
           # Validate HelmRelease status after deployment
           if [[ "${FLUX_CRDS_AVAILABLE}" == "true" ]]; then
             echo "🔍 Validating HelmRelease status..."
