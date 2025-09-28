@@ -18,4 +18,5 @@ resources:
   - radarr-helmrepository.yaml
   - sabnzbd-helmrepository.yaml
   - sonarr-helmrepository.yaml
+  - tautulli-helmrepository.yaml
   - sealed-secrets-helmrepository.yaml
