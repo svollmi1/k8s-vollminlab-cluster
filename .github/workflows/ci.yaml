@@ -99,6 +99,9 @@ jobs:
           else
             echo "📋 Found changed cluster files - will run deployment validation"
             echo "changed=true" >> $GITHUB_OUTPUT
+            echo "changed_files<<EOF" >> $GITHUB_OUTPUT
+            printf '%s\n' "$CHANGED_FILES"
+            echo "EOF" >> $GITHUB_OUTPUT
             {
               echo "CHANGED_FILES<<EOF"
               printf '%s\n' "$CHANGED_FILES"
@@ -294,6 +297,8 @@ jobs:
     runs-on: vollminlab-3
     needs: [validate-changes]
     if: needs.validate-changes.result == 'success'
+    env:
+      CHANGED_FILES: ${{ needs.validate-changes.outputs.changed_files }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
