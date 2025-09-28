@@ -580,8 +580,20 @@ jobs:
                 
                 if [[ -n "$CHART_NAME" && -n "$CHART_VERSION" && -n "$SOURCE_REF" ]]; then
                   echo "Checking chart availability: $CHART_NAME version $CHART_VERSION from $SOURCE_REF"
-                  # This would ideally check if the chart exists, but kubectl doesn't have a direct way
-                  # The HelmRepository Ready condition should indicate if charts are available
+                  
+                  # Validate that the HelmRepository is ready and has the chart
+                  if ! kubectl get helmrepository "$SOURCE_REF" -n "$TEST_NAMESPACE" -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}' | grep -q "True"; then
+                    echo "❌ HelmRepository $SOURCE_REF is not ready"
+                    exit 1
+                  fi
+                  
+                  # Try to validate chart version by attempting a dry-run
+                  echo "Validating chart version with dry-run..."
+                  kubectl apply --dry-run=server -f "$file" || {
+                    echo "❌ Chart validation failed for $CHART_NAME version $CHART_VERSION"
+                    echo "This indicates the chart version does not exist or is invalid"
+                    exit 1
+                  }
                 fi
               fi
             done
