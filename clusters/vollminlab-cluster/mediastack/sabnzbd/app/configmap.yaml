@@ -6,7 +6,7 @@ metadata:
   labels:
     app: sabnzbd
     env: production
-    category: apps
+    category: media
 data:
   values.yaml: |
     persistence:
@@ -25,7 +25,7 @@ data:
     podLabels:
       app: sabnzbd
       env: production
-      category: apps
+      category: media
     resources:
       requests:
         cpu: 200m

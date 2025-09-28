@@ -410,27 +410,43 @@ jobs:
           # Export mapping file for HelmRelease step
           echo "OCI_MAPPING_FILE=$OCI_MAPPING_FILE" >> $GITHUB_ENV
           
-          # Wait for OCI repositories to sync (this validates if versions exist)
-          echo "⏳ Waiting for OCI repositories to sync..."
+          # Wait for repositories to sync (OCI and Helm)
+          echo "⏳ Waiting for repositories to sync..."
           echo "This may take 1-5 minutes depending on network conditions and registry response time"
-          echo "The sync process downloads chart metadata from remote OCI registries"
           
           # Show initial status
-          echo "Current OCI Repository Status:"
-          kubectl get ocirepository -n "$TEST_NAMESPACE" -o wide || true
+          echo "Current Repository Status:"
+          kubectl get ocirepository,helmrepository -n "$TEST_NAMESPACE" -o wide || true
           
-          # Wait for OCI repositories to sync with timeout
-          echo "Starting OCI repository sync..."
+          # Wait for repositories to sync with timeout
+          echo "Starting repository sync..."
           
           # Use timeout command to ensure we don't wait forever
           timeout 300s bash -c '
             while true; do
-              echo "⏳ Checking OCI repository status..."
-              kubectl get ocirepository -n "$TEST_NAMESPACE" -o wide || true
+              echo "⏳ Checking repository status..."
+              kubectl get ocirepository,helmrepository -n "$TEST_NAMESPACE" -o wide || true
               
               # Check if all repositories are ready
-              if kubectl wait --for=condition=Ready --timeout=10s ocirepositories.source.toolkit.fluxcd.io --all -n "$TEST_NAMESPACE" 2>/dev/null; then
-                echo "✅ All OCI repositories are ready"
+              OCI_READY=true
+              HELM_READY=true
+              
+              # Check OCI repositories
+              if kubectl get ocirepository -n "$TEST_NAMESPACE" --no-headers 2>/dev/null | grep -q .; then
+                if ! kubectl wait --for=condition=Ready --timeout=10s ocirepositories.source.toolkit.fluxcd.io --all -n "$TEST_NAMESPACE" 2>/dev/null; then
+                  OCI_READY=false
+                fi
+              fi
+              
+              # Check Helm repositories
+              if kubectl get helmrepository -n "$TEST_NAMESPACE" --no-headers 2>/dev/null | grep -q .; then
+                if ! kubectl wait --for=condition=Ready --timeout=10s helmrepositories.source.toolkit.fluxcd.io --all -n "$TEST_NAMESPACE" 2>/dev/null; then
+                  HELM_READY=false
+                fi
+              fi
+              
+              if [[ "$OCI_READY" == "true" && "$HELM_READY" == "true" ]]; then
+                echo "✅ All repositories are ready"
                 exit 0
               fi
               

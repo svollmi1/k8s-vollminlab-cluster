@@ -6,7 +6,7 @@ metadata:
   labels:
     app: tautulli
     env: production
-    category: apps
+    category: media
 data:
   values.yaml: |
     persistence:
@@ -17,7 +17,7 @@ data:
     podLabels:
       app: tautulli
       env: production
-      category: apps
+      category: media
     resources:
       requests:
         cpu: 100m

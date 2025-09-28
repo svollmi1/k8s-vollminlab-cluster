@@ -9,7 +9,7 @@ metadata:
   labels:
     app: radarr
     env: production
-    category: apps
+    category: media
 spec:
   ingressClassName: nginx
   rules:
