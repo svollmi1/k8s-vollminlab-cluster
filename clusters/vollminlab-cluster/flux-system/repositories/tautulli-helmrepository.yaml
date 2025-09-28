@@ -1,5 +1,5 @@
 apiVersion: source.toolkit.fluxcd.io/v1beta2
-kind: OCIRepository
+kind: HelmRepository
 metadata:
   name: tautulli-repo
   namespace: flux-system
@@ -8,7 +8,5 @@ metadata:
     env: production
     category: apps
 spec:
-  url: oci://ghcr.io/linuxserver/helm-charts
+  url: https://k8s-at-home.com/charts/
   interval: 5m
-  ref:
-    tag: tautulli-2.14.15
