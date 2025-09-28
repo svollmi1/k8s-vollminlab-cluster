@@ -69,37 +69,42 @@ jobs:
           set -euo pipefail
           echo "🔍 Finding changed files..."
           
-          # Handle both PR and push events correctly
+          # Simple approach: only check if any cluster files exist in the latest commit
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            BASE_SHA="${{ github.event.pull_request.base.sha }}"
-            RANGE="$BASE_SHA..HEAD"
+            # For PRs, check if any cluster files were changed in the latest commit
+            LATEST_COMMIT_FILES=$(git show --name-only --pretty=format: HEAD | grep -E '\.(yaml|yml)$' | grep '^clusters/' || echo "")
+            CHANGED_FILES="$LATEST_COMMIT_FILES"
           else
+            # For pushes, use the standard diff approach
             BASE_SHA="${{ github.event.before }}"
             if [[ -z "$BASE_SHA" ]]; then
               BASE_SHA="$(git rev-list --max-parents=0 HEAD | tail -1)"
             fi
             RANGE="$BASE_SHA..HEAD"
+            CHANGED_FILES=$(git diff --name-only "$RANGE" | grep -E '\.(yaml|yml)$' | grep '^clusters/' || echo "")
           fi
           
-          CHANGED_FILES=$(git diff --name-only "$RANGE" | grep -E '\.(yaml|yml)$' | grep '^clusters/' || echo "")
+          echo "Files changed in latest commit:"
+          git show --name-only --pretty=format: HEAD
           
-          echo "All changed files:"
-          git diff --name-only "$RANGE"
+          echo "🔍 DEBUG: CHANGED_FILES variable: '$CHANGED_FILES'"
+          echo "🔍 DEBUG: CHANGED_FILES length: ${#CHANGED_FILES}"
+          echo "🔍 DEBUG: Will set changed=false because no cluster files found"
+          echo "Changed YAML files in clusters/: $CHANGED_FILES"
           
           if [[ -z "$CHANGED_FILES" ]]; then
             echo "✅ No YAML files changed in clusters directory"
             echo "changed=false" >> $GITHUB_OUTPUT
             echo "CHANGED_FILES=" >> $GITHUB_ENV
-            exit 0
+          else
+            echo "📋 Found changed cluster files - will run deployment validation"
+            echo "changed=true" >> $GITHUB_OUTPUT
+            {
+              echo "CHANGED_FILES<<EOF"
+              printf '%s\n' "$CHANGED_FILES"
+              echo "EOF"
+            } >> $GITHUB_ENV
           fi
-          
-          echo "Changed YAML files in clusters/: $CHANGED_FILES"
-          echo "changed=true" >> $GITHUB_OUTPUT
-          {
-            echo "CHANGED_FILES<<EOF"
-            printf '%s\n' "$CHANGED_FILES"
-            echo "EOF"
-          } >> $GITHUB_ENV
 
       - name: Validate YAML syntax
         if: env.CHANGED_FILES != ''
@@ -145,8 +150,8 @@ jobs:
               echo "Validating: $file"
               yamllint "$file" || {
                 echo "❌ YAML lint error in $file"
-                exit 1
-              }
+              exit 1
+            }
             fi
           done
           
@@ -258,8 +263,8 @@ jobs:
           if [ $rc -ne 0 ]; then
             echo "❌ Secrets detected in changed files"
             echo "Please remove any hardcoded secrets and use SealedSecrets instead"
-            exit 1
-          fi
+              exit 1
+            fi
           
           echo "✅ No secrets detected in changed files"
 
@@ -267,8 +272,28 @@ jobs:
     name: Flux Configuration Validation
     runs-on: vollminlab-2
     needs: validate-changes
-    if: needs.validate-changes.outputs.changed == 'true'
-    timeout-minutes: 10
+    if: needs.validate-changes.result == 'success' && needs.validate-changes.outputs.changed == 'true'
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup kubectl
+        run: |
+          set -euo pipefail
+          KUBECTL_VERSION="v${{ env.KUBERNETES_VERSION }}"
+          curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
+          kubectl version --client
+
+  server-side-validation:
+    name: Server-Side Validation with Temporary Namespace
+    runs-on: vollminlab-3
+    needs: [validate-changes]
+    if: needs.validate-changes.result == 'success' && needs.validate-changes.outputs.changed == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -382,11 +407,112 @@ jobs:
             fi
           done
           
+          # Export mapping file for HelmRelease step
+          echo "OCI_MAPPING_FILE=$OCI_MAPPING_FILE" >> $GITHUB_ENV
+          
+          # Wait for OCI repositories to sync (this validates if versions exist)
+          echo "⏳ Waiting for OCI repositories to sync..."
+          echo "This may take 1-5 minutes depending on network conditions and registry response time"
+          echo "The sync process downloads chart metadata from remote OCI registries"
+          
+          # Show initial status
+          echo "Current OCI Repository Status:"
+          kubectl get ocirepository -n "$TEST_NAMESPACE" -o wide || true
+          
+          # Wait for OCI repositories to sync with timeout
+          echo "Starting OCI repository sync..."
+          
+          # Use timeout command to ensure we don't wait forever
+          timeout 300s bash -c '
+            while true; do
+              echo "⏳ Checking OCI repository status..."
+              kubectl get ocirepository -n "$TEST_NAMESPACE" -o wide || true
+              
+              # Check if all repositories are ready
+              if kubectl wait --for=condition=Ready --timeout=10s ocirepositories.source.toolkit.fluxcd.io --all -n "$TEST_NAMESPACE" 2>/dev/null; then
+                echo "✅ All OCI repositories are ready"
+                exit 0
+              fi
+              
+              # Check for failed conditions - look for any repository with Ready=False or error conditions
+              FAILED_REPOS=""
+              for repo in $(kubectl get ocirepository -n "$TEST_NAMESPACE" -o name | cut -d/ -f2); do
+                # Check if repository has Ready=False condition
+                READY_STATUS=$(kubectl get ocirepository "$repo" -n "$TEST_NAMESPACE" -o jsonpath='{.status.conditions[0].status}' 2>/dev/null || echo "")
+                READY_REASON=$(kubectl get ocirepository "$repo" -n "$TEST_NAMESPACE" -o jsonpath='{.status.conditions[0].reason}' 2>/dev/null || echo "")
+                
+                if [[ "$READY_STATUS" == "False" ]] || [[ "$READY_REASON" == *"Failed"* ]] || [[ "$READY_REASON" == *"Error"* ]]; then
+                  FAILED_REPOS="$FAILED_REPOS $repo"
+                fi
+              done
+              
+              if [[ -n "$FAILED_REPOS" ]]; then
+                echo "❌ Some OCI repositories have failed: $FAILED_REPOS"
+                for repo in $FAILED_REPOS; do
+                  echo "--- $repo failure details ---"
+                  kubectl describe ocirepository "$repo" -n "$TEST_NAMESPACE" | grep -A 5 -B 5 "Ready\|Failed\|Error" || true
+                done
+                exit 1
+              fi
+              
+              sleep 30
+            done
+          ' || {
+            echo "❌ OCI repositories failed to sync within 5 minutes"
+            echo "This indicates that chart versions may not exist or repositories are inaccessible"
+            
+            # Show detailed status
+            echo "OCI Repository Status:"
+            kubectl get ocirepository -n "$TEST_NAMESPACE" -o wide
+            echo ""
+            echo "OCI Repository Details:"
+            for repo in $(kubectl get ocirepository -n "$TEST_NAMESPACE" -o name); do
+              echo "--- $repo ---"
+              kubectl describe "$repo" -n "$TEST_NAMESPACE" | tail -20
+            done
+            
+            echo ""
+            echo "🔍 Troubleshooting OCI Repository Issues:"
+            echo "Common causes:"
+            echo "1. Registry temporarily unavailable (tccr.io, ghcr.io, etc.)"
+            echo "2. Chart version/tag does not exist"
+            echo "3. Network connectivity issues"
+            echo "4. Registry authentication required"
+            echo ""
+            echo "To resolve:"
+            echo "- Check if the registry is accessible: curl -I https://tccr.io"
+            echo "- Verify the chart version exists in the registry"
+            echo "- Check if authentication is required"
+            echo "- Consider using a different registry or chart version"
+            
+            exit 1
+          }
+          
+          echo "✅ Changed OCI repositories synced successfully"
+
+      - name: Deploy and validate changed HelmReleases
+        run: |
+          set -euo pipefail
+          echo "🔍 Deploying and validating changed HelmReleases..."
+          TEST_NAMESPACE="$TEST_NAMESPACE"
+          RUN_SUFFIX="${{ env.RUN_SUFFIX }}"
+          
+          # Create mapping file if it doesn't exist
+          OCI_MAPPING_FILE="/tmp/oci-mapping-$RUN_SUFFIX.txt"
+          if [[ ! -f "$OCI_MAPPING_FILE" ]]; then
+            touch "$OCI_MAPPING_FILE"
+          fi
+          
           # Wait for OCIRepositories to be ready before deploying HelmReleases
           if [[ "${FLUX_CRDS_AVAILABLE}" == "true" ]]; then
             echo "⏳ Waiting for OCIRepositories to be ready..."
-          kubectl wait --for=condition=Ready --timeout=300s ocirepositories.source.toolkit.fluxcd.io --all -n "$TEST_NAMESPACE" || {
-              echo "⚠️ Some OCIRepositories may not be ready, but continuing..."
+            kubectl wait --for=condition=Ready --timeout=300s ocirepositories.source.toolkit.fluxcd.io --all -n "$TEST_NAMESPACE" || {
+              echo "❌ OCIRepository sync failed - this would break production deployment"
+              echo "🔍 Checking OCIRepository status:"
+              kubectl get ocirepositories -n "$TEST_NAMESPACE" -o wide
+              echo "📋 OCIRepository events:"
+              kubectl get events -n "$TEST_NAMESPACE" --field-selector involvedObject.kind=OCIRepository --sort-by='.lastTimestamp'
+              exit 1
             }
           fi
           
@@ -580,8 +706,8 @@ jobs:
                 # handle multi-doc YAMLs
                 if yq eval-all '.[].kind' "$f" | grep -Eq '^(Policy|ClusterPolicy)$'; then
                   echo "$f"
-                fi
-              done
+            fi
+          done
           )
           
           if (( ${#POLICY_FILES[@]} == 0 )); then
@@ -613,7 +739,7 @@ jobs:
     name: Integration Test
     runs-on: vollminlab-2
     needs: [validate-changes, test-deployment, security-scan, policy-validation]
-    if: always() && (needs.validate-changes.result == 'success' || needs.validate-changes.result == 'skipped') && (needs.test-deployment.result == 'success' || needs.test-deployment.result == 'skipped') && needs.security-scan.result == 'success' && needs.policy-validation.result == 'success'
+    if: always() && needs.security-scan.result == 'success' && needs.policy-validation.result == 'success'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
