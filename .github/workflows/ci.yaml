@@ -293,6 +293,7 @@ jobs:
     name: Server-Side Validation with Temporary Namespace
     runs-on: vollminlab-3
     needs: [validate-changes]
+    if: needs.validate-changes.result == 'success' && needs.validate-changes.outputs.changed == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
