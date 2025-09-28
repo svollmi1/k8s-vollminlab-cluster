@@ -69,28 +69,26 @@ jobs:
           set -euo pipefail
           echo "🔍 Finding changed files..."
           
-          # Only check the latest commit changes, not the entire PR
+          # Check what files changed in the commit that triggered this workflow
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            # For PRs, check only the latest commit
-            RANGE="HEAD~1..HEAD"
+            # For PRs, check only the files in the latest commit
+            CHANGED_FILES=$(git diff-tree --no-commit-id --name-only -r HEAD | grep -E '\.(yaml|yml)$' | grep '^clusters/' || echo "")
           else
-            # For pushes, check against the previous commit
+            # For pushes, use the standard diff approach
             BASE_SHA="${{ github.event.before }}"
             if [[ -z "$BASE_SHA" ]]; then
               BASE_SHA="$(git rev-list --max-parents=0 HEAD | tail -1)"
             fi
             RANGE="$BASE_SHA..HEAD"
+            CHANGED_FILES=$(git diff --name-only "$RANGE" | grep -E '\.(yaml|yml)$' | grep '^clusters/' || echo "")
           fi
           
-          CHANGED_FILES=$(git diff --name-only "$RANGE" | grep -E '\.(yaml|yml)$' | grep '^clusters/' || echo "")
-          
-          echo "All changed files:"
-          git diff --name-only "$RANGE"
-          
-          echo "🔍 DEBUG: Range being used: $RANGE"
-          echo "🔍 DEBUG: Git diff command: git diff --name-only $RANGE"
-          echo "🔍 DEBUG: Raw git diff output:"
-          git diff --name-only "$RANGE" || echo "No diff output"
+          echo "All changed files in this commit:"
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            git diff-tree --no-commit-id --name-only -r HEAD
+          else
+            git diff --name-only "$RANGE"
+          fi
           
           echo "Changed YAML files in clusters/: $CHANGED_FILES"
           
