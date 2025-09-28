@@ -287,7 +287,7 @@ jobs:
   server-side-validation:
     name: Server-Side Validation with Temporary Namespace
     runs-on: vollminlab-3
-    needs: [basic-validation]
+    needs: [validate-changes]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
