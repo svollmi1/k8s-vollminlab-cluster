@@ -555,6 +555,22 @@ jobs:
             fi
           done
           
+          # Validate HelmRelease status after deployment
+          if [[ "${FLUX_CRDS_AVAILABLE}" == "true" ]]; then
+            echo "🔍 Validating HelmRelease status..."
+            kubectl wait --for=condition=Ready --timeout=300s helmreleases.helm.toolkit.fluxcd.io --all -n "$TEST_NAMESPACE" || {
+              echo "❌ HelmRelease validation failed - this would break production deployment"
+              echo "🔍 Checking HelmRelease status:"
+              kubectl get helmreleases -n "$TEST_NAMESPACE" -o wide
+              echo "📋 HelmRelease events:"
+              kubectl get events -n "$TEST_NAMESPACE" --field-selector involvedObject.kind=HelmRelease --sort-by='.lastTimestamp'
+              echo "📋 Detailed HelmRelease status:"
+              kubectl describe helmreleases -n "$TEST_NAMESPACE"
+              exit 1
+            }
+            echo "✅ All HelmReleases are ready and valid"
+          fi
+          
           # Third pass: Deploy other namespaced resources (skip cluster-scoped and Flux resources)
           for file in $CHANGED_FILES; do
             if [[ -f "$file" ]] && yq eval '.kind' "$file" | grep -q .; then
