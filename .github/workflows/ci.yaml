@@ -69,10 +69,11 @@ jobs:
           set -euo pipefail
           echo "🔍 Finding changed files..."
           
-          # Check what files changed in the commit that triggered this workflow
+          # Simple approach: only check if any cluster files exist in the latest commit
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            # For PRs, check only the files in the latest commit
-            CHANGED_FILES=$(git diff-tree --no-commit-id --name-only -r HEAD | grep -E '\.(yaml|yml)$' | grep '^clusters/' || echo "")
+            # For PRs, check if any cluster files were changed in the latest commit
+            LATEST_COMMIT_FILES=$(git show --name-only --pretty=format: HEAD | grep -E '\.(yaml|yml)$' | grep '^clusters/' || echo "")
+            CHANGED_FILES="$LATEST_COMMIT_FILES"
           else
             # For pushes, use the standard diff approach
             BASE_SHA="${{ github.event.before }}"
@@ -83,12 +84,8 @@ jobs:
             CHANGED_FILES=$(git diff --name-only "$RANGE" | grep -E '\.(yaml|yml)$' | grep '^clusters/' || echo "")
           fi
           
-          echo "All changed files in this commit:"
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            git diff-tree --no-commit-id --name-only -r HEAD
-          else
-            git diff --name-only "$RANGE"
-          fi
+          echo "Files changed in latest commit:"
+          git show --name-only --pretty=format: HEAD
           
           echo "Changed YAML files in clusters/: $CHANGED_FILES"
           
