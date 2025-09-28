@@ -89,6 +89,7 @@ jobs:
           
           echo "🔍 DEBUG: CHANGED_FILES variable: '$CHANGED_FILES'"
           echo "🔍 DEBUG: CHANGED_FILES length: ${#CHANGED_FILES}"
+          echo "🔍 DEBUG: Will set changed=false because no cluster files found"
           echo "Changed YAML files in clusters/: $CHANGED_FILES"
           
           if [[ -z "$CHANGED_FILES" ]]; then
@@ -271,7 +272,7 @@ jobs:
     name: Flux Configuration Validation
     runs-on: vollminlab-2
     needs: validate-changes
-    if: needs.validate-changes.outputs.changed == 'true'
+    if: needs.validate-changes.result == 'success' && needs.validate-changes.outputs.changed == 'true'
     timeout-minutes: 15
     steps:
       - name: Checkout code
