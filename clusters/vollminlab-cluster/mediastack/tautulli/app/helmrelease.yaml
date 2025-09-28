@@ -9,14 +9,14 @@ metadata:
     category: apps
 spec:
   interval: 5m
-  chartRef:
-    kind: HelmRepository
-    name: tautulli-repo
-    namespace: flux-system
   chart:
     spec:
       chart: tautulli
       version: "15.5.3"
+      sourceRef:
+        kind: HelmRepository
+        name: tautulli-repo
+        namespace: flux-system
   valuesFrom:
     - kind: ConfigMap
       name: tautulli-values
