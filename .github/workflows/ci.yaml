@@ -69,11 +69,12 @@ jobs:
           set -euo pipefail
           echo "🔍 Finding changed files..."
           
-          # Handle both PR and push events correctly
+          # Only check the latest commit changes, not the entire PR
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            BASE_SHA="${{ github.event.pull_request.base.sha }}"
-            RANGE="$BASE_SHA..HEAD"
+            # For PRs, check only the latest commit
+            RANGE="HEAD~1..HEAD"
           else
+            # For pushes, check against the previous commit
             BASE_SHA="${{ github.event.before }}"
             if [[ -z "$BASE_SHA" ]]; then
               BASE_SHA="$(git rev-list --max-parents=0 HEAD | tail -1)"
@@ -146,8 +147,8 @@ jobs:
               echo "Validating: $file"
               yamllint "$file" || {
                 echo "❌ YAML lint error in $file"
-                exit 1
-              }
+              exit 1
+            }
             fi
           done
           
@@ -259,8 +260,8 @@ jobs:
           if [ $rc -ne 0 ]; then
             echo "❌ Secrets detected in changed files"
             echo "Please remove any hardcoded secrets and use SealedSecrets instead"
-            exit 1
-          fi
+              exit 1
+            fi
           
           echo "✅ No secrets detected in changed files"
 
@@ -271,12 +272,6 @@ jobs:
     if: needs.validate-changes.outputs.changed == 'true'
     timeout-minutes: 15
     steps:
-      - name: Debug job condition
-        run: |
-          echo "🔍 Debug: validate-changes.outputs.changed = '${{ needs.validate-changes.outputs.changed }}'"
-          echo "🔍 Debug: This job should only run when changed == 'true'"
-          echo "🔍 Debug: If you see this, the condition is evaluating to true"
-
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -707,8 +702,8 @@ jobs:
                 # handle multi-doc YAMLs
                 if yq eval-all '.[].kind' "$f" | grep -Eq '^(Policy|ClusterPolicy)$'; then
                   echo "$f"
-                fi
-              done
+            fi
+          done
           )
           
           if (( ${#POLICY_FILES[@]} == 0 )); then
