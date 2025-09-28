@@ -275,7 +275,7 @@ jobs:
     name: Flux Configuration Validation
     runs-on: vollminlab-2
     needs: validate-changes
-    if: needs.validate-changes.result == 'success'
+    if: needs.validate-changes.result == 'success' && needs.validate-changes.outputs.changed == 'true'
     timeout-minutes: 15
     steps:
       - name: Checkout code
@@ -296,7 +296,7 @@ jobs:
     name: Server-Side Validation with Temporary Namespace
     runs-on: vollminlab-3
     needs: [validate-changes]
-    if: needs.validate-changes.result == 'success'
+    if: needs.validate-changes.result == 'success' && needs.validate-changes.outputs.changed == 'true'
     env:
       CHANGED_FILES: ${{ needs.validate-changes.outputs.changed_files }}
     steps:
@@ -409,6 +409,48 @@ jobs:
               echo "❌ Failed to deploy OCIRepository: $file"
               exit 1
             }
+            fi
+          done
+          
+          # Deploy HelmRepositories (needed for HelmReleases)
+          for file in $CHANGED_FILES; do
+            if [[ -f "$file" ]] && yq eval '.kind' "$file" | grep -qi '^HelmRelease$'; then
+              # Find the HelmRepository this HelmRelease references
+              if [[ "$(yq eval '.spec.chartRef // ""' "$file")" != "" ]]; then
+                SOURCE_REF="$(yq eval '.spec.chartRef.name' "$file")"
+                SOURCE_NAMESPACE="$(yq eval '.spec.chartRef.namespace // "flux-system"' "$file")"
+              else
+                SOURCE_REF="$(yq eval '.spec.chart.spec.sourceRef.name' "$file")"
+                SOURCE_NAMESPACE="$(yq eval '.spec.chart.spec.sourceRef.namespace // "flux-system"' "$file")"
+              fi
+              
+              if [[ -n "$SOURCE_REF" ]]; then
+                echo "Looking for HelmRepository: $SOURCE_REF in namespace: $SOURCE_NAMESPACE"
+                
+                # Check if HelmRepository exists in source namespace
+                if kubectl get helmrepository "$SOURCE_REF" -n "$SOURCE_NAMESPACE" >/dev/null 2>&1; then
+                  echo "Found HelmRepository: $SOURCE_REF, deploying to test namespace"
+                  
+                  # Get the HelmRepository and deploy it to test namespace
+                  TEST_NAME="test-${SOURCE_REF}-${RUN_SUFFIX}"
+                  kubectl get helmrepository "$SOURCE_REF" -n "$SOURCE_NAMESPACE" -o yaml | \
+                    yq eval "
+                      .metadata.namespace = \"$TEST_NAMESPACE\" |
+                      .metadata.name = \"$TEST_NAME\" |
+                      del(.status) |
+                      del(.metadata.resourceVersion) |
+                      del(.metadata.uid) |
+                      del(.metadata.creationTimestamp)
+                    " | kubectl apply -f - || {
+                    echo "❌ Failed to deploy HelmRepository: $SOURCE_REF"
+                    exit 1
+                  }
+                  
+                  echo "$SOURCE_REF:$TEST_NAME" >> "$OCI_MAPPING_FILE"
+                else
+                  echo "⚠️ HelmRepository $SOURCE_REF not found in $SOURCE_NAMESPACE - skipping"
+                fi
+              fi
             fi
           done
           
