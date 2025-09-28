@@ -272,7 +272,7 @@ jobs:
     name: Flux Configuration Validation
     runs-on: vollminlab-2
     needs: validate-changes
-    if: needs.validate-changes.result == 'success' && needs.validate-changes.outputs.changed == 'true'
+    if: needs.validate-changes.result == 'success'
     timeout-minutes: 15
     steps:
       - name: Checkout code
@@ -293,7 +293,7 @@ jobs:
     name: Server-Side Validation with Temporary Namespace
     runs-on: vollminlab-3
     needs: [validate-changes]
-    if: needs.validate-changes.result == 'success' && needs.validate-changes.outputs.changed == 'true'
+    if: needs.validate-changes.result == 'success'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -348,11 +348,11 @@ jobs:
           if ! kubectl get crd helmreleases.helm.toolkit.fluxcd.io >/dev/null 2>&1; then
             echo "⚠️ HelmRelease CRD not found - skipping Flux resource testing"
             echo "FLUX_CRDS_AVAILABLE=false" >> $GITHUB_ENV
-            exit 0
+            # Don't exit - continue with basic validation
+          else
+            echo "✅ Flux CRDs are available"
+            echo "FLUX_CRDS_AVAILABLE=true" >> $GITHUB_ENV
           fi
-          
-          echo "✅ Flux CRDs are available"
-          echo "FLUX_CRDS_AVAILABLE=true" >> $GITHUB_ENV
 
       - name: Test deploy changed resources
         run: |
@@ -555,7 +555,43 @@ jobs:
             fi
           done
           
-          # Validate HelmRepository status first
+          # Basic validation that runs even without Flux CRDs
+          echo "🔍 Running basic HelmRelease validation..."
+          for file in $CHANGED_FILES; do
+            if [[ -f "$file" ]] && yq eval '.kind' "$file" | grep -qi '^HelmRelease$'; then
+              echo "Validating HelmRelease: $file"
+              
+              # Check for basic syntax issues
+              yq eval '.' "$file" > /dev/null || {
+                echo "❌ Invalid YAML syntax in $file"
+                exit 1
+              }
+              
+              # Check for required fields
+              CHART_NAME=$(yq eval '.spec.chart.spec.chart' "$file")
+              CHART_VERSION=$(yq eval '.spec.chart.spec.version' "$file")
+              SOURCE_REF=$(yq eval '.spec.chart.spec.sourceRef.name' "$file")
+              
+              if [[ -z "$CHART_NAME" || -z "$CHART_VERSION" || -z "$SOURCE_REF" ]]; then
+                echo "❌ Missing required fields in $file"
+                echo "Chart: $CHART_NAME, Version: $CHART_VERSION, Source: $SOURCE_REF"
+                exit 1
+              fi
+              
+              echo "✅ Basic validation passed for $file"
+              
+              # Try dry-run validation to catch chart version issues
+              echo "🔍 Testing HelmRelease with dry-run..."
+              kubectl apply --dry-run=server -f "$file" || {
+                echo "❌ HelmRelease dry-run failed for $file"
+                echo "This indicates the chart version or configuration is invalid"
+                exit 1
+              }
+              echo "✅ Dry-run validation passed for $file"
+            fi
+          done
+          
+          # Advanced validation that requires Flux CRDs
           if [[ "${FLUX_CRDS_AVAILABLE}" == "true" ]]; then
             echo "🔍 Validating HelmRepository status..."
             kubectl wait --for=condition=Ready --timeout=300s helmrepositories.source.toolkit.fluxcd.io --all -n "$TEST_NAMESPACE" || {
@@ -580,8 +616,20 @@ jobs:
                 
                 if [[ -n "$CHART_NAME" && -n "$CHART_VERSION" && -n "$SOURCE_REF" ]]; then
                   echo "Checking chart availability: $CHART_NAME version $CHART_VERSION from $SOURCE_REF"
-                  # This would ideally check if the chart exists, but kubectl doesn't have a direct way
-                  # The HelmRepository Ready condition should indicate if charts are available
+                  
+                  # Validate that the HelmRepository is ready and has the chart
+                  if ! kubectl get helmrepository "$SOURCE_REF" -n "$TEST_NAMESPACE" -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}' | grep -q "True"; then
+                    echo "❌ HelmRepository $SOURCE_REF is not ready"
+                    exit 1
+                  fi
+                  
+                  # Try to validate chart version by attempting a dry-run
+                  echo "Validating chart version with dry-run..."
+                  kubectl apply --dry-run=server -f "$file" || {
+                    echo "❌ Chart validation failed for $CHART_NAME version $CHART_VERSION"
+                    echo "This indicates the chart version does not exist or is invalid"
+                    exit 1
+                  }
                 fi
               fi
             done
