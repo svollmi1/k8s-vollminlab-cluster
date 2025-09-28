@@ -5,4 +5,4 @@ metadata:
   labels:
     app: mediastack
     env: production
-    category: apps
+    category: media

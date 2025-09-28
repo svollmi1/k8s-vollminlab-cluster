@@ -99,6 +99,9 @@ jobs:
           else
             echo "📋 Found changed cluster files - will run deployment validation"
             echo "changed=true" >> $GITHUB_OUTPUT
+            echo "changed_files<<EOF" >> $GITHUB_OUTPUT
+            printf '%s\n' "$CHANGED_FILES"
+            echo "EOF" >> $GITHUB_OUTPUT
             {
               echo "CHANGED_FILES<<EOF"
               printf '%s\n' "$CHANGED_FILES"
@@ -272,7 +275,7 @@ jobs:
     name: Flux Configuration Validation
     runs-on: vollminlab-2
     needs: validate-changes
-    if: needs.validate-changes.result == 'success'
+    if: needs.validate-changes.result == 'success' && needs.validate-changes.outputs.changed == 'true'
     timeout-minutes: 15
     steps:
       - name: Checkout code
@@ -293,7 +296,9 @@ jobs:
     name: Server-Side Validation with Temporary Namespace
     runs-on: vollminlab-3
     needs: [validate-changes]
-    if: needs.validate-changes.result == 'success'
+    if: needs.validate-changes.result == 'success' && needs.validate-changes.outputs.changed == 'true'
+    env:
+      CHANGED_FILES: ${{ needs.validate-changes.outputs.changed_files }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -407,30 +412,88 @@ jobs:
             fi
           done
           
+          # Deploy HelmRepositories (needed for HelmReleases)
+          for file in $CHANGED_FILES; do
+            if [[ -f "$file" ]] && yq eval '.kind' "$file" | grep -qi '^HelmRelease$'; then
+              # Find the HelmRepository this HelmRelease references
+              if [[ "$(yq eval '.spec.chartRef // ""' "$file")" != "" ]]; then
+                SOURCE_REF="$(yq eval '.spec.chartRef.name' "$file")"
+                SOURCE_NAMESPACE="$(yq eval '.spec.chartRef.namespace // "flux-system"' "$file")"
+              else
+                SOURCE_REF="$(yq eval '.spec.chart.spec.sourceRef.name' "$file")"
+                SOURCE_NAMESPACE="$(yq eval '.spec.chart.spec.sourceRef.namespace // "flux-system"' "$file")"
+              fi
+              
+              if [[ -n "$SOURCE_REF" ]]; then
+                echo "Looking for HelmRepository: $SOURCE_REF in namespace: $SOURCE_NAMESPACE"
+                
+                # Check if HelmRepository exists in source namespace
+                if kubectl get helmrepository "$SOURCE_REF" -n "$SOURCE_NAMESPACE" >/dev/null 2>&1; then
+                  echo "Found HelmRepository: $SOURCE_REF, deploying to test namespace"
+                  
+                  # Get the HelmRepository and deploy it to test namespace
+                  TEST_NAME="test-${SOURCE_REF}-${RUN_SUFFIX}"
+                  kubectl get helmrepository "$SOURCE_REF" -n "$SOURCE_NAMESPACE" -o yaml | \
+                    yq eval "
+                      .metadata.namespace = \"$TEST_NAMESPACE\" |
+                      .metadata.name = \"$TEST_NAME\" |
+                      del(.status) |
+                      del(.metadata.resourceVersion) |
+                      del(.metadata.uid) |
+                      del(.metadata.creationTimestamp)
+                    " | kubectl apply -f - || {
+                    echo "❌ Failed to deploy HelmRepository: $SOURCE_REF"
+                    exit 1
+                  }
+                  
+                  echo "$SOURCE_REF:$TEST_NAME" >> "$OCI_MAPPING_FILE"
+                else
+                  echo "⚠️ HelmRepository $SOURCE_REF not found in $SOURCE_NAMESPACE - skipping"
+                fi
+              fi
+            fi
+          done
+          
           # Export mapping file for HelmRelease step
           echo "OCI_MAPPING_FILE=$OCI_MAPPING_FILE" >> $GITHUB_ENV
           
-          # Wait for OCI repositories to sync (this validates if versions exist)
-          echo "⏳ Waiting for OCI repositories to sync..."
+          # Wait for repositories to sync (OCI and Helm)
+          echo "⏳ Waiting for repositories to sync..."
           echo "This may take 1-5 minutes depending on network conditions and registry response time"
-          echo "The sync process downloads chart metadata from remote OCI registries"
           
           # Show initial status
-          echo "Current OCI Repository Status:"
-          kubectl get ocirepository -n "$TEST_NAMESPACE" -o wide || true
+          echo "Current Repository Status:"
+          kubectl get ocirepository,helmrepository -n "$TEST_NAMESPACE" -o wide || true
           
-          # Wait for OCI repositories to sync with timeout
-          echo "Starting OCI repository sync..."
+          # Wait for repositories to sync with timeout
+          echo "Starting repository sync..."
           
           # Use timeout command to ensure we don't wait forever
           timeout 300s bash -c '
             while true; do
-              echo "⏳ Checking OCI repository status..."
-              kubectl get ocirepository -n "$TEST_NAMESPACE" -o wide || true
+              echo "⏳ Checking repository status..."
+              kubectl get ocirepository,helmrepository -n "$TEST_NAMESPACE" -o wide || true
               
               # Check if all repositories are ready
-              if kubectl wait --for=condition=Ready --timeout=10s ocirepositories.source.toolkit.fluxcd.io --all -n "$TEST_NAMESPACE" 2>/dev/null; then
-                echo "✅ All OCI repositories are ready"
+              OCI_READY=true
+              HELM_READY=true
+              
+              # Check OCI repositories
+              if kubectl get ocirepository -n "$TEST_NAMESPACE" --no-headers 2>/dev/null | grep -q .; then
+                if ! kubectl wait --for=condition=Ready --timeout=10s ocirepositories.source.toolkit.fluxcd.io --all -n "$TEST_NAMESPACE" 2>/dev/null; then
+                  OCI_READY=false
+                fi
+              fi
+              
+              # Check Helm repositories
+              if kubectl get helmrepository -n "$TEST_NAMESPACE" --no-headers 2>/dev/null | grep -q .; then
+                if ! kubectl wait --for=condition=Ready --timeout=10s helmrepositories.source.toolkit.fluxcd.io --all -n "$TEST_NAMESPACE" 2>/dev/null; then
+                  HELM_READY=false
+                fi
+              fi
+              
+              if [[ "$OCI_READY" == "true" && "$HELM_READY" == "true" ]]; then
+                echo "✅ All repositories are ready"
                 exit 0
               fi
               
@@ -503,17 +566,35 @@ jobs:
             touch "$OCI_MAPPING_FILE"
           fi
           
-          # Wait for OCIRepositories to be ready before deploying HelmReleases
+          # Wait for repositories to be ready before deploying HelmReleases
           if [[ "${FLUX_CRDS_AVAILABLE}" == "true" ]]; then
-            echo "⏳ Waiting for OCIRepositories to be ready..."
-            kubectl wait --for=condition=Ready --timeout=300s ocirepositories.source.toolkit.fluxcd.io --all -n "$TEST_NAMESPACE" || {
-              echo "❌ OCIRepository sync failed - this would break production deployment"
-              echo "🔍 Checking OCIRepository status:"
-              kubectl get ocirepositories -n "$TEST_NAMESPACE" -o wide
-              echo "📋 OCIRepository events:"
-              kubectl get events -n "$TEST_NAMESPACE" --field-selector involvedObject.kind=OCIRepository --sort-by='.lastTimestamp'
-              exit 1
-            }
+            echo "⏳ Waiting for repositories to be ready..."
+            
+            # Wait for OCIRepositories if they exist
+            if kubectl get ocirepository -n "$TEST_NAMESPACE" --no-headers 2>/dev/null | grep -q .; then
+              kubectl wait --for=condition=Ready --timeout=300s ocirepositories.source.toolkit.fluxcd.io --all -n "$TEST_NAMESPACE" || {
+                echo "❌ OCIRepository sync failed - this would break production deployment"
+                echo "🔍 Checking OCIRepository status:"
+                kubectl get ocirepositories -n "$TEST_NAMESPACE" -o wide
+                echo "📋 OCIRepository events:"
+                kubectl get events -n "$TEST_NAMESPACE" --field-selector involvedObject.kind=OCIRepository --sort-by='.lastTimestamp' || true
+                exit 1
+              }
+            fi
+            
+            # Wait for HelmRepositories if they exist
+            if kubectl get helmrepository -n "$TEST_NAMESPACE" --no-headers 2>/dev/null | grep -q .; then
+              kubectl wait --for=condition=Ready --timeout=300s helmrepositories.source.toolkit.fluxcd.io --all -n "$TEST_NAMESPACE" || {
+                echo "❌ HelmRepository sync failed - this would break production deployment"
+                echo "🔍 Checking HelmRepository status:"
+                kubectl get helmrepositories -n "$TEST_NAMESPACE" -o wide
+                echo "📋 HelmRepository events:"
+                kubectl get events -n "$TEST_NAMESPACE" --field-selector involvedObject.kind=HelmRepository --sort-by='.lastTimestamp' || true
+                exit 1
+              }
+            fi
+            
+            echo "✅ All repositories are ready"
           fi
           
           # Second pass: Deploy HelmReleases with sourceRef mapping

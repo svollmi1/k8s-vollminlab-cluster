@@ -6,7 +6,7 @@ metadata:
   labels:
     app: radarr
     env: production
-    category: apps
+    category: media
 data:
   values.yaml: |
     persistence:
@@ -32,4 +32,4 @@ data:
     podLabels:
       app: radarr
       env: production
-      category: apps
+      category: media

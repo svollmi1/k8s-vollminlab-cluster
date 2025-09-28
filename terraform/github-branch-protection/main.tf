@@ -28,7 +28,7 @@ resource "github_branch_protection" "main" {
       # Require status checks to pass before merging
       required_status_checks {
         strict   = true
-        contexts = ["Validate Kubernetes Manifests", "Security Scan", "Flux Configuration Validation", "Kyverno Policy Validation", "Integration Test"]
+        contexts = ["Validate Kubernetes Manifests", "Security Scan", "Flux Configuration Validation", "Kyverno Policy Validation", "Server-Side Validation with Temporary Namespace", "Integration Test"]
       }
   
   # Enforce branch protection rules for administrators
