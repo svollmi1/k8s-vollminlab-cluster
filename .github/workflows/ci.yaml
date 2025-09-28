@@ -664,6 +664,20 @@ jobs:
             }
           done
           
+          # Wait for OCIRepositories to be ready and validate they can sync
+          if [[ -n "$CHANGED_OCI_REPOS" ]]; then
+            echo "⏳ Waiting for OCIRepositories to be ready..."
+            kubectl wait --for=condition=Ready --timeout=300s ocirepositories.source.toolkit.fluxcd.io --all -n "$TEST_NAMESPACE" || {
+              echo "❌ OCIRepository sync failed - this would break production deployment"
+              echo "🔍 Checking OCIRepository status:"
+              kubectl get ocirepositories -n "$TEST_NAMESPACE" -o wide
+              echo "📋 OCIRepository events:"
+              kubectl get events -n "$TEST_NAMESPACE" --field-selector involvedObject.kind=OCIRepository --sort-by='.lastTimestamp'
+              exit 1
+            }
+            echo "✅ All OCIRepositories are ready and synced"
+          fi
+          
           # Export mapping file for HelmRelease step
           echo "OCI_MAPPING_FILE=$OCI_MAPPING_FILE" >> $GITHUB_ENV
           
