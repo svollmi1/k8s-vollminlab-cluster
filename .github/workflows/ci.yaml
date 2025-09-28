@@ -369,51 +369,94 @@ jobs:
   security-scan:
     name: Security Scan
     runs-on: vollminlab-2
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.28.0
-        timeout-minutes: 3
-        continue-on-error: true
+      - name: Prepare Trivy cache
+        run: mkdir -p "${{ env.TRIVY_CACHE_DIR }}"
+
+      # 1) Install Trivy once (pin version)
+      - name: Setup Trivy
+        uses: aquasecurity/setup-trivy@v0.2.1
         with:
+          trivy-version: '0.56.1'   # pin
+
+      # 2) Warm DB + policy cache with timeout + retries
+      - name: Pre-fetch Trivy DB & policies (offline warm)
+        shell: bash
+        run: |
+          set -euo pipefail
+          # retry loop to avoid transient hangs
+          for i in {1..3}; do
+            echo "Attempt $i: downloading DB..."
+            if trivy --cache-dir "${{ env.TRIVY_CACHE_DIR }}" --timeout 2m --download-db-only; then
+              break
+            fi
+            sleep 5
+          done
+
+          for i in {1..3}; do
+            echo "Attempt $i: downloading policies..."
+            if trivy --cache-dir "${{ env.TRIVY_CACHE_DIR }}" --timeout 2m --download-policy-only; then
+              break
+            fi
+            sleep 5
+          done
+
+      # 3) Filesystem scan (no updates; hard timeout)
+      - name: Run Trivy filesystem scan
+        uses: aquasecurity/trivy-action@0.28.0
+        timeout-minutes: 5
+        with:
+          setup-trivy: false              # reuse the installed binary
           scan-type: 'fs'
           scan-ref: '.'
           format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'HIGH,CRITICAL'
+          cache-dir: ${{ env.TRIVY_CACHE_DIR }}
           ignore-unfixed: true
+          hide-progress: true
+          args: >
+            --timeout 2m
+            --skip-db-update
+            --skip-java-db-update
+            --skip-policy-update
 
+      # 4) IaC scan (no updates; hard timeout)
       - name: Run Trivy IaC scan
         uses: aquasecurity/trivy-action@0.28.0
-        timeout-minutes: 3
-        continue-on-error: true
+        timeout-minutes: 5
         with:
+          setup-trivy: false
           scan-type: 'config'
           scan-ref: '.'
           format: 'sarif'
           output: 'trivy-config-results.sarif'
           severity: 'HIGH,CRITICAL'
+          cache-dir: ${{ env.TRIVY_CACHE_DIR }}
+          hide-progress: true
+          args: >
+            --timeout 2m
+            --skip-db-update
+            --skip-java-db-update
+            --skip-policy-update
 
-      - name: Upload Trivy FS scan results to GitHub Security tab
+      - name: Upload Trivy filesystem SARIF results
         uses: github/codeql-action/upload-sarif@v3
-        if: always() && !cancelled()
-        timeout-minutes: 1
-        continue-on-error: true
         with:
           sarif_file: 'trivy-results.sarif'
+          category: 'trivy-fs'
 
-      - name: Upload Trivy IaC scan results to GitHub Security tab
+      - name: Upload Trivy IaC SARIF results
         uses: github/codeql-action/upload-sarif@v3
-        if: always() && !cancelled()
-        timeout-minutes: 1
-        continue-on-error: true
         with:
           sarif_file: 'trivy-config-results.sarif'
+          category: 'trivy-config'
           
       - name: Display Trivy results if upload fails
         if: failure()
