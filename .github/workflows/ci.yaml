@@ -87,6 +87,11 @@ jobs:
           echo "All changed files:"
           git diff --name-only "$RANGE"
           
+          echo "🔍 DEBUG: Range being used: $RANGE"
+          echo "🔍 DEBUG: Git diff command: git diff --name-only $RANGE"
+          echo "🔍 DEBUG: Raw git diff output:"
+          git diff --name-only "$RANGE" || echo "No diff output"
+          
           echo "Changed YAML files in clusters/: $CHANGED_FILES"
           
           if [[ -z "$CHANGED_FILES" ]]; then
