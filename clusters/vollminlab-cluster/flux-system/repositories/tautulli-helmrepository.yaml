@@ -8,7 +8,7 @@ metadata:
     env: production
     category: apps
 spec:
-  url: oci://tccr.io/truecharts/tautulli
+  url: oci://ghcr.io/linuxserver/helm-charts
   interval: 5m
   ref:
-    tag: latest
+    tag: tautulli-2.14.15
