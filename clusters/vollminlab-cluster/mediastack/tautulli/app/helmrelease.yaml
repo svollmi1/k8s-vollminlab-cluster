@@ -10,9 +10,13 @@ metadata:
 spec:
   interval: 5m
   chartRef:
-    kind: OCIRepository
+    kind: HelmRepository
     name: tautulli-repo
     namespace: flux-system
+  chart:
+    spec:
+      chart: tautulli
+      version: "15.5.3"
   valuesFrom:
     - kind: ConfigMap
       name: tautulli-values
