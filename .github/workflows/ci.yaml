@@ -2,13 +2,13 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [ main, develop, merge/tautulli-ci-validation ]
+    branches: [ main, develop ]
     paths:
       - 'clusters/**'
       - '.github/workflows/**'
       - 'terraform/**'
   pull_request:
-    branches: [ main ]
+    branches: [ main, develop ]
     paths:
       - 'clusters/**'
       - '.github/workflows/**'
