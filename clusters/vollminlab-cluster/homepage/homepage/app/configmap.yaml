@@ -43,6 +43,8 @@ data:
                 description: Movie collection manager
                 href: https://radarr.vollminlab.com
                 icon: radarr.png
+                namespace: mediastack
+                app: radarr
                 widget:
                   type: radarr
                   url: https://radarr.vollminlab.com
@@ -61,6 +63,8 @@ data:
                 description: Usenet downloader
                 href: https://sabnzbd.vollminlab.com
                 icon: sabnzbd.png
+                namespace: mediastack
+                app: sabnzbd
                 widget:
                   type: sabnzbd
                   url: https://sabnzbd.vollminlab.com

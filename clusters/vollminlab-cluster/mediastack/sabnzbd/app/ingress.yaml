@@ -6,12 +6,6 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    gethomepage.dev/enabled: "true"
-    gethomepage.dev/name: "SABnzbd"
-    gethomepage.dev/description: "Usenet downloader"
-    gethomepage.dev/group: "Media Stack"
-    gethomepage.dev/icon: "sabnzbd.png"
-    gethomepage.dev/pod-selector: "app.kubernetes.io/name=sabnzbd"
   labels:
     app: sabnzbd
     env: production
