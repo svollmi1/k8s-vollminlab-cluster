@@ -791,7 +791,7 @@ jobs:
   security-scan:
     name: Security Scan
     runs-on: vollminlab-1
-    timeout-minutes: 10
+    timeout-minutes: 5
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
