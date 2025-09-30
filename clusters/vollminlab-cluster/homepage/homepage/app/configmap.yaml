@@ -18,6 +18,7 @@ data:
                 description: Media streaming server
                 href: https://plex.vollminlab.com
                 icon: plex.png
+                ping: https://plex.vollminlab.com
             - Tautulli:
                 description: Plex monitoring and analytics
                 href: https://tautulli.vollminlab.com
@@ -28,10 +29,6 @@ data:
                   type: tautulli
                   url: https://tautulli.vollminlab.com
                   key: "{{HOMEPAGE_VAR_TAUTULLI_API_KEY}}"
-            - Overseerr:
-                description: Media request management
-                href: https://overseerr.vollminlab.com
-                icon: overseerr.png
             - Sonarr:
                 description: TV show collection manager
                 href: https://sonarr.vollminlab.com
@@ -110,10 +107,6 @@ data:
                 href: http://haproxy01.vollminlab.com:8404/stats
                 icon: haproxy.png
                 ping: http://haproxy01.vollminlab.com:8404/stats
-            - Capacitor:
-                description: Flux GitOps dashboard
-                href: https://capacitor.vollminlab.com
-                icon: flux.png
         - Monitoring & Observability:
             - Grafana:
                 description: Metrics visualization
@@ -125,16 +118,6 @@ data:
                 href: https://prometheus.vollminlab.com
                 icon: prometheus.png
                 ping: https://prometheus.vollminlab.com
-            - Policy Reporter:
-                description: Kubernetes policy reporting
-                href: https://policyreporter.vollminlab.com
-                icon: policy-reporter.png
-                ping: https://policyreporter.vollminlab.com
-            - Longhorn:
-                description: Kubernetes storage management
-                href: https://longhorn.vollminlab.com
-                icon: longhorn.png
-                ping: https://longhorn.vollminlab.com
         - Documentation & Tools:
             - BookStack:
                 description: Wiki and documentation
