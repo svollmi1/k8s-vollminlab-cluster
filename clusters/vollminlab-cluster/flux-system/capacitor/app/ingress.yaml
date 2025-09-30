@@ -15,20 +15,21 @@ metadata:
     gethomepage.dev/description: "Flux GitOps dashboard"
     gethomepage.dev/group: "Infrastructure"
     gethomepage.dev/icon: "flux.png"
+    gethomepage.dev/pod-selector: "app=capacitor"
 spec:
   ingressClassName: nginx
   rules:
-  - host: capacitor.vollminlab.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: capacitor
-            port:
-              number: 9000
+    - host: capacitor.vollminlab.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: capacitor
+                port:
+                  number: 9000
   tls:
-  - hosts:
-    - capacitor.vollminlab.com
-    secretName: wildcard-tls
+    - hosts:
+        - capacitor.vollminlab.com
+      secretName: wildcard-tls

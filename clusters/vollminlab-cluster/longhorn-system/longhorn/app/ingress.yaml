@@ -8,8 +8,9 @@ metadata:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/name: "Longhorn"
     gethomepage.dev/description: "Kubernetes storage management"
-    gethomepage.dev/group: "Monitoring & Observability"
+    gethomepage.dev/group: "Infrastructure"
     gethomepage.dev/icon: "longhorn.png"
+    gethomepage.dev/pod-selector: "app=longhorn-ui"
   labels:
     app: longhorn
     env: production
@@ -17,17 +18,17 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: longhorn.vollminlab.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: longhorn-frontend
-            port:
-              number: 80
+    - host: longhorn.vollminlab.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: longhorn-frontend
+                port:
+                  number: 80
   tls:
-  - hosts:
-    - longhorn.vollminlab.com
-    secretName: wildcard-tls
+    - hosts:
+        - longhorn.vollminlab.com
+      secretName: wildcard-tls

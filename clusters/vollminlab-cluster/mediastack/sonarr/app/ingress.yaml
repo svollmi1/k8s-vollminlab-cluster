@@ -11,6 +11,7 @@ metadata:
     gethomepage.dev/description: "TV show collection manager"
     gethomepage.dev/group: "Media Stack"
     gethomepage.dev/icon: "sonarr.png"
+    gethomepage.dev/pod-selector: "app.kubernetes.io/name=sonarr"
   labels:
     app: sonarr
     env: production
@@ -18,17 +19,17 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: sonarr.vollminlab.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: sonarr
-            port:
-              number: 8989
+    - host: sonarr.vollminlab.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: sonarr
+                port:
+                  number: 8989
   tls:
-  - hosts:
-    - sonarr.vollminlab.com
-    secretName: wildcard-tls
+    - hosts:
+        - sonarr.vollminlab.com
+      secretName: wildcard-tls

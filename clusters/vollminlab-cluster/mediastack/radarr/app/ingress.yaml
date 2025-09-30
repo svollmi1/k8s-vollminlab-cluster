@@ -11,6 +11,7 @@ metadata:
     gethomepage.dev/description: "Movie collection manager"
     gethomepage.dev/group: "Media Stack"
     gethomepage.dev/icon: "radarr.png"
+    gethomepage.dev/pod-selector: "app.kubernetes.io/name=radarr"
   labels:
     app: radarr
     env: production
@@ -18,17 +19,17 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: radarr.vollminlab.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: radarr
-            port:
-              number: 7878
+    - host: radarr.vollminlab.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: radarr
+                port:
+                  number: 7878
   tls:
-  - hosts:
-    - radarr.vollminlab.com
-    secretName: wildcard-tls
+    - hosts:
+        - radarr.vollminlab.com
+      secretName: wildcard-tls
