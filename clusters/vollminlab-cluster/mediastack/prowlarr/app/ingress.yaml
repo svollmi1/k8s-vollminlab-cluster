@@ -6,6 +6,11 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "Prowlarr"
+    gethomepage.dev/description: "Indexer manager"
+    gethomepage.dev/group: "Media Stack"
+    gethomepage.dev/icon: "prowlarr.png"
   labels:
     app: prowlarr
     env: production
