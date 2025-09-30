@@ -1,0 +1,43 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: homepage
+  labels:
+    app: homepage
+    env: production
+    category: apps
+rules:
+- apiGroups:
+    - networking.k8s.io
+    - apps
+    - ""
+  resources:
+    - pods
+    - pods/log
+    - ingresses
+    - deployments
+    - services
+    - secrets
+    - events
+    - configmaps
+  verbs:
+    - get
+    - watch
+    - list
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: homepage
+  labels:
+    app: homepage
+    env: production
+    category: apps
+subjects:
+  - kind: ServiceAccount
+    name: homepage
+    namespace: homepage
+roleRef:
+  kind: ClusterRole
+  name: homepage
+  apiGroup: rbac.authorization.k8s.io

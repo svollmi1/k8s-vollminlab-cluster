@@ -8,3 +8,4 @@ resources:
   - helmrelease.yaml
   - ingress.yaml
   - homepage-env-vars-sealedsecret.yaml
+  - rbac.yaml
