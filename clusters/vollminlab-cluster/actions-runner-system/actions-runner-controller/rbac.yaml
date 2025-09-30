@@ -14,10 +14,6 @@ rules:
   - apiGroups: [""]
     resources: ["nodes", "namespaces", "pods", "services", "configmaps", "persistentvolumeclaims", "persistentvolumes"]
     verbs: ["get", "list", "watch"]
-  # Secrets - read only (needed for runner secrets)
-  - apiGroups: [""]
-    resources: ["secrets"]
-    verbs: ["get", "list", "watch"]
   # Service accounts - read only
   - apiGroups: [""]
     resources: ["serviceaccounts"]
