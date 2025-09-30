@@ -5,6 +5,11 @@ metadata:
   namespace: longhorn-system
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "Longhorn"
+    gethomepage.dev/description: "Kubernetes storage management"
+    gethomepage.dev/group: "Monitoring & Observability"
+    gethomepage.dev/icon: "longhorn.png"
   labels:
     app: longhorn
     env: production

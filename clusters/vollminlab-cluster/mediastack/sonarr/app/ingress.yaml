@@ -6,6 +6,11 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "Sonarr"
+    gethomepage.dev/description: "TV show collection manager"
+    gethomepage.dev/group: "Media Stack"
+    gethomepage.dev/icon: "sonarr.png"
   labels:
     app: sonarr
     env: production
