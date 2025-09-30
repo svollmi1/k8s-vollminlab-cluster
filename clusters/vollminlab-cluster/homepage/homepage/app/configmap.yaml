@@ -84,7 +84,7 @@ data:
             - vCenter:
                 description: VMware vCenter Server
                 href: https://vcenter.vollminlab.com
-                icon: vmware.png
+                icon: vmware-esxi.png
                 ping: https://vcenter.vollminlab.com
             - Portainer:
                 description: Container management
@@ -100,7 +100,7 @@ data:
             - Pi-hole:
                 description: DNS Sinkhole
                 href: https://pihole.vollminlab.com/admin
-                icon: pihole.png
+                icon: pi-hole.png
                 ping: https://pihole.vollminlab.com/admin
             - UDM:
                 description: UniFi Dream Machine
