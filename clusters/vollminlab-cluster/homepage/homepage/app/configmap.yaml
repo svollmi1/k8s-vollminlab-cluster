@@ -11,7 +11,7 @@ data:
   values.yaml: |
     config:
       kubernetes:
-        mode: disabled
+        mode: cluster
       services:
         - Media Stack:
             - Plex:
@@ -73,6 +73,7 @@ data:
                 description: Network attached storage
                 href: https://truenas.vollminlab.com
                 icon: truenas.png
+                ping: https://truenas.vollminlab.com
                 widget:
                   type: truenas
                   url: https://truenas.vollminlab.com
@@ -83,26 +84,32 @@ data:
                 description: VMware vCenter Server
                 href: https://vcenter.vollminlab.com
                 icon: vmware.png
+                ping: https://vcenter.vollminlab.com
             - Portainer:
                 description: Container management
                 href: https://portainer.vollminlab.com
                 icon: portainer.png
+                ping: https://portainer.vollminlab.com
             - Nginx Proxy Manager:
                 description: Reverse proxy management
                 href: https://npm.vollminlab.com
                 icon: nginx-proxy-manager.png
+                ping: https://npm.vollminlab.com
             - Pi-hole:
                 description: DNS Sinkhole
                 href: https://pihole.vollminlab.com/admin
                 icon: pihole.png
+                ping: https://pihole.vollminlab.com/admin
             - UDM:
                 description: UniFi Dream Machine
                 href: https://udm.vollminlab.com
                 icon: unifi.png
+                ping: https://udm.vollminlab.com
             - HAProxy Stats:
                 description: Load balancer statistics
                 href: http://haproxy01.vollminlab.com:8404/stats
                 icon: haproxy.png
+                ping: http://haproxy01.vollminlab.com:8404/stats
             - Capacitor:
                 description: Flux GitOps dashboard
                 href: https://capacitor.vollminlab.com
@@ -112,27 +119,33 @@ data:
                 description: Metrics visualization
                 href: https://grafana.vollminlab.com
                 icon: grafana.png
+                ping: https://grafana.vollminlab.com
             - Prometheus:
                 description: Metrics collection
                 href: https://prometheus.vollminlab.com
                 icon: prometheus.png
+                ping: https://prometheus.vollminlab.com
             - Policy Reporter:
                 description: Kubernetes policy reporting
                 href: https://policyreporter.vollminlab.com
                 icon: policy-reporter.png
+                ping: https://policyreporter.vollminlab.com
             - Longhorn:
                 description: Kubernetes storage management
                 href: https://longhorn.vollminlab.com
                 icon: longhorn.png
+                ping: https://longhorn.vollminlab.com
         - Documentation & Tools:
             - BookStack:
                 description: Wiki and documentation
                 href: https://bookstack.vollminlab.com
                 icon: bookstack.png
+                ping: https://bookstack.vollminlab.com
             - Homepage:
                 description: This dashboard
                 href: https://homepage.vollminlab.com
                 icon: homepage.png
+                ping: https://homepage.vollminlab.com
             - Homelab Repo:
                 description: This Kubernetes cluster repo
                 href: https://github.com/svollmi1/k8s-vollminlab-cluster
