@@ -10,57 +10,38 @@ kind: ClusterRole
 metadata:
   name: github-actions-runner
 rules:
+  # Core Kubernetes resources - read only
   - apiGroups: [""]
-    resources: ["nodes", "namespaces", "pods", "services", "configmaps", "secrets", "serviceaccounts", "persistentvolumeclaims", "persistentvolumes", "resourcequotas"]
-    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+    resources: ["nodes", "namespaces", "pods", "services", "configmaps", "persistentvolumeclaims", "persistentvolumes"]
+    verbs: ["get", "list", "watch"]
+  # Secrets - read only (needed for runner secrets)
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list", "watch"]
+  # Service accounts - read only
+  - apiGroups: [""]
+    resources: ["serviceaccounts"]
+    verbs: ["get", "list", "watch"]
+  # Storage - read only
   - apiGroups: ["storage.k8s.io"]
     resources: ["storageclasses"]
-    verbs: ["get", "list", "watch", "create", "update", "patch"]
+    verbs: ["get", "list", "watch"]
+  # Networking - read only
   - apiGroups: ["networking.k8s.io"]
     resources: ["ingresses", "networkpolicies"]
     verbs: ["get", "list", "watch"]
+  # Apps - read only
   - apiGroups: ["apps"]
     resources: ["deployments", "replicasets", "daemonsets", "statefulsets"]
     verbs: ["get", "list", "watch"]
+  # Batch jobs - minimal permissions (runners may need to create jobs)
   - apiGroups: ["batch"]
     resources: ["jobs", "cronjobs"]
-    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
-  - apiGroups: ["admissionregistration.k8s.io"]
-    resources: ["validatingwebhookconfigurations", "mutatingwebhookconfigurations"]
-    verbs: ["get", "list", "watch", "patch"]
-  - apiGroups: ["kyverno.io"]
-    resources: ["policies", "clusterpolicies"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["helm.toolkit.fluxcd.io"]
-    resources: ["helmreleases"]
-    verbs: ["get", "list", "watch", "create", "update", "patch"]
-  - apiGroups: ["helm.toolkit.fluxcd.io/v2beta1"]
-    resources: ["helmreleases"]
-    verbs: ["get", "list", "watch", "create", "update", "patch"]
-  - apiGroups: ["kustomize.toolkit.fluxcd.io"]
-    resources: ["kustomizations"]
-    verbs: ["get", "list", "watch", "create", "update", "patch"]
-  - apiGroups: ["source.toolkit.fluxcd.io"]
-    resources: ["gitrepositories", "helmrepositories", "ocirepositories"]
-    verbs: ["get", "list", "watch", "create", "update", "patch"]
-  - apiGroups: ["apiextensions.k8s.io"]
-    resources: ["customresourcedefinitions"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["bitnami.com"]
-    resources: ["sealedsecrets"]
-    verbs: ["get", "list", "watch", "create", "update", "patch"]
-  - apiGroups: ["rbac.authorization.k8s.io"]
-    resources: ["clusterroles", "clusterrolebindings", "roles", "rolebindings"]
-    verbs: ["get", "list", "watch"]
+    verbs: ["get", "list", "watch", "create", "delete"]
+  # Actions Runner Controller resources - full access (needed for controller operation)
   - apiGroups: ["actions.summerwind.dev"]
     resources: ["runnerdeployments", "runners", "runnerreplicasets"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["metallb.io"]
-    resources: ["l2advertisements", "ipaddresspools", "bgpadvertisements", "bgppeers", "bfdprofiles", "communities"]
-    verbs: ["get", "list", "watch", "create", "update", "patch"]
-  - apiGroups: ["metallb.io/v1beta1"]
-    resources: ["l2advertisements", "ipaddresspools", "bgpadvertisements", "bgppeers", "bfdprofiles", "communities"]
-    verbs: ["get", "list", "watch", "create", "update", "patch"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
