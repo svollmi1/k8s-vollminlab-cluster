@@ -789,12 +789,17 @@ jobs:
 
       - name: Cleanup test namespace
         if: always()
+        continue-on-error: true
         run: |
           set -euo pipefail
           TEST_NAMESPACE="$TEST_NAMESPACE"
           
           echo "🧹 Cleaning up test namespace..."
-            kubectl delete namespace "$TEST_NAMESPACE" --ignore-not-found=true
+          kubectl delete namespace "$TEST_NAMESPACE" --ignore-not-found=true || {
+            echo "⚠️ Failed to delete namespace (RBAC permissions needed - will be fixed once PR is merged)"
+            echo "Namespace $TEST_NAMESPACE will need manual cleanup"
+            exit 0
+          }
           echo "✅ Cleaned up test namespace: $TEST_NAMESPACE"
 
   security-scan:
