@@ -866,12 +866,16 @@ jobs:
 
       - name: Upload Trivy filesystem SARIF results
         uses: github/codeql-action/upload-sarif@v3
+        timeout-minutes: 2
+        continue-on-error: true
         with:
           sarif_file: 'trivy-results.sarif'
           category: 'trivy-fs'
           
       - name: Upload Trivy IaC SARIF results
         uses: github/codeql-action/upload-sarif@v3
+        timeout-minutes: 2
+        continue-on-error: true
         with:
           sarif_file: 'trivy-config-results.sarif'
           category: 'trivy-config'
