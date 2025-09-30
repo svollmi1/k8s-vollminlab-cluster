@@ -153,28 +153,28 @@ data:
             - Chocolatey:
                 description: Package manager community
                 href: https://community.chocolatey.org
-                icon: chocolatey.png
+                icon: mdi-package-variant
         - Personal/External:
             - Yahoo Fantasy Football:
                 description: Yahoo Fantasy Football
                 href: https://football.fantasysports.yahoo.com/
-                icon: yahoo.png
+                icon: mdi-football
             - ESPN Fantasy Football:
                 description: ESPN Fantasy Football
                 href: https://www.espn.com/fantasy/football/
-                icon: espn.png
+                icon: mdi-football-helmet
             - D.E. Shaw Access:
                 description: Work access portal
                 href: https://access-test.deshaw.com
-                icon: briefcase.png
+                icon: mdi-briefcase
             - GroupMe:
                 description: Group messaging web
                 href: https://web.groupme.com/chats
-                icon: groupme.png
+                icon: mdi-message-text
             - MakerWorld:
                 description: 3D printing community
                 href: https://makerworld.com/en
-                icon: makerworld.png
+                icon: mdi-printer-3d
       settings:
         theme: dark
         favicon: null

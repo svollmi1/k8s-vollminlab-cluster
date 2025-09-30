@@ -10,7 +10,7 @@ metadata:
     gethomepage.dev/name: "Policy Reporter"
     gethomepage.dev/description: "Kubernetes policy reporting"
     gethomepage.dev/group: "Monitoring & Observability"
-    gethomepage.dev/icon: "policy-reporter.png"
+    gethomepage.dev/icon: "mdi-shield-check"
     gethomepage.dev/pod-selector: "app.kubernetes.io/name=policy-reporter-ui"
   labels:
     app: policy-reporter
