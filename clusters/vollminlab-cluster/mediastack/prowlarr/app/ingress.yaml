@@ -11,6 +11,7 @@ metadata:
     gethomepage.dev/description: "Indexer manager"
     gethomepage.dev/group: "Media Stack"
     gethomepage.dev/icon: "prowlarr.png"
+    gethomepage.dev/pod-selector: "app.kubernetes.io/name=prowlarr"
   labels:
     app: prowlarr
     env: production

@@ -11,6 +11,7 @@ metadata:
     gethomepage.dev/description: "Movie collection manager"
     gethomepage.dev/group: "Media Stack"
     gethomepage.dev/icon: "radarr.png"
+    gethomepage.dev/pod-selector: "app.kubernetes.io/name=radarr"
   labels:
     app: radarr
     env: production

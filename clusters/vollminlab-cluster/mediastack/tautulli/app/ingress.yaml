@@ -11,6 +11,7 @@ metadata:
     gethomepage.dev/description: "Plex monitoring and analytics"
     gethomepage.dev/group: "Media Stack"
     gethomepage.dev/icon: "tautulli.png"
+    gethomepage.dev/pod-selector: "app.kubernetes.io/name=tautulli"
   labels:
     app: tautulli
     env: production

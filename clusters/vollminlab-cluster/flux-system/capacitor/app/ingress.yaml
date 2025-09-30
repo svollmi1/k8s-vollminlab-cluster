@@ -15,6 +15,7 @@ metadata:
     gethomepage.dev/description: "Flux GitOps dashboard"
     gethomepage.dev/group: "Infrastructure"
     gethomepage.dev/icon: "flux.png"
+    gethomepage.dev/pod-selector: "app=capacitor"
 spec:
   ingressClassName: nginx
   rules:

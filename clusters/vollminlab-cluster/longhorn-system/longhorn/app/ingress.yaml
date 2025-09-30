@@ -8,8 +8,9 @@ metadata:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/name: "Longhorn"
     gethomepage.dev/description: "Kubernetes storage management"
-    gethomepage.dev/group: "Monitoring & Observability"
+    gethomepage.dev/group: "Infrastructure"
     gethomepage.dev/icon: "longhorn.png"
+    gethomepage.dev/pod-selector: "app=longhorn-ui"
   labels:
     app: longhorn
     env: production

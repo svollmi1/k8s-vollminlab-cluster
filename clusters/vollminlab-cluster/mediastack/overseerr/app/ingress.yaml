@@ -11,6 +11,7 @@ metadata:
     gethomepage.dev/description: "Media request management"
     gethomepage.dev/group: "Media Stack"
     gethomepage.dev/icon: "overseerr.png"
+    gethomepage.dev/pod-selector: "app.kubernetes.io/name=overseerr"
   labels:
     app: overseerr
     env: production
