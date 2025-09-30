@@ -86,7 +86,8 @@ data:
                 description: Container management
                 href: https://portainer.vollminlab.com
                 icon: portainer.png
-                ping: https://portainer.vollminlab.com
+                namespace: portainer
+                app: portainer
             - Nginx Proxy Manager:
                 description: Reverse proxy management
                 href: https://npm.vollminlab.com
@@ -112,23 +113,27 @@ data:
                 description: Metrics visualization
                 href: https://grafana.vollminlab.com
                 icon: grafana.png
-                ping: https://grafana.vollminlab.com
+                namespace: monitoring
+                app: grafana
             - Prometheus:
                 description: Metrics collection
                 href: https://prometheus.vollminlab.com
                 icon: prometheus.png
-                ping: https://prometheus.vollminlab.com
+                namespace: monitoring
+                app: prometheus
         - Documentation & Tools:
             - BookStack:
                 description: Wiki and documentation
                 href: https://bookstack.vollminlab.com
                 icon: bookstack.png
-                ping: https://bookstack.vollminlab.com
+                namespace: bookstack
+                app: bookstack
             - Homepage:
                 description: This dashboard
                 href: https://homepage.vollminlab.com
                 icon: homepage.png
-                ping: https://homepage.vollminlab.com
+                namespace: homepage
+                app: homepage
             - Homelab Repo:
                 description: This Kubernetes cluster repo
                 href: https://github.com/svollmi1/k8s-vollminlab-cluster
