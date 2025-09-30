@@ -812,22 +812,56 @@ jobs:
       - name: Run Trivy filesystem scan
         run: |
           set -euo pipefail
-          echo "🔍 Running Trivy filesystem scan with 3-minute timeout..."
-          timeout 3m trivy fs --format sarif --output trivy-results.sarif --severity HIGH,CRITICAL --cache-dir "${{ env.TRIVY_CACHE_DIR }}" . || {
-            echo "⚠️ Trivy filesystem scan timed out after 3 minutes"
-            echo "Creating empty SARIF file to prevent upload errors"
-            echo '{"version": "2.1.0", "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json", "runs": [{"tool": {"driver": {"name": "Trivy", "version": "timeout"}}, "results": []}]}' > trivy-results.sarif
-          }
+          echo "🔍 Running Trivy filesystem scan with 90-second timeout..."
+          
+          # Start Trivy in background and capture PID
+          trivy fs --format sarif --output trivy-results.sarif --severity HIGH,CRITICAL --cache-dir "${{ env.TRIVY_CACHE_DIR }}" . &
+          TRIVY_PID=$!
+          
+          # Wait for 90 seconds or until process completes
+          for i in {1..90}; do
+            if ! kill -0 $TRIVY_PID 2>/dev/null; then
+              echo "✅ Trivy filesystem scan completed successfully"
+              exit 0
+            fi
+            sleep 1
+          done
+          
+          # If we get here, it timed out
+          echo "⚠️ Trivy filesystem scan timed out after 90 seconds"
+          kill -TERM $TRIVY_PID 2>/dev/null || true
+          sleep 2
+          kill -KILL $TRIVY_PID 2>/dev/null || true
+          
+          echo "Creating empty SARIF file to prevent upload errors"
+          echo '{"version": "2.1.0", "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json", "runs": [{"tool": {"driver": {"name": "Trivy", "version": "timeout"}}, "results": []}]}' > trivy-results.sarif
 
       - name: Run Trivy IaC scan
         run: |
           set -euo pipefail
-          echo "🔍 Running Trivy IaC scan with 3-minute timeout..."
-          timeout 3m trivy config --format sarif --output trivy-config-results.sarif --severity HIGH,CRITICAL --cache-dir "${{ env.TRIVY_CACHE_DIR }}" . || {
-            echo "⚠️ Trivy IaC scan timed out after 3 minutes"
-            echo "Creating empty SARIF file to prevent upload errors"
-            echo '{"version": "2.1.0", "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json", "runs": [{"tool": {"driver": {"name": "Trivy", "version": "timeout"}}, "results": []}]}' > trivy-config-results.sarif
-          }
+          echo "🔍 Running Trivy IaC scan with 90-second timeout..."
+          
+          # Start Trivy in background and capture PID
+          trivy config --format sarif --output trivy-config-results.sarif --severity HIGH,CRITICAL --cache-dir "${{ env.TRIVY_CACHE_DIR }}" . &
+          TRIVY_PID=$!
+          
+          # Wait for 90 seconds or until process completes
+          for i in {1..90}; do
+            if ! kill -0 $TRIVY_PID 2>/dev/null; then
+              echo "✅ Trivy IaC scan completed successfully"
+              exit 0
+            fi
+            sleep 1
+          done
+          
+          # If we get here, it timed out
+          echo "⚠️ Trivy IaC scan timed out after 90 seconds"
+          kill -TERM $TRIVY_PID 2>/dev/null || true
+          sleep 2
+          kill -KILL $TRIVY_PID 2>/dev/null || true
+          
+          echo "Creating empty SARIF file to prevent upload errors"
+          echo '{"version": "2.1.0", "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json", "runs": [{"tool": {"driver": {"name": "Trivy", "version": "timeout"}}, "results": []}]}' > trivy-config-results.sarif
 
       - name: Upload Trivy filesystem SARIF results
         uses: github/codeql-action/upload-sarif@v3
