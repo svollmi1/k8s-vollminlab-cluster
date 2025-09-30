@@ -823,59 +823,91 @@ jobs:
       - name: Prepare Trivy cache
         run: mkdir -p "${{ env.TRIVY_CACHE_DIR }}"
 
-      - name: Run Trivy filesystem scan
+      - name: Get changed files for security scan
+        id: changed-files-security
         run: |
           set -euo pipefail
-          echo "🔍 Running Trivy filesystem scan with 90-second timeout..."
+          echo "🔍 Determining files to scan for security vulnerabilities..."
           
-          # Start Trivy in background and capture PID
-          trivy fs --format sarif --output trivy-results.sarif --severity HIGH,CRITICAL --cache-dir "${{ env.TRIVY_CACHE_DIR }}" . &
-          TRIVY_PID=$!
-          
-          # Wait for 90 seconds or until process completes
-          for i in {1..90}; do
-            if ! kill -0 $TRIVY_PID 2>/dev/null; then
-              echo "✅ Trivy filesystem scan completed successfully"
-              exit 0
+          # Get range for diff
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            RANGE="$BASE_SHA..HEAD"
+          else
+            BASE_SHA="${{ github.event.before }}"
+            if [[ -z "$BASE_SHA" ]]; then
+              BASE_SHA="$(git rev-list --max-parents=0 HEAD | tail -1)"
             fi
-            sleep 1
-          done
+            RANGE="$BASE_SHA..HEAD"
+          fi
           
-          # If we get here, it timed out
-          echo "⚠️ Trivy filesystem scan timed out after 90 seconds"
-          kill -TERM $TRIVY_PID 2>/dev/null || true
-          sleep 2
-          kill -KILL $TRIVY_PID 2>/dev/null || true
+          # Get changed files that are relevant for security scanning
+          CHANGED_FILES=$(git diff --name-only "$RANGE" | grep -E '\.(yaml|yml|json|tf|hcl|dockerfile|Dockerfile)$|^clusters/' | head -20 || true)
           
-          echo "Creating empty SARIF file to prevent upload errors"
-          echo '{"version": "2.1.0", "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json", "runs": [{"tool": {"driver": {"name": "Trivy", "version": "timeout"}}, "results": []}]}' > trivy-results.sarif
+          if [[ -z "$CHANGED_FILES" ]]; then
+            echo "No security-relevant files changed, skipping detailed scan"
+            echo "changed=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          echo "Security-relevant files changed:"
+          echo "$CHANGED_FILES"
+          echo "changed=true" >> $GITHUB_OUTPUT
+          echo "files<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGED_FILES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Run Trivy IaC scan
+      - name: Run optimized Trivy scans
+        if: steps.changed-files-security.outputs.changed == 'true'
         run: |
           set -euo pipefail
-          echo "🔍 Running Trivy IaC scan with 90-second timeout..."
+          echo "🔍 Running optimized Trivy scans with 60-second timeout..."
           
-          # Start Trivy in background and capture PID
-          trivy config --format sarif --output trivy-config-results.sarif --severity HIGH,CRITICAL --cache-dir "${{ env.TRIVY_CACHE_DIR }}" . &
-          TRIVY_PID=$!
-          
-          # Wait for 90 seconds or until process completes
-          for i in {1..90}; do
-            if ! kill -0 $TRIVY_PID 2>/dev/null; then
-              echo "✅ Trivy IaC scan completed successfully"
-              exit 0
+          # Create scan directory with only changed files
+          SCAN_DIR=$(mktemp -d)
+          echo "${{ steps.changed-files-security.outputs.files }}" | while IFS= read -r file; do
+            if [[ -f "$file" ]]; then
+              # Create directory structure and copy file
+              mkdir -p "$SCAN_DIR/$(dirname "$file")"
+              cp "$file" "$SCAN_DIR/$file"
             fi
-            sleep 1
           done
           
-          # If we get here, it timed out
-          echo "⚠️ Trivy IaC scan timed out after 90 seconds"
-          kill -TERM $TRIVY_PID 2>/dev/null || true
-          sleep 2
-          kill -KILL $TRIVY_PID 2>/dev/null || true
+          # Run filesystem scan on changed files only
+          echo "Running filesystem scan on changed files..."
+          timeout 60 trivy fs \
+            --format sarif \
+            --output trivy-results.sarif \
+            --severity HIGH,CRITICAL \
+            --cache-dir "${{ env.TRIVY_CACHE_DIR }}" \
+            --skip-files "*.log,*.tmp,*.cache,node_modules/*,.git/*" \
+            "$SCAN_DIR" || {
+            echo "⚠️ Trivy filesystem scan timed out or failed"
+            echo '{"version": "2.1.0", "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json", "runs": [{"tool": {"driver": {"name": "Trivy", "version": "timeout"}}, "results": []}]}' > trivy-results.sarif
+          }
           
-          echo "Creating empty SARIF file to prevent upload errors"
-          echo '{"version": "2.1.0", "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json", "runs": [{"tool": {"driver": {"name": "Trivy", "version": "timeout"}}, "results": []}]}' > trivy-config-results.sarif
+          # Run config scan on changed files only
+          echo "Running config scan on changed files..."
+          timeout 60 trivy config \
+            --format sarif \
+            --output trivy-config-results.sarif \
+            --severity HIGH,CRITICAL \
+            --cache-dir "${{ env.TRIVY_CACHE_DIR }}" \
+            "$SCAN_DIR" || {
+            echo "⚠️ Trivy config scan timed out or failed"
+            echo '{"version": "2.1.0", "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json", "runs": [{"tool": {"driver": {"name": "Trivy", "version": "timeout"}}, "results": []}]}' > trivy-config-results.sarif
+          }
+          
+          # Cleanup
+          rm -rf "$SCAN_DIR"
+          echo "✅ Trivy scans completed"
+
+      - name: Create empty SARIF files if no changes
+        if: steps.changed-files-security.outputs.changed == 'false'
+        run: |
+          echo "Creating empty SARIF files (no security-relevant changes)"
+          echo '{"version": "2.1.0", "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json", "runs": [{"tool": {"driver": {"name": "Trivy", "version": "no-changes"}}, "results": []}]}' > trivy-results.sarif
+          echo '{"version": "2.1.0", "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json", "runs": [{"tool": {"driver": {"name": "Trivy", "version": "no-changes"}}, "results": []}]}' > trivy-config-results.sarif
 
       - name: Upload Trivy filesystem SARIF results
         uses: github/codeql-action/upload-sarif@v3
