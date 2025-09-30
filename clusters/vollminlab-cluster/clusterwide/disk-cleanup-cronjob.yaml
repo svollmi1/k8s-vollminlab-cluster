@@ -21,12 +21,12 @@ spec:
           serviceAccountName: disk-cleanup
           containers:
           - name: disk-cleanup
-            image: bitnami/kubectl:latest
+            image: alpine/k8s:1.30.3
             command:
-            - /bin/bash
+            - /bin/sh
             - -c
             - |
-              #!/bin/bash
+              #!/bin/sh
               set -e
               
               echo "Starting scheduled disk cleanup"
