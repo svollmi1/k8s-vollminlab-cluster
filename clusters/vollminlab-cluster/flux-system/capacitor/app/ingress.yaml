@@ -33,4 +33,3 @@ spec:
     - hosts:
         - capacitor.vollminlab.com
       secretName: wildcard-tls
-
