@@ -12,8 +12,12 @@ metadata:
 rules:
   # Core Kubernetes resources - read only
   - apiGroups: [""]
-    resources: ["nodes", "namespaces", "pods", "services", "configmaps", "persistentvolumeclaims", "persistentvolumes"]
+    resources: ["nodes", "pods", "services", "configmaps", "persistentvolumeclaims", "persistentvolumes"]
     verbs: ["get", "list", "watch"]
+  # Namespaces - read + create/delete for CI test namespaces
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["get", "list", "watch", "create", "delete"]
   # Service accounts - read only
   - apiGroups: [""]
     resources: ["serviceaccounts"]
