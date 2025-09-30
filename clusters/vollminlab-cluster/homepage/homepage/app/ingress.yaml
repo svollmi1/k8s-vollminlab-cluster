@@ -6,11 +6,6 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    gethomepage.dev/enabled: "true"
-    gethomepage.dev/name: "Homepage"
-    gethomepage.dev/description: "Dynamically Detected Homepage"
-    gethomepage.dev/group: "Dynamic"
-    gethomepage.dev/icon: "homepage.png"
   labels:
     app: homepage
     env: production
