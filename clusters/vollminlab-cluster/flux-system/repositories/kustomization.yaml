@@ -20,3 +20,4 @@ resources:
   - sonarr-helmrepository.yaml
   - tautulli-helmrepository.yaml
   - sealed-secrets-helmrepository.yaml
+  - portainer-helmrepository.yaml
