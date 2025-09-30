@@ -19,17 +19,17 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: sonarr.vollminlab.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: sonarr
-            port:
-              number: 8989
+    - host: sonarr.vollminlab.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: sonarr
+                port:
+                  number: 8989
   tls:
-  - hosts:
-    - sonarr.vollminlab.com
-    secretName: wildcard-tls
+    - hosts:
+        - sonarr.vollminlab.com
+      secretName: wildcard-tls

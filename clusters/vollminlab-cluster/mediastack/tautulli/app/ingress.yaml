@@ -19,17 +19,17 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: tautulli.vollminlab.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: tautulli
-            port:
-              number: 8181
+    - host: tautulli.vollminlab.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: tautulli
+                port:
+                  number: 8181
   tls:
-  - hosts:
-    - tautulli.vollminlab.com
-    secretName: wildcard-tls
+    - hosts:
+        - tautulli.vollminlab.com
+      secretName: wildcard-tls
