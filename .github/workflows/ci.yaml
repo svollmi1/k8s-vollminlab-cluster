@@ -154,7 +154,7 @@ jobs:
           
           # Create yamllint config for Kubernetes files
           echo 'extends: default' > .yamllint
-          echo '' >> .yamllint
+          echo >> .yamllint
           echo 'rules:' >> .yamllint
           echo '  document-start:' >> .yamllint
           echo '    present: false' >> .yamllint
@@ -187,7 +187,7 @@ jobs:
                 echo "  SealedSecret detected - using relaxed line-length rules"
                 # Create a special config for SealedSecret files
                 echo 'extends: default' > .yamllint-sealed
-                echo '' >> .yamllint-sealed
+                echo >> .yamllint-sealed
                 echo 'rules:' >> .yamllint-sealed
                 echo '  document-start:' >> .yamllint-sealed
                 echo '    present: false' >> .yamllint-sealed
@@ -294,7 +294,7 @@ jobs:
           # Create gitleaks config in temp directory
           echo '[extend]' > gitleaks.toml
           echo 'useDefault = true' >> gitleaks.toml
-          echo '' >> gitleaks.toml
+          echo >> gitleaks.toml
           echo '[allowlist]' >> gitleaks.toml
           echo 'description = "Ignore SealedSecrets keys"' >> gitleaks.toml
           echo 'regexes = [' >> gitleaks.toml
