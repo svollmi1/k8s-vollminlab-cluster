@@ -148,22 +148,25 @@ jobs:
           set -euo pipefail
           echo "🔍 Validating YAML syntax with yamllint..."
           
-          # Install yamllint using apt
+          # Install yamllint
           sudo apt-get update
-          sudo apt-get install -y python3-yamllint
+          sudo apt-get install -y python3-pip
+          sudo pip3 install yamllint
           
           # Create yamllint config for Kubernetes files
-          echo 'extends: default' > .yamllint
-          echo >> .yamllint
-          echo 'rules:' >> .yamllint
-          echo '  document-start:' >> .yamllint
-          echo '    present: false' >> .yamllint
-          echo '  new-line-at-end-of-file:' >> .yamllint
-          echo '    level: warning' >> .yamllint
-          echo '  line-length:' >> .yamllint
-          echo '    max: 200' >> .yamllint
-          echo '  truthy:' >> .yamllint
-          echo '    allowed-values: [true, false, on, off]' >> .yamllint
+          cat > .yamllint << 'EOF'
+          extends: default
+          
+          rules:
+            document-start:
+              present: false
+            new-line-at-end-of-file:
+              level: warning
+            line-length:
+              max: 200
+            truthy:
+              allowed-values: ['true', 'false', 'on', 'off']
+          EOF
           
           # Get range for diff
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
@@ -186,17 +189,19 @@ jobs:
               if grep -q "kind: SealedSecret" "$file"; then
                 echo "  SealedSecret detected - using relaxed line-length rules"
                 # Create a special config for SealedSecret files
-                echo 'extends: default' > .yamllint-sealed
-                echo >> .yamllint-sealed
-                echo 'rules:' >> .yamllint-sealed
-                echo '  document-start:' >> .yamllint-sealed
-                echo '    present: false' >> .yamllint-sealed
-                echo '  new-line-at-end-of-file:' >> .yamllint-sealed
-                echo '    level: warning' >> .yamllint-sealed
-                echo '  line-length:' >> .yamllint-sealed
-                echo '    max: 1000  # Allow much longer lines for encrypted data' >> .yamllint-sealed
-                echo '  truthy:' >> .yamllint-sealed
-                echo '    allowed-values: [true, false, on, off]' >> .yamllint-sealed
+                cat > .yamllint-sealed << 'EOF'
+          extends: default
+          
+          rules:
+            document-start:
+              present: false
+            new-line-at-end-of-file:
+              level: warning
+            line-length:
+              max: 1000  # Allow much longer lines for encrypted data
+            truthy:
+              allowed-values: ['true', 'false', 'on', 'off']
+          EOF
                 yamllint -c .yamllint-sealed "$file" || {
                   echo "❌ YAML lint error in $file"
                   exit 1
@@ -292,15 +297,17 @@ jobs:
           cd "$TEMP_DIR"
           
           # Create gitleaks config in temp directory
-          echo '[extend]' > gitleaks.toml
-          echo 'useDefault = true' >> gitleaks.toml
-          echo >> gitleaks.toml
-          echo '[allowlist]' >> gitleaks.toml
-          echo 'description = "Ignore SealedSecrets keys"' >> gitleaks.toml
-          echo 'regexes = [' >> gitleaks.toml
-          echo '  "-----BEGIN CERTIFICATE-----",' >> gitleaks.toml
-          echo '  "-----BEGIN PUBLIC KEY-----"' >> gitleaks.toml
-          echo ']' >> gitleaks.toml
+          cat > gitleaks.toml << 'EOF'
+          [extend]
+          useDefault = true
+          
+          [allowlist]
+          description = "Ignore SealedSecrets keys"
+          regexes = [
+            "-----BEGIN CERTIFICATE-----",
+            "-----BEGIN PUBLIC KEY-----"
+          ]
+          EOF
           
           git init
           git config user.email "ci@example.com"
@@ -323,7 +330,7 @@ jobs:
 
   test-deployment:
     name: Flux Configuration Validation
-    runs-on: vollminlab-1-2
+    runs-on: vollminlab-2
     needs: validate-changes
     if: needs.validate-changes.result == 'success' && needs.validate-changes.outputs.changed == 'true'
     timeout-minutes: 15
@@ -344,7 +351,7 @@ jobs:
 
   server-side-validation:
     name: Server-Side Validation with Temporary Namespace
-    runs-on: vollminlab-1
+    runs-on: vollminlab-3
     needs: [validate-changes]
     if: needs.validate-changes.result == 'success' && needs.validate-changes.outputs.changed == 'true'
     env:
@@ -880,7 +887,7 @@ jobs:
               exit 1
             fi
             
-            echo "$HOME/.local/bin" >> GITHUB_PATH
+            echo "$HOME/.local/bin" >> $GITHUB_PATH
             ~/.local/bin/trivy --version
           fi
 
@@ -1070,7 +1077,7 @@ jobs:
           
   integration-test:
     name: Integration Test
-    runs-on: vollminlab-1-2
+    runs-on: vollminlab-2
     needs: [validate-changes, test-deployment, security-scan, policy-validation]
     if: always() && needs.security-scan.result == 'success' && needs.policy-validation.result == 'success'
     steps:
@@ -1086,7 +1093,7 @@ jobs:
 
   notify-success:
     name: Notify Success
-    runs-on: vollminlab-1
+    runs-on: vollminlab-3
     needs: [validate-changes, test-deployment, security-scan, policy-validation, integration-test]
     if: success()
     steps:
