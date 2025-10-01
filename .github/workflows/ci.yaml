@@ -148,9 +148,9 @@ jobs:
           set -euo pipefail
           echo "🔍 Validating YAML syntax with yamllint..."
           
-          # Quick yamllint install (minimal dependencies)
-          python3 -m pip install --user --no-deps yamllint
-          echo "$HOME/.local/bin" >> GITHUB_PATH
+          # Install yamllint using apt
+          sudo apt-get update
+          sudo apt-get install -y python3-yamllint
           
           # Create yamllint config for Kubernetes files
           echo 'extends: default' > .yamllint
