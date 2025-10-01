@@ -6,12 +6,6 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    gethomepage.dev/enabled: "true"
-    gethomepage.dev/name: "Overseerr"
-    gethomepage.dev/description: "Media request management"
-    gethomepage.dev/group: "Media Stack"
-    gethomepage.dev/icon: "overseerr.png"
-    gethomepage.dev/pod-selector: "app.kubernetes.io/name=overseerr"
   labels:
     app: overseerr
     env: production
