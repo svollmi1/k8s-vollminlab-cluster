@@ -160,10 +160,34 @@ jobs:
           printf '%s\n' "$CHANGED_FILES" | while IFS= read -r file; do
             if [[ -f "$file" ]]; then
               echo "Validating: $file"
-              yamllint "$file" || {
-                echo "❌ YAML lint error in $file"
-              exit 1
-            }
+              
+              # Check if this is a SealedSecret file - they have long encrypted values
+              if grep -q "kind: SealedSecret" "$file"; then
+                echo "  SealedSecret detected - using relaxed line-length rules"
+                # Create a special config for SealedSecret files
+                cat > .yamllint-sealed << 'EOF'
+          extends: default
+          
+          rules:
+            document-start:
+              present: false
+            new-line-at-end-of-file:
+              level: warning
+            line-length:
+              max: 1000  # Allow much longer lines for encrypted data
+            truthy:
+              allowed-values: ['true', 'false', 'on', 'off']
+          EOF
+                yamllint -c .yamllint-sealed "$file" || {
+                  echo "❌ YAML lint error in $file"
+                  exit 1
+                }
+              else
+                yamllint "$file" || {
+                  echo "❌ YAML lint error in $file"
+                  exit 1
+                }
+              fi
             fi
           done
           
