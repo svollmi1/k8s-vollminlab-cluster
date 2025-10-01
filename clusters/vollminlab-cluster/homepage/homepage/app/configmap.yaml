@@ -19,6 +19,16 @@ data:
                 href: https://plex.vollminlab.com
                 icon: plex.png
                 ping: https://plex.vollminlab.com
+            - Overseerr:
+                description: Media request management
+                href: https://overseerr.vollminlab.com
+                icon: overseerr.png
+                namespace: mediastack
+                app: overseerr
+                widget:
+                  type: overseerr
+                  url: https://overseerr.vollminlab.com
+                  key: "{{HOMEPAGE_VAR_OVERSEERR_API_KEY}}"
             - Tautulli:
                 description: Plex monitoring and analytics
                 href: https://tautulli.vollminlab.com
