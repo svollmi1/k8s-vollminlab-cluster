@@ -1082,20 +1082,34 @@ jobs:
           fi
           
           # Find policy files by parsing 'kind' for each document (handles multi-doc YAML)
+          echo "🔍 Searching for Kyverno policy files..."
           mapfile -t POLICY_FILES < <(
-            git ls-files 'clusters/**/kyverno/**/policies/*.ya?ml' \
+            git ls-files 'clusters/**/kyverno/**/*.ya?ml' \
             | while IFS= read -r f; do
-                # handle multi-doc YAMLs
-                if yq eval-all '.[].kind' "$f" | grep -Eq '^(Policy|ClusterPolicy)$'; then
-                  echo "$f"
-            fi
-          done
+                # Only check files in the policies directory
+                if [[ "$f" == *"/kyverno/"*"/policies/"* ]]; then
+                  echo "📄 Checking policy file: $f"
+                  # handle multi-doc YAMLs
+                  if yq eval-all '.[].kind' "$f" | grep -Eq '^(Policy|ClusterPolicy)$'; then
+                    echo "✅ Found policy: $f"
+                    echo "$f"
+                  else
+                    echo "⚠️ Not a policy file: $f"
+                  fi
+                fi
+            done
           )
           
+          echo "📊 Found ${#POLICY_FILES[@]} policy files"
           if (( ${#POLICY_FILES[@]} == 0 )); then
             echo "⚠️ No Kyverno Policy/ClusterPolicy documents found"
             exit 0
           fi
+          
+          echo "📋 Policy files to use for validation:"
+          for policy in "${POLICY_FILES[@]}"; do
+            echo "  - $policy"
+          done
           
           # Validate only the changed resource files
           for file in $CHANGED_FILES; do
