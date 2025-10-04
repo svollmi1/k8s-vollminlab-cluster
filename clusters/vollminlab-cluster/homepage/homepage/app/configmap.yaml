@@ -80,6 +80,15 @@ data:
                   url: https://sabnzbd.vollminlab.com
                   key: "{{HOMEPAGE_VAR_SABNZBD_API_KEY}}"
         - Infrastructure:
+            - Pi-hole:
+                description: DNS sinkhole and ad blocker
+                href: https://pihole.vollminlab.com
+                icon: pihole.png
+                ping: https://pihole.vollminlab.com
+                widget:
+                  type: pihole
+                  url: https://pihole.vollminlab.com
+                  key: "{{HOMEPAGE_VAR_PIHOLE_API_KEY}}"
             - TrueNAS:
                 description: Network attached storage
                 href: https://truenas.vollminlab.com
@@ -281,6 +290,11 @@ data:
           secretKeyRef:
             name: homepage-env-vars
             key: TAUTULLI_API_KEY
+      - name: HOMEPAGE_VAR_PIHOLE_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: PIHOLE_API_KEY
       - name: HOMEPAGE_ALLOWED_HOSTS
         value: "homepage.vollminlab.com,localhost,127.0.0.1"
     resources:
