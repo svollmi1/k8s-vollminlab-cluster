@@ -88,6 +88,7 @@ data:
                 widget:
                   type: pihole
                   url: https://pihole.vollminlab.com
+                  version: 6
                   key: "{{HOMEPAGE_VAR_PIHOLE_API_KEY}}"
             - TrueNAS:
                 description: Network attached storage
