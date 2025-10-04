@@ -38,7 +38,7 @@ jobs:
   validate-changes:
     name: Validate Kubernetes Manifests
     runs-on: vollminlab-1
-    timeout-minutes: 10
+    timeout-minutes: 5
     outputs:
       changed: ${{ steps.get-changed-files.outputs.changed }}
     steps:
@@ -148,10 +148,9 @@ jobs:
           set -euo pipefail
           echo "🔍 Validating YAML syntax with yamllint..."
           
-          # Install yamllint
+          # Install yamllint using system package (much faster than pip)
           sudo apt-get update
-          sudo apt-get install -y python3-pip
-          sudo pip3 install yamllint
+          sudo apt-get install -y yamllint
           
           # Create yamllint config for Kubernetes files
           cat > .yamllint << 'EOF'
@@ -333,7 +332,7 @@ jobs:
     runs-on: vollminlab-2
     needs: validate-changes
     if: needs.validate-changes.result == 'success' && needs.validate-changes.outputs.changed == 'true'
-    timeout-minutes: 15
+    timeout-minutes: 5
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -1042,7 +1041,7 @@ jobs:
   policy-validation:
     name: Kyverno Policy Validation
     runs-on: vollminlab-1
-    timeout-minutes: 10
+    timeout-minutes: 5
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -1084,7 +1083,7 @@ jobs:
           
           # Find policy files by parsing 'kind' for each document (handles multi-doc YAML)
           mapfile -t POLICY_FILES < <(
-            git ls-files 'clusters/**/kyverno/**/*.ya?ml' \
+            git ls-files 'clusters/**/kyverno/**/policies/*.ya?ml' \
             | while IFS= read -r f; do
                 # handle multi-doc YAMLs
                 if yq eval-all '.[].kind' "$f" | grep -Eq '^(Policy|ClusterPolicy)$'; then
@@ -1123,6 +1122,7 @@ jobs:
     runs-on: vollminlab-2
     needs: [validate-changes, test-deployment, security-scan, policy-validation]
     if: always() && needs.security-scan.result == 'success' && needs.policy-validation.result == 'success'
+    timeout-minutes: 5
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

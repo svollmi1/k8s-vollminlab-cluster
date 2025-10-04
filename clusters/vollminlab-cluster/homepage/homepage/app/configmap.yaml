@@ -82,8 +82,8 @@ data:
         - Infrastructure:
             - Pi-hole:
                 description: DNS sinkhole and ad blocker
-                href: https://pihole.vollminlab.com
-                icon: pihole.png
+                href: https://pihole.vollminlab.com/admin
+                icon: pi-hole.png
                 ping: https://pihole.vollminlab.com
                 widget:
                   type: pihole
@@ -116,11 +116,6 @@ data:
                 href: https://npm.vollminlab.com
                 icon: nginx-proxy-manager.png
                 ping: https://npm.vollminlab.com
-            - Pi-hole:
-                description: DNS Sinkhole
-                href: https://pihole.vollminlab.com/admin
-                icon: pi-hole.png
-                ping: https://pihole.vollminlab.com/admin
             - UDM:
                 description: UniFi Dream Machine
                 href: https://udm.vollminlab.com
