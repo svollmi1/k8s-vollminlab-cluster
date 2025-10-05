@@ -1,14 +1,12 @@
 apiVersion: source.toolkit.fluxcd.io/v1beta2
-kind: OCIRepository
+kind: HelmRepository
 metadata:
   name: bazarr-repo
   namespace: flux-system
   labels:
     app: bazarr
     env: production
-    category: apps
+    category: media
 spec:
-  url: oci://tccr.io/truecharts/bazarr
+  url: https://k8s-home-lab.github.io/helm-charts/
   interval: 5m
-  ref:
-    tag: 22.8.1

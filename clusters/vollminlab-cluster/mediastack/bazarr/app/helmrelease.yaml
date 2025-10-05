@@ -9,10 +9,14 @@ metadata:
     category: media
 spec:
   interval: 5m
-  chartRef:
-    kind: OCIRepository
-    name: bazarr-repo
-    namespace: flux-system
+  chart:
+    spec:
+      chart: bazarr
+      version: "11.1.1"
+      sourceRef:
+        kind: HelmRepository
+        name: bazarr-repo
+        namespace: flux-system
   valuesFrom:
     - kind: ConfigMap
       name: bazarr-values
