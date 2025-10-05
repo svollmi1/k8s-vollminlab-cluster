@@ -995,7 +995,7 @@ jobs:
               "/repos/${{ github.repository }}/code-scanning/sarifs" \
               -f "commit_sha=${{ github.sha }}" \
               -f "ref=$ref" \
-              -f "sarif=@$file" || return 1
+              -f "sarif=$(cat $file | gzip | base64 -w 0)" || return 1
           }
           
           # Try filesystem SARIF upload with retries
