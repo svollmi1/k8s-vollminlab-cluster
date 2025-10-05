@@ -8,6 +8,7 @@ metadata:
     category: system
 resources:
   - arc-helmrepository.yaml
+  - bazarr-helmrepository.yaml
   - bitnami-helmrepository.yaml
   - capacitor-helmrepository.yaml
   - elastic-helmrepository.yaml
