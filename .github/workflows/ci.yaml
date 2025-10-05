@@ -1128,6 +1128,12 @@ jobs:
               continue
             fi
             
+            # Skip policy files themselves to avoid circular validation
+            if [[ "$file" =~ /kyverno/.*/policies/.*\.ya\?ml$ ]]; then
+              echo "Skipping policy file (avoiding circular validation): $file"
+              continue
+            fi
+            
             echo "Validating: $file"
             
             # Check if file is a valid Kubernetes resource (handle multi-doc YAML)
