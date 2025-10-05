@@ -1,0 +1,23 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: bazarr
+  namespace: mediastack
+  labels:
+    app: bazarr
+    env: production
+    category: media
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: bazarr
+      version: "11.1.1"
+      sourceRef:
+        kind: HelmRepository
+        name: bazarr-repo
+        namespace: flux-system
+  valuesFrom:
+    - kind: ConfigMap
+      name: bazarr-values
+      valuesKey: values.yaml
