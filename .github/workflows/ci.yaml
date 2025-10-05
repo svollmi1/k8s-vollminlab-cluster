@@ -1142,16 +1142,41 @@ jobs:
             
             # Run validation with better error handling
             if [[ ${#args[@]} -gt 0 ]]; then
-              echo "Running: kyverno apply ${args[*]} --resource \"$file\""
-              if kyverno apply "${args[@]}" --resource "$file"; then
-                echo "✅ Validation passed for $file"
+              # For multi-document YAML files, validate each document separately
+              if yq eval-all 'select(.kind != null)' "$file" 2>/dev/null | grep -q 'kind:'; then
+                echo "Multi-document YAML detected, validating each document separately"
+                
+                # Split multi-document YAML and validate each document
+                yq eval-all 'select(.kind != null)' "$file" 2>/dev/null | \
+                yq eval-all 'split_doc' - | \
+                while IFS= read -r doc; do
+                  if [[ -n "$doc" && "$doc" != "---" ]]; then
+                    echo "Validating document with kind: $(echo "$doc" | yq eval '.kind' -)"
+                    echo "$doc" | kyverno apply "${args[@]}" --resource-file - || {
+                      echo "❌ Policy validation failed for document in $file"
+                      echo "🔍 Debugging info:"
+                      echo "  File: $file"
+                      echo "  Policy count: ${#POLICY_FILES[@]}"
+                      echo "  Policy files: ${POLICY_FILES[*]}"
+                      exit 1
+                    }
+                  fi
+                done
+                echo "✅ Validation passed for all documents in $file"
               else
-                echo "❌ Policy validation failed for $file"
-                echo "🔍 Debugging info:"
-                echo "  File: $file"
-                echo "  Policies: ${POLICY_FILES[*]}"
-                echo "  Args: ${args[*]}"
-                exit 1
+                echo "Single-document YAML detected"
+                echo "Running: kyverno apply ${args[*]} --resource-file \"$file\""
+                if kyverno apply "${args[@]}" --resource-file "$file"; then
+                  echo "✅ Validation passed for $file"
+                else
+                  echo "❌ Policy validation failed for $file"
+                  echo "🔍 Debugging info:"
+                  echo "  File: $file"
+                  echo "  Policy count: ${#POLICY_FILES[@]}"
+                  echo "  Policy files: ${POLICY_FILES[*]}"
+                  echo "  Args: ${args[*]}"
+                  exit 1
+                fi
               fi
             else
               echo "⚠️ No valid policy files found for validation"
