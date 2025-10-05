@@ -983,10 +983,10 @@ jobs:
             
             echo "📤 Attempt $attempt: Uploading $file (category: $category)"
             
-            # Use proper ref format for PRs
+            # Use proper ref format for GitHub SARIF API
             local ref="${{ github.ref }}"
             if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-              ref="${{ github.event.pull_request.head.ref }}"
+              ref="refs/heads/${{ github.event.pull_request.head.ref }}"
             fi
             
             timeout 60s gh api -X POST \
