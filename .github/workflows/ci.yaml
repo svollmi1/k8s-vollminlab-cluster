@@ -41,6 +41,7 @@ jobs:
     timeout-minutes: 5
     outputs:
       changed: ${{ steps.get-changed-files.outputs.changed }}
+      changed_files: ${{ steps.get-changed-files.outputs.changed_files }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
