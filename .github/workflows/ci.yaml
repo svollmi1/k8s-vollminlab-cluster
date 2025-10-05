@@ -1157,7 +1157,8 @@ jobs:
                   if [[ -n "$doc" && "$doc" =~ kind: ]]; then
                     KIND=$(echo "$doc" | yq eval '.kind' - 2>/dev/null || echo "unknown")
                     echo "Validating document with kind: $KIND"
-                    echo "$doc" | kyverno apply "${args[@]}" --resource - || {
+                    echo "Running: kyverno apply ${POLICY_FILES[*]} --resource -"
+                    echo "$doc" | kyverno apply "${POLICY_FILES[@]}" --resource - || {
                       echo "❌ Policy validation failed for document in $file"
                       echo "🔍 Debugging info:"
                       echo "  File: $file"
@@ -1171,8 +1172,8 @@ jobs:
                 echo "✅ Validation passed for all documents in $file"
               else
                 echo "Single-document YAML detected"
-                echo "Running: kyverno apply ${args[*]} --resource \"$file\""
-                if kyverno apply "${args[@]}" --resource "$file"; then
+                echo "Running: kyverno apply ${POLICY_FILES[*]} --resource \"$file\""
+                if kyverno apply "${POLICY_FILES[@]}" --resource "$file"; then
                   echo "✅ Validation passed for $file"
                 else
                   echo "❌ Policy validation failed for $file"
