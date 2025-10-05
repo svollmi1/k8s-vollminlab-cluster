@@ -1089,19 +1089,18 @@ jobs:
           
           # Find policy files by parsing 'kind' for each document (handles multi-doc YAML)
           echo "🔍 Searching for Kyverno policy files..."
-          mapfile -t POLICY_FILES < <(
-            git ls-files | grep '/kyverno/.*/policies/.*\.ya\?ml$' \
-            | while IFS= read -r f; do
-                echo "📄 Checking policy file: $f"
-                # handle single and multi-doc YAMLs
-                if yq eval '.kind' "$f" 2>/dev/null | grep -Eq '^(Policy|ClusterPolicy)$'; then
-                  echo "✅ Found policy: $f"
-                  echo "$f"
-                else
-                  echo "⚠️ Not a policy file: $f"
-                fi
-            done
-          )
+          # Find policy files and store only the file paths
+          POLICY_FILES=()
+          while IFS= read -r f; do
+            echo "📄 Checking policy file: $f"
+            # handle single and multi-doc YAMLs
+            if yq eval '.kind' "$f" 2>/dev/null | grep -Eq '^(Policy|ClusterPolicy)$'; then
+              echo "✅ Found policy: $f"
+              POLICY_FILES+=("$f")
+            else
+              echo "⚠️ Not a policy file: $f"
+            fi
+          done < <(git ls-files | grep '/kyverno/.*/policies/.*\.ya\?ml$')
           
           echo "📊 Found ${#POLICY_FILES[@]} policy files"
           if (( ${#POLICY_FILES[@]} == 0 )); then
@@ -1152,7 +1151,7 @@ jobs:
                 while IFS= read -r doc; do
                   if [[ -n "$doc" && "$doc" != "---" ]]; then
                     echo "Validating document with kind: $(echo "$doc" | yq eval '.kind' -)"
-                    echo "$doc" | kyverno apply "${args[@]}" --resource-file - || {
+                    echo "$doc" | kyverno apply "${args[@]}" || {
                       echo "❌ Policy validation failed for document in $file"
                       echo "🔍 Debugging info:"
                       echo "  File: $file"
@@ -1165,8 +1164,8 @@ jobs:
                 echo "✅ Validation passed for all documents in $file"
               else
                 echo "Single-document YAML detected"
-                echo "Running: kyverno apply ${args[*]} --resource-file \"$file\""
-                if kyverno apply "${args[@]}" --resource-file "$file"; then
+                echo "Running: kyverno apply ${args[*]} < \"$file\""
+                if kyverno apply "${args[@]}" < "$file"; then
                   echo "✅ Validation passed for $file"
                 else
                   echo "❌ Policy validation failed for $file"
