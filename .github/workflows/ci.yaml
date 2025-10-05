@@ -1093,8 +1093,8 @@ jobs:
             git ls-files | grep '/kyverno/.*/policies/.*\.ya\?ml$' \
             | while IFS= read -r f; do
                 echo "📄 Checking policy file: $f"
-                # handle multi-doc YAMLs
-                if yq eval-all '.[].kind' "$f" 2>/dev/null | grep -Eq '^(Policy|ClusterPolicy)$'; then
+                # handle single and multi-doc YAMLs
+                if yq eval '.kind' "$f" 2>/dev/null | grep -Eq '^(Policy|ClusterPolicy)$'; then
                   echo "✅ Found policy: $f"
                   echo "$f"
                 else
@@ -1126,8 +1126,8 @@ jobs:
             
             echo "Validating: $file"
             
-            # Check if file is a valid Kubernetes resource
-            if ! yq eval '.kind' "$file" 2>/dev/null | grep -qE '^[A-Z]'; then
+            # Check if file is a valid Kubernetes resource (handle multi-doc YAML)
+            if ! yq eval-all '.kind' "$file" 2>/dev/null | grep -qE '^[A-Z]'; then
               echo "⚠️ Skipping non-Kubernetes resource: $file"
               continue
             fi
