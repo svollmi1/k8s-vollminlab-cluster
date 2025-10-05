@@ -11,6 +11,7 @@ spec:
   schedule: "0 2 * * *"  # Run daily at 2 AM
   jobTemplate:
     spec:
+      ttlSecondsAfterFinished: 3600  # Clean up completed jobs after 1 hour
       template:
         metadata:
           labels:
@@ -70,5 +71,5 @@ spec:
                   memory: 128Mi
           restartPolicy: OnFailure
       backoffLimit: 3
-  successfulJobsHistoryLimit: 3
+  successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 1
