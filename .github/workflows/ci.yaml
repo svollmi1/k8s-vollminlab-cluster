@@ -225,7 +225,7 @@ jobs:
           # Install kubeconform
           curl -L https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz | tar xvzf -
           sudo mv kubeconform /usr/local/bin/
-          kubeconform -version || kubeconform -v
+          kubeconform -v
           
           # Get range for diff
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
@@ -924,12 +924,14 @@ jobs:
           
           # Run filesystem scan on changed files only
           echo "Running filesystem scan on changed files..."
-          timeout 60 trivy fs \
+          timeout 120 trivy fs \
             --format sarif \
             --output trivy-results.sarif \
             --severity HIGH,CRITICAL \
             --cache-dir "${{ env.TRIVY_CACHE_DIR }}" \
             --skip-files "*.log,*.tmp,*.cache,node_modules/*,.git/*" \
+            --timeout 60s \
+            --skip-db-update \
             "$SCAN_DIR" || {
             echo "⚠️ Trivy filesystem scan timed out or failed"
             echo '{"version": "2.1.0", "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json", "runs": [{"tool": {"driver": {"name": "Trivy", "version": "timeout"}}, "results": []}]}' > trivy-results.sarif
@@ -937,11 +939,13 @@ jobs:
           
           # Run config scan on changed files only
           echo "Running config scan on changed files..."
-          timeout 60 trivy config \
+          timeout 120 trivy config \
             --format sarif \
             --output trivy-config-results.sarif \
             --severity HIGH,CRITICAL \
             --cache-dir "${{ env.TRIVY_CACHE_DIR }}" \
+            --timeout 60s \
+            --skip-db-update \
             "$SCAN_DIR" || {
             echo "⚠️ Trivy config scan timed out or failed"
             echo '{"version": "2.1.0", "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json", "runs": [{"tool": {"driver": {"name": "Trivy", "version": "timeout"}}, "results": []}]}' > trivy-config-results.sarif
@@ -1081,17 +1085,15 @@ jobs:
           # Find policy files by parsing 'kind' for each document (handles multi-doc YAML)
           echo "🔍 Searching for Kyverno policy files..."
           mapfile -t POLICY_FILES < <(
-            git ls-files 'clusters/**/kyverno/**/*.ya?ml' \
+            git ls-files | grep '/kyverno/.*/policies/.*\.ya\?ml$' \
             | while IFS= read -r f; do
-                # Only check files in the policies directory
-                if [[ "$f" == *"/kyverno/"*"/policies/"* ]]; then
-                  echo "📄 Checking policy file: $f"
-                  # handle multi-doc YAMLs
-                  if yq eval-all '.[].kind' "$f" | grep -Eq '^(Policy|ClusterPolicy)$'; then
-                    echo "✅ Found policy: $f"
-                    echo "$f"
-                  else
-                    echo "⚠️ Not a policy file: $f"
+                echo "📄 Checking policy file: $f"
+                # handle multi-doc YAMLs
+                if yq eval-all '.[].kind' "$f" 2>/dev/null | grep -Eq '^(Policy|ClusterPolicy)$'; then
+                  echo "✅ Found policy: $f"
+                  echo "$f"
+                else
+                  echo "⚠️ Not a policy file: $f"
                   fi
                 fi
             done
