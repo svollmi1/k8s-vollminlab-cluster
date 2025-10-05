@@ -327,29 +327,8 @@ jobs:
           
           echo "✅ No secrets detected in changed files"
 
-  test-deployment:
-    name: Flux Configuration Validation
-    runs-on: vollminlab-2
-    needs: validate-changes
-    if: needs.validate-changes.result == 'success' && needs.validate-changes.outputs.changed == 'true'
-    timeout-minutes: 5
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup kubectl
-        run: |
-          set -euo pipefail
-          KUBECTL_VERSION="v${{ env.KUBERNETES_VERSION }}"
-          curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
-          chmod +x kubectl
-          sudo mv kubectl /usr/local/bin/
-          kubectl version --client
-
-  server-side-validation:
-    name: Server-Side Validation with Temporary Namespace
+  integration-test:
+    name: Integration Test
     runs-on: vollminlab-3
     needs: [validate-changes]
     if: needs.validate-changes.result == 'success' && needs.validate-changes.outputs.changed == 'true'
@@ -979,7 +958,19 @@ jobs:
           echo '{"version": "2.1.0", "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json", "runs": [{"tool": {"driver": {"name": "Trivy", "version": "no-changes"}}, "results": []}]}' > trivy-results.sarif
           echo '{"version": "2.1.0", "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json", "runs": [{"tool": {"driver": {"name": "Trivy", "version": "no-changes"}}, "results": []}]}' > trivy-config-results.sarif
 
+      - name: Install GitHub CLI
+        run: |
+          set -euo pipefail
+          echo "📦 Installing GitHub CLI..."
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+          sudo apt update
+          sudo apt install gh -y
+          gh --version
+
       - name: Upload Trivy SARIF results with retry
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           echo "🔄 Uploading SARIF results with retry mechanism..."
@@ -1131,27 +1122,11 @@ jobs:
           
           echo "✅ All resources comply with Kyverno policies"
           
-  integration-test:
-    name: Integration Test
-    runs-on: vollminlab-2
-    needs: [validate-changes, test-deployment, security-scan, policy-validation]
-    if: always() && needs.security-scan.result == 'success' && needs.policy-validation.result == 'success'
-    timeout-minutes: 5
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Integration test placeholder
-        run: |
-          set -euo pipefail
-          echo "🧪 Running integration tests..."
-          echo "✅ Integration tests passed!"
-          echo "📋 All components are working correctly together"
 
   notify-success:
     name: Notify Success
     runs-on: vollminlab-3
-    needs: [validate-changes, test-deployment, security-scan, policy-validation, integration-test]
+    needs: [validate-changes, integration-test, security-scan, policy-validation]
     if: success()
     steps:
       - name: Success notification
@@ -1163,7 +1138,7 @@ jobs:
   notify-failure:
     name: Notify Failure
     runs-on: vollminlab-3
-    needs: [validate-changes, test-deployment, security-scan, policy-validation, integration-test]
+    needs: [validate-changes, integration-test, security-scan, policy-validation]
     if: failure()
     steps:
       - name: Failure notification
