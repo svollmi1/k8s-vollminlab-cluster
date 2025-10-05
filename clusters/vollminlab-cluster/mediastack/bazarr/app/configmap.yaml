@@ -33,9 +33,9 @@ data:
     podSecurityContext:
       fsGroup: 568
       fsGroupChangePolicy: "OnRootMismatch"
-    securityContext:
-      runAsUser: 568
-      runAsGroup: 568
+      securityContext:
+        runAsUser: 568
+        runAsGroup: 568
     env:
       PUID: "568"
       PGID: "568"

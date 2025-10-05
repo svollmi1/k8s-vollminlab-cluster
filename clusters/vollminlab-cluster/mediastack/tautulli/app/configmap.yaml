@@ -15,7 +15,7 @@ data:
       - name: PGID
         value: "1000"
       - name: TZ
-        value: "UTC"    
+        value: "UTC"
     persistence:
       config:
         enabled: true
@@ -24,12 +24,12 @@ data:
     podLabels:
       app: tautulli
       env: production
-      category: media   
+      category: media
     podSecurityContext:
       runAsUser: 1000
       runAsGroup: 1000
       fsGroup: 1000
-      fsGroupChangePolicy: "OnRootMismatch"    
+      fsGroupChangePolicy: "OnRootMismatch"
     resources:
       requests:
         cpu: 100m
@@ -37,3 +37,4 @@ data:
       limits:
         cpu: 200m
         memory: 512Mi
+
