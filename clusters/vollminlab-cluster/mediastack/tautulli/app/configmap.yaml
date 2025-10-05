@@ -16,24 +16,20 @@ data:
         value: "1000"
       - name: TZ
         value: "UTC"
-    
     persistence:
       config:
         enabled: true
         existingClaim: pvc-tautulli-config
         mountPath: /config
-    
     podLabels:
       app: tautulli
       env: production
       category: media
-    
     podSecurityContext:
       runAsUser: 1000
       runAsGroup: 1000
       fsGroup: 1000
       fsGroupChangePolicy: "OnRootMismatch"
-    
     resources:
       requests:
         cpu: 100m
