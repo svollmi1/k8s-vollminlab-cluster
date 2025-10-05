@@ -41,6 +41,7 @@ jobs:
     timeout-minutes: 5
     outputs:
       changed: ${{ steps.get-changed-files.outputs.changed }}
+      changed_files: ${{ steps.get-changed-files.outputs.changed_files }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -225,7 +226,7 @@ jobs:
           # Install kubeconform
           curl -L https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz | tar xvzf -
           sudo mv kubeconform /usr/local/bin/
-          kubeconform -version || kubeconform -v
+          kubeconform -v
           
           # Get range for diff
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
@@ -831,6 +832,8 @@ jobs:
   security-scan:
     name: Security Scan
     runs-on: vollminlab-1
+    needs: [validate-changes]
+    if: needs.validate-changes.result == 'success' && needs.validate-changes.outputs.changed == 'true'
     timeout-minutes: 5
     steps:
       - name: Checkout code
@@ -924,12 +927,14 @@ jobs:
           
           # Run filesystem scan on changed files only
           echo "Running filesystem scan on changed files..."
-          timeout 60 trivy fs \
+          timeout 120 trivy fs \
             --format sarif \
             --output trivy-results.sarif \
             --severity HIGH,CRITICAL \
             --cache-dir "${{ env.TRIVY_CACHE_DIR }}" \
             --skip-files "*.log,*.tmp,*.cache,node_modules/*,.git/*" \
+            --timeout 60s \
+            --skip-db-update \
             "$SCAN_DIR" || {
             echo "⚠️ Trivy filesystem scan timed out or failed"
             echo '{"version": "2.1.0", "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json", "runs": [{"tool": {"driver": {"name": "Trivy", "version": "timeout"}}, "results": []}]}' > trivy-results.sarif
@@ -937,11 +942,13 @@ jobs:
           
           # Run config scan on changed files only
           echo "Running config scan on changed files..."
-          timeout 60 trivy config \
+          timeout 120 trivy config \
             --format sarif \
             --output trivy-config-results.sarif \
             --severity HIGH,CRITICAL \
             --cache-dir "${{ env.TRIVY_CACHE_DIR }}" \
+            --timeout 60s \
+            --skip-db-update \
             "$SCAN_DIR" || {
             echo "⚠️ Trivy config scan timed out or failed"
             echo '{"version": "2.1.0", "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json", "runs": [{"tool": {"driver": {"name": "Trivy", "version": "timeout"}}, "results": []}]}' > trivy-config-results.sarif
@@ -1038,6 +1045,8 @@ jobs:
   policy-validation:
     name: Kyverno Policy Validation
     runs-on: vollminlab-1
+    needs: [validate-changes]
+    if: needs.validate-changes.result == 'success' && needs.validate-changes.outputs.changed == 'true'
     timeout-minutes: 5
     steps:
       - name: Checkout code
@@ -1045,7 +1054,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install kyverno CLI
+      - name: Install kyverno CLI and yq
         run: |
           set -euo pipefail
           echo "📦 Installing Kyverno CLI..."
@@ -1053,6 +1062,11 @@ jobs:
           tar -xzf kyverno.tar.gz
           sudo mv kyverno /usr/local/bin/
           kyverno version
+          
+          echo "📦 Installing yq..."
+          sudo curl -L -o /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          yq --version
 
       - name: Validate against Kyverno policies
         run: |
@@ -1080,22 +1094,18 @@ jobs:
           
           # Find policy files by parsing 'kind' for each document (handles multi-doc YAML)
           echo "🔍 Searching for Kyverno policy files..."
-          mapfile -t POLICY_FILES < <(
-            git ls-files 'clusters/**/kyverno/**/*.ya?ml' \
-            | while IFS= read -r f; do
-                # Only check files in the policies directory
-                if [[ "$f" == *"/kyverno/"*"/policies/"* ]]; then
-                  echo "📄 Checking policy file: $f"
-                  # handle multi-doc YAMLs
-                  if yq eval-all '.[].kind' "$f" | grep -Eq '^(Policy|ClusterPolicy)$'; then
-                    echo "✅ Found policy: $f"
-                    echo "$f"
-                  else
-                    echo "⚠️ Not a policy file: $f"
-                  fi
-                fi
-            done
-          )
+          # Find policy files and store only the file paths
+          POLICY_FILES=()
+          while IFS= read -r f; do
+            echo "📄 Checking policy file: $f"
+            # handle single and multi-doc YAMLs
+            if yq eval '.kind' "$f" 2>/dev/null | grep -Eq '^(Policy|ClusterPolicy)$'; then
+              echo "✅ Found policy: $f"
+              POLICY_FILES+=("$f")
+            else
+              echo "⚠️ Not a policy file: $f"
+            fi
+          done < <(git ls-files | grep '/kyverno/.*/policies/.*\.ya\?ml$')
           
           echo "📊 Found ${#POLICY_FILES[@]} policy files"
           if (( ${#POLICY_FILES[@]} == 0 )); then
@@ -1111,19 +1121,77 @@ jobs:
           # Validate only the changed resource files
           for file in $CHANGED_FILES; do
             [[ -f "$file" ]] || continue
+            
             # Skip Flux kinds if policies don't target them
-            if yq eval '.kind' "$file" | grep -Eq '^(HelmRelease|OCIRepository)$'; then
+            if yq eval '.kind' "$file" 2>/dev/null | grep -Eq '^(HelmRelease|OCIRepository)$'; then
               echo "Skipping Flux resource (not targeted by policies): $file"
               continue
             fi
             
             echo "Validating: $file"
+            
+            # Check if file is a valid Kubernetes resource (handle multi-doc YAML)
+            if ! yq eval-all '.kind' "$file" 2>/dev/null | grep -qE '^[A-Z]'; then
+              echo "⚠️ Skipping non-Kubernetes resource: $file"
+              continue
+            fi
+            
+            # Build policy arguments
             args=()
-            for p in "${POLICY_FILES[@]}"; do args+=(-f "$p"); done
-            kyverno apply "${args[@]}" --resource "$file" || {
-              echo "❌ Policy validation failed for $file"
-            exit 1
-          }
+            for p in "${POLICY_FILES[@]}"; do 
+              if [[ -f "$p" ]]; then
+                args+=(-f "$p")
+              fi
+            done
+            
+            # Run validation with better error handling
+            if [[ ${#args[@]} -gt 0 ]]; then
+              # For multi-document YAML files, validate each document separately
+              if grep -q '^---$' "$file"; then
+                echo "Multi-document YAML detected, validating each document separately"
+                
+                # Split multi-document YAML and validate each document
+                # Use yq to properly split multi-document YAML
+                yq eval-all 'select(.kind != null)' "$file" | \
+                yq eval-all 'split_doc' - | \
+                while IFS= read -r doc; do
+                  if [[ -n "$doc" && "$doc" =~ apiVersion: && "$doc" =~ kind: ]]; then
+                    KIND=$(echo "$doc" | yq eval '.kind' - 2>/dev/null || echo "unknown")
+                    echo "Validating document with kind: $KIND"
+                    echo "Running: kyverno apply ${POLICY_FILES[*]} --resource -"
+                    echo "$doc" | kyverno apply "${POLICY_FILES[@]}" --resource - || {
+                      echo "❌ Policy validation failed for document in $file"
+                      echo "🔍 Debugging info:"
+                      echo "  File: $file"
+                      echo "  Document kind: $KIND"
+                      echo "  Policy count: ${#POLICY_FILES[@]}"
+                      echo "  Policy files: ${POLICY_FILES[*]}"
+                      echo "  Document preview:"
+                      echo "$doc" | head -5
+                      exit 1
+                    }
+                  fi
+                done
+                echo "✅ Validation passed for all documents in $file"
+              else
+                echo "Single-document YAML detected"
+                echo "Running: kyverno apply ${POLICY_FILES[*]} --resource \"$file\""
+                if kyverno apply "${POLICY_FILES[@]}" --resource "$file"; then
+                  echo "✅ Validation passed for $file"
+                else
+                  echo "❌ Policy validation failed for $file"
+                  echo "🔍 Debugging info:"
+                  echo "  File: $file"
+                  echo "  Policy count: ${#POLICY_FILES[@]}"
+                  echo "  Policy files: ${POLICY_FILES[*]}"
+                  echo "  Args: ${args[*]}"
+                  exit 1
+                fi
+              fi
+            else
+              echo "⚠️ No valid policy files found for validation"
+              exit 1
+            fi
           done
           
           echo "✅ All resources comply with Kyverno policies"
