@@ -969,6 +969,8 @@ jobs:
           gh --version
 
       - name: Upload Trivy SARIF results with retry
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           echo "🔄 Uploading SARIF results with retry mechanism..."
