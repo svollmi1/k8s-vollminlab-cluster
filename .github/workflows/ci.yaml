@@ -1094,7 +1094,6 @@ jobs:
                   echo "$f"
                 else
                   echo "⚠️ Not a policy file: $f"
-                  fi
                 fi
             done
           )
