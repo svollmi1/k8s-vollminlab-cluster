@@ -1151,15 +1151,17 @@ jobs:
                 echo "Multi-document YAML detected, validating each document separately"
                 
                 # Split multi-document YAML and validate each document
-                yq eval-all 'select(.kind != null)' "$file" 2>/dev/null | \
-                yq eval-all 'split_doc' - | \
+                # Use a simpler approach: split on --- and process each document
+                awk '/^---$/ { if (doc) print doc; doc="" } !/^---$/ { if (doc) doc=doc"\n"$0; else doc=$0 } END { if (doc) print doc }' "$file" | \
                 while IFS= read -r doc; do
-                  if [[ -n "$doc" && "$doc" != "---" ]]; then
-                    echo "Validating document with kind: $(echo "$doc" | yq eval '.kind' -)"
+                  if [[ -n "$doc" && "$doc" =~ kind: ]]; then
+                    KIND=$(echo "$doc" | yq eval '.kind' - 2>/dev/null || echo "unknown")
+                    echo "Validating document with kind: $KIND"
                     echo "$doc" | kyverno apply "${args[@]}" --resource - || {
                       echo "❌ Policy validation failed for document in $file"
                       echo "🔍 Debugging info:"
                       echo "  File: $file"
+                      echo "  Document kind: $KIND"
                       echo "  Policy count: ${#POLICY_FILES[@]}"
                       echo "  Policy files: ${POLICY_FILES[*]}"
                       exit 1
