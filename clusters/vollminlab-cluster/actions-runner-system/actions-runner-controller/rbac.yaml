@@ -42,16 +42,16 @@ rules:
   - apiGroups: ["actions.summerwind.dev"]
     resources: ["runnerdeployments", "runners", "runnerreplicasets"]
     verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
-  # Flux CD resources - read access for CI validation
+  # Flux CD resources - read access for CI validation + create/delete for testing
   - apiGroups: ["source.toolkit.fluxcd.io"]
     resources: ["gitrepositories", "ocirepositories", "helmrepositories", "buckets"]
-    verbs: ["get", "list", "watch"]
+    verbs: ["get", "list", "watch", "create", "delete"]
   - apiGroups: ["helm.toolkit.fluxcd.io"]
     resources: ["helmreleases", "helmcharts"]
-    verbs: ["get", "list", "watch"]
+    verbs: ["get", "list", "watch", "create", "delete"]
   - apiGroups: ["kustomize.toolkit.fluxcd.io"]
     resources: ["kustomizations"]
-    verbs: ["get", "list", "watch"]
+    verbs: ["get", "list", "watch", "create", "delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
