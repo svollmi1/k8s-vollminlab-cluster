@@ -9,6 +9,21 @@ metadata:
     category: media
 data:
   values.yaml: |
+    controllers:
+      main:
+        pod:
+          securityContext:
+            fsGroup: 568
+            fsGroupChangePolicy: "OnRootMismatch"
+        containers:
+          main:
+            securityContext:
+              runAsUser: 568
+              runAsGroup: 568
+            env:
+              PUID: "568"
+              PGID: "568"
+              UMASK: "002"
     persistence:
       config:
         enabled: true
@@ -30,16 +45,6 @@ data:
       app: bazarr
       env: production
       category: media
-    podSecurityContext:
-      fsGroup: 568
-      fsGroupChangePolicy: "OnRootMismatch"
-      securityContext:
-        runAsUser: 568
-        runAsGroup: 568
-    env:
-      PUID: "568"
-      PGID: "568"
-      UMASK: "002"
     resources:
       requests:
         cpu: 100m
