@@ -31,12 +31,6 @@ spec:
                     values:
                       - kube-system
                       - default
-      exclude:
-        resources:
-          kinds:
-            - Kustomization
-          namespaces:
-            - flux-system
       validate:
         message: "Required labels: app, env, category"
         pattern:
