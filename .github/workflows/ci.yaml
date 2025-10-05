@@ -1123,8 +1123,14 @@ jobs:
             [[ -f "$file" ]] || continue
             
             # Skip Flux kinds if policies don't target them
-            if yq eval '.kind' "$file" 2>/dev/null | grep -Eq '^(HelmRelease|OCIRepository)$'; then
+            if yq eval '.kind' "$file" 2>/dev/null | grep -Eq '^(HelmRelease|OCIRepository|Kustomization)$'; then
               echo "Skipping Flux resource (not targeted by policies): $file"
+              continue
+            fi
+            
+            # Skip policy files themselves to avoid circular validation
+            if [[ "$file" =~ /kyverno/.*/policies/.*\.ya\?ml$ ]]; then
+              echo "Skipping policy file (avoiding circular validation): $file"
               continue
             fi
             
