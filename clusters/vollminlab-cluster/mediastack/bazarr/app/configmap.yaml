@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bazarr-values
+  namespace: mediastack
+  labels:
+    app: bazarr
+    env: production
+    category: media
+data:
+  values.yaml: |
+    persistence:
+      config:
+        enabled: true
+        existingClaim: pvc-bazarr-config
+        mountPath: /config
+      downloads:
+        enabled: true
+        existingClaim: pvc-completed-downloads
+        mountPath: /downloads
+      tv:
+        enabled: true
+        existingClaim: pvc-tv
+        mountPath: /tv
+      movies:
+        enabled: true
+        existingClaim: pvc-movies
+        mountPath: /movies
+    podLabels:
+      app: bazarr
+      env: production
+      category: media
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 200m
+        memory: 512Mi

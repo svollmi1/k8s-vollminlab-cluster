@@ -1,0 +1,14 @@
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: OCIRepository
+metadata:
+  name: bazarr-repo
+  namespace: flux-system
+  labels:
+    app: bazarr
+    env: production
+    category: apps
+spec:
+  url: oci://tccr.io/truecharts/bazarr
+  interval: 5m
+  ref:
+    tag: 22.8.1

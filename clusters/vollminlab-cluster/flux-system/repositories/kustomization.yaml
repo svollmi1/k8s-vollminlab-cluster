@@ -4,6 +4,7 @@ metadata:
   name: flux-repositories
 resources:
   - arc-helmrepository.yaml
+  - bazarr-helmrepository.yaml
   - bitnami-helmrepository.yaml
   - capacitor-helmrepository.yaml
   - elastic-helmrepository.yaml
