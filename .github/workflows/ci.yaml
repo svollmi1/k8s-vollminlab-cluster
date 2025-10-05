@@ -1042,6 +1042,8 @@ jobs:
   policy-validation:
     name: Kyverno Policy Validation
     runs-on: vollminlab-1
+    needs: [validate-changes]
+    if: needs.validate-changes.result == 'success' && needs.validate-changes.outputs.changed == 'true'
     timeout-minutes: 5
     steps:
       - name: Checkout code
