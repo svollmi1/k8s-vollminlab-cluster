@@ -69,7 +69,7 @@ data:
           app: longhorn-csi-snapshotter
           env: production
           category: storage
-      plugin:
+      node:
         podLabels:
           app: longhorn-csi-plugin
           env: production
