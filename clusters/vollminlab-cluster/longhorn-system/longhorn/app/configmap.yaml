@@ -17,22 +17,50 @@ data:
         app: longhorn-manager
         env: production
         category: storage
+      tolerations:
+        - key: dmz
+          operator: Exists
+          effect: NoSchedule
+        - key: dmz
+          operator: Exists
+          effect: NoExecute
     engineImage:
       podLabels:
         app: longhorn-engine-image
         env: production
         category: storage
+      tolerations:
+        - key: dmz
+          operator: Exists
+          effect: NoSchedule
+        - key: dmz
+          operator: Exists
+          effect: NoExecute
     instanceManager:
       podLabels:
         app: longhorn-instance-manager
         env: production
         category: storage
+      tolerations:
+        - key: dmz
+          operator: Exists
+          effect: NoSchedule
+        - key: dmz
+          operator: Exists
+          effect: NoExecute
     csi:
       attacher:
         podLabels:
           app: longhorn-csi-attacher
           env: production
           category: storage
+        tolerations:
+          - key: dmz
+            operator: Exists
+            effect: NoSchedule
+          - key: dmz
+            operator: Exists
+            effect: NoExecute
       provisioner:
         podLabels:
           app: longhorn-csi-provisioner
