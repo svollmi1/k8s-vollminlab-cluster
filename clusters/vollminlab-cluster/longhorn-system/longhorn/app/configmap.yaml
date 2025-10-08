@@ -54,13 +54,6 @@ data:
           app: longhorn-csi-attacher
           env: production
           category: storage
-        tolerations:
-          - key: dmz
-            operator: Exists
-            effect: NoSchedule
-          - key: dmz
-            operator: Exists
-            effect: NoExecute
       provisioner:
         podLabels:
           app: longhorn-csi-provisioner
@@ -81,6 +74,13 @@ data:
           app: longhorn-csi-plugin
           env: production
           category: storage
+        tolerations:
+          - key: dmz
+            operator: Exists
+            effect: NoSchedule
+          - key: dmz
+            operator: Exists
+            effect: NoExecute
     driverDeployer:
       podLabels:
         app: longhorn-driver-deployer
