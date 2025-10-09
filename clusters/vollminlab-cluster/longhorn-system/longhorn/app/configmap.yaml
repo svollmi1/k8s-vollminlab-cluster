@@ -12,6 +12,7 @@ data:
     defaultSettings:
       defaultReplicaCount: 3
       defaultDataPath: /var/lib/longhorn
+      taintToleration: "dmz=true:NoSchedule;dmz=true:NoExecute"
     longhornManager:
       podLabels:
         app: longhorn-manager
