@@ -180,7 +180,7 @@ data:
                 icon: mdi-football-helmet
             - D.E. Shaw Access:
                 description: Work access portal
-                href: https://access-test.deshaw.com
+                href: https://access-cloud.deshaw.com
                 icon: mdi-briefcase
             - GroupMe:
                 description: Group messaging web
