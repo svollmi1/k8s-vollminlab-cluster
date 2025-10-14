@@ -24,6 +24,24 @@ spec:
                 - "*"
               namespaces:
                 - default
+      exclude:
+        any:
+          - resources:
+              kinds:
+                - StorageClass
+                - ClusterRole
+                - ClusterRoleBinding
+                - ClusterPolicy
+                - PolicyException
+                - CustomResourceDefinition
+                - Namespace
+                - Node
+                - PersistentVolume
+                - NetworkPolicy
+                - IngressClass
+                - CSIDriver
+                - CSINode
+                - VolumeAttachment
       validate:
         message: "Do not deploy resources into the 'default' namespace."
         deny: {}

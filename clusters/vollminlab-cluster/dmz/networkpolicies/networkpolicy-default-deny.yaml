@@ -1,0 +1,14 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: dmz
+  labels:
+    app: networkpolicy-default-deny
+    env: production
+    category: security
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress

@@ -1,0 +1,63 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: dmz-restrict-external-access
+  annotations:
+    policies.kyverno.io/title: DMZ Restrict External Access Label
+    policies.kyverno.io/category: Security, Multi-Tenancy
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >-
+      Prevents pods outside the DMZ namespace from using the external-access or
+      internet-egress labels. These labels allow external traffic and internet access,
+      which should only be permitted in the isolated DMZ namespace.
+  labels:
+    app: kyverno
+    env: production
+    category: security
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: restrict-external-access-label
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - dmz
+      validate:
+        message: >-
+          The label 'external-access: true' is only allowed in the DMZ namespace.
+          External access must be restricted to isolated DMZ workloads for security.
+        deny:
+          conditions:
+            any:
+              - key: "{{ request.object.metadata.labels.\"external-access\" || '' }}"
+                operator: Equals
+                value: "true"
+    - name: restrict-internet-egress-label
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - dmz
+      validate:
+        message: >-
+          The label 'internet-egress: true' is only allowed in the DMZ namespace.
+          Internet egress must be restricted to isolated DMZ workloads for security.
+        deny:
+          conditions:
+            any:
+              - key: "{{ request.object.metadata.labels.\"internet-egress\" || '' }}"
+                operator: Equals
+                value: "true"
