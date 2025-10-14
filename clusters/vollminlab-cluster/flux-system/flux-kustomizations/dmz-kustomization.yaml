@@ -12,4 +12,3 @@ spec:
     name: flux-system
   wait: true
   timeout: 5m
-
