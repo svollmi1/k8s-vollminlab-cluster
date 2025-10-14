@@ -17,4 +17,3 @@ parameters:
   staleReplicaTimeout: "30"
   fromBackup: ""
   fsType: "ext4"
-
