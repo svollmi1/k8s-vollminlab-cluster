@@ -18,4 +18,3 @@ spec:
     - from:
         - ipBlock:
             cidr: 0.0.0.0/0
-
