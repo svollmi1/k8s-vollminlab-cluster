@@ -36,4 +36,3 @@ spec:
               - key: dmz
                 operator: Exists
                 effect: NoSchedule
-
