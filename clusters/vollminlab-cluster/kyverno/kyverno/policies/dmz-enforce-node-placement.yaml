@@ -16,8 +16,7 @@ metadata:
     env: production
     category: security
 spec:
-  validationFailureAction: Enforce
-  background: true
+  background: false
   rules:
     - name: add-dmz-node-selector
       match:
