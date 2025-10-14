@@ -4,6 +4,7 @@ metadata:
   name: flux-kustomizations
 resources:
   - clusterwide-kustomization.yaml
+  - dmz-kustomization.yaml
   - metallb-system-kustomization.yaml
   - capacitor-kustomization.yaml
   - kyverno-kustomization.yaml

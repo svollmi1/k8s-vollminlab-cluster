@@ -4,6 +4,8 @@ kind: Kustomization
 metadata:
   name: kyverno-cluster-policies
 resources:
+  - dmz-enforce-node-placement.yaml
+  - dmz-restrict-external-access.yaml
   - flux-exception.yaml
   - force-rescan.yaml
   - inject-namespace-labels.yaml

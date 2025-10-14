@@ -1,0 +1,39 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: dmz-enforce-node-placement
+  annotations:
+    policies.kyverno.io/title: DMZ Enforce Node Placement
+    policies.kyverno.io/category: Security, Multi-Tenancy
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >-
+      Automatically adds nodeSelector and tolerations to all pods in the DMZ namespace
+      to ensure they only run on designated DMZ nodes. This prevents DMZ workloads
+      from running on internal cluster nodes.
+  labels:
+    app: kyverno
+    env: production
+    category: security
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: add-dmz-node-selector
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - dmz
+      mutate:
+        patchStrategicMerge:
+          spec:
+            nodeSelector:
+              role: dmz
+            tolerations:
+              - key: dmz
+                operator: Exists
+                effect: NoSchedule
+
