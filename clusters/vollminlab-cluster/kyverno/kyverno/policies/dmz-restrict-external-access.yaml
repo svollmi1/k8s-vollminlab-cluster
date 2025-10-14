@@ -40,7 +40,6 @@ spec:
               - key: "{{ request.object.metadata.labels.\"external-access\" || '' }}"
                 operator: Equals
                 value: "true"
-    
     - name: restrict-internet-egress-label
       match:
         any:
