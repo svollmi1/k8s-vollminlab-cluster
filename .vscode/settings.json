@@ -12,6 +12,7 @@
       "file:///c%3A/git/k8s-vollminlab-cluster/clusters/vollminlab-cluster/kyverno/kyverno/policies/inject-resource-requirements.yaml",
       "file:///c%3A/git/k8s-vollminlab-cluster/clusters/vollminlab-cluster/kyverno/kyverno/policies/restrict-latest-tag.yaml",
       "file:///c%3A/git/k8s-vollminlab-cluster/clusters/vollminlab-cluster/kyverno/kyverno/policies/require-resources.yaml",
+      "file:///c%3A/git/k8s-vollminlab-cluster/clusters/vollminlab-cluster/kyverno/kyverno/policies/dmz-enforce-node-placement.yaml",
       "file:///c%3A/git/k8s-vollminlab-cluster/clusters/vollminlab-cluster/kyverno/kyverno/policies/dmz-restrict-external-access.yaml"
     ],
     "https://json.schemastore.org/kustomization.json": [
