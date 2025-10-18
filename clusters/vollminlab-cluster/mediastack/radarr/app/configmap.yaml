@@ -33,3 +33,9 @@ data:
       app: radarr
       env: production
       category: media
+    securityContext:
+      runAsUser: 568
+      runAsGroup: 568
+    podSecurityContext:
+      fsGroup: 568
+      fsGroupChangePolicy: "OnRootMismatch"
