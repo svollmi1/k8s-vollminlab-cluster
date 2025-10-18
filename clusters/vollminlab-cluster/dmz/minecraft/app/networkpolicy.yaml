@@ -16,18 +16,25 @@ spec:
     - Egress
   ingress:
     - from:
-        - ipBlock: { cidr: 192.168.160.2/32 }   # HAProxy node 1
-        - ipBlock: { cidr: 192.168.160.3/32 }   # HAProxy node 2
+        - ipBlock:
+            cidr: 192.168.160.2/32  # HAProxy node 1
+        - ipBlock:
+            cidr: 192.168.160.3/32  # HAProxy node 2
       ports:
         - protocol: TCP
           port: 25565
   egress:
     - to:
-        - ipBlock: { cidr: 0.0.0.0/0 }
+        - ipBlock:
+            cidr: 0.0.0.0/0
       ports:
-        - { protocol: TCP, port: 443 }
-        - { protocol: TCP, port: 80 }
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 80
     - to:
-        - ipBlock: { cidr: 10.96.0.10/32 }   # replace with your kube-dns ClusterIP
+        - ipBlock:
+            cidr: 10.96.0.10/32  # kube-dns ClusterIP
       ports:
-        - { protocol: UDP, port: 53 }
+        - protocol: UDP
+          port: 53
