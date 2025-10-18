@@ -24,6 +24,17 @@ data:
     nodeSelector:
       kubernetes.io/hostname: k8sworker05
 
+    tolerations:
+      - key: "dmz"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+
+    podLabels:
+      app: minecraft
+      env: production
+      category: gaming
+
     persistence:
       dataDir:
         enabled: true
