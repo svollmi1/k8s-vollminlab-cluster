@@ -11,8 +11,7 @@ data:
   values.yaml: |
     image:
       repository: itzg/minecraft-server
-      tag: latest
-
+      tag: "java21"
     resources:
       requests:
         cpu: 2000m
@@ -20,29 +19,25 @@ data:
       limits:
         cpu: 4000m
         memory: 8Gi
-
     nodeSelector:
       kubernetes.io/hostname: k8sworker05
-
     tolerations:
       - key: "dmz"
         operator: "Equal"
         value: "true"
         effect: "NoSchedule"
-
     podLabels:
       app: minecraft
       env: production
       category: gaming
-
     persistence:
       dataDir:
         enabled: true
         Size: 20Gi
       storageClass: longhorn
-
     minecraftServer:
       eula: "TRUE"
+      version: "1.21.10"
       type: "PAPER"
       memory: "6G"
       viewDistance: 8
@@ -55,14 +50,12 @@ data:
         enabled: false
       extraEnv:
         SIMULATION_DISTANCE: "6"
-
     readinessProbe:
       initialDelaySeconds: 30
       periodSeconds: 10
       failureThreshold: 10
       successThreshold: 1
       timeoutSeconds: 1
-
     livenessProbe:
       initialDelaySeconds: 30
       periodSeconds: 5
