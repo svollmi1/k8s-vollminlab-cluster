@@ -22,10 +22,6 @@ data:
         enabled: true
         existingClaim: pvc-tv
         mountPath: /downloads/tv
-    podLabels:
-      app: overseerr
-      env: production
-      category: media
     resources:
       requests:
         cpu: 100m
@@ -33,3 +29,25 @@ data:
       limits:
         cpu: 200m
         memory: 512Mi
+    podLabels:
+      app: overseerr
+      env: production
+      category: media
+    securityContext:
+      runAsUser: 568
+      runAsGroup: 568
+    podSecurityContext:
+      fsGroup: 568
+      fsGroupChangePolicy: "OnRootMismatch"
+    terminationGracePeriodSeconds: 60
+    livenessProbe:
+      httpGet:
+        path: /
+        port: 5055
+      initialDelaySeconds: 60
+    startupProbe:
+      httpGet:
+        path: /
+        port: 5055
+      failureThreshold: 60
+      periodSeconds: 5
