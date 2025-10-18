@@ -122,11 +122,16 @@ data:
                 href: https://udm.vollminlab.com
                 icon: unifi.png
                 ping: https://udm.vollminlab.com
-            - HAProxy Stats:
+            - HAProxy Internal Stats:
                 description: Load balancer statistics
-                href: http://haproxy01.vollminlab.com:8404/stats
+                href: http://haproxyvip.vollminlab.com:8404/stats
                 icon: haproxy.png
-                ping: http://haproxy01.vollminlab.com:8404/stats
+                ping: http://haproxyvip.vollminlab.com:8404/stats
+            - HAProxy DMZ Stats:
+                description: Load balancer statistics
+                href: http://haproxydmzvip.vollminlab.com:8404/stats
+                icon: haproxy.png
+                ping: http://haproxydmzvip.vollminlab.com:8404/stats
         - Monitoring & Observability:
             - Grafana:
                 description: Metrics visualization
