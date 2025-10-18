@@ -12,7 +12,7 @@ data:
     image:
       repository: itzg/minecraft-server
       tag: latest
-    
+
     resources:
       requests:
         cpu: 2000m
@@ -20,16 +20,16 @@ data:
       limits:
         cpu: 4000m
         memory: 8Gi
-    
+
     nodeSelector:
       kubernetes.io/hostname: k8sworker05
-    
+
     persistence:
       dataDir:
         enabled: true
         Size: 20Gi
       storageClass: longhorn
-    
+
     minecraftServer:
       eula: "TRUE"
       type: "PAPER"
@@ -44,14 +44,14 @@ data:
         enabled: false
       extraEnv:
         SIMULATION_DISTANCE: "6"
-    
+
     readinessProbe:
       initialDelaySeconds: 30
       periodSeconds: 10
       failureThreshold: 10
       successThreshold: 1
       timeoutSeconds: 1
-    
+
     livenessProbe:
       initialDelaySeconds: 30
       periodSeconds: 5
