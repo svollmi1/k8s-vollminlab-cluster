@@ -12,16 +12,7 @@ data:
     image:
       repository: itzg/minecraft-server
       tag: latest
-    persistence:
-      enabled: true
-      size: 20Gi
-      storageClass: longhorn
-    service:
-      type: NodePort
-      nodePort: 32565
-      externalTrafficPolicy: Local
-    nodeSelector:
-      kubernetes.io/hostname: k8sworker05
+    
     resources:
       requests:
         cpu: 2000m
@@ -29,33 +20,41 @@ data:
       limits:
         cpu: 4000m
         memory: 8Gi
-    env:
-      EULA: "TRUE"
-      TYPE: "PAPER"
-      MEMORY: "6G"
-      VIEW_DISTANCE: "8"
-      SIMULATION_DISTANCE: "6"
-      ENABLE_RCON: "FALSE"
+    
+    nodeSelector:
+      kubernetes.io/hostname: k8sworker05
+    
+    persistence:
+      dataDir:
+        enabled: true
+        Size: 20Gi
+      storageClass: longhorn
+    
+    minecraftServer:
+      eula: "TRUE"
+      type: "PAPER"
+      memory: "6G"
+      viewDistance: 8
+      maxPlayers: 20
+      difficulty: normal
+      serviceType: NodePort
+      nodePort: 32565
+      externalTrafficPolicy: Local
+      rcon:
+        enabled: false
+      extraEnv:
+        SIMULATION_DISTANCE: "6"
+    
     readinessProbe:
-      tcpSocket:
-        port: 25565
-      initialDelaySeconds: 10
+      initialDelaySeconds: 30
       periodSeconds: 10
-    networkPolicy:
-      enabled: true
-      ingress:
-        - from:
-            - ipBlock:
-                cidr: 192.168.160.4/32
-          ports:
-            - protocol: TCP
-              port: 25565
-      egress:
-        - to:
-            - ipBlock:
-                cidr: 0.0.0.0/0
-          ports:
-            - protocol: TCP
-              port: 443
-            - protocol: TCP
-              port: 80
+      failureThreshold: 10
+      successThreshold: 1
+      timeoutSeconds: 1
+    
+    livenessProbe:
+      initialDelaySeconds: 30
+      periodSeconds: 5
+      failureThreshold: 10
+      successThreshold: 1
+      timeoutSeconds: 1
