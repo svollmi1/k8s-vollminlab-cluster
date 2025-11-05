@@ -46,7 +46,6 @@ spec:
                   app: "?*"
                   env: "?*"
                   category: "?*"
-
     - name: require-labels-on-pods-and-namespaces
       match:
         resources:
@@ -65,7 +64,6 @@ spec:
               app: "?*"
               env: "?*"
               category: "?*"
-    
     - name: require-labels-on-services
       match:
         resources:
