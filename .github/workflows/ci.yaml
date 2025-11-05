@@ -254,8 +254,13 @@ jobs:
               esac
               
               echo "Validating schema for CHANGED file: $file"
-              kubeconform -strict -ignore-missing-schemas -summary "$file" || {
-                echo "❌ Kubernetes schema validation failed for CHANGED file: $file"
+              timeout 30s kubeconform -strict -ignore-missing-schemas -summary "$file" || {
+                EXIT_CODE=$?
+                if [[ $EXIT_CODE -eq 124 ]]; then
+                  echo "❌ Kubernetes schema validation TIMED OUT for CHANGED file: $file (exceeded 30s)"
+                else
+                  echo "❌ Kubernetes schema validation failed for CHANGED file: $file"
+                fi
                 exit 1
               }
             fi
