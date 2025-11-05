@@ -1194,8 +1194,12 @@ jobs:
                   echo "🔍 Attempting to identify failing policy by testing individually..."
                   for policy in "${POLICY_FILES[@]}"; do
                     echo "Testing policy: $policy"
-                    if ! kyverno apply -f "$policy" --resource "$file" 2>&1; then
+                    OUTPUT=$(kyverno apply "$policy" --resource "$file" 2>&1) || true
+                    if echo "$OUTPUT" | grep -q "fail:\|error:"; then
                       echo "❌ FAILED: $policy"
+                      echo "$OUTPUT" | grep -A 5 "fail:\|error:"
+                    elif echo "$OUTPUT" | grep -q "require policy"; then
+                      echo "⚠️ SKIPPED: $policy (requires variables)"
                     else
                       echo "✅ PASSED: $policy"
                     fi
