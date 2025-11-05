@@ -1200,13 +1200,15 @@ jobs:
                   for policy in "${POLICY_FILES[@]}"; do
                     echo "Testing policy: $policy"
                     OUTPUT=$(kyverno apply "$policy" --resource "$file" 2>&1) || true
-                    if echo "$OUTPUT" | grep -q "fail:\|error:"; then
+                    if echo "$OUTPUT" | grep -qE "fail: [1-9]|error: [1-9]"; then
                       echo "❌ FAILED: $policy"
-                      echo "$OUTPUT" | grep -A 5 "fail:\|error:"
+                      echo "$OUTPUT" | grep -E "fail:|error:|warn:" | head -3
                     elif echo "$OUTPUT" | grep -q "require policy"; then
                       echo "⚠️ SKIPPED: $policy (requires variables)"
-                    else
+                    elif echo "$OUTPUT" | grep -qE "pass: [1-9]|pass: 0, fail: 0"; then
                       echo "✅ PASSED: $policy"
+                    else
+                      echo "ℹ️  NO MATCH: $policy (does not apply to this resource)"
                     fi
                   done
                   exit 1
