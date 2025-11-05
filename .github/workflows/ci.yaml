@@ -254,8 +254,13 @@ jobs:
               esac
               
               echo "Validating schema for CHANGED file: $file"
-              kubeconform -strict -ignore-missing-schemas -summary "$file" || {
-                echo "❌ Kubernetes schema validation failed for CHANGED file: $file"
+              timeout 30s kubeconform -strict -ignore-missing-schemas -summary "$file" || {
+                EXIT_CODE=$?
+                if [[ $EXIT_CODE -eq 124 ]]; then
+                  echo "❌ Kubernetes schema validation TIMED OUT for CHANGED file: $file (exceeded 30s)"
+                else
+                  echo "❌ Kubernetes schema validation failed for CHANGED file: $file"
+                fi
                 exit 1
               }
             fi
@@ -1182,16 +1187,33 @@ jobs:
               else
                 echo "Single-document YAML detected"
                 echo "Running: kyverno apply ${POLICY_FILES[*]} --resource \"$file\""
-                if kyverno apply "${POLICY_FILES[@]}" --resource "$file"; then
-                  echo "✅ Validation passed for $file"
-                else
+                if ! kyverno apply "${POLICY_FILES[@]}" --resource "$file" 2>&1; then
+                  echo ""
                   echo "❌ Policy validation failed for $file"
                   echo "🔍 Debugging info:"
                   echo "  File: $file"
                   echo "  Policy count: ${#POLICY_FILES[@]}"
                   echo "  Policy files: ${POLICY_FILES[*]}"
                   echo "  Args: ${args[*]}"
+                  echo ""
+                  echo "🔍 Attempting to identify failing policy by testing individually..."
+                  for policy in "${POLICY_FILES[@]}"; do
+                    echo "Testing policy: $policy"
+                    OUTPUT=$(kyverno apply "$policy" --resource "$file" 2>&1) || true
+                    if echo "$OUTPUT" | grep -qE "fail: [1-9]|error: [1-9]"; then
+                      echo "❌ FAILED: $policy"
+                      echo "$OUTPUT" | grep -E "fail:|error:|warn:" | head -3
+                    elif echo "$OUTPUT" | grep -q "require policy"; then
+                      echo "⚠️ SKIPPED: $policy (requires variables)"
+                    elif echo "$OUTPUT" | grep -qE "pass: [1-9]|pass: 0, fail: 0"; then
+                      echo "✅ PASSED: $policy"
+                    else
+                      echo "ℹ️  NO MATCH: $policy (does not apply to this resource)"
+                    fi
+                  done
                   exit 1
+                else
+                  echo "✅ Validation passed for $file"
                 fi
               fi
             else

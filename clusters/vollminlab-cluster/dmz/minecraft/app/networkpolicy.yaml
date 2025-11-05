@@ -23,6 +23,8 @@ spec:
       ports:
         - protocol: TCP
           port: 25565
+        - protocol: TCP
+          port: 8123  # Dynmap web interface
   egress:
     - to:
         - ipBlock:

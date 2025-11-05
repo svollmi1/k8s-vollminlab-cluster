@@ -6,3 +6,4 @@ resources:
   - configmap.yaml
   - helmrelease.yaml
   - networkpolicy.yaml
+  - dynmap-service.yaml

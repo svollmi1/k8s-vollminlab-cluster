@@ -25,10 +25,9 @@ spec:
         resources:
           namespaces:
             - ingress-nginx
-          names:
-            - ingress-nginx-controller
+            - dmz
       validate:
-        message: "Only ingress-nginx-controller in the ingress-nginx namespace may use Service type LoadBalancer."
+        message: "Only ingress-nginx-controller in the ingress-nginx namespace may use Service type LoadBalancer. DMZ namespace is excluded for external-facing services."
         pattern:
           spec:
             type: ClusterIP
