@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: minecraft-dynmap
+  namespace: dmz
+  labels:
+    app: minecraft
+    env: production
+    category: gaming
+spec:
+  type: NodePort
+  ports:
+    - name: dynmap
+      port: 8123
+      targetPort: 8123
+      protocol: TCP
+      nodePort: 32566
+  selector:
+    app: minecraft-minecraft
+  externalTrafficPolicy: Local
+

@@ -48,6 +48,8 @@ data:
       externalTrafficPolicy: Local
       rcon:
         enabled: false
+      pluginUrls:
+        - https://github.com/webbukkit/dynmap/releases/download/v3.4-beta-1/Dynmap-3.4-beta-1-spigot.jar
       extraEnv:
         SIMULATION_DISTANCE: "6"
     readinessProbe:
