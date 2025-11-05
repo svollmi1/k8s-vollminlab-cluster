@@ -22,16 +22,12 @@ spec:
           kinds:
             - Service
       exclude:
-        any:
-          - resources:
-              namespaces:
-                - ingress-nginx
-          - resources:
-              namespaces:
-                - dmz
-          - resources:
-              names:
-                - ingress-nginx-controller
+        resources:
+          namespaces:
+            - ingress-nginx
+            - dmz
+          names:
+            - ingress-nginx-controller
       validate:
         message: "Only ingress-nginx-controller in the ingress-nginx namespace may use Service type LoadBalancer. DMZ namespace is excluded for external-facing services."
         pattern:
