@@ -40,6 +40,8 @@ data:
       version: "1.21.10"
       type: "PAPER"
       memory: "6G"
+      spigetResources:
+        - 274
       viewDistance: 8
       maxPlayers: 20
       difficulty: normal
@@ -48,8 +50,6 @@ data:
       externalTrafficPolicy: Local
       rcon:
         enabled: false
-      pluginUrls:
-        - https://github.com/webbukkit/dynmap/releases/download/v3.4-beta-1/Dynmap-3.4-beta-1-spigot.jar
       extraEnv:
         SIMULATION_DISTANCE: "6"
     readinessProbe:
