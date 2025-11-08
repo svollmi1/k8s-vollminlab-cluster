@@ -41,7 +41,7 @@ data:
       type: "PAPER"
       memory: "6G"
       spigetResources:
-        - 274
+        - "274"
       viewDistance: 8
       maxPlayers: 20
       difficulty: normal
