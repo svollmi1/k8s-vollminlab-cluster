@@ -40,8 +40,6 @@ data:
       version: "1.21.10"
       type: "PAPER"
       memory: "6G"
-      spigetResources:
-        - "274"
       viewDistance: 8
       maxPlayers: 20
       difficulty: normal
@@ -52,6 +50,7 @@ data:
         enabled: false
       extraEnv:
         SIMULATION_DISTANCE: "6"
+        SPIGET_RESOURCES: "274"
     readinessProbe:
       initialDelaySeconds: 30
       periodSeconds: 10
