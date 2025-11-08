@@ -48,11 +48,9 @@ data:
       externalTrafficPolicy: Local
       rcon:
         enabled: false
-      spigetResources: []
     extraEnv:
       SIMULATION_DISTANCE: "6"
-      SPIGET_RESOURCES: ""
-      PLUGINS: "https://edge.forgecdn.net/files/6090/792/Dynmap-3.7-beta-8-spigot.jar"
+      PLUGINS: "https://cdn.modrinth.com/data/swbUV1cr/versions/lfk408pd/bluemap-5.13-spigot.jar"
     readinessProbe:
       initialDelaySeconds: 30
       periodSeconds: 10

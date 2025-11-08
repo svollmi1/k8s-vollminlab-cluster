@@ -24,7 +24,7 @@ spec:
         - protocol: TCP
           port: 25565
         - protocol: TCP
-          port: 8123  # Dynmap web interface
+          port: 8100  # Web map interface
   egress:
     - to:
         - ipBlock:
