@@ -48,9 +48,9 @@ data:
       externalTrafficPolicy: Local
       rcon:
         enabled: false
-      extraEnv:
-        SIMULATION_DISTANCE: "6"
-        SPIGET_RESOURCES: "274"
+    extraEnv:
+      SIMULATION_DISTANCE: "6"
+      SPIGET_RESOURCES: "274"
     readinessProbe:
       initialDelaySeconds: 30
       periodSeconds: 10
