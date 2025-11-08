@@ -21,3 +21,25 @@ spec:
     - kind: ConfigMap
       name: minecraft-values
       valuesKey: values.yaml
+  postRenderers:
+    - kustomize:
+        patchesStrategicMerge:
+          - |
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: minecraft-minecraft
+            spec:
+              template:
+                spec:
+                  securityContext:
+                    runAsNonRoot: true
+                    seccompProfile:
+                      type: RuntimeDefault
+                  containers:
+                    - name: minecraft-minecraft
+                      securityContext:
+                        allowPrivilegeEscalation: false
+                        capabilities:
+                          drop:
+                            - ALL
