@@ -50,7 +50,7 @@ data:
         enabled: false
     extraEnv:
       SIMULATION_DISTANCE: "6"
-      SPIGET_RESOURCES: "274"
+      PLUGINS: "https://github.com/webbukkit/dynmap/releases/download/v3.2.1/Dynmap-3.2.1-spigot.jar"
     readinessProbe:
       initialDelaySeconds: 30
       periodSeconds: 10
