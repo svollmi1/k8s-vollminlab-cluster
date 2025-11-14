@@ -47,10 +47,19 @@ data:
       nodePort: 32565
       externalTrafficPolicy: Local
       rcon:
-        enabled: false
+        enabled: true
+        # Password is now stored in SealedSecret and passed via environment variable
     extraEnv:
       SIMULATION_DISTANCE: "6"
       PLUGINS: "https://cdn.modrinth.com/data/swbUV1cr/versions/lfk408pd/bluemap-5.13-spigot.jar"
+    # RCON password from secret (itzg/minecraft-server supports RCON_PASSWORD env var)
+    # Note: The Helm chart may need extraEnvVars or envFrom instead - check chart docs
+    extraEnvVars:
+      - name: RCON_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: minecraft-rcon-secret
+            key: password
     readinessProbe:
       initialDelaySeconds: 30
       periodSeconds: 10
