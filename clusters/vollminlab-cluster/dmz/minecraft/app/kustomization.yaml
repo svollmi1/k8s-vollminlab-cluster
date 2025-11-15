@@ -4,6 +4,7 @@ metadata:
   name: minecraft
 resources:
   - configmap.yaml
+  - max-world-size-script-configmap.yaml
   - minecraft-rcon-secret-sealedsecret.yaml
   - helmrelease.yaml
   - networkpolicy.yaml
