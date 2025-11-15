@@ -54,8 +54,9 @@ data:
       serviceType: NodePort
       nodePort: 32565
       externalTrafficPolicy: Local
-      # maxWorldSize: Not directly supported by Helm chart
-      # Using startup script (set-max-world-size.sh) to set max-world-size in server.properties
+      # Set maxWorldSize explicitly to prevent Helm chart from adding duplicate MAX_WORLD_SIZE env var
+      # The startup script will override this in server.properties anyway
+      maxWorldSize: 29999984
       rcon:
         enabled: true
         # Password is now stored in SealedSecret and passed via environment variable
