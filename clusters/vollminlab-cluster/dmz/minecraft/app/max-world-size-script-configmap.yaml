@@ -12,9 +12,9 @@ data:
     #!/bin/bash
     # Script to set max-world-size in server.properties
     # The itzg/minecraft-server image executes scripts in /data that end with .sh on startup
-    
+
     PROPERTIES_FILE="/data/server.properties"
-    
+
     # Wait for server.properties to exist (it might be created on first run)
     MAX_WAIT=30
     WAITED=0
@@ -22,18 +22,17 @@ data:
       sleep 1
       WAITED=$((WAITED + 1))
     done
-    
+
     if [ -f "$PROPERTIES_FILE" ]; then
       echo "Setting max-world-size to 29999984 in server.properties..."
-      
+
       # Remove existing max-world-size line if present (including commented out)
       sed -i '/^#*max-world-size=/d' "$PROPERTIES_FILE"
-      
+
       # Add the correct max-world-size setting
       echo "max-world-size=29999984" >> "$PROPERTIES_FILE"
-      
+
       echo "max-world-size has been set to 29999984 in server.properties"
     else
       echo "Warning: server.properties file not found at $PROPERTIES_FILE after waiting ${MAX_WAIT}s"
     fi
-
