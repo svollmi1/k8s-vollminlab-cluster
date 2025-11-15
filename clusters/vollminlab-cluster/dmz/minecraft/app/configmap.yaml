@@ -46,7 +46,7 @@ data:
       serviceType: NodePort
       nodePort: 32565
       externalTrafficPolicy: Local
-      maxworldsize: 29999984  # Set to default max (effectively unlimited) - this controls world generation, NOT the playable border
+      maxWorldSize: 29999984  # Set to default max (effectively unlimited) - controls world generation, NOT the playable border
       # The world border is controlled via /worldborder command, not this setting
       rcon:
         enabled: true
