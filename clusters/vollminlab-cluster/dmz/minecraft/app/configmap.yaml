@@ -35,6 +35,14 @@ data:
         enabled: true
         Size: 20Gi
       storageClass: longhorn
+    extraVolumes:
+      - name: max-world-size-script
+        configMap:
+          name: minecraft-max-world-size-script
+    extraVolumeMounts:
+      - name: max-world-size-script
+        mountPath: /data/set-max-world-size.sh
+        subPath: set-max-world-size.sh
     minecraftServer:
       eula: "TRUE"
       version: "1.21.10"
@@ -46,16 +54,14 @@ data:
       serviceType: NodePort
       nodePort: 32565
       externalTrafficPolicy: Local
-      # maxWorldSize: Not directly supported by Helm chart - use MAX_WORLD_SIZE env var instead
+      # maxWorldSize: Not directly supported by Helm chart
+      # Using startup script (set-max-world-size.sh) to set max-world-size in server.properties
       rcon:
         enabled: true
         # Password is now stored in SealedSecret and passed via environment variable
     extraEnv:
       SIMULATION_DISTANCE: "6"
       PLUGINS: "https://cdn.modrinth.com/data/swbUV1cr/versions/lfk408pd/bluemap-5.13-spigot.jar"
-      # Set max-world-size to default (29999984) - controls world generation, NOT the playable border
-      # The world border is controlled via /worldborder command
-      MAX_WORLD_SIZE: "29999984"
     # RCON password from secret (itzg/minecraft-server supports RCON_PASSWORD env var)
     # Note: The Helm chart may need extraEnvVars or envFrom instead - check chart docs
     extraEnvVars:
