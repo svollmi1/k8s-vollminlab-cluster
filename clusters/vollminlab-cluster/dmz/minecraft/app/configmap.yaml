@@ -46,6 +46,7 @@ data:
       serviceType: NodePort
       nodePort: 32565
       externalTrafficPolicy: Local
+      maxworldsize: 30000
       rcon:
         enabled: true
         # Password is now stored in SealedSecret and passed via environment variable
