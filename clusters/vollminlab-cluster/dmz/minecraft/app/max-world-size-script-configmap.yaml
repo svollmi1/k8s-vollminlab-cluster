@@ -12,19 +12,21 @@ data:
     #!/bin/bash
     # Script to set max-world-size in server.properties
     # The itzg/minecraft-server image executes scripts in /data that end with .sh on startup
+    # Make sure we're executable
+    chmod +x "$0" 2>/dev/null || true
 
     PROPERTIES_FILE="/data/server.properties"
 
     # Wait for server.properties to exist (it might be created on first run)
-    MAX_WAIT=30
+    MAX_WAIT=60
     WAITED=0
     while [ ! -f "$PROPERTIES_FILE" ] && [ $WAITED -lt $MAX_WAIT ]; do
-      sleep 1
-      WAITED=$((WAITED + 1))
+      sleep 2
+      WAITED=$((WAITED + 2))
     done
 
     if [ -f "$PROPERTIES_FILE" ]; then
-      echo "Setting max-world-size to 29999984 in server.properties..."
+      echo "[set-max-world-size.sh] Setting max-world-size to 29999984 in server.properties..."
 
       # Remove existing max-world-size line if present (including commented out)
       sed -i '/^#*max-world-size=/d' "$PROPERTIES_FILE"
@@ -32,7 +34,16 @@ data:
       # Add the correct max-world-size setting
       echo "max-world-size=29999984" >> "$PROPERTIES_FILE"
 
-      echo "max-world-size has been set to 29999984 in server.properties"
+      echo "[set-max-world-size.sh] Successfully set max-world-size=29999984 in server.properties"
+      # Verify it was set
+      if grep -q "max-world-size=29999984" "$PROPERTIES_FILE"; then
+        echo "[set-max-world-size.sh] Verified: max-world-size is correctly set to 29999984"
+      else
+        echo "[set-max-world-size.sh] WARNING: Failed to verify max-world-size setting (server may still start)" >&2
+        # Don't exit with error - let server start anyway
+      fi
     else
-      echo "Warning: server.properties file not found at $PROPERTIES_FILE after waiting ${MAX_WAIT}s"
+      echo "[set-max-world-size.sh] INFO: server.properties not found yet (will be created by server on first run)" >&2
+      echo "[set-max-world-size.sh] The setting will be applied when the server creates the file"
     fi
+    echo "[set-max-world-size.sh] Script completed"

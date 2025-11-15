@@ -35,14 +35,6 @@ data:
         enabled: true
         Size: 20Gi
       storageClass: longhorn
-    extraVolumes:
-      - name: max-world-size-script
-        configMap:
-          name: minecraft-max-world-size-script
-    extraVolumeMounts:
-      - name: max-world-size-script
-        mountPath: /data/set-max-world-size.sh
-        subPath: set-max-world-size.sh
     minecraftServer:
       eula: "TRUE"
       version: "1.21.10"
@@ -54,8 +46,10 @@ data:
       serviceType: NodePort
       nodePort: 32565
       externalTrafficPolicy: Local
-      # Set maxWorldSize explicitly to prevent Helm chart from adding duplicate MAX_WORLD_SIZE env var
-      # The startup script will override this in server.properties anyway
+      # Set maxWorldSize to prevent duplicate MAX_WORLD_SIZE env var in Helm deployment
+      # NOTE: This sets the env var, but server.properties must be manually set to 29999984
+      # The server.properties file is in a PVC and persists across restarts
+      # Manual fix applied: max-world-size=29999984 in /data/server.properties
       maxWorldSize: 29999984
       rcon:
         enabled: true
