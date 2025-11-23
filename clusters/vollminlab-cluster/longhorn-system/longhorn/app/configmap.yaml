@@ -19,36 +19,29 @@ data:
         env: production
         category: storage
       tolerations:
-        - key: dmz
-          operator: Exists
-          effect: NoSchedule
-        - key: dmz
-          operator: Exists
-          effect: NoExecute
-    engineImage:
+        - key: "dmz"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
+        - key: "dmz"
+          operator: "Equal"
+          value: "true"
+          effect: "NoExecute"
+    # longhornDriver covers engine-image and driver pods
+    longhornDriver:
       podLabels:
-        app: longhorn-engine-image
+        app: longhorn-driver
         env: production
         category: storage
       tolerations:
-        - key: dmz
-          operator: Exists
-          effect: NoSchedule
-        - key: dmz
-          operator: Exists
-          effect: NoExecute
-    instanceManager:
-      podLabels:
-        app: longhorn-instance-manager
-        env: production
-        category: storage
-      tolerations:
-        - key: dmz
-          operator: Exists
-          effect: NoSchedule
-        - key: dmz
-          operator: Exists
-          effect: NoExecute
+        - key: "dmz"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
+        - key: "dmz"
+          operator: "Equal"
+          value: "true"
+          effect: "NoExecute"
     csi:
       attacher:
         podLabels:
@@ -76,17 +69,14 @@ data:
           env: production
           category: storage
         tolerations:
-          - key: dmz
-            operator: Exists
-            effect: NoSchedule
-          - key: dmz
-            operator: Exists
-            effect: NoExecute
-    driverDeployer:
-      podLabels:
-        app: longhorn-driver-deployer
-        env: production
-        category: storage
+          - key: "dmz"
+            operator: "Equal"
+            value: "true"
+            effect: "NoSchedule"
+          - key: "dmz"
+            operator: "Equal"
+            value: "true"
+            effect: "NoExecute"
     ui:
       podLabels:
         app: longhorn-ui
