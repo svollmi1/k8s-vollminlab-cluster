@@ -49,7 +49,7 @@ data:
       dataDir:
         enabled: true
         Size: 20Gi
-      storageClass: longhorn
+      storageClass: longhorn-dmz
     minecraftServer:
       eula: "TRUE"
       version: "1.21.10"
