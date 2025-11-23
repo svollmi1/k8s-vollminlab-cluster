@@ -20,7 +20,7 @@ data:
         cpu: 4000m
         memory: 8Gi
     nodeSelector:
-      kubernetes.io/hostname: k8sworker05
+      node-role.kubernetes.io/dmz: "true"
     tolerations:
       - key: "dmz"
         operator: "Equal"
