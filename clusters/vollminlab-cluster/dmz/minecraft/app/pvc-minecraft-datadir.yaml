@@ -13,4 +13,4 @@ spec:
   storageClassName: longhorn-dmz
   resources:
     requests:
-      storage: 10Gi
+      storage: 6Gi
