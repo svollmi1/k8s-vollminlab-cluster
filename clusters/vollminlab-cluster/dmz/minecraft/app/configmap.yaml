@@ -48,8 +48,8 @@ data:
     persistence:
       dataDir:
         enabled: true
-        Size: 20Gi
-      storageClass: longhorn
+        existingClaim: pvc-minecraft-datadir
+      storageClass: longhorn-dmz
     minecraftServer:
       eula: "TRUE"
       version: "1.21.10"
