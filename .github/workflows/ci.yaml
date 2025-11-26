@@ -8,6 +8,7 @@ on:
       - 'clusters/**'
       - '.github/workflows/**'
       - 'terraform/**'
+      - '.vscode/**'
   pull_request:
     branches: [ main, develop ]
     types: [opened, synchronize, reopened, ready_for_review]
@@ -15,6 +16,7 @@ on:
       - 'clusters/**'
       - '.github/workflows/**'
       - 'terraform/**'
+      - '.vscode/**'
   workflow_dispatch:
 
 concurrency:

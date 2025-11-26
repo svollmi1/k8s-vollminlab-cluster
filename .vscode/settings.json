@@ -1,7 +1,6 @@
 {
   "yaml.schemas": {
     "kubernetes://schema/kyverno.io/v1@clusterpolicy": [
-      "file:///c%3A/git/k8s-vollminlab-cluster/clusters/vollminlab-cluster/kyverno/kyverno/policies/flux-exception.yaml",
       "file:///c%3A/git/k8s-vollminlab-cluster/clusters/vollminlab-cluster/kyverno/kyverno/policies/require-labels.yaml",
       "file:///c%3A/git/k8s-vollminlab-cluster/clusters/vollminlab-cluster/kyverno/kyverno/policies/restrict-hostpath.yaml",
       "file:///c%3A/git/k8s-vollminlab-cluster/clusters/vollminlab-cluster/kyverno/kyverno/policies/restrict-loadbalancer.yaml",
@@ -14,6 +13,9 @@
       "file:///c%3A/git/k8s-vollminlab-cluster/clusters/vollminlab-cluster/kyverno/kyverno/policies/require-resources.yaml",
       "file:///c%3A/git/k8s-vollminlab-cluster/clusters/vollminlab-cluster/kyverno/kyverno/policies/dmz-enforce-node-placement.yaml",
       "file:///c%3A/git/k8s-vollminlab-cluster/clusters/vollminlab-cluster/kyverno/kyverno/policies/dmz-restrict-external-access.yaml"
+    ],
+    "kubernetes://schema/kyverno.io/v2@policyexception": [
+      "file:///c%3A/git/k8s-vollminlab-cluster/clusters/vollminlab-cluster/kyverno/kyverno/policies/flux-exception.yaml"
     ],
     "https://json.schemastore.org/kustomization.json": [
       "file:///c%3A/git/k8s-vollminlab-cluster/clusters/vollminlab-cluster/kyverno/kyverno/policies/kustomization.yaml",
