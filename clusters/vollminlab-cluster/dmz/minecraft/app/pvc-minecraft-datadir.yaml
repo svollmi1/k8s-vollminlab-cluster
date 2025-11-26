@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-minecraft-datadir
+  namespace: dmz
+  labels:
+    app: minecraft
+    env: production
+    category: gaming
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: longhorn-dmz
+  resources:
+    requests:
+      storage: 20Gi
