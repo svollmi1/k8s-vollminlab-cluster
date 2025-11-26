@@ -11,7 +11,7 @@ reclaimPolicy: Delete
 allowVolumeExpansion: true
 volumeBindingMode: WaitForFirstConsumer
 parameters:
-  numberOfReplicas: "1"
+  numberOfReplicas: "2"
   nodeSelector: "dmz"
   dataLocality: "best-effort"
   staleReplicaTimeout: "30"
