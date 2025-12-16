@@ -52,7 +52,7 @@ data:
       storageClass: longhorn-dmz
     minecraftServer:
       eula: "TRUE"
-      version: "1.21.10"
+      # version: "1.21.10"
       type: "PAPER"
       memory: "6G"
       viewDistance: 8
