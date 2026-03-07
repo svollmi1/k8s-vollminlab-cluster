@@ -8,7 +8,7 @@ metadata:
     env: production
     category: apps
 spec:
-  url: oci://tccr.io/truecharts/overseerr
+  url: oci://oci.trueforge.org/truecharts/overseerr
   interval: 5m
   ref:
     tag: 15.6.0
