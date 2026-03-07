@@ -9,6 +9,7 @@ on:
       - '.github/workflows/**'
       - 'terraform/**'
       - '.vscode/**'
+      - 'scripts/**'
   pull_request:
     branches: [ main, develop ]
     types: [opened, synchronize, reopened, ready_for_review]
@@ -17,6 +18,7 @@ on:
       - '.github/workflows/**'
       - 'terraform/**'
       - '.vscode/**'
+      - 'scripts/**'
   workflow_dispatch:
 
 concurrency:
@@ -339,16 +341,21 @@ jobs:
     name: Integration Test
     runs-on: vollminlab-3
     needs: [validate-changes]
-    if: needs.validate-changes.result == 'success' && needs.validate-changes.outputs.changed == 'true'
+    if: needs.validate-changes.result == 'success'
     env:
       CHANGED_FILES: ${{ needs.validate-changes.outputs.changed_files }}
     steps:
+      - name: Skip when no cluster files changed
+        if: needs.validate-changes.outputs.changed != 'true'
+        run: echo "No cluster YAML changed; job succeeds." && exit 0
       - name: Checkout code
+        if: needs.validate-changes.outputs.changed == 'true'
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Setup kubectl
+        if: needs.validate-changes.outputs.changed == 'true'
         run: |
           set -euo pipefail
           KUBECTL_VERSION="v${{ env.KUBERNETES_VERSION }}"
@@ -357,6 +364,7 @@ jobs:
           sudo mv kubectl /usr/local/bin/
 
       - name: Install yq
+        if: needs.validate-changes.outputs.changed == 'true'
         run: |
           set -euo pipefail
           echo "📦 Installing yq..."
@@ -365,6 +373,7 @@ jobs:
           yq --version
 
       - name: Setup Flux CLI
+        if: needs.validate-changes.outputs.changed == 'true'
         run: |
           set -euo pipefail
           echo "📦 Installing Flux CLI..."
@@ -374,6 +383,7 @@ jobs:
           sudo mv flux /usr/local/bin/
 
       - name: Create test namespace
+        if: needs.validate-changes.outputs.changed == 'true'
         run: |
           set -euo pipefail
           TEST_NAMESPACE="ci-test-${{ env.RUN_SUFFIX }}"
@@ -383,6 +393,7 @@ jobs:
           echo "✅ Created test namespace: $TEST_NAMESPACE"
 
       - name: Check Flux CRDs
+        if: needs.validate-changes.outputs.changed == 'true'
         run: |
           set -euo pipefail
           echo "🔍 Checking Flux CRDs availability..."
@@ -403,6 +414,7 @@ jobs:
           fi
 
       - name: Test deploy changed resources
+        if: needs.validate-changes.outputs.changed == 'true'
         run: |
           set -euo pipefail
           TEST_NAMESPACE="$TEST_NAMESPACE"
@@ -597,6 +609,7 @@ jobs:
           echo "✅ Changed OCI repositories synced successfully"
 
       - name: Deploy and validate changed HelmReleases
+        if: needs.validate-changes.outputs.changed == 'true'
         run: |
           set -euo pipefail
           echo "🔍 Deploying and validating changed HelmReleases..."
@@ -812,6 +825,7 @@ jobs:
           echo "✅ Successfully test deployed all changed resources"
 
       - name: Wait for deployments
+        if: needs.validate-changes.outputs.changed == 'true'
         run: |
           set -euo pipefail
           TEST_NAMESPACE="$TEST_NAMESPACE"
@@ -822,7 +836,7 @@ jobs:
           }
 
       - name: Cleanup test namespace
-        if: always()
+        if: always() && needs.validate-changes.outputs.changed == 'true'
         continue-on-error: true
         run: |
           set -euo pipefail
@@ -840,15 +854,20 @@ jobs:
     name: Security Scan
     runs-on: vollminlab-1
     needs: [validate-changes]
-    if: needs.validate-changes.result == 'success' && needs.validate-changes.outputs.changed == 'true'
+    if: needs.validate-changes.result == 'success'
     timeout-minutes: 5
     steps:
+      - name: Skip when no cluster files changed
+        if: needs.validate-changes.outputs.changed != 'true'
+        run: echo "No cluster YAML changed; job succeeds." && exit 0
       - name: Checkout code
+        if: needs.validate-changes.outputs.changed == 'true'
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Install Trivy
+        if: needs.validate-changes.outputs.changed == 'true'
         run: |
           set -euo pipefail
           echo "📦 Installing Trivy..."
@@ -880,9 +899,11 @@ jobs:
           fi
 
       - name: Prepare Trivy cache
+        if: needs.validate-changes.outputs.changed == 'true'
         run: mkdir -p "${{ env.TRIVY_CACHE_DIR }}"
 
       - name: Get changed files for security scan
+        if: needs.validate-changes.outputs.changed == 'true'
         id: changed-files-security
         run: |
           set -euo pipefail
@@ -973,6 +994,7 @@ jobs:
           echo '{"version": "2.1.0", "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json", "runs": [{"tool": {"driver": {"name": "Trivy", "version": "no-changes"}}, "results": []}]}' > trivy-config-results.sarif
 
       - name: Install GitHub CLI
+        if: needs.validate-changes.outputs.changed == 'true'
         run: |
           set -euo pipefail
           echo "📦 Installing GitHub CLI..."
@@ -983,6 +1005,7 @@ jobs:
           gh --version
 
       - name: Upload Trivy SARIF results with retry
+        if: needs.validate-changes.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -1053,15 +1076,20 @@ jobs:
     name: Kyverno Policy Validation
     runs-on: vollminlab-1
     needs: [validate-changes]
-    if: needs.validate-changes.result == 'success' && needs.validate-changes.outputs.changed == 'true'
+    if: needs.validate-changes.result == 'success'
     timeout-minutes: 5
     steps:
+      - name: Skip when no cluster files changed
+        if: needs.validate-changes.outputs.changed != 'true'
+        run: echo "No cluster YAML changed; job succeeds." && exit 0
       - name: Checkout code
+        if: needs.validate-changes.outputs.changed == 'true'
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Install kyverno CLI and yq
+        if: needs.validate-changes.outputs.changed == 'true'
         run: |
           set -euo pipefail
           echo "📦 Installing Kyverno CLI..."
@@ -1076,6 +1104,7 @@ jobs:
           yq --version
 
       - name: Validate against Kyverno policies
+        if: needs.validate-changes.outputs.changed == 'true'
         run: |
           set -euo pipefail
           echo "🔍 Validating resources against Kyverno policies..."
