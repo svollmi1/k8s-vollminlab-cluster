@@ -8,7 +8,7 @@ metadata:
     env: production
     category: apps
 spec:
-  url: oci://tccr.io/truecharts/radarr
+  url: oci://oci.trueforge.org/truecharts/radarr
   interval: 5m
   ref:
     tag: 23.26.0
