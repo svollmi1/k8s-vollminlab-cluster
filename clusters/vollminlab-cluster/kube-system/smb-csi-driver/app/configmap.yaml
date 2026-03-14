@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: smb-csi-driver-values
+  namespace: kube-system
+  labels:
+    app: smb-csi-driver
+    env: production
+    category: storage
+data:
+  values.yaml: |
+    {}
