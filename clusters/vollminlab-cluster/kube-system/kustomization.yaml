@@ -5,3 +5,4 @@ metadata:
 resources:
   - namespace.yaml
   - ./metrics-server/app
+  - ./smb-csi-driver/app
