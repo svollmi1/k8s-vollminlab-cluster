@@ -2,7 +2,7 @@
 
 A GitOps-managed Kubernetes cluster configuration using Flux CD for automated deployment and management.
 
-## 🏗️ Architecture
+## Architecture
 
 This repository contains the complete configuration for a Kubernetes cluster managed with:
 
@@ -11,134 +11,77 @@ This repository contains the complete configuration for a Kubernetes cluster man
 - **Terraform** - Infrastructure as Code for GitHub branch protection
 - **Kustomize** - Kubernetes native configuration management
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```
-clusters/vollminlab-cluster/
-├── actions-runner-system/     # GitHub Actions runners
-├── clusterwide/               # Cluster-wide resources (PVs, StorageClasses, RBAC)
-├── elastic-system/           # Elastic Stack (ECK Operator)
-├── flux-system/             # Flux CD configuration
-├── homepage/                # Homepage dashboard
-├── kube-system/            # Core Kubernetes components
-├── kyverno/                 # Policy engine and policies
-├── longhorn-system/         # Longhorn storage
-├── mediastack/             # Media applications (Sonarr, Radarr, etc.)
-├── metallb-system/         # MetalLB load balancer
-├── monitoring/             # Monitoring stack
-├── op-connect/             # 1Password Connect
-└── sealed-secrets/         # SealedSecrets encryption
+├── bootstrap/                        # Manual bootstrap reference (not Flux-managed)
+│   ├── calico/                       # Calico CNI — apply before Flux bootstraps
+│   └── coredns/                      # CoreDNS config reference
+├── clusters/vollminlab-cluster/
+│   ├── actions-runner-system/        # GitHub Actions self-hosted runners
+│   ├── cert-manager/                 # Certificate management
+│   ├── clusterwide/                  # Cluster-wide resources (PVs, StorageClasses, RBAC)
+│   ├── dmz/                          # DMZ workloads (Minecraft)
+│   ├── elastic-system/               # ECK Operator
+│   ├── flux-system/                  # Flux CD — HelmRepositories and Kustomizations
+│   ├── homepage/                     # Homepage dashboard
+│   ├── ingress-nginx/                # Ingress controller
+│   ├── kube-system/                  # metrics-server, smb-csi-driver
+│   ├── kyverno/                      # Policy engine, policies, policy-reporter
+│   ├── local-path-storage/           # Local path provisioner
+│   ├── longhorn-system/              # Distributed block storage
+│   ├── mediastack/                   # Sonarr, Radarr, Bazarr, Prowlarr, SABnzbd, Overseerr, Tautulli
+│   ├── metallb-system/               # Bare-metal load balancer
+│   ├── monitoring/                   # Monitoring stack (planned)
+│   ├── portainer/                    # Container management UI
+│   └── sealed-secrets/               # Encrypted secrets in Git
+├── scripts/                          # Utility scripts
+└── terraform/                        # GitHub branch protection
 ```
 
-## 🔧 Key Components
+## Bootstrap Order
 
-### CI/CD Pipeline
-- **Kubernetes manifest validation** - Validates all YAML files
-- **Security scanning** - Trivy vulnerability scanning
-- **RBAC validation** - Ensures proper permissions
-- **Branch protection** - Requires CI to pass and PR reviews
+For a full cluster rebuild, components must be applied in this order:
 
-### GitOps with Flux CD
-- **Automated reconciliation** - Continuous deployment from Git
-- **Helm releases** - Managed application deployments
-- **Kustomization** - Configuration management
-- **Source management** - Git and Helm repository integration
+1. **Kubernetes control plane** — kubeadm
+2. **Calico CNI** — must exist before any pods can communicate; see `bootstrap/calico/`
+3. **Flux CD** — bootstraps from this repository
+4. **Everything else** — Flux reconciles all remaining workloads automatically
 
-### Security & Compliance
-- **Kyverno policies** - Policy enforcement
-- **SealedSecrets** - Encrypted secrets in Git
-- **RBAC** - Role-based access control
-- **Network policies** - Network segmentation
+## Key Components
 
-## 🚀 Getting Started
+### Storage
+- **Longhorn** — distributed block storage (RWO + RWX)
+- **SMB CSI Driver** — SMB/CIFS volume mounts
+- **Local Path Provisioner** — local node storage
 
-### Prerequisites
-- Kubernetes cluster (1.24+)
-- Flux CD installed
-- kubectl configured
+### Networking
+- **Calico** — CNI with BGP and IPIP encapsulation
+- **MetalLB** — bare-metal load balancer
+- **ingress-nginx** — ingress controller
+- **cert-manager** — TLS certificate automation
 
-### Deployment
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/svollmi1/k8s-vollminlab-cluster.git
-   cd k8s-vollminlab-cluster
-   ```
+### Security & Policy
+- **Kyverno** — policy enforcement (enforce mode)
+- **SealedSecrets** — encrypted secrets committed to git
+- **RBAC** — role-based access control throughout
 
-2. **Bootstrap Flux CD**
-   ```bash
-   flux bootstrap github \
-     --owner=svollmi1 \
-     --repository=k8s-vollminlab-cluster \
-     --branch=main \
-     --path=clusters/vollminlab-cluster
-   ```
+### CI/CD
+- **Flux CD** — GitOps reconciliation from main branch
+- **GitHub Actions** — manifest validation, Kyverno policy checks, security scanning
+- **Actions Runner Controller** — self-hosted runners for CI
 
-3. **Verify deployment**
-   ```bash
-   flux get all
-   kubectl get pods -A
-   ```
+## Making Changes
 
-## 🔒 Security Features
+1. Create a feature branch from `main`
+2. Make changes and push
+3. CI runs: manifest validation, Kyverno policy checks, Trivy security scan
+4. Create a Pull Request — requires CI to pass
+5. Merge to `main` — Flux reconciles within 10 minutes
 
-- **Branch Protection** - Enforced via Terraform
-- **CI/CD Validation** - All changes must pass CI
-- **Policy Enforcement** - Kyverno policies for compliance
-- **Secret Management** - SealedSecrets for encrypted storage
-- **RBAC** - Comprehensive role-based access control
+## Security
 
-## 📊 Monitoring & Observability
-
-- **Homepage** - Centralized dashboard
-- **Elastic Stack** - Log aggregation and analysis
-- **Longhorn** - Persistent storage monitoring
-- **MetalLB** - Load balancer status
-
-## 🛠️ Development
-
-### Making Changes
-1. Create a feature branch
-2. Make your changes
-3. Ensure CI passes
-4. Create a Pull Request
-5. Get required approvals
-6. Merge to main
-
-### CI Pipeline
-The CI pipeline validates:
-- Kubernetes manifest syntax
-- RBAC permissions
-- Security vulnerabilities
-- Policy compliance
-- Helm chart validation
-
-## 📚 Documentation
-
-- [Flux CD Documentation](https://fluxcd.io/docs/)
-- [Kubernetes Documentation](https://kubernetes.io/docs/)
-- [Kyverno Policies](https://kyverno.io/policies/)
-- [SealedSecrets](https://github.com/bitnami-labs/sealed-secrets)
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Ensure all CI checks pass
-5. Submit a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🆘 Support
-
-For issues and questions:
-- Create an issue in this repository
-- Check the CI pipeline logs
-- Review the Flux CD status
-
----
-
-**Built with ❤️ using Flux CD, Kubernetes, and GitOps principles**
-# Trigger CI
+- **Branch protection** — enforced via Terraform, CI required before merge
+- **Kyverno policies** — block default namespace, restrict privileged containers, require labels, restrict LoadBalancer services
+- **SealedSecrets** — secrets encrypted with cluster-specific key, safe to commit
+- **Network segmentation** — DMZ workloads isolated via Kyverno NetworkPolicy policies

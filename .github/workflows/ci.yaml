@@ -11,6 +11,7 @@ on:
       - 'terraform/**'
       - '.vscode/**'
       - 'scripts/**'
+      - '*.md'
   pull_request:
     branches: [ main, develop ]
     types: [opened, synchronize, reopened, ready_for_review]
@@ -21,6 +22,7 @@ on:
       - 'terraform/**'
       - '.vscode/**'
       - 'scripts/**'
+      - '*.md'
   workflow_dispatch:
 
 concurrency:
