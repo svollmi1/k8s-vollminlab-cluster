@@ -20,6 +20,7 @@ resources:
   - actions-runner-system-patch-kustomization.yaml
   - elastic-system-kustomization.yaml
   - homepage-kustomization.yaml
+  - local-path-storage-kustomization.yaml
   - longhorn-system-kustomization.yaml
   - mediastack-kustomization.yaml
   - monitoring-kustomization.yaml
