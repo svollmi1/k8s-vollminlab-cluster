@@ -1,12 +1,12 @@
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
-  name: kyverno-repo
+  name: cert-manager-repo
   namespace: flux-system
   labels:
-    app: kyverno
+    app: cert-manager
     env: production
     category: security
 spec:
+  url: https://charts.jetstack.io
   interval: 5m
-  url: https://kyverno.github.io/kyverno

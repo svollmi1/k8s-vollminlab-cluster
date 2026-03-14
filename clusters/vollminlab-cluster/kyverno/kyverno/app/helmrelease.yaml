@@ -15,7 +15,7 @@ spec:
       version: 3.4.1
       sourceRef:
         kind: HelmRepository
-        name: kyverno
+        name: kyverno-repo
         namespace: flux-system
   install:
     createNamespace: true

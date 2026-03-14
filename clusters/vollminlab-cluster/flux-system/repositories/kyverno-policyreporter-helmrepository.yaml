@@ -1,7 +1,7 @@
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
-  name: policy-reporter
+  name: kyverno-policyreporter-repo
   namespace: flux-system
   labels:
     app: policy-reporter
