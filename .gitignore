@@ -1,0 +1,16 @@
+# Claude Code
+.claude/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# JetBrains IDEs
+.idea/
+
+# Kubeconfig - never commit cluster credentials
+kubeconfig
+*.kubeconfig
+kubeconfig.yaml
