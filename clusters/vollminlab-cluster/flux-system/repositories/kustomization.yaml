@@ -9,6 +9,8 @@ metadata:
 resources:
   - arc-helmrepository.yaml
   - bazarr-helmrepository.yaml
+  - cert-manager-helmrepository.yaml
+  - ingress-nginx-helmrepository.yaml
   - bitnami-helmrepository.yaml
   - capacitor-helmrepository.yaml
   - elastic-helmrepository.yaml

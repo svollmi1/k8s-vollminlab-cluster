@@ -1,7 +1,7 @@
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
-  name: metrics-server
+  name: metrics-server-repo
   namespace: flux-system
   labels:
     app: metrics-server

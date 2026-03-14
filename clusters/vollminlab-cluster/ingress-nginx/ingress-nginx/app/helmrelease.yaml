@@ -1,25 +1,26 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: metrics-server
-  namespace: kube-system
+  name: ingress-nginx
+  namespace: ingress-nginx
   labels:
-    app: metrics-server
+    app: ingress-nginx
     env: production
-    category: observability
+    category: networking
 spec:
   interval: 5m
   chart:
     spec:
-      chart: metrics-server
-      version: 3.12.2
+      chart: ingress-nginx
+      version: 4.12.0
       sourceRef:
         kind: HelmRepository
-        name: metrics-server-repo
+        name: ingress-nginx-repo
         namespace: flux-system
+  releaseName: ingress-nginx
   install:
     createNamespace: false
   valuesFrom:
     - kind: ConfigMap
-      name: metrics-server-values
+      name: ingress-nginx-values
       valuesKey: values.yaml
