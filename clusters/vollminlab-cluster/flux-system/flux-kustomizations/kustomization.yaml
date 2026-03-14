@@ -24,5 +24,4 @@ resources:
   - longhorn-system-kustomization.yaml
   - mediastack-kustomization.yaml
   - monitoring-kustomization.yaml
-  - op-connect-kustomization.yaml
   - portainer-kustomization.yaml
