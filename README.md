@@ -1,87 +1,219 @@
-# Kubernetes Vollminlab Cluster
+# Vollminlab Kubernetes Cluster
 
-A GitOps-managed Kubernetes cluster configuration using Flux CD for automated deployment and management.
+GitOps-managed bare-metal Kubernetes cluster. All workloads are defined as code in this repository and reconciled continuously by Flux CD.
 
-## Architecture
+> **Full configuration reference:** [docs/cluster-reference.md](docs/cluster-reference.md) — versions, resource limits, network policies, storage layout, and every configured value in excruciating detail.
 
-This repository contains the complete configuration for a Kubernetes cluster managed with:
+---
 
-- **Flux CD** - GitOps toolkit for continuous delivery
-- **GitHub Actions** - CI/CD pipeline with comprehensive validation
-- **Terraform** - Infrastructure as Code for GitHub branch protection
-- **Kustomize** - Kubernetes native configuration management
+## Architecture Overview
+
+| Layer | Tool | Role |
+|---|---|---|
+| Orchestration | Kubernetes (kubeadm) | Cluster control plane |
+| CNI | Calico v3.29.1 | Pod networking, BGP, IPIP |
+| GitOps | Flux CD | Continuous reconciliation from `main` |
+| Helm management | Flux HelmRelease | All app deployments |
+| Secret management | Sealed Secrets | Encrypted secrets committed to Git |
+| Policy enforcement | Kyverno | Admission control (enforce mode) |
+| Ingress | ingress-nginx | HTTP/HTTPS routing |
+| Certificates | cert-manager | TLS automation |
+| Load balancing | MetalLB | Bare-metal LoadBalancer services |
+| Block storage | Longhorn | Distributed RWO + RWX volumes |
+| File storage | SMB CSI Driver | SMB/CIFS network shares |
+| CI | GitHub Actions | Manifest validation + policy checks |
+
+---
 
 ## Repository Structure
 
 ```
-├── bootstrap/                        # Manual bootstrap reference (not Flux-managed)
-│   ├── calico/                       # Calico CNI — apply before Flux bootstraps
-│   └── coredns/                      # CoreDNS config reference
-├── clusters/vollminlab-cluster/
-│   ├── actions-runner-system/        # GitHub Actions self-hosted runners
-│   ├── cert-manager/                 # Certificate management
-│   ├── clusterwide/                  # Cluster-wide resources (PVs, StorageClasses, RBAC)
-│   ├── dmz/                          # DMZ workloads (Minecraft)
-│   ├── elastic-system/               # ECK Operator
-│   ├── flux-system/                  # Flux CD — HelmRepositories and Kustomizations
-│   ├── homepage/                     # Homepage dashboard
-│   ├── ingress-nginx/                # Ingress controller
-│   ├── kube-system/                  # metrics-server, smb-csi-driver
-│   ├── kyverno/                      # Policy engine, policies, policy-reporter
-│   ├── local-path-storage/           # Local path provisioner
-│   ├── longhorn-system/              # Distributed block storage
-│   ├── mediastack/                   # Sonarr, Radarr, Bazarr, Prowlarr, SABnzbd, Overseerr, Tautulli
-│   ├── metallb-system/               # Bare-metal load balancer
-│   ├── monitoring/                   # Monitoring stack (planned)
-│   ├── portainer/                    # Container management UI
-│   └── sealed-secrets/               # Encrypted secrets in Git
-├── scripts/                          # Utility scripts
-└── terraform/                        # GitHub branch protection
+bootstrap/                              # Manual bootstrap only — NOT Flux-managed
+  calico/                               # Calico CNI install reference (apply before Flux)
+  coredns/                              # CoreDNS config reference
+  sealed-secrets/                       # Sealing key disaster recovery guide
+
+clusters/vollminlab-cluster/            # Everything Flux reconciles
+  flux-system/
+    repositories/                       # 24 HelmRepositories + 1 GitRepository
+    flux-kustomizations/                # Flux Kustomization CRs (one per app/namespace)
+  actions-runner-system/                # GitHub Actions self-hosted runners
+  cert-manager/                         # TLS certificate automation
+  clusterwide/                          # PersistentVolumes, StorageClasses, RBAC
+  dmz/                                  # Internet-exposed workloads (Minecraft)
+  elastic-system/                       # ECK Operator
+  flux-system/                          # Flux controllers + sync config
+  homepage/                             # Homepage dashboard
+  ingress-nginx/                        # Ingress controller
+  kube-system/                          # metrics-server, smb-csi-driver
+  kyverno/                              # Policy engine + 12 ClusterPolicies + policy-reporter
+  local-path-storage/                   # Node-local storage provisioner
+  longhorn-system/                      # Distributed block storage
+  mediastack/                           # Sonarr, Radarr, Bazarr, Prowlarr, SABnzbd, Overseerr, Tautulli
+  metallb-system/                       # Bare-metal load balancer
+  monitoring/                           # Monitoring stack (planned)
+  portainer/                            # Container management UI
+  sealed-secrets/                       # Sealed secrets controller
+
+scripts/                                # Utility scripts
+terraform/github-branch-protection/    # Branch protection rules as code
 ```
 
-## Bootstrap Order
+---
 
-For a full cluster rebuild, components must be applied in this order:
+## Deployed Applications
 
-1. **Kubernetes control plane** — kubeadm
-2. **Calico CNI** — must exist before any pods can communicate; see `bootstrap/calico/`
-3. **Flux CD** — bootstraps from this repository
-4. **Everything else** — Flux reconciles all remaining workloads automatically
+### Core Infrastructure
 
-## Key Components
+| App | Namespace | Chart Version | Purpose |
+|---|---|---|---|
+| Flux CD | flux-system | — | GitOps reconciliation |
+| Capacitor | flux-system | latest | Flux UI dashboard |
+| Kyverno | kyverno | v3.4.1 | Policy enforcement |
+| Policy Reporter | kyverno | ~v16 | Policy violation reporting |
+| ingress-nginx | ingress-nginx | v4.12.0 | Ingress controller |
+| cert-manager | cert-manager | v1.16.3 | TLS certificates |
+| MetalLB | metallb-system | — | LoadBalancer IPs |
+| Sealed Secrets | sealed-secrets | — | Git-safe secrets |
+| metrics-server | kube-system | v3.12.2 | Resource metrics API |
+| ECK Operator | elastic-system | v2.16.1 | Elasticsearch on K8s |
 
 ### Storage
-- **Longhorn** — distributed block storage (RWO + RWX)
-- **SMB CSI Driver** — SMB/CIFS volume mounts
-- **Local Path Provisioner** — local node storage
 
-### Networking
-- **Calico** — CNI with BGP and IPIP encapsulation
-- **MetalLB** — bare-metal load balancer
-- **ingress-nginx** — ingress controller
-- **cert-manager** — TLS certificate automation
+| App | Namespace | Purpose |
+|---|---|---|
+| Longhorn | longhorn-system | Distributed block storage (RWO + RWX) |
+| SMB CSI Driver | kube-system | v1.17.0 — SMB/CIFS network shares |
+| Local Path Provisioner | local-path-storage | Node-local ephemeral storage |
 
-### Security & Policy
-- **Kyverno** — policy enforcement (enforce mode)
-- **SealedSecrets** — encrypted secrets committed to git
-- **RBAC** — role-based access control throughout
+### Applications
+
+| App | Namespace | Purpose |
+|---|---|---|
+| Homepage | homepage | v2.1.0 — Cluster dashboard |
+| Portainer | portainer | Container management UI |
+| Overseerr | mediastack | Media request management |
+| Sonarr | mediastack | TV series automation |
+| Radarr | mediastack | Movie automation |
+| Bazarr | mediastack | Subtitle management |
+| Prowlarr | mediastack | Indexer aggregation |
+| SABnzbd | mediastack | Usenet downloader |
+| Tautulli | mediastack | Plex monitoring |
+| Minecraft | dmz | Game server (internet-exposed, DMZ isolated) |
 
 ### CI/CD
-- **Flux CD** — GitOps reconciliation from main branch
-- **GitHub Actions** — manifest validation, Kyverno policy checks, security scanning
-- **Actions Runner Controller** — self-hosted runners for CI
+
+| App | Namespace | Purpose |
+|---|---|---|
+| Actions Runner Controller | actions-runner-system | v0.23.7 — Self-hosted GitHub Actions runners |
+
+---
+
+## Cluster Bootstrap Order
+
+For a full cluster rebuild, follow this order exactly:
+
+```
+1. Install Kubernetes control plane (kubeadm)
+2. Install Calico CNI             → see bootstrap/calico/README.md
+3. Restore sealed-secrets key     → see bootstrap/sealed-secrets/README.md
+4. Bootstrap Flux CD              → flux bootstrap github ...
+5. Everything else                → Flux reconciles automatically
+```
+
+**Steps 2 and 3 must happen before Flux bootstraps.** Calico is required for pod networking; the sealing key must exist before the sealed-secrets controller starts, or all SealedSecrets become permanently unreadable.
+
+---
+
+## Network Configuration
+
+| Parameter | Value |
+|---|---|
+| Pod CIDR | `172.18.0.0/16` |
+| CNI | Calico (IPIP encapsulation, BGP enabled) |
+| Dataplane | iptables |
+| Control plane replicas | 2 |
+| DMZ node | `k8sworker05` (taint: `dmz=true:NoSchedule`) |
+
+---
+
+## Security Model
+
+### Kyverno Policies (enforce mode)
+
+| Policy | Action | Rule |
+|---|---|---|
+| restrict-default | Block | No workloads in `default` namespace |
+| require-labels | Block | All pods need `app`, `env`, `category` labels |
+| require-resources | Block | CPU/memory requests and limits required |
+| inject-resource-requirements | Mutate | Auto-inject default limits |
+| restrict-privileged | Block | No privileged containers |
+| restrict-hostpath | Block | No hostPath volumes |
+| restrict-latest-tag | Block | No `:latest` image tags |
+| inject-namespace-labels | Mutate | Auto-label namespaces |
+| dmz-enforce-node-placement | Mutate | DMZ pods auto-targeted to DMZ node |
+| dmz-restrict-external-access | Block | External access labels only allowed in `dmz/` |
+
+### DMZ Isolation
+
+The `dmz/` namespace is a security boundary for internet-exposed workloads. See [clusters/vollminlab-cluster/dmz/README.md](clusters/vollminlab-cluster/dmz/README.md) for the full security model.
+
+- Dedicated node (`k8sworker05`) with `dmz=true:NoSchedule` taint
+- Kyverno auto-enforces node placement for all dmz pods
+- Default-deny NetworkPolicy with explicit allow rules only
+- Dedicated `longhorn-dmz` StorageClass for node-local storage isolation
+
+### Secret Management
+
+All secrets are encrypted as `SealedSecret` resources before committing to Git. The sealing key is cluster-specific and backed up in 1Password (`Sealed Secrets Sealing Key`). See [bootstrap/sealed-secrets/README.md](bootstrap/sealed-secrets/README.md).
+
+---
 
 ## Making Changes
 
-1. Create a feature branch from `main`
-2. Make changes and push
-3. CI runs: manifest validation, Kyverno policy checks, Trivy security scan
-4. Create a Pull Request — requires CI to pass
-5. Merge to `main` — Flux reconciles within 10 minutes
+```
+1. Create a branch from main
+2. Make changes
+3. Push — CI runs automatically (manifest validation, Kyverno checks, Trivy scan)
+4. Open a PR — requires CI to pass + 1 review
+5. Merge to main — Flux reconciles within 10 minutes
+```
 
-## Security
+Direct pushes to `main` are blocked. Branch protection is enforced via Terraform in `terraform/github-branch-protection/`.
 
-- **Branch protection** — enforced via Terraform, CI required before merge
-- **Kyverno policies** — block default namespace, restrict privileged containers, require labels, restrict LoadBalancer services
-- **SealedSecrets** — secrets encrypted with cluster-specific key, safe to commit
-- **Network segmentation** — DMZ workloads isolated via Kyverno NetworkPolicy policies
+---
+
+## Adding a New Application
+
+1. Create the namespace directory: `clusters/vollminlab-cluster/[namespace]/`
+2. Add `namespace.yaml` and `kustomization.yaml`
+3. Create the app directory: `[namespace]/[app-name]/app/`
+4. Add `kustomization.yaml`, `helmrelease.yaml`, `configmap.yaml`
+5. Add a HelmRepository to `flux-system/repositories/` if needed
+6. Add a Flux Kustomization CR to `flux-system/flux-kustomizations/`
+7. Ensure all pod labels include `app`, `env: production`, and a valid `category`
+8. Secrets must be SealedSecrets — never plain `Secret` objects
+
+---
+
+## Useful Commands
+
+```bash
+# Flux reconciliation state
+flux get kustomizations -A
+flux get helmreleases -A
+
+# Force reconciliation
+flux reconcile kustomization [name] --with-source
+
+# Check Kyverno violations
+kubectl get policyreport -A
+kubectl get clusterpolicyreport
+
+# Sealed secrets key check
+kubectl get secret -n sealed-secrets -l sealedsecrets.bitnami.com/sealed-secrets-key
+
+# Calico status (NOT Flux-managed — check manually)
+kubectl get tigerastatus
+kubectl get pods -n calico-system
+```
