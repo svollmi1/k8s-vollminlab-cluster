@@ -25,3 +25,4 @@ resources:
   - mediastack-kustomization.yaml
   - monitoring-kustomization.yaml
   - portainer-kustomization.yaml
+  - shlink-kustomization.yaml
