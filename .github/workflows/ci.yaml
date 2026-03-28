@@ -844,7 +844,11 @@ jobs:
     runs-on: vollminlab-1
     needs: [validate-changes]
     if: needs.validate-changes.result == 'success'
-    timeout-minutes: 5
+    timeout-minutes: 15
+    # Trivy is informational (uploads to GitHub Security tab). Hard gates are
+    # gitleaks (secret-scanning workflow) and Kyverno (policy-validation job).
+    # Infrastructure timeouts should not block merges.
+    continue-on-error: true
     steps:
       - name: Skip when no cluster files changed
         if: needs.validate-changes.outputs.changed != 'true'

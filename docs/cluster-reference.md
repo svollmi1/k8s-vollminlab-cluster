@@ -480,6 +480,8 @@ All ingresses use `ingressClassName: nginx`, TLS termination via `wildcard-tls`,
 
 **Short links inventory** (`go.vollminlab.com/<slug>` → destination):
 
+*Cluster apps:*
+
 | Slug | Destination |
 |---|---|
 | homepage | https://homepage.vollminlab.com |
@@ -495,6 +497,11 @@ All ingresses use `ingressClassName: nginx`, TLS termination via `wildcard-tls`,
 | tautulli | https://tautulli.vollminlab.com |
 | portainer | https://portainer.vollminlab.com |
 | shlink | https://shlink.vollminlab.com |
+
+*Infrastructure services:*
+
+| Slug | Destination |
+|---|---|
 | pihole | https://pihole.vollminlab.com |
 | npm | https://npm.vollminlab.com |
 | plex | https://plex.vollminlab.com |
@@ -502,6 +509,11 @@ All ingresses use `ingressClassName: nginx`, TLS termination via `wildcard-tls`,
 | udm | https://udm.vollminlab.com |
 | vcenter | https://vcenter.vollminlab.com |
 | haproxy | https://haproxy.vollminlab.com |
+
+*DMZ / Gaming:*
+
+| Slug | Destination |
+|---|---|
 | bluemap | https://bluemap.vollminlab.com |
 
 > Short links are configured via the Shlink web UI at `shlink.vollminlab.com` — they are not stored in Git.

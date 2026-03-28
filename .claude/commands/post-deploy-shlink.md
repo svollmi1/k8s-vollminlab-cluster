@@ -55,6 +55,8 @@ create_link truenas      https://truenas.vollminlab.com
 create_link udm          https://udm.vollminlab.com
 create_link vcenter      https://vcenter.vollminlab.com
 create_link haproxy      https://haproxy.vollminlab.com
+
+# DMZ / Gaming
 create_link bluemap      https://bluemap.vollminlab.com
 ```
 
