@@ -18,6 +18,11 @@ data:
       app: prowlarr
       env: production
       category: media
+    terminationGracePeriodSeconds: 60
+    lifecycle:
+      preStop:
+        exec:
+          command: ["/bin/sh", "-c", "sleep 10"]
     resources:
       requests:
         cpu: 100m
