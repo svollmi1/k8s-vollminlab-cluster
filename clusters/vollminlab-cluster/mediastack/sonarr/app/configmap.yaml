@@ -40,6 +40,10 @@ data:
       fsGroup: 568
       fsGroupChangePolicy: "OnRootMismatch"
     terminationGracePeriodSeconds: 60
+    lifecycle:
+      preStop:
+        exec:
+          command: ["/bin/sh", "-c", "sleep 10"]
     livenessProbe:
       httpGet: { path: /ping, port: 8989 }
       initialDelaySeconds: 60

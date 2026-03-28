@@ -22,6 +22,11 @@ data:
         enabled: true
         existingClaim: pvc-movies
         mountPath: /movies
+    terminationGracePeriodSeconds: 60
+    lifecycle:
+      preStop:
+        exec:
+          command: ["/bin/sh", "-c", "sleep 10"]
     resources:
       requests:
         cpu: 100m
