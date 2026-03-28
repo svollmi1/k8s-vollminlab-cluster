@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shlink-web-values
+  namespace: shlink
+data:
+  values.yaml: |
+    podLabels:
+      app: shlink-web
+      env: production
+      category: apps
+
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        cpu: 100m
+        memory: 64Mi
+
+    # Pre-configure the backend server connection.
+    # SHLINK_SERVER_API_KEY is injected from shlink-credentials secret.
+    extraEnv:
+      - name: SHLINK_SERVER_URL
+        value: https://go.vollminlab.com
+      - name: SHLINK_SERVER_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: shlink-credentials
+            key: initial-api-key

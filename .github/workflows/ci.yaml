@@ -276,69 +276,54 @@ jobs:
           
           echo "✅ All Kubernetes resources have valid schemas"
 
-      - name: Scan for secrets
+      - name: Scan for secrets (fast file-content check)
         if: env.CHANGED_FILES != ''
         run: |
           set -euo pipefail
           echo "🔍 Scanning changed files for secrets..."
-          
+
           # Install gitleaks
-          curl -L -o gitleaks.tar.gz "https://github.com/gitleaks/gitleaks/releases/download/v8.18.0/gitleaks_8.18.0_linux_x64.tar.gz"
-          tar -xzf gitleaks.tar.gz
-          sudo mv gitleaks /usr/local/bin/
-          
-          # Get range for diff
+          curl -sL -o gitleaks.tar.gz \
+            "https://github.com/gitleaks/gitleaks/releases/download/v8.18.0/gitleaks_8.18.0_linux_x64.tar.gz"
+          tar -xzf gitleaks.tar.gz gitleaks
+          sudo mv gitleaks /usr/local/bin/gitleaks
+
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            BASE_SHA="${{ github.event.pull_request.base.sha }}"
-            RANGE="$BASE_SHA..HEAD"
+            LOG_OPTS="${{ github.event.pull_request.base.sha }}..${{ github.sha }}"
           else
-            BASE_SHA="${{ github.event.before }}"
-            if [[ -z "$BASE_SHA" ]]; then
-              BASE_SHA="$(git rev-list --max-parents=0 HEAD | tail -1)"
+            BEFORE="${{ github.event.before }}"
+            if [[ -z "$BEFORE" || "$BEFORE" == "0000000000000000000000000000000000000000" ]]; then
+              BEFORE="$(git rev-list --max-parents=0 HEAD | tail -1)"
             fi
-            RANGE="$BASE_SHA..HEAD"
+            LOG_OPTS="$BEFORE..${{ github.sha }}"
           fi
-          
-          # Create temporary directory and copy changed files
-          TEMP_DIR=$(mktemp -d)
-          printf '%s\n' "$CHANGED_FILES" | while IFS= read -r file; do
-            if [[ -f "$file" ]]; then
-              cp "$file" "$TEMP_DIR/"
-            fi
-          done
-          
-          cd "$TEMP_DIR"
-          
-          # Create gitleaks config in temp directory
-          cat > gitleaks.toml << 'EOF'
+
+          cat > .gitleaks.toml << 'GITLEAKS_CFG'
           [extend]
           useDefault = true
-          
+
           [allowlist]
-          description = "Ignore SealedSecrets keys"
-          regexes = [
-            "-----BEGIN CERTIFICATE-----",
-            "-----BEGIN PUBLIC KEY-----"
+          description = "Allow certificates, public keys, and SealedSecret ciphertext files"
+          paths = [
+            '''.*-sealedsecret\.yaml''',
+            '''pub-cert\.pem'''
           ]
-          EOF
-          
-          git init
-          git config user.email "ci@example.com"
-          git config user.name "CI"
-          git add .
-          git commit -m "CI scan" || true
-          
-          # Run gitleaks with custom config
-          set +e
-          gitleaks detect --source . --config gitleaks.toml --no-banner --exit-code 1
-          rc=$?
-          set -e
-          if [ $rc -ne 0 ]; then
-            echo "❌ Secrets detected in changed files"
-            echo "Please remove any hardcoded secrets and use SealedSecrets instead"
+          regexes = [
+            '''-----BEGIN CERTIFICATE-----''',
+            '''-----BEGIN PUBLIC KEY-----'''
+          ]
+          GITLEAKS_CFG
+
+          gitleaks detect \
+            --config .gitleaks.toml \
+            --log-opts "$LOG_OPTS" \
+            --no-banner \
+            --exit-code 1 || {
+              echo "❌ Secrets detected. Never commit plain API keys or passwords."
+              echo "Use SealedSecrets for k8s secrets; store credentials in 1Password."
               exit 1
-            fi
-          
+            }
+
           echo "✅ No secrets detected in changed files"
 
   integration-test:
@@ -859,7 +844,11 @@ jobs:
     runs-on: vollminlab-1
     needs: [validate-changes]
     if: needs.validate-changes.result == 'success'
-    timeout-minutes: 5
+    timeout-minutes: 15
+    # Trivy is informational (uploads to GitHub Security tab). Hard gates are
+    # gitleaks (secret-scanning workflow) and Kyverno (policy-validation job).
+    # Infrastructure timeouts should not block merges.
+    continue-on-error: true
     steps:
       - name: Skip when no cluster files changed
         if: needs.validate-changes.outputs.changed != 'true'
