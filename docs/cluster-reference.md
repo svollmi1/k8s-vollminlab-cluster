@@ -512,9 +512,9 @@ All ingresses use `ingressClassName: nginx`, TLS termination via `wildcard-tls`,
 
 *DMZ / Gaming:*
 
-| Slug | Destination |
-|---|---|
-| bluemap | https://bluemap.vollminlab.com |
+| Slug | Destination | Notes |
+|---|---|---|
+| bluemap | https://bluemap.vollminlab.com | Externally accessible via DDNS (`dynamic.vollminlab.com` → public WAN IP → haproxydmz) |
 
 > Short links are configured via the Shlink web UI at `shlink.vollminlab.com` — they are not stored in Git.
 
