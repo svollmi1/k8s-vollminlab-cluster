@@ -4,9 +4,16 @@ description: SealedSecrets workflow — how to create, seal, and manage secrets 
 
 # Secrets Rules
 
-## Hard rule: never commit plain Secrets
+## Hard rules — enforced by CI (gitleaks) and must never be violated
 
-All secrets in this repo **must** be `SealedSecret` resources (kind: `SealedSecret`, apiVersion: `bitnami.com/v1alpha1`). A plain `kind: Secret` object must never be committed.
+- **Never commit a plain `kind: Secret`** — only `SealedSecret` (bitnami.com/v1alpha1)
+- **Never commit API keys, passwords, tokens, or any credential** in any file — YAML, shell script, markdown, or otherwise
+- **Never put a secret value in a ConfigMap** — use `secretKeyRef` to reference it from a SealedSecret
+- **Never log or echo a secret value** in a CI step or script
+
+The CI runs gitleaks on every PR as a required check ("Secret Scanning"). If it fires, the PR cannot merge. If you generated a value that was accidentally committed, treat it as compromised and rotate it immediately.
+
+Credentials belong in **1Password** (Homelab vault). Kubernetes secrets belong in **SealedSecrets**.
 
 ## Creating a sealed secret
 
