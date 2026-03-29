@@ -42,6 +42,7 @@ spec:
                 - CSIDriver
                 - CSINode
                 - VolumeAttachment
+                - ClusterIssuer
       validate:
         message: "Do not deploy resources into the 'default' namespace."
         deny: {}

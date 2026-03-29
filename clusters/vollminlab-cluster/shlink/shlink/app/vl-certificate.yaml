@@ -1,0 +1,14 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: vl-tls
+  namespace: shlink
+spec:
+  secretName: vl-tls
+  commonName: vl
+  dnsNames:
+    - vl
+  issuerRef:
+    name: internal-ca
+    kind: ClusterIssuer
+    group: cert-manager.io
