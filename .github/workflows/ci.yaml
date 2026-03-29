@@ -11,6 +11,7 @@ on:
       - 'terraform/**'
       - '.vscode/**'
       - 'scripts/**'
+      - '.claude/**'
       - '*.md'
   pull_request:
     branches: [ main, develop ]
@@ -22,6 +23,7 @@ on:
       - 'terraform/**'
       - '.vscode/**'
       - 'scripts/**'
+      - '.claude/**'
       - '*.md'
   workflow_dispatch:
 
