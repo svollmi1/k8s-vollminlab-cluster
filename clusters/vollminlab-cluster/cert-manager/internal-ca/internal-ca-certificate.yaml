@@ -7,6 +7,8 @@ spec:
   isCA: true
   commonName: vollminlab-internal-ca
   secretName: internal-ca-tls
+  duration: 87600h  # 10 years
+  renewBefore: 720h  # renew 30 days before expiry
   privateKey:
     algorithm: ECDSA
     size: 256
