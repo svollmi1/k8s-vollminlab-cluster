@@ -1,0 +1,14 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: vollm-in-tls
+  namespace: shlink
+spec:
+  secretName: vollm-in-tls
+  commonName: vollm.in
+  dnsNames:
+    - vollm.in
+  issuerRef:
+    name: letsencrypt-cloudflare
+    kind: ClusterIssuer
+    group: cert-manager.io
