@@ -360,23 +360,39 @@ All Kustomizations use `interval: 10m`, `prune: true`, source `flux-system` GitR
 | DNS01 recursive nameservers only | true |
 | DNS01 recursive nameservers | `10.96.0.10:53` |
 
+### ClusterIssuers
+
+| Name | Type | Notes |
+|---|---|---|
+| `letsencrypt-cloudflare` | ACME (DNS-01) | Let's Encrypt production; Cloudflare API token from `cloudflare-api-token` SealedSecret |
+| `selfsigned` | Self-signed | Bootstrap issuer used only to create the internal CA cert |
+| `internal-ca` | CA | Signs certs for internal bare hostnames (e.g. `vl`); backed by `internal-ca-tls` secret in `cert-manager` namespace |
+
+**Internal CA certificate** (`internal-ca-tls`):
+- Validity: 10 years (`duration: 87600h`), renews 30 days before expiry (`renewBefore: 720h`)
+- Signed by: `selfsigned` ClusterIssuer
+- Used by: `internal-ca` ClusterIssuer to issue child certificates
+
 ### Ingress Hostnames
 
 All ingresses use `ingressClassName: nginx`, TLS termination via `wildcard-tls`, ssl-redirect enabled.
 
-| Hostname | Backend | Port | Namespace |
-|---|---|---|---|
-| `homepage.vollminlab.com` | homepage | 3000 | homepage |
-| `capacitor.vollminlab.com` | capacitor | 9000 | flux-system |
-| `longhorn.vollminlab.com` | longhorn-frontend | 80 | longhorn-system |
-| `policyreporter.vollminlab.com` | policy-reporter-ui | 8080 | kyverno |
-| `radarr.vollminlab.com` | radarr | 7878 | mediastack |
-| `sonarr.vollminlab.com` | sonarr | 8989 | mediastack |
-| `sabnzbd.vollminlab.com` | sabnzbd | 10097 | mediastack |
-| `prowlarr.vollminlab.com` | prowlarr | 9696 | mediastack |
-| `bazarr.vollminlab.com` | bazarr | 6767 | mediastack |
-| `overseerr.vollminlab.com` | overseerr | 5055 | mediastack |
-| `tautulli.vollminlab.com` | tautulli | 8181 | mediastack |
+| Hostname | Backend | Port | Namespace | TLS Secret |
+|---|---|---|---|---|
+| `homepage.vollminlab.com` | homepage | 3000 | homepage | wildcard-tls |
+| `capacitor.vollminlab.com` | capacitor | 9000 | flux-system | wildcard-tls |
+| `longhorn.vollminlab.com` | longhorn-frontend | 80 | longhorn-system | wildcard-tls |
+| `policyreporter.vollminlab.com` | policy-reporter-ui | 8080 | kyverno | wildcard-tls |
+| `radarr.vollminlab.com` | radarr | 7878 | mediastack | wildcard-tls |
+| `sonarr.vollminlab.com` | sonarr | 8989 | mediastack | wildcard-tls |
+| `sabnzbd.vollminlab.com` | sabnzbd | 10097 | mediastack | wildcard-tls |
+| `prowlarr.vollminlab.com` | prowlarr | 9696 | mediastack | wildcard-tls |
+| `bazarr.vollminlab.com` | bazarr | 6767 | mediastack | wildcard-tls |
+| `overseerr.vollminlab.com` | overseerr | 5055 | mediastack | wildcard-tls |
+| `tautulli.vollminlab.com` | tautulli | 8181 | mediastack | wildcard-tls |
+| `go.vollminlab.com` | shlink-shlink-backend | 8080 | shlink | wildcard-tls |
+| `vl.vollminlab.com` | shlink-shlink-backend | 8080 | shlink | wildcard-tls |
+| `vollm.in` | shlink-shlink-backend | 8080 | shlink | vollm-in-tls (Let's Encrypt) |
 
 ---
 
@@ -465,7 +481,7 @@ All ingresses use `ingressClassName: nginx`, TLS termination via `wildcard-tls`,
 | Web client chart | shlink-web v1.11.0 (christianhuth) |
 | Web client app version | shlink-web-client 4.7.0 |
 | Helm repo | https://charts.christianhuth.de |
-| Short domain | `go.vollminlab.com` |
+| Short domains | `vollm.in` (primary), `go.vollminlab.com`, `vl.vollminlab.com` |
 | Management UI | `shlink.vollminlab.com` |
 | Database | PostgreSQL (Bitnami subchart, bundled in shlink-backend) |
 | DB credentials | SealedSecret: `shlink-credentials` |
@@ -478,7 +494,7 @@ All ingresses use `ingressClassName: nginx`, TLS termination via `wildcard-tls`,
 | Redirect on 404 | `https://homepage.vollminlab.com` |
 | Redirect status | 302 |
 
-**Short links inventory** (`go.vollminlab.com/<slug>` → destination):
+**Short links inventory** (`vollm.in/<slug>` → destination; also accessible via `go.vollminlab.com/<slug>`):
 
 *Cluster apps:*
 
@@ -534,13 +550,14 @@ All ingresses use `ingressClassName: nginx`, TLS termination via `wildcard-tls`,
 | Container mode | kubernetes |
 | Anti-affinity | preferred (weight 100) |
 
-**RunnerDeployments** — 3 pools, 2 replicas each:
+**RunnerDeployments** — 2 pools, 5 total replicas:
 
-| Runner label | Repository | Image | CPU | Memory |
-|---|---|---|---|---|
-| vollminlab-1 | svollmi1/k8s-vollminlab-cluster | summerwind/actions-runner:ubuntu-22.04 | req 500m / limits 2000m | req 512Mi / limits 2Gi |
-| vollminlab-2 | svollmi1/k8s-vollminlab-cluster | summerwind/actions-runner:ubuntu-22.04 | req 500m / limits 2000m | req 512Mi / limits 2Gi |
-| vollminlab-3 | svollmi1/k8s-vollminlab-cluster | summerwind/actions-runner:ubuntu-22.04 | req 500m / limits 2000m | req 512Mi / limits 2Gi |
+| Pool | Runner label | Replicas | Repository | Image | CPU | Memory |
+|---|---|---|---|---|---|---|
+| pool-1 | vollminlab-1 | 3 | svollmi1/k8s-vollminlab-cluster | summerwind/actions-runner:ubuntu-22.04 | req 500m / limits 2000m | req 512Mi / limits 2Gi |
+| pool-3 | vollminlab-3 | 2 | svollmi1/k8s-vollminlab-cluster | summerwind/actions-runner:ubuntu-22.04 | req 500m / limits 2000m | req 512Mi / limits 2Gi |
+
+Pool-1 has 3 replicas to support concurrent CI jobs. Pool-2 (`vollminlab-2`) was removed — no CI jobs used that label.
 
 Runners are ephemeral (`RUNNER_EPHEMERAL=true`). `RUNNER_WAIT_FOR_DOCKERD_SECONDS=120`.
 
@@ -753,4 +770,4 @@ The `dmz` namespace is a security boundary for internet-exposed workloads. Full 
 
 ### Self-Hosted Runners (ARC)
 
-CI runs on self-hosted runners in `actions-runner-system`. 3 pools × 2 replicas = 6 concurrent runners available. Jobs target runner labels `vollminlab-1`, `vollminlab-2`, `vollminlab-3`.
+CI runs on self-hosted runners in `actions-runner-system`. 2 pools, 5 total replicas. Jobs target runner labels `vollminlab-1` (pool-1, 3 replicas) and `vollminlab-3` (pool-3, 2 replicas).
