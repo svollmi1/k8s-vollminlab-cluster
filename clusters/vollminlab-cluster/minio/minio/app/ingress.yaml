@@ -13,17 +13,17 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: minio.vollminlab.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: minio
-            port:
-              number: 9001
+    - host: minio.vollminlab.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: minio
+                port:
+                  number: 9001
   tls:
-  - hosts:
-    - minio.vollminlab.com
-    secretName: wildcard-tls
+    - hosts:
+        - minio.vollminlab.com
+      secretName: wildcard-tls
