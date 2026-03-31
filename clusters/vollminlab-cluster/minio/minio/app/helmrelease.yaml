@@ -9,6 +9,7 @@ metadata:
     category: storage
 spec:
   interval: 10m
+  timeout: 5m
   chart:
     spec:
       chart: minio
