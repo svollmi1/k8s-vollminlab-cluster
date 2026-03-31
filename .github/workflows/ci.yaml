@@ -373,6 +373,14 @@ jobs:
           tar -xzf flux.tar.gz
           sudo mv flux /usr/local/bin/
 
+      - name: Install Helm
+        if: needs.validate-changes.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+          echo "📦 Installing Helm..."
+          curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+          helm version
+
       - name: Create test namespace
         if: needs.validate-changes.outputs.changed == 'true'
         run: |
