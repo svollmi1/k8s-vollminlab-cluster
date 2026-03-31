@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: minio-values
+  namespace: minio
+data:
+  values.yaml: |
+    mode: standalone
+
+    auth:
+      existingSecret: "minio-credentials"
+      rootUserSecretKey: "root-user"
+      rootPasswordSecretKey: "root-password"
+
+    podLabels:
+      app: minio
+      env: production
+      category: storage
+
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+
+    persistence:
+      enabled: true
+      storageClass: "longhorn"
+      size: 50Gi
+
+    service:
+      type: ClusterIP
+      ports:
+        api: 9000
+        console: 9001
+
+    provisioning:
+      enabled: true
+      buckets:
+        - name: velero
+          versioning: false
+          withLock: false
+      podLabels:
+        app: minio-provisioning
+        env: production
+        category: storage
