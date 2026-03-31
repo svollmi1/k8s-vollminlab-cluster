@@ -397,14 +397,16 @@ jobs:
           set -euo pipefail
           echo "🔍 Checking Flux CRDs availability..."
           
-          if ! kubectl get crd ocirepositories.source.toolkit.fluxcd.io >/dev/null 2>&1; then
-            echo "⚠️ OCIRepository CRD not found - skipping Flux resource testing"
+          # Check by listing resources, not CRDs — the runner SA can list Flux resources
+          # but does not have permission to list customresourcedefinitions cluster-wide.
+          if ! kubectl get ocirepositories.source.toolkit.fluxcd.io -A --no-headers >/dev/null 2>&1; then
+            echo "⚠️ OCIRepository resource type not accessible - skipping Flux resource testing"
             echo "FLUX_CRDS_AVAILABLE=false" >> $GITHUB_ENV
             exit 0
           fi
-          
-          if ! kubectl get crd helmreleases.helm.toolkit.fluxcd.io >/dev/null 2>&1; then
-            echo "⚠️ HelmRelease CRD not found - skipping Flux resource testing"
+
+          if ! kubectl get helmreleases.helm.toolkit.fluxcd.io -A --no-headers >/dev/null 2>&1; then
+            echo "⚠️ HelmRelease resource type not accessible - skipping Flux resource testing"
             echo "FLUX_CRDS_AVAILABLE=false" >> $GITHUB_ENV
             # Don't exit - continue with basic validation
           else
