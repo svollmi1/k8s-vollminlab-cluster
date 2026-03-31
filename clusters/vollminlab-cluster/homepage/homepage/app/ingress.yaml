@@ -13,17 +13,17 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: homepage.vollminlab.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: homepage
-            port:
-              number: 3000
+    - host: homepage.vollminlab.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: homepage
+                port:
+                  number: 3000
   tls:
-  - hosts:
-    - homepage.vollminlab.com
-    secretName: wildcard-tls
+    - hosts:
+        - homepage.vollminlab.com
+      secretName: wildcard-tls
