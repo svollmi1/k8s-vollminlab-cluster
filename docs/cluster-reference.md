@@ -394,6 +394,7 @@ All ingresses use `ingressClassName: nginx`, TLS termination via `wildcard-tls`,
 | `go.vollminlab.com` | shlink-shlink-backend | 8080 | shlink | wildcard-tls |
 | `vl.vollminlab.com` | shlink-shlink-backend | 8080 | shlink | wildcard-tls |
 | `vollm.in` | shlink-shlink-backend | 8080 | shlink | vollm-in-tls (Let's Encrypt) |
+| `minio.vollminlab.com` | minio | 9001 | minio | wildcard-tls |
 
 ---
 
@@ -472,7 +473,7 @@ Kubernetes manifests are **not** backed up by Velero — they are restored by Fl
 | Mode | standalone |
 | Storage | 50Gi Longhorn PVC |
 | API endpoint (in-cluster) | `http://minio.minio.svc.cluster.local:9000` |
-| Console port | 9001 |
+| Console | `minio.vollminlab.com` (port 9001) |
 | Root user | `root` (password in 1Password: **MinIO**) |
 | Bucket | `velero` (auto-provisioned on startup) |
 
