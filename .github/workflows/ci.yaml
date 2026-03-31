@@ -475,12 +475,26 @@ jobs:
                 
                 # Check if HelmRepository exists in source namespace
                 if kubectl get helmrepository "$SOURCE_REF" -n "$SOURCE_NAMESPACE" >/dev/null 2>&1; then
-                  # OCI-type HelmRepositories don't fetch an index and won't reconcile Ready
-                  # in ad-hoc test namespaces. Chart version is validated by manifest checks.
+                  # OCI-type HelmRepositories don't reconcile Ready in ad-hoc test namespaces
+                  # (no chart index to fetch; source-controller needs an existing HelmRelease
+                  # to trigger the first pull). Validate directly with helm instead.
                   REPO_TYPE=$(kubectl get helmrepository "$SOURCE_REF" -n "$SOURCE_NAMESPACE" \
                     -o jsonpath='{.spec.type}' 2>/dev/null || echo "")
                   if [[ "$REPO_TYPE" == "oci" ]]; then
-                    echo "⏭️ Skipping OCI-type HelmRepository $SOURCE_REF (chart version validated by manifest checks)"
+                    OCI_URL=$(kubectl get helmrepository "$SOURCE_REF" -n "$SOURCE_NAMESPACE" \
+                      -o jsonpath='{.spec.url}' 2>/dev/null || echo "")
+                    CHART_NAME=$(yq eval '.spec.chart.spec.chart' "$file")
+                    CHART_VERSION=$(yq eval '.spec.chart.spec.version' "$file")
+                    if [[ -n "$OCI_URL" && -n "$CHART_NAME" && -n "$CHART_VERSION" ]]; then
+                      echo "🔍 Validating OCI chart $CHART_NAME@$CHART_VERSION from $OCI_URL..."
+                      helm show chart "${OCI_URL}/${CHART_NAME}" --version "$CHART_VERSION" > /dev/null || {
+                        echo "❌ Chart $CHART_NAME@$CHART_VERSION not found in OCI registry $OCI_URL"
+                        exit 1
+                      }
+                      echo "✅ OCI chart $CHART_NAME@$CHART_VERSION exists and is accessible"
+                    else
+                      echo "⚠️ Could not determine OCI chart details for $SOURCE_REF — skipping chart validation"
+                    fi
                   else
                     echo "Found HelmRepository: $SOURCE_REF, deploying to test namespace"
 
