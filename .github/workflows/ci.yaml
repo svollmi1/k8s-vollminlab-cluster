@@ -373,6 +373,14 @@ jobs:
           tar -xzf flux.tar.gz
           sudo mv flux /usr/local/bin/
 
+      - name: Install Helm
+        if: needs.validate-changes.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+          echo "📦 Installing Helm..."
+          curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+          helm version
+
       - name: Create test namespace
         if: needs.validate-changes.outputs.changed == 'true'
         run: |
@@ -475,24 +483,46 @@ jobs:
                 
                 # Check if HelmRepository exists in source namespace
                 if kubectl get helmrepository "$SOURCE_REF" -n "$SOURCE_NAMESPACE" >/dev/null 2>&1; then
-                  echo "Found HelmRepository: $SOURCE_REF, deploying to test namespace"
-                  
-                  # Get the HelmRepository and deploy it to test namespace
-                  TEST_NAME="test-${SOURCE_REF}-${RUN_SUFFIX}"
-                  kubectl get helmrepository "$SOURCE_REF" -n "$SOURCE_NAMESPACE" -o yaml | \
-                    yq eval "
-                      .metadata.namespace = \"$TEST_NAMESPACE\" |
-                      .metadata.name = \"$TEST_NAME\" |
-                      del(.status) |
-                      del(.metadata.resourceVersion) |
-                      del(.metadata.uid) |
-                      del(.metadata.creationTimestamp)
-                    " | kubectl apply -f - || {
-                    echo "❌ Failed to deploy HelmRepository: $SOURCE_REF"
-                    exit 1
-                  }
-                  
-                  echo "$SOURCE_REF:$TEST_NAME" >> "$OCI_MAPPING_FILE"
+                  # OCI-type HelmRepositories don't reconcile Ready in ad-hoc test namespaces
+                  # (no chart index to fetch; source-controller needs an existing HelmRelease
+                  # to trigger the first pull). Validate directly with helm instead.
+                  REPO_TYPE=$(kubectl get helmrepository "$SOURCE_REF" -n "$SOURCE_NAMESPACE" \
+                    -o jsonpath='{.spec.type}' 2>/dev/null || echo "")
+                  if [[ "$REPO_TYPE" == "oci" ]]; then
+                    OCI_URL=$(kubectl get helmrepository "$SOURCE_REF" -n "$SOURCE_NAMESPACE" \
+                      -o jsonpath='{.spec.url}' 2>/dev/null || echo "")
+                    CHART_NAME=$(yq eval '.spec.chart.spec.chart' "$file")
+                    CHART_VERSION=$(yq eval '.spec.chart.spec.version' "$file")
+                    if [[ -n "$OCI_URL" && -n "$CHART_NAME" && -n "$CHART_VERSION" ]]; then
+                      echo "🔍 Validating OCI chart $CHART_NAME@$CHART_VERSION from $OCI_URL..."
+                      helm show chart "${OCI_URL}/${CHART_NAME}" --version "$CHART_VERSION" > /dev/null || {
+                        echo "❌ Chart $CHART_NAME@$CHART_VERSION not found in OCI registry $OCI_URL"
+                        exit 1
+                      }
+                      echo "✅ OCI chart $CHART_NAME@$CHART_VERSION exists and is accessible"
+                    else
+                      echo "⚠️ Could not determine OCI chart details for $SOURCE_REF — skipping chart validation"
+                    fi
+                  else
+                    echo "Found HelmRepository: $SOURCE_REF, deploying to test namespace"
+
+                    # Get the HelmRepository and deploy it to test namespace
+                    TEST_NAME="test-${SOURCE_REF}-${RUN_SUFFIX}"
+                    kubectl get helmrepository "$SOURCE_REF" -n "$SOURCE_NAMESPACE" -o yaml | \
+                      yq eval "
+                        .metadata.namespace = \"$TEST_NAMESPACE\" |
+                        .metadata.name = \"$TEST_NAME\" |
+                        del(.status) |
+                        del(.metadata.resourceVersion) |
+                        del(.metadata.uid) |
+                        del(.metadata.creationTimestamp)
+                      " | kubectl apply -f - || {
+                      echo "❌ Failed to deploy HelmRepository: $SOURCE_REF"
+                      exit 1
+                    }
+
+                    echo "$SOURCE_REF:$TEST_NAME" >> "$OCI_MAPPING_FILE"
+                  fi
                 else
                   echo "⚠️ HelmRepository $SOURCE_REF not found in $SOURCE_NAMESPACE - skipping"
                 fi
