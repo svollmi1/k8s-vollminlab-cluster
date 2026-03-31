@@ -9,11 +9,10 @@ metadata:
     category: storage
 spec:
   interval: 10m
-  timeout: 5m
   chart:
     spec:
       chart: minio
-      version: 16.0.10
+      version: 5.4.0
       sourceRef:
         kind: HelmRepository
         name: minio
