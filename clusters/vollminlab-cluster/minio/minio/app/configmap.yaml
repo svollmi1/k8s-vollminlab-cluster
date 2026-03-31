@@ -46,3 +46,10 @@ data:
         app: minio-provisioning
         env: production
         category: storage
+      resources:
+        requests:
+          cpu: 250m
+          memory: 128Mi
+        limits:
+          cpu: 500m
+          memory: 256Mi

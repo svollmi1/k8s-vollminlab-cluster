@@ -60,6 +60,20 @@ data:
             name: velero-b2-credentials
             key: cloud
 
+    # node-agent DaemonSet runs kopia on every node for file-system PVC backups
+    nodeAgent:
+      podLabels:
+        app: velero-node-agent
+        env: production
+        category: storage
+      resources:
+        requests:
+          cpu: 500m
+          memory: 512Mi
+        limits:
+          cpu: 1000m
+          memory: 1Gi
+
     schedules:
       daily-full:
         disabled: false
