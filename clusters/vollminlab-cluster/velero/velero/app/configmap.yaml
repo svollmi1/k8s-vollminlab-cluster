@@ -27,6 +27,10 @@ data:
           - mountPath: /target
             name: plugins
 
+    # CSI snapshots disabled — using kopia file-system backup instead
+    # Prevents chart from creating an empty VolumeSnapshotLocation
+    snapshotsEnabled: false
+
     # Per-BSL credentials are used; no global credentials secret needed
     credentials:
       useSecret: false
