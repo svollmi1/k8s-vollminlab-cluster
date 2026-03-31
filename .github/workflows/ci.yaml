@@ -754,17 +754,21 @@ jobs:
           # Advanced validation that requires Flux CRDs
           if [[ "${FLUX_CRDS_AVAILABLE}" == "true" ]]; then
             echo "🔍 Validating HelmRepository status..."
-            kubectl wait --for=condition=Ready --timeout=300s helmrepositories.source.toolkit.fluxcd.io --all -n "$TEST_NAMESPACE" || {
-              echo "❌ HelmRepository validation failed - this would break production deployment"
-              echo "🔍 Checking HelmRepository status:"
-              kubectl get helmrepositories -n "$TEST_NAMESPACE" -o wide
-              echo "📋 HelmRepository events:"
-              kubectl get events -n "$TEST_NAMESPACE" --field-selector involvedObject.kind=HelmRepository --sort-by='.lastTimestamp'
-              echo "📋 Detailed HelmRepository status:"
-              kubectl describe helmrepositories -n "$TEST_NAMESPACE"
-              exit 1
-            }
-            echo "✅ All HelmRepositories are ready and synced"
+            if kubectl get helmrepository -n "$TEST_NAMESPACE" --no-headers 2>/dev/null | grep -q .; then
+              kubectl wait --for=condition=Ready --timeout=300s helmrepositories.source.toolkit.fluxcd.io --all -n "$TEST_NAMESPACE" || {
+                echo "❌ HelmRepository validation failed - this would break production deployment"
+                echo "🔍 Checking HelmRepository status:"
+                kubectl get helmrepositories -n "$TEST_NAMESPACE" -o wide
+                echo "📋 HelmRepository events:"
+                kubectl get events -n "$TEST_NAMESPACE" --field-selector involvedObject.kind=HelmRepository --sort-by='.lastTimestamp' || true
+                echo "📋 Detailed HelmRepository status:"
+                kubectl describe helmrepositories -n "$TEST_NAMESPACE"
+                exit 1
+              }
+              echo "✅ All HelmRepositories are ready and synced"
+            else
+              echo "✅ No HelmRepositories in test namespace (OCI-type repos validated via helm show chart)"
+            fi
             
             # Validate that charts are actually available
             echo "🔍 Validating chart availability..."
