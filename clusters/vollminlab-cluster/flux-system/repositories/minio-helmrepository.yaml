@@ -9,4 +9,4 @@ metadata:
     category: storage
 spec:
   interval: 24h
-  url: https://helm.min.io/
+  url: https://charts.min.io/
