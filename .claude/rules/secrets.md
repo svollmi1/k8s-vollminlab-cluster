@@ -21,7 +21,7 @@ Credentials belong in **1Password** (Homelab vault). Kubernetes secrets belong i
 # 1. Fetch the current sealing certificate
 kubeseal --fetch-cert \
   --controller-namespace sealed-secrets \
-  --controller-name sealed-secrets > pub-cert.pem
+  --controller-name sealed-secrets-controller > pub-cert.pem
 
 # 2. Create and seal (pipe, never write the plain secret to disk)
 kubectl create secret generic my-secret -n my-namespace \

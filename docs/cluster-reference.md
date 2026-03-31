@@ -14,11 +14,12 @@ Comprehensive configuration reference for the vollminlab Kubernetes cluster. Thi
 6. [GitOps — Flux CD](#gitops--flux-cd)
 7. [Ingress & Certificates](#ingress--certificates)
 8. [Storage](#storage)
-9. [Infrastructure Services](#infrastructure-services)
-10. [Media Stack](#media-stack)
-11. [Applications](#applications)
-12. [DMZ — Isolated Workloads](#dmz--isolated-workloads)
-13. [CI/CD](#cicd)
+9. [Backup](#backup)
+10. [Infrastructure Services](#infrastructure-services)
+11. [Media Stack](#media-stack)
+12. [Applications](#applications)
+13. [DMZ — Isolated Workloads](#dmz--isolated-workloads)
+14. [CI/CD](#cicd)
 
 ---
 
@@ -393,6 +394,7 @@ All ingresses use `ingressClassName: nginx`, TLS termination via `wildcard-tls`,
 | `go.vollminlab.com` | shlink-shlink-backend | 8080 | shlink | wildcard-tls |
 | `vl.vollminlab.com` | shlink-shlink-backend | 8080 | shlink | wildcard-tls |
 | `vollm.in` | shlink-shlink-backend | 8080 | shlink | vollm-in-tls (Let's Encrypt) |
+| `minio.vollminlab.com` | minio | 9001 | minio | wildcard-tls |
 
 ---
 
@@ -445,6 +447,124 @@ All ingresses use `ingressClassName: nginx`, TLS termination via `wildcard-tls`,
 | `pvc-tautulli-config` | mediastack | 1Gi | longhorn | RWO |
 | `pvc-minecraft-datadir` | dmz | 20Gi | longhorn-dmz | RWX |
 | `portainer` | portainer | 10Gi | local-path | RWO |
+| `minio` | minio | 50Gi | longhorn | RWO |
+
+---
+
+## Backup
+
+### Architecture
+
+```
+Velero ──► MinIO (minio namespace, Longhorn PVC) ──► Backblaze B2 (off-site, manual replication)
+              │
+              └── secondary BSL: Velero can target B2 directly if MinIO is unavailable
+```
+
+Kubernetes manifests are **not** backed up by Velero — they are restored by Flux from Git. Only stateful PVC data is backed up.
+
+### MinIO
+
+| Parameter | Value |
+|---|---|
+| Chart | bitnami/minio 17.0.23 |
+| Helm repo | https://charts.bitnami.com/bitnami |
+| Namespace | `minio` |
+| Mode | standalone |
+| Storage | 50Gi Longhorn PVC |
+| API endpoint (in-cluster) | `http://minio.minio.svc.cluster.local:9000` |
+| Console | `minio.vollminlab.com` (port 9001) |
+| Root user | `root` (password in 1Password: **MinIO**) |
+| Bucket | `velero` (auto-provisioned on startup) |
+
+### Velero
+
+| Parameter | Value |
+|---|---|
+| Chart | vmware-tanzu/velero 12.0.0 (v1.18.0) |
+| Helm repo | https://vmware-tanzu.github.io/helm-charts |
+| Namespace | `velero` |
+| Backup method | kopia file-system backup (node-agent DaemonSet) |
+| Primary BSL | `minio` (default) |
+| Secondary BSL | `b2` (Backblaze B2, DR use only) |
+| B2 bucket | `vollminlab-k8s-backups` |
+| B2 endpoint | `https://s3.us-west-000.backblazeb2.com` |
+| B2 credentials | 1Password: **Backblaze B2 - vollminlab-k8s-velero** |
+| Schedule | `daily-full` — 02:00 daily, 30-day retention |
+
+### Checking backup status
+
+```bash
+# List all backups
+velero backup get
+
+# Check schedule status
+velero schedule get
+
+# Describe a specific backup
+velero backup describe <backup-name> --details
+
+# Check backup logs
+velero backup logs <backup-name>
+
+# Check node-agent (kopia) status
+kubectl get pods -n velero -l app=velero-node-agent
+```
+
+### Triggering a manual backup
+
+```bash
+# Full cluster backup (all namespaces)
+velero backup create manual-$(date +%Y%m%d) --storage-location minio
+
+# Single namespace backup
+velero backup create mediastack-$(date +%Y%m%d) --include-namespaces mediastack --storage-location minio
+```
+
+### Restore procedure
+
+#### Normal restore (MinIO available)
+
+```bash
+# List available backups
+velero backup get
+
+# Restore a full backup
+velero restore create --from-backup <backup-name>
+
+# Restore a single namespace
+velero restore create --from-backup <backup-name> --include-namespaces mediastack
+
+# Check restore status
+velero restore get
+velero restore describe <restore-name>
+```
+
+#### DR restore (MinIO unavailable — use B2 directly)
+
+```bash
+# Switch Velero to use the B2 BSL as default
+kubectl patch backupstoragelocation b2 -n velero \
+  --type merge -p '{"spec":{"default":true}}'
+kubectl patch backupstoragelocation minio -n velero \
+  --type merge -p '{"spec":{"default":false}}'
+
+# Velero will sync available backups from B2 within ~1 minute
+velero backup get
+
+# Restore as normal
+velero restore create --from-backup <backup-name>
+```
+
+#### Full cluster rebuild restore
+
+1. Bootstrap the cluster (CNI, Flux, Sealed Secrets key from 1Password)
+2. Let Flux reconcile all namespaces from Git — this recreates all deployments
+3. Deploy MinIO first: `flux reconcile kustomization minio --with-source`
+4. Deploy Velero: `flux reconcile kustomization velero --with-source`
+5. Point Velero at B2 (MinIO will be empty after rebuild — see DR restore above)
+6. Restore stateful namespaces: `velero restore create --from-backup <backup-name>`
+7. Scale down and back up affected deployments to remount restored PVCs
 
 ---
 

@@ -1,0 +1,85 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: velero-values
+  namespace: velero
+data:
+  values.yaml: |
+    podLabels:
+      app: velero
+      env: production
+      category: storage
+
+    resources:
+      requests:
+        cpu: 500m
+        memory: 128Mi
+      limits:
+        cpu: 1000m
+        memory: 512Mi
+
+    # AWS plugin provides S3-compatible support for both MinIO and Backblaze B2
+    initContainers:
+      - name: velero-plugin-for-aws
+        image: velero/velero-plugin-for-aws:v1.14.0
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+          - mountPath: /target
+            name: plugins
+
+    # Per-BSL credentials are used; no global credentials secret needed
+    credentials:
+      useSecret: false
+
+    configuration:
+      # Use kopia file-system backup for PVC data
+      defaultVolumesToFsBackup: true
+
+      backupStorageLocation:
+        # Primary: in-cluster MinIO (fast restores, no egress cost)
+        - name: minio
+          provider: aws
+          bucket: velero
+          default: true
+          config:
+            region: us-east-1
+            s3ForcePathStyle: "true"
+            s3Url: "http://minio.minio.svc.cluster.local:9000"
+          credential:
+            name: velero-minio-credentials
+            key: cloud
+        # Secondary: Backblaze B2 (off-site DR — use if MinIO is unavailable)
+        - name: b2
+          provider: aws
+          bucket: vollminlab-k8s-backups
+          config:
+            region: us-west-000
+            s3Url: "https://s3.us-west-000.backblazeb2.com"
+            s3ForcePathStyle: "true"
+          credential:
+            name: velero-b2-credentials
+            key: cloud
+
+    # node-agent DaemonSet runs kopia on every node for file-system PVC backups
+    nodeAgent:
+      podLabels:
+        app: velero-node-agent
+        env: production
+        category: storage
+      resources:
+        requests:
+          cpu: 500m
+          memory: 512Mi
+        limits:
+          cpu: 1000m
+          memory: 1Gi
+
+    schedules:
+      daily-full:
+        disabled: false
+        schedule: "0 2 * * *"
+        useOwnerReferencesInBackup: false
+        template:
+          ttl: 720h
+          storageLocation: minio
+          defaultVolumesToFsBackup: true

@@ -26,3 +26,5 @@ resources:
   - monitoring-kustomization.yaml
   - portainer-kustomization.yaml
   - shlink-kustomization.yaml
+  - minio-kustomization.yaml
+  - velero-kustomization.yaml
