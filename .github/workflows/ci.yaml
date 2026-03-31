@@ -475,24 +475,32 @@ jobs:
                 
                 # Check if HelmRepository exists in source namespace
                 if kubectl get helmrepository "$SOURCE_REF" -n "$SOURCE_NAMESPACE" >/dev/null 2>&1; then
-                  echo "Found HelmRepository: $SOURCE_REF, deploying to test namespace"
-                  
-                  # Get the HelmRepository and deploy it to test namespace
-                  TEST_NAME="test-${SOURCE_REF}-${RUN_SUFFIX}"
-                  kubectl get helmrepository "$SOURCE_REF" -n "$SOURCE_NAMESPACE" -o yaml | \
-                    yq eval "
-                      .metadata.namespace = \"$TEST_NAMESPACE\" |
-                      .metadata.name = \"$TEST_NAME\" |
-                      del(.status) |
-                      del(.metadata.resourceVersion) |
-                      del(.metadata.uid) |
-                      del(.metadata.creationTimestamp)
-                    " | kubectl apply -f - || {
-                    echo "❌ Failed to deploy HelmRepository: $SOURCE_REF"
-                    exit 1
-                  }
-                  
-                  echo "$SOURCE_REF:$TEST_NAME" >> "$OCI_MAPPING_FILE"
+                  # OCI-type HelmRepositories don't fetch an index and won't reconcile Ready
+                  # in ad-hoc test namespaces. Chart version is validated by manifest checks.
+                  REPO_TYPE=$(kubectl get helmrepository "$SOURCE_REF" -n "$SOURCE_NAMESPACE" \
+                    -o jsonpath='{.spec.type}' 2>/dev/null || echo "")
+                  if [[ "$REPO_TYPE" == "oci" ]]; then
+                    echo "⏭️ Skipping OCI-type HelmRepository $SOURCE_REF (chart version validated by manifest checks)"
+                  else
+                    echo "Found HelmRepository: $SOURCE_REF, deploying to test namespace"
+
+                    # Get the HelmRepository and deploy it to test namespace
+                    TEST_NAME="test-${SOURCE_REF}-${RUN_SUFFIX}"
+                    kubectl get helmrepository "$SOURCE_REF" -n "$SOURCE_NAMESPACE" -o yaml | \
+                      yq eval "
+                        .metadata.namespace = \"$TEST_NAMESPACE\" |
+                        .metadata.name = \"$TEST_NAME\" |
+                        del(.status) |
+                        del(.metadata.resourceVersion) |
+                        del(.metadata.uid) |
+                        del(.metadata.creationTimestamp)
+                      " | kubectl apply -f - || {
+                      echo "❌ Failed to deploy HelmRepository: $SOURCE_REF"
+                      exit 1
+                    }
+
+                    echo "$SOURCE_REF:$TEST_NAME" >> "$OCI_MAPPING_FILE"
+                  fi
                 else
                   echo "⚠️ HelmRepository $SOURCE_REF not found in $SOURCE_NAMESPACE - skipping"
                 fi
