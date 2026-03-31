@@ -31,5 +31,6 @@ resources:
   - smb-csi-driver-helmrepository.yaml
   - sonarr-helmrepository.yaml
   - tautulli-helmrepository.yaml
+  - minio-helmrepository.yaml
   - shlink-helmrepository.yaml
   - velero-helmrepository.yaml
