@@ -1,4 +1,4 @@
-apiVersion: source.toolkit.fluxcd.io/v1beta2
+apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
   name: minio
@@ -8,6 +8,5 @@ metadata:
     env: production
     category: storage
 spec:
-  type: oci
   interval: 24h
-  url: oci://registry-1.docker.io/bitnamicharts
+  url: https://helm.min.io/

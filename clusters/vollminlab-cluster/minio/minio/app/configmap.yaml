@@ -6,11 +6,9 @@ metadata:
 data:
   values.yaml: |
     mode: standalone
+    replicas: 1
 
-    auth:
-      existingSecret: "minio-credentials"
-      rootUserSecretKey: "root-user"
-      rootPasswordSecretKey: "root-password"
+    existingSecret: "minio-credentials"
 
     podLabels:
       app: minio
@@ -32,20 +30,22 @@ data:
 
     service:
       type: ClusterIP
-      ports:
-        api: 9000
-        console: 9001
+      port: "9000"
 
-    provisioning:
-      enabled: true
-      buckets:
-        - name: velero
-          versioning: false
-          withLock: false
-      podLabels:
-        app: minio-provisioning
-        env: production
-        category: storage
+    consoleService:
+      type: ClusterIP
+      port: "9001"
+
+    users: []
+
+    buckets:
+      - name: velero
+        policy: none
+        purge: false
+        versioning: false
+        objectlocking: false
+
+    makeBucketJob:
       resources:
         requests:
           cpu: 250m

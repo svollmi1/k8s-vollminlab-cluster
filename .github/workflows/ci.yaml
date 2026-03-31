@@ -482,17 +482,41 @@ jobs:
               
               if [[ -n "$SOURCE_REF" ]]; then
                 echo "Looking for HelmRepository: $SOURCE_REF in namespace: $SOURCE_NAMESPACE"
-                
-                # Check if HelmRepository exists in source namespace
-                if kubectl get helmrepository "$SOURCE_REF" -n "$SOURCE_NAMESPACE" >/dev/null 2>&1; then
+
+                # Check if the HelmRepository itself was changed in this PR — prefer file over cluster
+                # This handles type changes (e.g. OCI→HTTP) and brand-new repositories
+                CHANGED_REPO_FILE=""
+                for cf in $CHANGED_FILES; do
+                  if [[ -f "$cf" ]] && yq eval '.kind' "$cf" 2>/dev/null | grep -qi '^HelmRepository$'; then
+                    FILE_REPO_NAME=$(yq eval '.metadata.name' "$cf" 2>/dev/null || echo "")
+                    if [[ "$FILE_REPO_NAME" == "$SOURCE_REF" ]]; then
+                      CHANGED_REPO_FILE="$cf"
+                      break
+                    fi
+                  fi
+                done
+
+                # Check if HelmRepository exists in source namespace OR was changed in this PR
+                if kubectl get helmrepository "$SOURCE_REF" -n "$SOURCE_NAMESPACE" >/dev/null 2>&1 || [[ -n "$CHANGED_REPO_FILE" ]]; then
                   # OCI-type HelmRepositories don't reconcile Ready in ad-hoc test namespaces
                   # (no chart index to fetch; source-controller needs an existing HelmRelease
                   # to trigger the first pull). Validate directly with helm instead.
-                  REPO_TYPE=$(kubectl get helmrepository "$SOURCE_REF" -n "$SOURCE_NAMESPACE" \
-                    -o jsonpath='{.spec.type}' 2>/dev/null || echo "")
+                  # Prefer type from the changed file if available (handles OCI→HTTP migrations)
+                  if [[ -n "$CHANGED_REPO_FILE" ]]; then
+                    REPO_TYPE=$(yq eval '.spec.type // ""' "$CHANGED_REPO_FILE" 2>/dev/null || echo "")
+                    echo "📝 Using updated HelmRepository type from changed file: $CHANGED_REPO_FILE (type: ${REPO_TYPE:-http})"
+                  else
+                    REPO_TYPE=$(kubectl get helmrepository "$SOURCE_REF" -n "$SOURCE_NAMESPACE" \
+                      -o jsonpath='{.spec.type}' 2>/dev/null || echo "")
+                  fi
+
                   if [[ "$REPO_TYPE" == "oci" ]]; then
-                    OCI_URL=$(kubectl get helmrepository "$SOURCE_REF" -n "$SOURCE_NAMESPACE" \
-                      -o jsonpath='{.spec.url}' 2>/dev/null || echo "")
+                    if [[ -n "$CHANGED_REPO_FILE" ]]; then
+                      OCI_URL=$(yq eval '.spec.url' "$CHANGED_REPO_FILE" 2>/dev/null || echo "")
+                    else
+                      OCI_URL=$(kubectl get helmrepository "$SOURCE_REF" -n "$SOURCE_NAMESPACE" \
+                        -o jsonpath='{.spec.url}' 2>/dev/null || echo "")
+                    fi
                     CHART_NAME=$(yq eval '.spec.chart.spec.chart' "$file")
                     CHART_VERSION=$(yq eval '.spec.chart.spec.version' "$file")
                     if [[ -n "$OCI_URL" && -n "$CHART_NAME" && -n "$CHART_VERSION" ]]; then
@@ -509,8 +533,10 @@ jobs:
                     echo "Found HelmRepository: $SOURCE_REF, deploying to test namespace"
 
                     # Get the HelmRepository and deploy it to test namespace
+                    # Prefer the changed file so the test uses the new repo config, not the stale cluster version
                     TEST_NAME="test-${SOURCE_REF}-${RUN_SUFFIX}"
-                    kubectl get helmrepository "$SOURCE_REF" -n "$SOURCE_NAMESPACE" -o yaml | \
+                    if [[ -n "$CHANGED_REPO_FILE" ]]; then
+                      echo "📝 Deploying updated HelmRepository from changed file: $CHANGED_REPO_FILE"
                       yq eval "
                         .metadata.namespace = \"$TEST_NAMESPACE\" |
                         .metadata.name = \"$TEST_NAME\" |
@@ -518,10 +544,24 @@ jobs:
                         del(.metadata.resourceVersion) |
                         del(.metadata.uid) |
                         del(.metadata.creationTimestamp)
-                      " | kubectl apply -f - || {
-                      echo "❌ Failed to deploy HelmRepository: $SOURCE_REF"
-                      exit 1
-                    }
+                      " "$CHANGED_REPO_FILE" | kubectl apply -f - || {
+                        echo "❌ Failed to deploy HelmRepository: $SOURCE_REF"
+                        exit 1
+                      }
+                    else
+                      kubectl get helmrepository "$SOURCE_REF" -n "$SOURCE_NAMESPACE" -o yaml | \
+                        yq eval "
+                          .metadata.namespace = \"$TEST_NAMESPACE\" |
+                          .metadata.name = \"$TEST_NAME\" |
+                          del(.status) |
+                          del(.metadata.resourceVersion) |
+                          del(.metadata.uid) |
+                          del(.metadata.creationTimestamp)
+                        " | kubectl apply -f - || {
+                        echo "❌ Failed to deploy HelmRepository: $SOURCE_REF"
+                        exit 1
+                      }
+                    fi
 
                     echo "$SOURCE_REF:$TEST_NAME" >> "$OCI_MAPPING_FILE"
                   fi
