@@ -7,7 +7,7 @@ metadata:
     env: production
     category: system
 resources:
-  - arc-oci-helmrepository.yaml
+  - arc-helmrepository.yaml
   - bazarr-helmrepository.yaml
   - cert-manager-helmrepository.yaml
   - ingress-nginx-helmrepository.yaml
