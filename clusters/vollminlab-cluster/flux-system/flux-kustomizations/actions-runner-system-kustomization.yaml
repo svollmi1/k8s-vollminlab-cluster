@@ -4,11 +4,6 @@ metadata:
   name: actions-runner-system
   namespace: flux-system
 spec:
-  healthChecks:
-    - apiVersion: apps/v1
-      kind: Deployment
-      name: actions-runner-controller
-      namespace: actions-runner-system
   interval: 10m
   path: ./clusters/vollminlab-cluster/actions-runner-system
   prune: true
