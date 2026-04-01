@@ -14,7 +14,7 @@ data:
 
     runnerScaleSetName: "vollminlab"
 
-    minRunners: 1
+    minRunners: 4
     maxRunners: 10
 
     controllerServiceAccount:
