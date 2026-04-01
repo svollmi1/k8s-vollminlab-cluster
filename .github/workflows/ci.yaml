@@ -207,8 +207,7 @@ jobs:
               present: false
             new-line-at-end-of-file:
               level: warning
-            line-length:
-              max: 1000  # Allow much longer lines for encrypted data
+            line-length: disable  # Sealed secret ciphertext can be arbitrarily long
             truthy:
               allowed-values: ['true', 'false', 'on', 'off']
           EOF
