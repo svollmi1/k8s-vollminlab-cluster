@@ -31,7 +31,7 @@ data:
         serviceAccountName: github-actions-runner
         containers:
           - name: runner
-            image: ghcr.io/actions/actions-runner:2.333.1
+            image: ghcr.io/actions/actions-runner:2.332.0
             resources:
               requests:
                 cpu: 500m
