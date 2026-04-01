@@ -1,0 +1,23 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: arc-controller
+  namespace: flux-system
+  labels:
+    app: arc-controller
+    env: production
+    category: apps
+spec:
+  interval: 10m
+  path: ./clusters/vollminlab-cluster/arc-controller
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  targetNamespace: arc-controller
+  timeout: 5m
+  healthChecks:
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: arc-controller
+      namespace: arc-controller
