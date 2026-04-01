@@ -47,7 +47,7 @@ env:
 jobs:
   validate-changes:
     name: Validate Kubernetes Manifests
-    runs-on: vollminlab-1
+    runs-on: vollminlab
     timeout-minutes: 5
     outputs:
       changed: ${{ steps.get-changed-files.outputs.changed }}
@@ -330,7 +330,7 @@ jobs:
 
   integration-test:
     name: Integration Test
-    runs-on: vollminlab-3
+    runs-on: vollminlab
     needs: [validate-changes]
     if: needs.validate-changes.result == 'success'
     env:
@@ -923,7 +923,7 @@ jobs:
 
   security-scan:
     name: Security Scan
-    runs-on: vollminlab-1
+    runs-on: vollminlab
     needs: [validate-changes]
     if: needs.validate-changes.result == 'success'
     timeout-minutes: 15
@@ -1149,7 +1149,7 @@ jobs:
 
   policy-validation:
     name: Kyverno Policy Validation
-    runs-on: vollminlab-1
+    runs-on: vollminlab
     needs: [validate-changes]
     if: needs.validate-changes.result == 'success'
     timeout-minutes: 5
@@ -1333,7 +1333,7 @@ jobs:
 
   notify-success:
     name: Notify Success
-    runs-on: vollminlab-3
+    runs-on: vollminlab
     needs: [validate-changes, integration-test, security-scan, policy-validation]
     if: success()
     steps:
@@ -1345,7 +1345,7 @@ jobs:
 
   notify-failure:
     name: Notify Failure
-    runs-on: vollminlab-3
+    runs-on: vollminlab
     needs: [validate-changes, integration-test, security-scan, policy-validation]
     if: failure()
     steps:

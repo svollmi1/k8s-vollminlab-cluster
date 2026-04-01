@@ -5,3 +5,5 @@ metadata:
 resources:
   - helmrelease.yaml
   - configmap.yaml
+  - rbac.yaml
+  - arc-githubapp-secret-sealedsecret.yaml
