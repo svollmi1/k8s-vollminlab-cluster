@@ -39,6 +39,11 @@ data:
       # Use kopia file-system backup for PVC data
       defaultVolumesToFsBackup: true
 
+      # Validate BSLs and sync backup list hourly instead of default 1 minute
+      # Prevents excessive Class C API calls against Backblaze B2
+      storeValidationFrequency: 1h
+      backupSyncPeriod: 1h
+
       backupStorageLocation:
         # Primary: in-cluster MinIO (fast restores, no egress cost)
         - name: minio
