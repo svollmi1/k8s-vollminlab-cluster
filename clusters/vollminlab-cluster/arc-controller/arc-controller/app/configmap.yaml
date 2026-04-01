@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: arc-controller-values
+  namespace: arc-controller
+  labels:
+    app: arc-controller
+    env: production
+    category: apps
+data:
+  values.yaml: |
+    replicaCount: 2
+
+    fullnameOverride: "arc-controller"
+
+    podLabels:
+      app: arc-controller
+      env: production
+      category: apps
+
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 500m
+        memory: 256Mi
+
+    affinity:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: gha-runner-scale-set-controller
+              topologyKey: kubernetes.io/hostname
+
+    flags:
+      logLevel: "info"
+      logFormat: "json"
+      watchSingleNamespace: "actions-runner-system"
+      runnerMaxConcurrentReconciles: 5
+      updateStrategy: "immediate"
+
+    metrics:
+      controllerManagerAddr: ":8080"
+      listenerAddr: ":8080"
+      listenerEndpoint: "/metrics"
