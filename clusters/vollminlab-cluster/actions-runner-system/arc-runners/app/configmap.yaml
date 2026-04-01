@@ -14,7 +14,7 @@ data:
 
     runnerScaleSetName: "vollminlab"
 
-    minRunners: 1
+    minRunners: 4
     maxRunners: 10
 
     controllerServiceAccount:
@@ -32,6 +32,7 @@ data:
         containers:
           - name: runner
             image: ghcr.io/actions/actions-runner:2.332.0
+            command: ["/home/runner/run.sh"]
             resources:
               requests:
                 cpu: 500m

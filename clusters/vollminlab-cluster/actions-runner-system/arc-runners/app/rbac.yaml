@@ -38,10 +38,6 @@ rules:
   - apiGroups: ["batch"]
     resources: ["jobs", "cronjobs"]
     verbs: ["get", "list", "watch", "create", "delete"]
-  # Actions Runner Controller resources - full access (needed for controller operation)
-  - apiGroups: ["actions.summerwind.dev"]
-    resources: ["runnerdeployments", "runners", "runnerreplicasets"]
-    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
   # Flux CD resources - read access for CI validation + create/delete for testing
   - apiGroups: ["source.toolkit.fluxcd.io"]
     resources: ["gitrepositories", "ocirepositories", "helmrepositories", "buckets"]
