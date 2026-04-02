@@ -79,6 +79,16 @@ data:
                   type: sabnzbd
                   url: https://sabnzbd.vollminlab.com
                   key: "{{HOMEPAGE_VAR_SABNZBD_API_KEY}}"
+            - Bazarr:
+                description: Subtitle manager
+                href: https://bazarr.vollminlab.com
+                icon: bazarr.png
+                namespace: mediastack
+                app: bazarr
+                widget:
+                  type: bazarr
+                  url: https://bazarr.vollminlab.com
+                  key: "{{HOMEPAGE_VAR_BAZARR_API_KEY}}"
         - Infrastructure:
             - Pi-hole:
                 description: DNS sinkhole and ad blocker
@@ -132,6 +142,33 @@ data:
                 href: http://haproxydmzvip.vollminlab.com:8404/stats
                 icon: haproxy.png
                 ping: http://haproxydmzvip.vollminlab.com:8404/stats
+            - Longhorn:
+                description: Distributed block storage
+                href: https://longhorn.vollminlab.com
+                icon: longhorn.png
+                namespace: longhorn-system
+                app: longhorn
+                widget:
+                  type: longhorn
+                  url: https://longhorn.vollminlab.com
+            - MinIO:
+                description: S3-compatible object storage
+                href: https://minio.vollminlab.com
+                icon: minio.png
+                namespace: minio
+                app: minio
+                widget:
+                  type: minio
+                  url: https://minio.vollminlab.com
+                  username: "{{HOMEPAGE_VAR_MINIO_USERNAME}}"
+                  password: "{{HOMEPAGE_VAR_MINIO_PASSWORD}}"
+            - Capacitor:
+                description: Flux CD dashboard
+                href: https://capacitor.vollminlab.com
+                icon: mdi-heat-wave
+                namespace: flux-system
+                app: capacitor
+                ping: https://capacitor.vollminlab.com
         - Monitoring & Observability:
             - Grafana:
                 description: Metrics visualization
@@ -145,6 +182,13 @@ data:
                 icon: prometheus.png
                 namespace: monitoring
                 app: prometheus
+            - Policy Reporter:
+                description: Kyverno policy violation reports
+                href: https://policyreporter.vollminlab.com
+                icon: mdi-shield-check
+                namespace: kyverno
+                app: policy-reporter
+                ping: https://policyreporter.vollminlab.com
         - Documentation & Tools:
             - BookStack:
                 description: Wiki and documentation
@@ -158,6 +202,16 @@ data:
                 icon: homepage.png
                 namespace: homepage
                 app: homepage
+            - Shlink:
+                description: URL shortener dashboard
+                href: https://shlink.vollminlab.com
+                icon: shlink.png
+                namespace: shlink
+                app: shlink-web
+                widget:
+                  type: shlink
+                  url: https://shlink.vollminlab.com
+                  key: "{{HOMEPAGE_VAR_SHLINK_API_KEY}}"
             - Homelab Repo:
                 description: This Kubernetes cluster repo
                 href: https://github.com/svollmi1/k8s-vollminlab-cluster
@@ -296,6 +350,26 @@ data:
           secretKeyRef:
             name: homepage-env-vars
             key: PIHOLE_API_KEY
+      - name: HOMEPAGE_VAR_BAZARR_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: BAZARR_API_KEY
+      - name: HOMEPAGE_VAR_MINIO_USERNAME
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: MINIO_USERNAME
+      - name: HOMEPAGE_VAR_MINIO_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: MINIO_PASSWORD
+      - name: HOMEPAGE_VAR_SHLINK_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: SHLINK_API_KEY
       - name: HOMEPAGE_ALLOWED_HOSTS
         value: "homepage.vollminlab.com,localhost,127.0.0.1"
     resources:

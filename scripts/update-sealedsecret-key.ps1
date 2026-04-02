@@ -53,7 +53,10 @@ param(
     [string]$ControllerNamespace = "sealed-secrets",
 
     [Parameter(HelpMessage = "Run without writing to repo: sealed output goes to a temp file; use to validate the script.")]
-    [switch]$DryRun
+    [switch]$DryRun,
+
+    [Parameter(HelpMessage = "Allow adding keys that do not yet exist in the secret (in addition to updating existing ones).")]
+    [switch]$AllowNewKeys
 )
 
 $ErrorActionPreference = "Stop"
@@ -103,12 +106,17 @@ if ($dataSectionLines.Count -eq 0) {
 # Discover keys present in secret data only (not metadata)
 $dataLinePattern = "(?m)^\s+([A-Za-z0-9_]+)\s*:"
 $keysBefore = [regex]::Matches($dataSectionYaml, $dataLinePattern) | ForEach-Object { $_.Groups[1].Value } | Select-Object -Unique
+$newKeys = @()
 foreach ($key in $KeysToUpdate) {
     if ($key -notin $keysBefore) {
-        Write-Error "Secret does not contain key '$key'. Aborting."
+        if (-not $AllowNewKeys) {
+            Write-Error "Secret does not contain key '$key'. Use -AllowNewKeys to add new keys. Aborting."
+        }
+        $newKeys += $key
     }
 }
 foreach ($key in $KeysToUpdate) {
+    if ($key -in $newKeys) { continue }  # new keys don't exist yet, skip count check
     $count = ([regex]::Matches($secretYaml, "(?m)^\s+$([regex]::Escape($key))\s*:")).Count
     if ($count -ne 1) {
         Write-Error "Expected exactly one line for key '$key'; found $count. Aborting."
@@ -154,8 +162,17 @@ foreach ($key in $keysBefore) {
     }
 }
 
+# Append new keys to the data section (values never logged)
+foreach ($key in $newKeys) {
+    $newVal = $KeyValues[$key]
+    $newB64 = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($newVal))
+    $secretYaml = $secretYaml -replace "(?m)^(data:)", "`$1`n  ${key}: $newB64"
+    Write-Host "Adding new key: $key"
+}
+
 # Replace only the requested keys (values never logged)
 foreach ($key in $KeysToUpdate) {
+    if ($key -in $newKeys) { continue }  # already handled above
     $newVal = $KeyValues[$key]
     $newB64 = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($newVal))
     $secretYaml = $secretYaml -replace "(?m)^(\s+$([regex]::Escape($key))\s*)[A-Za-z0-9+/=]+", "`${1}$newB64"
@@ -164,6 +181,7 @@ foreach ($key in $KeysToUpdate) {
         Write-Error "After replacing key '$key', line count is $countAfter (expected 1). Aborting."
     }
 }
+
 
 # Write to temp file for kubeseal (use .NET so -WhatIf does not skip this; only the repo write is gated)
 $tempSecret = Join-Path $env:TEMP "sealedsecret-update-$([Guid]::NewGuid().ToString('N').Substring(0,8)).yaml"
