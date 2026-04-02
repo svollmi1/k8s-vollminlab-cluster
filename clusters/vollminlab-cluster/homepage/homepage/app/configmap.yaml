@@ -117,8 +117,7 @@ data:
                 href: https://minio.vollminlab.com
                 icon: minio.png
                 namespace: minio
-                app: minio
-                ping: https://minio.vollminlab.com
+                podSelector: "app=minio"
         - Networking:
             - Pi-hole:
                 description: DNS sinkhole and ad blocker
@@ -182,7 +181,6 @@ data:
                 icon: shlink.png
                 namespace: shlink
                 app: shlink-web
-                ping: https://shlink.vollminlab.com
             - Homelab Repo:
                 description: This Kubernetes cluster repo
                 href: https://github.com/svollmi1/k8s-vollminlab-cluster
