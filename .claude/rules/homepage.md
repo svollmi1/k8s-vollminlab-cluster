@@ -14,6 +14,24 @@ Services currently auto-discovered (as of 2026-04-01):
 - **Longhorn** (`longhorn-system/longhorn-ingress`) → Infrastructure group
 - **Policy Reporter** (`kyverno/policy-reporter-ui`) → Monitoring & Observability group
 
+## Pod selector gotcha
+
+Homepage translates `app: <value>` to the label selector `app.kubernetes.io/name=<value>`. If a pod uses the plain `app=<value>` label instead (common with Bitnami and some other charts), the status check will show NOT FOUND.
+
+Fix: use `podSelector` to specify the exact label selector instead of `app`:
+```yaml
+- MyService:
+    namespace: my-namespace
+    podSelector: "app=my-app"   # exact label, not app.kubernetes.io/name
+```
+
+Check what labels a pod actually has before configuring:
+```bash
+kubectl get pod -n <namespace> --show-labels
+```
+
+## Auto-discovery via ingress annotations
+
 To add a new service via auto-discovery, annotate its ingress:
 ```yaml
 annotations:
