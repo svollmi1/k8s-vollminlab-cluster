@@ -135,10 +135,41 @@ Controlled fault injection for resilience testing:
 
 ---
 
-## Phase 6 — CNI Migration (Calico → Cilium)
+## Phase 6 — Node Maintenance Window
 
-**Status:** `planned` (depends on: 1.1 backups validated with a test restore, 1.3 Renovate, and 1.4 Flux Image Automation in place)
-**Risk:** High — CNI replacement requires controlled cluster-level maintenance
+**Status:** `planned` (depends on Phase 2 observability being in place for monitoring during maintenance)
+**Risk:** Medium — rolling node reboots; cluster should stay available if done one node at a time
+
+Normalize all nodes to current versions before the CNI migration. Current state (as of 2026-04-01):
+
+| Node | k8s | Kernel | Ubuntu |
+|---|---|---|---|
+| k8scp01 | v1.32.3 | 6.8.0-106 | 24.04.2 |
+| k8scp02 | v1.32.3 | 6.8.0-85 | 24.04.1 |
+| k8scp03 | v1.32.3 | 6.8.0-87 | 24.04.1 |
+| k8sworker01 | v1.32.3 | 6.8.0-79 | 24.04.1 |
+| k8sworker02 | v1.32.3 | 6.8.0-84 | 24.04.1 |
+| k8sworker03 | v1.32.3 | 6.8.0-87 | 24.04.1 |
+| k8sworker04 | v1.32.3 | 6.8.0-106 | 24.04.1 |
+| k8sworker05 | v1.32.9 | 6.8.0-87 | 24.04.3 |
+| k8sworker06 | v1.32.3 | 6.8.0-106 | 24.04.1 |
+
+Scope:
+- Upgrade all nodes to the latest Kubernetes 1.32.x patch (or latest stable minor if 1.33+ is current)
+- `apt upgrade` on all nodes to normalize Ubuntu patch levels and kernel versions
+- Upgrade containerd if a newer stable version is available (currently 1.7.27 across all nodes)
+- Drain → upgrade → reboot → uncordon, one node at a time
+- Control plane nodes first, workers after
+
+Do not bundle this with the Cilium migration — they should be separate maintenance windows.
+
+---
+
+## Phase 7 — CNI Migration (Calico → Cilium)
+
+**Status:** `planned`
+**Depends on:** 1.1 test restore validated, 1.3 Renovate, 1.4 Flux Image Automation, Phase 2 observability (2.1 + 2.2 minimum), Phase 6 node maintenance complete
+**Risk:** High — CNI replacement requires a full cluster maintenance window
 
 Cilium offers significant advantages over Calico for this use case:
 - **Hubble** — built-in L4/L7 network observability (flows, DNS, HTTP)
@@ -147,11 +178,13 @@ Cilium offers significant advantages over Calico for this use case:
 - Industry direction for SRE/platform engineering roles
 
 Migration approach:
-1. Ensure Velero backups are healthy and a test restore has been validated
-2. Plan a maintenance window
-3. Drain nodes, uninstall Calico, install Cilium
-4. Validate network policies and DMZ rules
-5. Update `bootstrap/calico/` → `bootstrap/cilium/` references
+1. Confirm Velero backups are healthy and a test restore has been validated
+2. Confirm Phase 2 observability is in place (Prometheus + Loki at minimum)
+3. Confirm all nodes are on current, normalized versions (Phase 6)
+4. Plan a maintenance window
+5. Drain nodes, uninstall Calico, install Cilium
+6. Validate network policies and DMZ rules (especially DMZ namespace on k8sworker05)
+7. Update `bootstrap/calico/` → `bootstrap/cilium/` references
 
 This is a cluster rebuild risk event — do not attempt without working backups.
 
