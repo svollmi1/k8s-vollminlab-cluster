@@ -56,7 +56,10 @@ param(
     [switch]$DryRun,
 
     [Parameter(HelpMessage = "Allow adding keys that do not yet exist in the secret (in addition to updating existing ones).")]
-    [switch]$AllowNewKeys
+    [switch]$AllowNewKeys,
+
+    [Parameter(HelpMessage = "List of key names to remove from the secret entirely.")]
+    [string[]]$RemoveKeys = @()
 )
 
 $ErrorActionPreference = "Stop"
@@ -160,6 +163,16 @@ foreach ($key in $keysBefore) {
     if ($key -notin $keysAfterStrip) {
         Write-Error "After stripping metadata, key '$key' is missing. Aborting to avoid breaking the secret."
     }
+}
+
+# Remove requested keys from the data section
+foreach ($key in $RemoveKeys) {
+    if ($key -notin $keysBefore) {
+        Write-Warning "Key '$key' not found in secret — skipping removal."
+        continue
+    }
+    $secretYaml = $secretYaml -replace "(?m)^\s+$([regex]::Escape($key))\s*:[^\n]*\n?", ""
+    Write-Host "Removing key: $key"
 }
 
 # Append new keys to the data section (values never logged)
