@@ -10,6 +10,7 @@ GitOps-managed Kubernetes cluster using Flux CD. All workloads are Helm-based Fl
 - `.claude/rules/kyverno.md` — required labels, enforce/audit policies, DMZ rules
 - `.claude/rules/secrets.md` — SealedSecrets workflow, never plain Secrets
 - `.claude/rules/subagents.md` — when to spawn parallel agents
+- `.claude/rules/homepage.md` — auto-discovery via ingress annotations, widget support, credentials
 
 ## Hard constraints
 
