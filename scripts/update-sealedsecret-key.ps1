@@ -116,6 +116,7 @@ foreach ($key in $KeysToUpdate) {
     }
 }
 foreach ($key in $KeysToUpdate) {
+    if ($key -in $newKeys) { continue }  # new keys don't exist yet, skip count check
     $count = ([regex]::Matches($secretYaml, "(?m)^\s+$([regex]::Escape($key))\s*:")).Count
     if ($count -ne 1) {
         Write-Error "Expected exactly one line for key '$key'; found $count. Aborting."
