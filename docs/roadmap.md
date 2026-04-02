@@ -9,52 +9,50 @@ Living document tracking planned infrastructure work. Update status as projects 
 ## Phase 1 — Foundations (Prerequisite for everything else)
 
 ### 1.1 Backup Stack — MinIO + Velero + Backblaze B2
-**Status:** `planned`
-**Priority:** CRITICAL — no backups currently exist
+**Status:** `done`
 
-Deploy a full backup pipeline for the cluster:
-- **MinIO** — S3-compatible object store running in-cluster as the local backup target
-- **Velero** — Kubernetes backup/restore operator; backs up PVCs (via Longhorn CSI snapshots) and all Kubernetes resources
-- **Backblaze B2** — Off-site cold storage; MinIO replicates to B2 for durability
-
-Scope:
-- MinIO deployed via Helm to a dedicated `backup` namespace
-- Velero BackupStorageLocation pointed at MinIO
-- MinIO configured with B2 as a remote tier (object lifecycle policy)
-- Daily full cluster backup schedule
-- Test restore procedure documented in `docs/`
-
-Decisions to make:
-- Which namespaces/PVCs are in scope for backup vs. recoverable-from-GitOps
-- B2 bucket naming and access credentials (SealedSecret)
-- Retention policy (e.g. 30 daily, 12 monthly)
+- MinIO deployed in-cluster as the primary (fast) backup target
+- Velero with two BackupStorageLocations: `minio` (default, daily at 02:00 UTC) and `b2` (off-site, daily at 04:00 UTC)
+- Backblaze B2 bucket: `vollminlab-k8s-backups`, region `us-west-000`
+- Credentials in SealedSecrets; validation frequency tuned to 1h to limit B2 Class C API calls
+- **Still needed:** run a test restore and document the procedure in `docs/`
 
 ---
 
 ### 1.2 GitHub Actions Runner Migration
-**Status:** `planned`
-**Priority:** High — current ARC (actions-runner-controller) is on the legacy `summerwind` image
+**Status:** `done`
 
-Migrate from legacy `summerwind/actions-runner` to the new ARC (Actions Runner Controller) v2 stack:
-- New controller: `gha-runner-scale-set-controller`
-- New runner sets: `AutoscalingRunnerSet` CRDs replacing `RunnerDeployment`
-- Ephemeral runner pods with `dind` or Kubernetes-mode container builds
-
-Reference: [actions/actions-runner-controller](https://github.com/actions/actions-runner-controller)
+Migrated to ARC v2 (`gha-runner-scale-set-controller` + `AutoscalingRunnerSet`). Legacy summerwind resources removed.
 
 ---
 
-### 1.3 Renovate Bot — Automated Dependency Updates
+### 1.3 Renovate Bot — Automated Helm Chart Updates
 **Status:** `planned`
-**Priority:** High
+**Priority:** High — complete before Cilium migration
 
 Install Renovate Bot as a GitHub App on `svollmi1/k8s-vollminlab-cluster`. Configure `renovate.json` to:
 - Watch `HelmRelease` chart versions across all namespaces
 - Open PRs when upstream Helm chart versions are published
-- Pin digest-based image updates where applicable
 - Auto-merge patch-level updates (optional, after observability is in place)
 
-This replaces manual chart version tracking entirely.
+Covers Helm chart version bumps only. Raw container image tag updates are handled by Flux Image Update Automation (1.4).
+
+---
+
+### 1.4 Flux Image Update Automation
+**Status:** `planned`
+**Priority:** High — complete before Cilium migration; pair with 1.3
+
+Automates container image tag updates directly in git without opening PRs. Complements Renovate (which handles chart versions) for any workloads with raw image references.
+
+Components:
+- `image-reflector-controller` — polls image registries, stores tag metadata
+- `image-automation-controller` — commits image tag updates to git when tags match a policy
+- `ImageRepository` + `ImagePolicy` + `ImageUpdateAutomation` CRDs per tracked image
+
+**Prerequisite:** both controllers must be enabled in the Flux bootstrap — they are not installed by default. Add `--components-extra=image-reflector-controller,image-automation-controller` to the bootstrap or patch the `flux-system` kustomization.
+
+Reference: https://fluxcd.io/flux/guides/image-update/
 
 ---
 
@@ -139,7 +137,7 @@ Controlled fault injection for resilience testing:
 
 ## Phase 6 — CNI Migration (Calico → Cilium)
 
-**Status:** `planned` (depends on Phase 1.1 backups — needs recovery path)
+**Status:** `planned` (depends on: 1.1 backups validated with a test restore, 1.3 Renovate, and 1.4 Flux Image Automation in place)
 **Risk:** High — CNI replacement requires controlled cluster-level maintenance
 
 Cilium offers significant advantages over Calico for this use case:
