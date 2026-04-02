@@ -85,7 +85,10 @@ data:
                 icon: bazarr.png
                 namespace: mediastack
                 app: bazarr
-                ping: https://bazarr.vollminlab.com
+                widget:
+                  type: bazarr
+                  url: https://bazarr.vollminlab.com
+                  key: "{{HOMEPAGE_VAR_BAZARR_API_KEY}}"
         - Infrastructure:
             - Pi-hole:
                 description: DNS sinkhole and ad blocker
@@ -145,14 +148,20 @@ data:
                 icon: longhorn.png
                 namespace: longhorn-system
                 app: longhorn
-                ping: https://longhorn.vollminlab.com
+                widget:
+                  type: longhorn
+                  url: https://longhorn.vollminlab.com
             - MinIO:
                 description: S3-compatible object storage
                 href: https://minio.vollminlab.com
                 icon: minio.png
                 namespace: minio
                 app: minio
-                ping: https://minio.vollminlab.com
+                widget:
+                  type: minio
+                  url: https://minio.vollminlab.com
+                  username: "{{HOMEPAGE_VAR_MINIO_USERNAME}}"
+                  password: "{{HOMEPAGE_VAR_MINIO_PASSWORD}}"
             - Capacitor:
                 description: Flux CD dashboard
                 href: https://capacitor.vollminlab.com
@@ -199,7 +208,10 @@ data:
                 icon: shlink.png
                 namespace: shlink
                 app: shlink-web
-                ping: https://shlink.vollminlab.com
+                widget:
+                  type: shlink
+                  url: https://shlink.vollminlab.com
+                  key: "{{HOMEPAGE_VAR_SHLINK_API_KEY}}"
             - Homelab Repo:
                 description: This Kubernetes cluster repo
                 href: https://github.com/svollmi1/k8s-vollminlab-cluster
@@ -338,6 +350,26 @@ data:
           secretKeyRef:
             name: homepage-env-vars
             key: PIHOLE_API_KEY
+      - name: HOMEPAGE_VAR_BAZARR_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: BAZARR_API_KEY
+      - name: HOMEPAGE_VAR_MINIO_USERNAME
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: MINIO_USERNAME
+      - name: HOMEPAGE_VAR_MINIO_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: MINIO_PASSWORD
+      - name: HOMEPAGE_VAR_SHLINK_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: SHLINK_API_KEY
       - name: HOMEPAGE_ALLOWED_HOSTS
         value: "homepage.vollminlab.com,localhost,127.0.0.1"
     resources:
