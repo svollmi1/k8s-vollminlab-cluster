@@ -79,6 +79,13 @@ data:
                   type: sabnzbd
                   url: https://sabnzbd.vollminlab.com
                   key: "{{HOMEPAGE_VAR_SABNZBD_API_KEY}}"
+            - Bazarr:
+                description: Subtitle manager
+                href: https://bazarr.vollminlab.com
+                icon: bazarr.png
+                namespace: mediastack
+                app: bazarr
+                ping: https://bazarr.vollminlab.com
         - Infrastructure:
             - Pi-hole:
                 description: DNS sinkhole and ad blocker
@@ -132,6 +139,27 @@ data:
                 href: http://haproxydmzvip.vollminlab.com:8404/stats
                 icon: haproxy.png
                 ping: http://haproxydmzvip.vollminlab.com:8404/stats
+            - Longhorn:
+                description: Distributed block storage
+                href: https://longhorn.vollminlab.com
+                icon: longhorn.png
+                namespace: longhorn-system
+                app: longhorn
+                ping: https://longhorn.vollminlab.com
+            - MinIO:
+                description: S3-compatible object storage
+                href: https://minio.vollminlab.com
+                icon: minio.png
+                namespace: minio
+                app: minio
+                ping: https://minio.vollminlab.com
+            - Capacitor:
+                description: Flux CD dashboard
+                href: https://capacitor.vollminlab.com
+                icon: mdi-heat-wave
+                namespace: flux-system
+                app: capacitor
+                ping: https://capacitor.vollminlab.com
         - Monitoring & Observability:
             - Grafana:
                 description: Metrics visualization
@@ -145,6 +173,13 @@ data:
                 icon: prometheus.png
                 namespace: monitoring
                 app: prometheus
+            - Policy Reporter:
+                description: Kyverno policy violation reports
+                href: https://policyreporter.vollminlab.com
+                icon: mdi-shield-check
+                namespace: kyverno
+                app: policy-reporter
+                ping: https://policyreporter.vollminlab.com
         - Documentation & Tools:
             - BookStack:
                 description: Wiki and documentation
@@ -158,6 +193,13 @@ data:
                 icon: homepage.png
                 namespace: homepage
                 app: homepage
+            - Shlink:
+                description: URL shortener dashboard
+                href: https://shlink.vollminlab.com
+                icon: shlink.png
+                namespace: shlink
+                app: shlink-web
+                ping: https://shlink.vollminlab.com
             - Homelab Repo:
                 description: This Kubernetes cluster repo
                 href: https://github.com/svollmi1/k8s-vollminlab-cluster
