@@ -92,3 +92,11 @@ data:
           ttl: 720h
           storageLocation: minio
           defaultVolumesToFsBackup: true
+      daily-b2:
+        disabled: false
+        schedule: "0 4 * * *"
+        useOwnerReferencesInBackup: false
+        template:
+          ttl: 720h
+          storageLocation: b2
+          defaultVolumesToFsBackup: true
