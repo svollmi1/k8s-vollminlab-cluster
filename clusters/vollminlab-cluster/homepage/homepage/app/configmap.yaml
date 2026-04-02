@@ -90,16 +90,6 @@ data:
                   url: https://bazarr.vollminlab.com
                   key: "{{HOMEPAGE_VAR_BAZARR_API_KEY}}"
         - Infrastructure:
-            - Pi-hole:
-                description: DNS sinkhole and ad blocker
-                href: https://pihole.vollminlab.com/admin
-                icon: pi-hole.png
-                ping: https://pihole.vollminlab.com
-                widget:
-                  type: pihole
-                  url: https://pihole.vollminlab.com
-                  version: 6
-                  key: "{{HOMEPAGE_VAR_PIHOLE_API_KEY}}"
             - TrueNAS:
                 description: Network attached storage
                 href: https://truenas.vollminlab.com
@@ -122,16 +112,34 @@ data:
                 icon: portainer.png
                 namespace: portainer
                 app: portainer
-            - Nginx Proxy Manager:
-                description: Reverse proxy management
-                href: https://npm.vollminlab.com
-                icon: nginx-proxy-manager.png
-                ping: https://npm.vollminlab.com
+            - MinIO:
+                description: S3-compatible object storage
+                href: https://minio.vollminlab.com
+                icon: minio.png
+                namespace: minio
+                app: minio
+                ping: https://minio.vollminlab.com
+        - Networking:
+            - Pi-hole:
+                description: DNS sinkhole and ad blocker
+                href: https://pihole.vollminlab.com/admin
+                icon: pi-hole.png
+                ping: https://pihole.vollminlab.com
+                widget:
+                  type: pihole
+                  url: https://pihole.vollminlab.com
+                  version: 6
+                  key: "{{HOMEPAGE_VAR_PIHOLE_API_KEY}}"
             - UDM:
                 description: UniFi Dream Machine
                 href: https://udm.vollminlab.com
                 icon: unifi.png
                 ping: https://udm.vollminlab.com
+            - Nginx Proxy Manager:
+                description: Reverse proxy management
+                href: https://npm.vollminlab.com
+                icon: nginx-proxy-manager.png
+                ping: https://npm.vollminlab.com
             - HAProxy Internal Stats:
                 description: Load balancer statistics
                 href: http://haproxyvip.vollminlab.com:8404/stats
@@ -142,27 +150,6 @@ data:
                 href: http://haproxydmzvip.vollminlab.com:8404/stats
                 icon: haproxy.png
                 ping: http://haproxydmzvip.vollminlab.com:8404/stats
-            - Longhorn:
-                description: Distributed block storage
-                href: https://longhorn.vollminlab.com
-                icon: longhorn.png
-                namespace: longhorn-system
-                app: longhorn
-                ping: https://longhorn.vollminlab.com
-            - MinIO:
-                description: S3-compatible object storage
-                href: https://minio.vollminlab.com
-                icon: minio.png
-                namespace: minio
-                app: minio
-                ping: https://minio.vollminlab.com
-            - Capacitor:
-                description: Flux CD dashboard
-                href: https://capacitor.vollminlab.com
-                icon: mdi-heat-wave
-                namespace: flux-system
-                app: capacitor
-                ping: https://capacitor.vollminlab.com
         - Monitoring & Observability:
             - Grafana:
                 description: Metrics visualization
@@ -176,13 +163,6 @@ data:
                 icon: prometheus.png
                 namespace: monitoring
                 app: prometheus
-            - Policy Reporter:
-                description: Kyverno policy violation reports
-                href: https://policyreporter.vollminlab.com
-                icon: mdi-shield-check
-                namespace: kyverno
-                app: policy-reporter
-                ping: https://policyreporter.vollminlab.com
         - Documentation & Tools:
             - BookStack:
                 description: Wiki and documentation
