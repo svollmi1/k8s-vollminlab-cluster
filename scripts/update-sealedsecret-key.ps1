@@ -69,8 +69,8 @@ if (-not [System.IO.Path]::IsPathRooted($SealedSecretPath)) {
 }
 
 $KeysToUpdate = @($KeyValues.Keys)
-if ($KeysToUpdate.Count -eq 0) {
-    Write-Error "KeyValues must contain at least one key."
+if ($KeysToUpdate.Count -eq 0 -and $RemoveKeys.Count -eq 0) {
+    Write-Error "Provide at least one key in -KeyValues or -RemoveKeys."
 }
 
 # Never log or echo secret values
