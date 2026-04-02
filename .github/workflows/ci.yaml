@@ -12,6 +12,7 @@ on:
       - '.vscode/**'
       - 'scripts/**'
       - '.claude/**'
+      - 'docs/**'
       - '*.md'
   pull_request:
     branches: [ main, develop ]
@@ -24,6 +25,7 @@ on:
       - '.vscode/**'
       - 'scripts/**'
       - '.claude/**'
+      - 'docs/**'
       - '*.md'
   workflow_dispatch:
 

@@ -9,52 +9,50 @@ Living document tracking planned infrastructure work. Update status as projects 
 ## Phase 1 — Foundations (Prerequisite for everything else)
 
 ### 1.1 Backup Stack — MinIO + Velero + Backblaze B2
-**Status:** `planned`
-**Priority:** CRITICAL — no backups currently exist
+**Status:** `done`
 
-Deploy a full backup pipeline for the cluster:
-- **MinIO** — S3-compatible object store running in-cluster as the local backup target
-- **Velero** — Kubernetes backup/restore operator; backs up PVCs (via Longhorn CSI snapshots) and all Kubernetes resources
-- **Backblaze B2** — Off-site cold storage; MinIO replicates to B2 for durability
-
-Scope:
-- MinIO deployed via Helm to a dedicated `backup` namespace
-- Velero BackupStorageLocation pointed at MinIO
-- MinIO configured with B2 as a remote tier (object lifecycle policy)
-- Daily full cluster backup schedule
-- Test restore procedure documented in `docs/`
-
-Decisions to make:
-- Which namespaces/PVCs are in scope for backup vs. recoverable-from-GitOps
-- B2 bucket naming and access credentials (SealedSecret)
-- Retention policy (e.g. 30 daily, 12 monthly)
+- MinIO deployed in-cluster as the primary (fast) backup target
+- Velero with two BackupStorageLocations: `minio` (default, daily at 02:00 UTC) and `b2` (off-site, daily at 04:00 UTC)
+- Backblaze B2 bucket: `vollminlab-k8s-backups`, region `us-west-000`
+- Credentials in SealedSecrets; validation frequency tuned to 1h to limit B2 Class C API calls
+- **Still needed:** run a test restore and document the procedure in `docs/`
 
 ---
 
 ### 1.2 GitHub Actions Runner Migration
-**Status:** `planned`
-**Priority:** High — current ARC (actions-runner-controller) is on the legacy `summerwind` image
+**Status:** `done`
 
-Migrate from legacy `summerwind/actions-runner` to the new ARC (Actions Runner Controller) v2 stack:
-- New controller: `gha-runner-scale-set-controller`
-- New runner sets: `AutoscalingRunnerSet` CRDs replacing `RunnerDeployment`
-- Ephemeral runner pods with `dind` or Kubernetes-mode container builds
-
-Reference: [actions/actions-runner-controller](https://github.com/actions/actions-runner-controller)
+Migrated to ARC v2 (`gha-runner-scale-set-controller` + `AutoscalingRunnerSet`). Legacy summerwind resources removed.
 
 ---
 
-### 1.3 Renovate Bot — Automated Dependency Updates
+### 1.3 Renovate Bot — Automated Helm Chart Updates
 **Status:** `planned`
-**Priority:** High
+**Priority:** High — complete before Cilium migration
 
 Install Renovate Bot as a GitHub App on `svollmi1/k8s-vollminlab-cluster`. Configure `renovate.json` to:
 - Watch `HelmRelease` chart versions across all namespaces
 - Open PRs when upstream Helm chart versions are published
-- Pin digest-based image updates where applicable
 - Auto-merge patch-level updates (optional, after observability is in place)
 
-This replaces manual chart version tracking entirely.
+Covers Helm chart version bumps only. Raw container image tag updates are handled by Flux Image Update Automation (1.4).
+
+---
+
+### 1.4 Flux Image Update Automation
+**Status:** `planned`
+**Priority:** High — complete before Cilium migration; pair with 1.3
+
+Automates container image tag updates directly in git without opening PRs. Complements Renovate (which handles chart versions) for any workloads with raw image references.
+
+Components:
+- `image-reflector-controller` — polls image registries, stores tag metadata
+- `image-automation-controller` — commits image tag updates to git when tags match a policy
+- `ImageRepository` + `ImagePolicy` + `ImageUpdateAutomation` CRDs per tracked image
+
+**Prerequisite:** both controllers must be enabled in the Flux bootstrap — they are not installed by default. Add `--components-extra=image-reflector-controller,image-automation-controller` to the bootstrap or patch the `flux-system` kustomization.
+
+Reference: https://fluxcd.io/flux/guides/image-update/
 
 ---
 
@@ -137,10 +135,41 @@ Controlled fault injection for resilience testing:
 
 ---
 
-## Phase 6 — CNI Migration (Calico → Cilium)
+## Phase 6 — Node Maintenance Window
 
-**Status:** `planned` (depends on Phase 1.1 backups — needs recovery path)
-**Risk:** High — CNI replacement requires controlled cluster-level maintenance
+**Status:** `planned` (depends on Phase 2 observability being in place for monitoring during maintenance)
+**Risk:** Medium — rolling node reboots; cluster should stay available if done one node at a time
+
+Normalize all nodes to current versions before the CNI migration. Current state (as of 2026-04-01):
+
+| Node | k8s | Kernel | Ubuntu |
+|---|---|---|---|
+| k8scp01 | v1.32.3 | 6.8.0-106 | 24.04.2 |
+| k8scp02 | v1.32.3 | 6.8.0-85 | 24.04.1 |
+| k8scp03 | v1.32.3 | 6.8.0-87 | 24.04.1 |
+| k8sworker01 | v1.32.3 | 6.8.0-79 | 24.04.1 |
+| k8sworker02 | v1.32.3 | 6.8.0-84 | 24.04.1 |
+| k8sworker03 | v1.32.3 | 6.8.0-87 | 24.04.1 |
+| k8sworker04 | v1.32.3 | 6.8.0-106 | 24.04.1 |
+| k8sworker05 | v1.32.9 | 6.8.0-87 | 24.04.3 |
+| k8sworker06 | v1.32.3 | 6.8.0-106 | 24.04.1 |
+
+Scope:
+- Upgrade all nodes to the latest Kubernetes 1.32.x patch (or latest stable minor if 1.33+ is current)
+- `apt upgrade` on all nodes to normalize Ubuntu patch levels and kernel versions
+- Upgrade containerd if a newer stable version is available (currently 1.7.27 across all nodes)
+- Drain → upgrade → reboot → uncordon, one node at a time
+- Control plane nodes first, workers after
+
+Do not bundle this with the Cilium migration — they should be separate maintenance windows.
+
+---
+
+## Phase 7 — CNI Migration (Calico → Cilium)
+
+**Status:** `planned`
+**Depends on:** 1.1 test restore validated, 1.3 Renovate, 1.4 Flux Image Automation, Phase 2 observability (2.1 + 2.2 minimum), Phase 6 node maintenance complete
+**Risk:** High — CNI replacement requires a full cluster maintenance window
 
 Cilium offers significant advantages over Calico for this use case:
 - **Hubble** — built-in L4/L7 network observability (flows, DNS, HTTP)
@@ -149,11 +178,13 @@ Cilium offers significant advantages over Calico for this use case:
 - Industry direction for SRE/platform engineering roles
 
 Migration approach:
-1. Ensure Velero backups are healthy and a test restore has been validated
-2. Plan a maintenance window
-3. Drain nodes, uninstall Calico, install Cilium
-4. Validate network policies and DMZ rules
-5. Update `bootstrap/calico/` → `bootstrap/cilium/` references
+1. Confirm Velero backups are healthy and a test restore has been validated
+2. Confirm Phase 2 observability is in place (Prometheus + Loki at minimum)
+3. Confirm all nodes are on current, normalized versions (Phase 6)
+4. Plan a maintenance window
+5. Drain nodes, uninstall Calico, install Cilium
+6. Validate network policies and DMZ rules (especially DMZ namespace on k8sworker05)
+7. Update `bootstrap/calico/` → `bootstrap/cilium/` references
 
 This is a cluster rebuild risk event — do not attempt without working backups.
 
