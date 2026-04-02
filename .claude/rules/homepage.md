@@ -12,6 +12,7 @@ kubectl get ingress <name> -n <namespace> -o jsonpath='{.metadata.annotations}' 
 Services currently auto-discovered (as of 2026-04-01):
 - **Capacitor** (`flux-system/capacitor-ingress`) → Infrastructure group
 - **Longhorn** (`longhorn-system/longhorn-ingress`) → Infrastructure group
+- **MinIO** (`minio/minio-ingress`) → Infrastructure group
 - **Policy Reporter** (`kyverno/policy-reporter-ui`) → Monitoring & Observability group
 
 ## Pod selector gotcha

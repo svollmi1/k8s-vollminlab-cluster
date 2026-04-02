@@ -112,12 +112,6 @@ data:
                 icon: portainer.png
                 namespace: portainer
                 app: portainer
-            - MinIO:
-                description: S3-compatible object storage
-                href: https://minio.vollminlab.com
-                icon: minio.png
-                namespace: minio
-                podSelector: "app=minio"
         - Networking:
             - Pi-hole:
                 description: DNS sinkhole and ad blocker
@@ -189,6 +183,10 @@ data:
                 description: AI Assistant
                 href: https://chatgpt.com
                 icon: openai.png
+            - Claude:
+                description: AI Assistant
+                href: https://claude.ai
+                icon: anthropic.png
             - Reddit:
                 description: Reddit /r/all
                 href: https://www.reddit.com/r/all/
