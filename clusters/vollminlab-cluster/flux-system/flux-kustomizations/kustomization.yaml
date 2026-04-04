@@ -20,6 +20,7 @@ resources:
   - actions-runner-system-kustomization.yaml
   - actions-runner-system-runners-kustomization.yaml
   - elastic-system-kustomization.yaml
+  - external-dns-kustomization.yaml
   - homepage-kustomization.yaml
   - local-path-storage-kustomization.yaml
   - longhorn-system-kustomization.yaml
