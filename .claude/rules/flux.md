@@ -32,8 +32,9 @@ networkpolicy.yaml     # Optional (required in dmz/)
 
 To add a new app, also create a Flux Kustomization CR in `flux-system/flux-kustomizations/`.
 
-## HelmRelease template
+## HelmRelease templates
 
+**Standard HTTP Helm registry** (use `spec.chart.spec.sourceRef` → `HelmRepository`):
 ```yaml
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
@@ -52,19 +53,79 @@ spec:
       version: [pinned-semver]    # never * or floating ranges
       sourceRef:
         kind: HelmRepository
-        name: [repo-name]         # named after the app, not the chart author
+        name: [app-name]-repo
         namespace: flux-system
   valuesFrom:
     - kind: ConfigMap
       name: [app-name]-values
 ```
 
-## HelmRepository convention
+**OCI registry** (use `spec.chartRef` → `OCIRepository`):
+```yaml
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: [app-name]
+  namespace: [namespace]
+  labels:
+    app: [app-name]
+    env: production
+    category: [category]
+spec:
+  interval: 10m
+  chartRef:
+    kind: OCIRepository
+    name: [app-name]-repo
+    namespace: flux-system
+  valuesFrom:
+    - kind: ConfigMap
+      name: [app-name]-values
+```
 
-- File named `[app-name]-helmrepository.yaml`
+Note: version is pinned in the `OCIRepository` `spec.ref.tag`, not in the HelmRelease.
+
+## Source repository conventions
+
+- File always named `[app-name]-helmrepository.yaml` regardless of kind
 - `metadata.name: [app-name]-repo` — always suffix with `-repo`, no exceptions
-- Named after the **app being deployed**, not the chart author — e.g. `shlink-repo`, `longhorn-repo`, `cert-manager-repo` — not `christianhuth`, `rancher`, `jetstack`
-- `sourceRef.name` in every HelmRelease must match the HelmRepository `metadata.name` exactly (i.e. always include the `-repo` suffix)
+- Named after the **app being deployed**, not the chart author
+
+**HTTP Helm registry** → `kind: HelmRepository` (`source.toolkit.fluxcd.io/v1`):
+```yaml
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: [app-name]-repo
+  namespace: flux-system
+  labels:
+    app: [app-name]
+    env: production
+    category: [category]
+spec:
+  interval: 1h
+  url: https://[chart-repo-url]
+```
+
+**OCI registry** → `kind: OCIRepository` (`source.toolkit.fluxcd.io/v1beta2`). **Do not use `HelmRepository type: oci` — it is in maintenance mode.**
+```yaml
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: OCIRepository
+metadata:
+  name: [app-name]-repo
+  namespace: flux-system
+  labels:
+    app: [app-name]
+    env: production
+    category: [category]
+spec:
+  interval: 1h
+  url: oci://[registry]/[chart-name]
+  ref:
+    tag: "[pinned-semver]"
+  layerSelector:
+    mediaType: "application/vnd.cncf.helm.chart.content.v1.tar+gzip"
+    operation: copy
+```
 
 ## Required labels — all resource kinds
 

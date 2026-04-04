@@ -28,4 +28,5 @@ resources:
   - portainer-kustomization.yaml
   - shlink-kustomization.yaml
   - minio-kustomization.yaml
+  - renovate-kustomization.yaml
   - velero-kustomization.yaml

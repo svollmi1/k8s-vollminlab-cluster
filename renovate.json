@@ -1,0 +1,60 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "timezone": "America/New_York",
+  "schedule": ["after 10pm every weekday", "before 5am every weekday", "every weekend"],
+  "prHourlyLimit": 5,
+  "prConcurrentLimit": 10,
+  "labels": ["renovate", "dependencies"],
+  "commitMessagePrefix": "chore(deps):",
+  "enabledManagers": ["flux", "github-actions"],
+  "flux": {
+    "fileMatch": [
+      "clusters/vollminlab-cluster/.+/app/helmrelease\\.yaml$"
+    ]
+  },
+  "registryAliases": {
+    "arc-repo": "oci://ghcr.io/actions/actions-runner-controller-charts",
+    "bazarr-repo": "https://k8s-home-lab.github.io/helm-charts/",
+    "capacitor-repo": "https://chart.onechart.dev",
+    "cert-manager-repo": "https://charts.jetstack.io",
+    "elastic-repo": "https://helm.elastic.co",
+    "homepage-repo": "https://jameswynn.github.io/helm-charts",
+    "ingress-nginx-repo": "https://kubernetes.github.io/ingress-nginx",
+    "kyverno-repo": "https://kyverno.github.io/kyverno",
+    "kyverno-policyreporter-repo": "https://kyverno.github.io/policy-reporter",
+    "longhorn-repo": "https://charts.longhorn.io",
+    "metallb-repo": "https://metallb.github.io/metallb",
+    "metrics-server-repo": "https://kubernetes-sigs.github.io/metrics-server/",
+    "minecraft-repo": "https://itzg.github.io/minecraft-server-charts/",
+    "minio-repo": "https://charts.min.io/",
+    "overseerr-repo": "oci://oci.trueforge.org/truecharts/overseerr",
+    "portainer-repo": "https://portainer.github.io/k8s",
+    "prowlarr-repo": "oci://oci.trueforge.org/truecharts/prowlarr",
+    "radarr-repo": "oci://oci.trueforge.org/truecharts/radarr",
+    "renovate-repo": "oci://ghcr.io/renovatebot/charts",
+    "sabnzbd-repo": "oci://oci.trueforge.org/truecharts/sabnzbd",
+    "sealed-secrets-repo": "https://bitnami-labs.github.io/sealed-secrets",
+    "shlink-repo": "https://charts.christianhuth.de",
+    "smb-csi-driver-repo": "https://raw.githubusercontent.com/kubernetes-csi/csi-driver-smb/master/charts",
+    "sonarr-repo": "oci://oci.trueforge.org/truecharts/sonarr",
+    "tautulli-repo": "https://k8s-at-home.com/charts/",
+    "velero-repo": "https://vmware-tanzu.github.io/helm-charts"
+  },
+  "packageRules": [
+    {
+      "description": "Require manual review for all Flux HelmRelease updates",
+      "matchManagers": ["flux"],
+      "automerge": false
+    },
+    {
+      "description": "Flag major updates with an additional label",
+      "matchManagers": ["flux"],
+      "matchUpdateTypes": ["major"],
+      "labels": ["renovate", "dependencies", "major-update"],
+      "automerge": false
+    }
+  ]
+}

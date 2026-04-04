@@ -31,5 +31,6 @@ resources:
   - sonarr-helmrepository.yaml
   - tautulli-helmrepository.yaml
   - minio-helmrepository.yaml
+  - renovate-helmrepository.yaml
   - shlink-helmrepository.yaml
   - velero-helmrepository.yaml
