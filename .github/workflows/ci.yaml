@@ -1260,7 +1260,7 @@ jobs:
             args=()
             for p in "${POLICY_FILES[@]}"; do
               if [[ -f "$p" ]]; then
-                if yq eval '.spec.rules[].context // [] | .[].apiCall // "" | .urlPath // ""' "$p" 2>/dev/null | grep -q .; then
+                if grep -q "apiCall:" "$p" 2>/dev/null; then
                   echo "⚠️ Skipping policy (uses apiCall context - requires live cluster): $p"
                   continue
                 fi
@@ -1312,7 +1312,7 @@ jobs:
                   echo "🔍 Attempting to identify failing policy by testing individually..."
                   for policy in "${POLICY_FILES[@]}"; do
                     echo "Testing policy: $policy"
-                    if yq eval '.spec.rules[].context // [] | .[].apiCall // "" | .urlPath // ""' "$policy" 2>/dev/null | grep -q .; then
+                    if grep -q "apiCall:" "$policy" 2>/dev/null; then
                       echo "⚠️ SKIPPED: $policy (uses apiCall context - requires live cluster)"
                       continue
                     fi
