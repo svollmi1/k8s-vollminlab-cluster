@@ -22,37 +22,42 @@ Living document tracking planned infrastructure work. Update status as projects 
 ### 1.2 GitHub Actions Runner Migration
 **Status:** `done`
 
-Migrated to ARC v2 (`gha-runner-scale-set-controller` + `AutoscalingRunnerSet`). Legacy summerwind resources removed.
+Migrated to ARC v2 (`gha-runner-scale-set-controller` + `AutoscalingRunnerSet`). Legacy summerwind resources removed. Both ARC HelmReleases use `OCIRepository` + `spec.chartRef` per current Flux best practice. Single `vollminlab` runner pool.
 
 ---
 
 ### 1.3 Renovate Bot — Automated Helm Chart Updates
-**Status:** `planned`
-**Priority:** High — complete before Cilium migration
+**Status:** `done`
 
-Install Renovate Bot as a GitHub App on `svollmi1/k8s-vollminlab-cluster`. Configure `renovate.json` to:
-- Watch `HelmRelease` chart versions across all namespaces
-- Open PRs when upstream Helm chart versions are published
-- Auto-merge patch-level updates (optional, after observability is in place)
+Self-hosted Renovate deployed as a Kubernetes CronJob in the `renovate` namespace. Runs nightly at 02:00 ET. Covers:
+- All `HelmRelease` chart versions (`spec.chart.spec.version`) across all namespaces
+- All `OCIRepository` tag versions (`spec.ref.tag`) — TrueCharts mediastack apps, ARC, Renovate itself
+- GitHub Actions `uses:` version pins in all workflow files
 
-Covers Helm chart version bumps only. Raw container image tag updates are handled by Flux Image Update Automation (1.4).
+All updates require manual review (no automerge). Dependency Dashboard issue maintained automatically in GitHub.
 
 ---
 
-### 1.4 Flux Image Update Automation
-**Status:** `planned`
-**Priority:** High — complete before Cilium migration; pair with 1.3
+### 1.4 Kyverno Policy Violations Cleanup
+**Status:** `in-progress` ← **NEXT ACTION**
+**Priority:** Complete before resuming chart updates
 
-Automates container image tag updates directly in git without opening PRs. Complements Renovate (which handles chart versions) for any workloads with raw image references.
+Fix all outstanding Kyverno policy violations to establish a clean baseline. Known violations from audit on 2026-04-04:
 
-Components:
-- `image-reflector-controller` — polls image registries, stores tag metadata
-- `image-automation-controller` — commits image tag updates to git when tags match a policy
-- `ImageRepository` + `ImagePolicy` + `ImageUpdateAutomation` CRDs per tracked image
+- `sonarr`, `sabnzbd`, `radarr`, `prowlarr` Deployments — missing `category` label on pod templates (TrueCharts charts don't inject custom labels onto pods; fix via chart values `podLabels`)
+- Flux Kustomization CRs — 25/27 missing `app`, `env`, `category` labels
+- `shlink` and `shlink-web` Ingress resources — missing all labels
+- `portainer` Namespace — non-standard label format
+- Verify `actions-runner-system` and `mediastack` Namespace categories are correct after adding `ci` and `media` to valid list
 
-**Prerequisite:** both controllers must be enabled in the Flux bootstrap — they are not installed by default. Add `--components-extra=image-reflector-controller,image-automation-controller` to the bootstrap or patch the `flux-system` kustomization.
+Branch: `chore/fix-kyverno-violations`
 
-Reference: https://fluxcd.io/flux/guides/image-update/
+---
+
+### 1.5 Flux Image Update Automation
+**Status:** `deferred`
+
+Renovate now covers OCI image tag updates via the `flux` manager on `OCIRepository` resources. Flux Image Update Automation adds complexity (additional controllers, ImagePolicy CRDs) for marginal gain. Revisit only if a use case arises that Renovate can't handle.
 
 ---
 
@@ -208,5 +213,9 @@ This is a cluster rebuild risk event — do not attempt without working backups.
 | Shlink short link service | Deployed with `vollm.in`, `go.vollminlab.com`, `vl.vollminlab.com` |
 | Internal CA issuer | 10-year cert, `internal-ca` ClusterIssuer |
 | ARC runner pool cleanup | Removed pool-2, pool-1 bumped to 3 replicas |
+| ARC migration to OCIRepository | Migrated `arc-repo` HelmRepository type:oci to two OCIRepository resources (arc-controller-repo, arc-runners-repo) per Flux best practice |
+| Renovate Bot | Deployed as CronJob, nightly, covers HelmRelease + OCIRepository + GitHub Actions |
+| HelmRepository naming convention | Renamed minio/velero/shlink to use -repo suffix; documented convention in flux.md |
+| Kyverno category expansion | Added `media` and `ci` as valid category values |
 | Sealed Secrets | Bootstrap procedure + 1Password key backup |
 | DMZ namespace + Minecraft | Node-isolated on k8sworker05, Kyverno-enforced |
