@@ -30,7 +30,19 @@ pvc-*.yaml             # Optional
 networkpolicy.yaml     # Optional (required in dmz/)
 ```
 
-To add a new app, also create a Flux Kustomization CR in `flux-system/flux-kustomizations/`.
+## Adding a new app — two explicit indexes MUST be updated
+
+Both of these files are **explicit lists**, not globs. Flux will silently ignore any file not listed. Missing either one means the app never deploys.
+
+### 1. `flux-system/flux-kustomizations/kustomization.yaml`
+Add `- [app]-kustomization.yaml` to the `resources` list.
+This is what causes Flux to pick up and reconcile the new Kustomization CR.
+
+### 2. `flux-system/repositories/kustomization.yaml`
+Add `- [app]-helmrepository.yaml` (or `-gitrepository.yaml`) to the `resources` list.
+This is what causes Flux to sync the chart source. Without it the HelmRelease can never pull the chart.
+
+**Both must be in the same PR as the app files. Never add an app without updating both.**
 
 ## HelmRelease templates
 
