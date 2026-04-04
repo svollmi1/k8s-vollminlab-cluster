@@ -33,13 +33,25 @@ spec:
                 - |
                   set -e
 
+                  PATCH='[
+                    {"op":"replace","path":"/webhooks/0/failurePolicy","value":"Ignore"},
+                    {"op":"replace","path":"/webhooks/0/namespaceSelector","value":{
+                      "matchExpressions":[{
+                        "key":"kubernetes.io/metadata.name",
+                        "operator":"NotIn",
+                        "values":["kyverno","kube-system","flux-system"]
+                      }]
+                    }}
+                  ]'
+
                   # Function to patch webhook with error handling
                   patch_webhook() {
                     local webhook_type=$1
                     local webhook_name=$2
                     echo "Patching $webhook_type $webhook_name..."
 
-                    kubectl patch "$webhook_type" "$webhook_name" --type='json' -p='[{"op": "replace", "path": "/webhooks/0/failurePolicy", "value": "Ignore"}, {"op": "replace", "path": "/webhooks/0/namespaceSelector", "value": {"matchExpressions":[{"key":"kubernetes.io/metadata.name","operator":"NotIn","values":["kyverno","kube-system","flux-system"]}]}}]'
+                    kubectl patch "$webhook_type" "$webhook_name" \
+                      --type='json' -p="$PATCH"
 
                     if [ $? -eq 0 ]; then
                       echo "Successfully patched $webhook_name"
@@ -50,10 +62,15 @@ spec:
                   }
 
                   # Patch all webhooks
-                  patch_webhook "validatingwebhookconfiguration" "kyverno-policy-validating-webhook-cfg"
-                  patch_webhook "validatingwebhookconfiguration" "kyverno-cleanup-validating-webhook-cfg"
-                  patch_webhook "validatingwebhookconfiguration" "kyverno-ttl-validating-webhook-cfg"
-                  patch_webhook "validatingwebhookconfiguration" "kyverno-resource-validating-webhook-cfg"
-                  patch_webhook "mutatingwebhookconfiguration" "kyverno-policy-mutating-webhook-cfg"
+                  patch_webhook "validatingwebhookconfiguration" \
+                    "kyverno-policy-validating-webhook-cfg"
+                  patch_webhook "validatingwebhookconfiguration" \
+                    "kyverno-cleanup-validating-webhook-cfg"
+                  patch_webhook "validatingwebhookconfiguration" \
+                    "kyverno-ttl-validating-webhook-cfg"
+                  patch_webhook "validatingwebhookconfiguration" \
+                    "kyverno-resource-validating-webhook-cfg"
+                  patch_webhook "mutatingwebhookconfiguration" \
+                    "kyverno-policy-mutating-webhook-cfg"
 
                   echo "All webhooks patched successfully"
