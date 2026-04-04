@@ -37,6 +37,11 @@ spec:
                       - calico-system
                       - calico-apiserver
                       - tigera-operator
+      context:
+        - name: nsLabels
+          apiCall:
+            urlPath: "/api/v1/namespaces/{{ target.metadata.namespace }}"
+            jmesPath: "metadata.labels"
       mutate:
         targets:
           - apiVersion: apps/v1
@@ -48,13 +53,13 @@ spec:
         patchStrategicMerge:
           metadata:
             labels:
-              +(app): "{{ lookup('v1', 'Namespace', '', target.metadata.namespace).metadata.labels.app }}"
-              +(env): "{{ lookup('v1', 'Namespace', '', target.metadata.namespace).metadata.labels.env }}"
-              +(category): "{{ lookup('v1', 'Namespace', '', target.metadata.namespace).metadata.labels.category }}"
+              +(app): "{{ nsLabels.app }}"
+              +(env): "{{ nsLabels.env }}"
+              +(category): "{{ nsLabels.category }}"
           spec:
             template:
               metadata:
                 labels:
-                  +(app): "{{ lookup('v1', 'Namespace', '', target.metadata.namespace).metadata.labels.app }}"
-                  +(env): "{{ lookup('v1', 'Namespace', '', target.metadata.namespace).metadata.labels.env }}"
-                  +(category): "{{ lookup('v1', 'Namespace', '', target.metadata.namespace).metadata.labels.category }}"
+                  +(app): "{{ nsLabels.app }}"
+                  +(env): "{{ nsLabels.env }}"
+                  +(category): "{{ nsLabels.category }}"

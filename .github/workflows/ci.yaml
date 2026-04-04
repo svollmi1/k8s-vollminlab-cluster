@@ -1256,11 +1256,15 @@ jobs:
               continue
             fi
             
-            # Build policy arguments
+            # Build policy arguments, skipping policies with apiCall context (require live cluster)
             args=()
-            for p in "${POLICY_FILES[@]}"; do 
+            for p in "${POLICY_FILES[@]}"; do
               if [[ -f "$p" ]]; then
-                args+=(-f "$p")
+                if grep -q "apiCall:" "$p" 2>/dev/null; then
+                  echo "⚠️ Skipping policy (uses apiCall context - requires live cluster): $p"
+                  continue
+                fi
+                args+=("$p")
               fi
             done
             
@@ -1278,14 +1282,14 @@ jobs:
                   if [[ -n "$doc" && "$doc" =~ apiVersion: && "$doc" =~ kind: ]]; then
                     KIND=$(echo "$doc" | yq eval '.kind' - 2>/dev/null || echo "unknown")
                     echo "Validating document with kind: $KIND"
-                    echo "Running: kyverno apply ${POLICY_FILES[*]} --resource -"
-                    echo "$doc" | kyverno apply "${POLICY_FILES[@]}" --resource - || {
+                    echo "Running: kyverno apply ${args[*]} --resource -"
+                    echo "$doc" | kyverno apply "${args[@]}" --resource - || {
                       echo "❌ Policy validation failed for document in $file"
                       echo "🔍 Debugging info:"
                       echo "  File: $file"
                       echo "  Document kind: $KIND"
-                      echo "  Policy count: ${#POLICY_FILES[@]}"
-                      echo "  Policy files: ${POLICY_FILES[*]}"
+                      echo "  Policy count: ${#args[@]}"
+                      echo "  Policy files: ${args[*]}"
                       echo "  Document preview:"
                       echo "$doc" | head -5
                       exit 1
@@ -1295,19 +1299,23 @@ jobs:
                 echo "✅ Validation passed for all documents in $file"
               else
                 echo "Single-document YAML detected"
-                echo "Running: kyverno apply ${POLICY_FILES[*]} --resource \"$file\""
-                if ! kyverno apply "${POLICY_FILES[@]}" --resource "$file" 2>&1; then
+                echo "Running: kyverno apply ${args[*]} --resource \"$file\""
+                if ! kyverno apply "${args[@]}" --resource "$file" 2>&1; then
                   echo ""
                   echo "❌ Policy validation failed for $file"
                   echo "🔍 Debugging info:"
                   echo "  File: $file"
-                  echo "  Policy count: ${#POLICY_FILES[@]}"
+                  echo "  Policy count: ${#args[@]}"
                   echo "  Policy files: ${POLICY_FILES[*]}"
                   echo "  Args: ${args[*]}"
                   echo ""
                   echo "🔍 Attempting to identify failing policy by testing individually..."
                   for policy in "${POLICY_FILES[@]}"; do
                     echo "Testing policy: $policy"
+                    if grep -q "apiCall:" "$policy" 2>/dev/null; then
+                      echo "⚠️ SKIPPED: $policy (uses apiCall context - requires live cluster)"
+                      continue
+                    fi
                     OUTPUT=$(kyverno apply "$policy" --resource "$file" 2>&1) || true
                     if echo "$OUTPUT" | grep -qE "fail: [1-9]|error: [1-9]"; then
                       echo "❌ FAILED: $policy"
