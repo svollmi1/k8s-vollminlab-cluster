@@ -1256,10 +1256,14 @@ jobs:
               continue
             fi
             
-            # Build policy arguments
+            # Build policy arguments, skipping policies with apiCall context (require live cluster)
             args=()
-            for p in "${POLICY_FILES[@]}"; do 
+            for p in "${POLICY_FILES[@]}"; do
               if [[ -f "$p" ]]; then
+                if yq eval '.spec.rules[].context // [] | .[].apiCall // "" | .urlPath // ""' "$p" 2>/dev/null | grep -q .; then
+                  echo "⚠️ Skipping policy (uses apiCall context - requires live cluster): $p"
+                  continue
+                fi
                 args+=(-f "$p")
               fi
             done
@@ -1308,6 +1312,10 @@ jobs:
                   echo "🔍 Attempting to identify failing policy by testing individually..."
                   for policy in "${POLICY_FILES[@]}"; do
                     echo "Testing policy: $policy"
+                    if yq eval '.spec.rules[].context // [] | .[].apiCall // "" | .urlPath // ""' "$policy" 2>/dev/null | grep -q .; then
+                      echo "⚠️ SKIPPED: $policy (uses apiCall context - requires live cluster)"
+                      continue
+                    fi
                     OUTPUT=$(kyverno apply "$policy" --resource "$file" 2>&1) || true
                     if echo "$OUTPUT" | grep -qE "fail: [1-9]|error: [1-9]"; then
                       echo "❌ FAILED: $policy"
