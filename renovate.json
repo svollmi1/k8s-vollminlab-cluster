@@ -10,6 +10,9 @@
   "labels": ["renovate", "dependencies"],
   "commitMessagePrefix": "chore(deps):",
   "enabledManagers": ["flux", "github-actions"],
+  "ignorePaths": [
+    "clusters/vollminlab-cluster/flux-system/gotk-components.yaml"
+  ],
   "flux": {
     "fileMatch": [
       "clusters/vollminlab-cluster/.+/app/helmrelease\\.yaml$"
