@@ -15,9 +15,7 @@ data:
     sources:
       - ingress
 
-    # upsert-only: creates/updates records but never deletes.
-    # Switch to 'sync' after validating records are created correctly.
-    policy: upsert-only
+    policy: sync
 
     # Pi-hole cannot store TXT ownership records.
     registry: noop
