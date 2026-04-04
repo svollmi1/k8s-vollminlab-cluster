@@ -61,7 +61,25 @@ spec:
 
 ## HelmRepository convention
 
-File named `[app-name]-helmrepository.yaml`, `metadata.name: [app-name]`. Named after the **app being deployed**, not the chart author. Examples: `shlink`, `longhorn`, `cert-manager` — not `christianhuth`, `rancher`, `jetstack`.
+- File named `[app-name]-helmrepository.yaml`
+- `metadata.name: [app-name]-repo` — always suffix with `-repo`, no exceptions
+- Named after the **app being deployed**, not the chart author — e.g. `shlink-repo`, `longhorn-repo`, `cert-manager-repo` — not `christianhuth`, `rancher`, `jetstack`
+- `sourceRef.name` in every HelmRelease must match the HelmRepository `metadata.name` exactly (i.e. always include the `-repo` suffix)
+
+## Required labels — all resource kinds
+
+Every resource in this repo must have these three labels. Kyverno enforces on pods; we apply them consistently to all kinds for uniformity.
+
+| Kind | Required labels |
+|------|----------------|
+| HelmRelease | `app`, `env: production`, `category` |
+| HelmRepository / OCIRepository | `app`, `env: production`, `category` |
+| Namespace | `app`, `env: production`, `category` |
+| Ingress | `app`, `env: production`, `category` |
+| Flux Kustomization CR | `app`, `env: production`, `category` |
+| ConfigMap (values) | `app`, `env: production`, `category` |
+
+See `kyverno.md` for valid `category` values.
 
 ## Critical rules
 
