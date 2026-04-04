@@ -8,11 +8,28 @@ metadata:
     env: production
     category: security
 spec:
-  # Longhorn creates these Pod objects directly (not via Deployment/StatefulSet),
-  # so no Deployment-targeting mutation policy can label them. They are ephemeral
-  # and managed entirely by the Longhorn controller.
+  # Longhorn creates several resource types that cannot be labelled via GitOps:
+  # - DaemonSet/longhorn-manager and Deployment/longhorn-ui are third-party
+  #   chart resources with no label injection point in their Helm values.
+  # - instance-manager-*, share-manager-*, engine-image-*, longhorn-manager-*,
+  #   longhorn-ui-*, and c-*-* (recurring job) pods are created dynamically by
+  #   the Longhorn controller, not by any GitOps-managed workload spec.
   match:
     any:
+      - resources:
+          kinds:
+            - DaemonSet
+          namespaces:
+            - longhorn-system
+          names:
+            - "longhorn-manager"
+      - resources:
+          kinds:
+            - Deployment
+          namespaces:
+            - longhorn-system
+          names:
+            - "longhorn-ui"
       - resources:
           kinds:
             - Pod
@@ -22,9 +39,13 @@ spec:
             - "instance-manager-*"
             - "share-manager-*"
             - "engine-image-*"
+            - "longhorn-manager-*"
+            - "longhorn-ui-*"
+            - "c-*"
   exceptions:
     - policyName: require-standard-labels
       ruleNames:
+        - require-labels-on-controllers
         - require-labels-on-pods-and-namespaces
     - policyName: require-resources
       ruleNames:
