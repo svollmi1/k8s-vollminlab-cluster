@@ -11,7 +11,7 @@ spec:
   chart:
     spec:
       chart: portainer
-      version: "1.0.59"  # Current version based on existing deployment
+      version: "1.0.69"  # Current version based on existing deployment
       sourceRef:
         kind: HelmRepository
         name: portainer-repo
