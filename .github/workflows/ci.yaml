@@ -1264,7 +1264,7 @@ jobs:
                   echo "⚠️ Skipping policy (uses apiCall context - requires live cluster): $p"
                   continue
                 fi
-                args+=(-f "$p")
+                args+=("$p")
               fi
             done
             
