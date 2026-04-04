@@ -3,6 +3,10 @@ kind: Kustomization
 metadata:
   name: actions-runner-system
   namespace: flux-system
+  labels:
+    app: actions-runner-system
+    env: production
+    category: ci
 spec:
   interval: 10m
   path: ./clusters/vollminlab-cluster/actions-runner-system

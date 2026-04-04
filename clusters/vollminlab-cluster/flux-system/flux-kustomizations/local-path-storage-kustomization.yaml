@@ -3,6 +3,10 @@ kind: Kustomization
 metadata:
   name: local-path-storage
   namespace: flux-system
+  labels:
+    app: local-path-provisioner
+    env: production
+    category: storage
 spec:
   interval: 10m
   path: ./clusters/vollminlab-cluster/local-path-storage

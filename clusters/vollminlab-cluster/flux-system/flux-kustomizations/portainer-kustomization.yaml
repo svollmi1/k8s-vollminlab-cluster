@@ -3,6 +3,10 @@ kind: Kustomization
 metadata:
   name: portainer
   namespace: flux-system
+  labels:
+    app: portainer
+    env: production
+    category: apps
 spec:
   interval: 10m
   path: ./clusters/vollminlab-cluster/portainer

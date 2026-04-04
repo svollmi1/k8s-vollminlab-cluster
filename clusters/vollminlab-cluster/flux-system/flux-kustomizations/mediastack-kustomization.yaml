@@ -3,6 +3,10 @@ kind: Kustomization
 metadata:
   name: mediastack
   namespace: flux-system
+  labels:
+    app: mediastack
+    env: production
+    category: media
 spec:
   interval: 10m
   path: ./clusters/vollminlab-cluster/mediastack

@@ -6,7 +6,12 @@ metadata:
     policies.kyverno.io/title: Inject Namespace Labels
     policies.kyverno.io/category: Label Injection
     policies.kyverno.io/severity: medium
-    policies.kyverno.io/description: "Automatically adds app, env, and category labels from the namespace to workloads (Deployment, StatefulSet, DaemonSet) and their pods."
+    policies.kyverno.io/description: >-
+      Automatically adds app, env, and category labels from the namespace to
+      workloads (Deployment, StatefulSet, DaemonSet) and their pod templates.
+      Uses +(label) syntax to only inject if the label is absent — existing
+      labels on managed apps are preserved. Calico and kube-system are excluded
+      permanently since they are CNI/kubeadm-managed and cannot be labelled via GitOps.
   labels:
     app: kyverno
     env: production
@@ -14,7 +19,6 @@ metadata:
 spec:
   mutateExistingOnPolicyUpdate: true
   background: true
-  validationFailureAction: Enforce
   rules:
     - name: inject-namespace-labels
       match:
@@ -24,6 +28,15 @@ spec:
                 - Deployment
                 - StatefulSet
                 - DaemonSet
+              namespaceSelector:
+                matchExpressions:
+                  - key: kubernetes.io/metadata.name
+                    operator: NotIn
+                    values:
+                      - kube-system
+                      - calico-system
+                      - calico-apiserver
+                      - tigera-operator
       mutate:
         targets:
           - apiVersion: apps/v1
@@ -32,29 +45,16 @@ spec:
             kind: StatefulSet
           - apiVersion: apps/v1
             kind: DaemonSet
-        foreach:
-          - list: "request.object"
-            preconditions:
-              all:
-                - key: "{{ request.object.metadata.labels.app || '' }}"
-                  operator: Equals
-                  value: ""
-                - key: "{{ request.namespace }}"
-                  operator: NotIn
-                  value:
-                    - longhorn-system
-                    - flux-system
-                    - monitoring
-            patchStrategicMerge:
+        patchStrategicMerge:
+          metadata:
+            labels:
+              +(app): "{{ lookup('v1', 'Namespace', target.metadata.namespace).metadata.labels.app }}"
+              +(env): "{{ lookup('v1', 'Namespace', target.metadata.namespace).metadata.labels.env }}"
+              +(category): "{{ lookup('v1', 'Namespace', target.metadata.namespace).metadata.labels.category }}"
+          spec:
+            template:
               metadata:
                 labels:
-                  app: "{{ request.namespace | lookup('v1', 'Namespace', request.namespace).metadata.labels.app }}"
-                  env: "{{ request.namespace | lookup('v1', 'Namespace', request.namespace).metadata.labels.env }}"
-                  category: "{{ request.namespace | lookup('v1', 'Namespace', request.namespace).metadata.labels.category }}"
-              spec:
-                template:
-                  metadata:
-                    labels:
-                      app: "{{ request.namespace | lookup('v1', 'Namespace', request.namespace).metadata.labels.app }}"
-                      env: "{{ request.namespace | lookup('v1', 'Namespace', request.namespace).metadata.labels.env }}"
-                      category: "{{ request.namespace | lookup('v1', 'Namespace', request.namespace).metadata.labels.category }}"
+                  +(app): "{{ lookup('v1', 'Namespace', target.metadata.namespace).metadata.labels.app }}"
+                  +(env): "{{ lookup('v1', 'Namespace', target.metadata.namespace).metadata.labels.env }}"
+                  +(category): "{{ lookup('v1', 'Namespace', target.metadata.namespace).metadata.labels.category }}"

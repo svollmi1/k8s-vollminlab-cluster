@@ -1,0 +1,43 @@
+apiVersion: kyverno.io/v2
+kind: PolicyException
+metadata:
+  name: ignore-calico-cni
+  namespace: kyverno
+  labels:
+    app: kyverno
+    env: production
+    category: security
+spec:
+  # Calico CNI resources (calico-system, calico-apiserver, tigera-operator) are
+  # managed by the tigera-operator during bootstrap — not manageable via GitOps.
+  # They require privileged containers and hostPath volumes by design.
+  # Bootstrap procedure: bootstrap/calico/
+  match:
+    any:
+      - resources:
+          kinds:
+            - Pod
+            - Deployment
+            - DaemonSet
+            - StatefulSet
+          namespaces:
+            - calico-system
+            - calico-apiserver
+            - tigera-operator
+  exceptions:
+    - policyName: require-standard-labels
+      ruleNames:
+        - require-labels-on-controllers
+        - require-labels-on-pods-and-namespaces
+    - policyName: require-resources
+      ruleNames:
+        - require-limits
+    - policyName: restrict-privileged
+      ruleNames:
+        - block-privileged
+    - policyName: restrict-hostpath-usage
+      ruleNames:
+        - disallow-hostpath-except-system
+    - policyName: restrict-latest-tag
+      ruleNames:
+        - restrict-latest-tag-containers
