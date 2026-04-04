@@ -7,18 +7,18 @@ metadata:
     policies.kyverno.io/category: Label Injection
     policies.kyverno.io/severity: medium
     policies.kyverno.io/description: >-
-      Automatically adds app, env, and category labels from the namespace to
-      workloads (Deployment, StatefulSet, DaemonSet) and their pod templates.
-      Uses +(label) syntax to only inject if the label is absent — existing
-      labels on managed apps are preserved. Calico and kube-system are excluded
-      permanently since they are CNI/kubeadm-managed and cannot be labelled via GitOps.
+      Adds app, env, and category labels from the namespace to Deployment,
+      StatefulSet, and DaemonSet objects and their pod templates at admission
+      time. Uses +(label) syntax to only inject if the label is absent.
+      Calico and kube-system are excluded permanently. Runs admission-only
+      (background: false) — request.object.metadata.namespace is only reliable
+      in admission context, not in background mutateExisting processing.
   labels:
     app: kyverno
     env: production
     category: security
 spec:
-  mutateExistingOnPolicyUpdate: true
-  background: true
+  background: false
   rules:
     - name: inject-namespace-labels
       match:
@@ -43,13 +43,6 @@ spec:
             urlPath: "/api/v1/namespaces/{{ request.object.metadata.namespace }}"
             jmesPath: "metadata.labels"
       mutate:
-        targets:
-          - apiVersion: apps/v1
-            kind: Deployment
-          - apiVersion: apps/v1
-            kind: StatefulSet
-          - apiVersion: apps/v1
-            kind: DaemonSet
         patchStrategicMerge:
           metadata:
             labels:
