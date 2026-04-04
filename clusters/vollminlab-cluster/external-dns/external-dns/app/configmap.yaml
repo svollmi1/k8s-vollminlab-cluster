@@ -41,7 +41,6 @@ data:
       - --pihole-server=http://192.168.100.2
       - --pihole-api-version=6
       - --domain-filter=vollminlab.com
-      - --log-level=info
 
     env:
       - name: EXTERNAL_DNS_PIHOLE_PASSWORD
