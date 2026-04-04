@@ -40,7 +40,7 @@ spec:
       context:
         - name: nsLabels
           apiCall:
-            urlPath: "/api/v1/namespaces/{{ target.metadata.namespace }}"
+            urlPath: "/api/v1/namespaces/{{ request.object.metadata.namespace }}"
             jmesPath: "metadata.labels"
       mutate:
         targets:
