@@ -51,6 +51,21 @@ Wait until all pods are Running and `calico` tigerastatus shows `AVAILABLE: True
 3. Open a PR — the diff is the upgrade record
 4. After merge: apply the new operator manifest manually, then verify tigerastatus
 
+## Step 4 — Apply Kyverno compliance labels
+
+Kyverno's `require-standard-labels` policy requires `app`, `env`, and `category` labels
+on all namespaces. Calico namespaces are created by the tigera-operator and cannot be
+labelled via GitOps. Apply these after Step 3 is complete:
+
+```bash
+kubectl label namespace calico-system   app=calico-system   env=production category=networking --overwrite
+kubectl label namespace calico-apiserver app=calico-apiserver env=production category=networking --overwrite
+kubectl label namespace tigera-operator  app=tigera-operator  env=production category=networking --overwrite
+```
+
+A `PolicyException` (kyverno/exceptions-calico.yaml) permanently exempts Calico pods from
+label and resource-limits enforcement. These labels are only required on the Namespace objects.
+
 ## Network configuration
 
 - IP pool CIDR: `172.18.0.0/16`

@@ -6,6 +6,8 @@ metadata:
 resources:
   - dmz-enforce-node-placement.yaml
   - dmz-restrict-external-access.yaml
+  - exceptions-calico.yaml
+  - exceptions-longhorn-dynamic.yaml
   - flux-exception.yaml
   - force-rescan.yaml
   - inject-namespace-labels.yaml

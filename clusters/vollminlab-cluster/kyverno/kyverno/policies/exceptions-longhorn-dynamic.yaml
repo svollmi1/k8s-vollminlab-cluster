@@ -1,0 +1,31 @@
+apiVersion: kyverno.io/v2
+kind: PolicyException
+metadata:
+  name: ignore-longhorn-dynamic-pods
+  namespace: kyverno
+  labels:
+    app: kyverno
+    env: production
+    category: security
+spec:
+  # Longhorn creates these Pod objects directly (not via Deployment/StatefulSet),
+  # so no Deployment-targeting mutation policy can label them. They are ephemeral
+  # and managed entirely by the Longhorn controller.
+  match:
+    any:
+      - resources:
+          kinds:
+            - Pod
+          namespaces:
+            - longhorn-system
+          names:
+            - "instance-manager-*"
+            - "share-manager-*"
+            - "engine-image-*"
+  exceptions:
+    - policyName: require-standard-labels
+      ruleNames:
+        - require-labels-on-pods-and-namespaces
+    - policyName: require-resources
+      ruleNames:
+        - require-limits
