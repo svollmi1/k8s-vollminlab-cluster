@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: renovate-values
+  namespace: renovate
+  labels:
+    app: renovate
+    env: production
+    category: apps
+data:
+  values.yaml: |
+    cronjobs:
+      renovate:
+        schedule: "0 2 * * *"
+        suspend: false
+
+    pod:
+      labels:
+        app: renovate
+        env: production
+        category: apps
+
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 1536Mi
+
+    envFrom:
+      - secretRef:
+          name: renovate-token
+
+    renovate:
+      config: |
+        {
+          "platform": "github",
+          "repositories": ["svollmi1/k8s-vollminlab-cluster"],
+          "gitAuthor": "Renovate Bot <bot@renovateapp.com>",
+          "onboarding": false,
+          "requireConfig": "optional",
+          "autodiscover": false
+        }
