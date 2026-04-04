@@ -322,7 +322,7 @@ All Kustomizations use `interval: 10m`, `prune: true`, source `flux-system` GitR
 | ingress-nginx-repo | HelmRepository | https://kubernetes.github.io/ingress-nginx |
 | kyverno-repo | HelmRepository | https://kyverno.github.io/kyverno/ |
 | kyverno-policyreporter-repo | HelmRepository | https://kyverno.github.io/policy-reporter/ |
-| local-path-provisioner-repo | GitRepository | https://github.com/rancher/local-path-provisioner (tag: v0.0.30) |
+| local-path-provisioner-repo | GitRepository | https://github.com/rancher/local-path-provisioner (tag: v0.0.35) |
 | longhorn-repo | HelmRepository | https://charts.longhorn.io |
 | metallb-repo | HelmRepository | https://metallb.universe.tf |
 | metrics-server-repo | HelmRepository | https://kubernetes-sigs.github.io/metrics-server/ |
@@ -424,9 +424,11 @@ All ingresses use `ingressClassName: nginx`, TLS termination via `wildcard-tls`,
 
 ### Local Path Provisioner
 
+> **Note:** Uses `GitRepository` instead of `HelmRepository`. Rancher has never published an official Helm repository for this chart (upstream issue open since 2020). The chart lives only inside the GitHub repo at `deploy/chart/local-path-provisioner`. This is intentional and not an oversight — the `GitRepository` approach pins directly to an upstream release tag with no third-party intermediary.
+
 | Parameter | Value |
 |---|---|
-| Chart source | GitRepository (rancher/local-path-provisioner tag v0.0.30) |
+| Chart source | GitRepository (rancher/local-path-provisioner tag v0.0.35) |
 | Chart path | `deploy/chart/local-path-provisioner` |
 | Values | defaults only |
 
