@@ -14,6 +14,7 @@ resources:
   - ingress-nginx-helmrepository.yaml
   - capacitor-helmrepository.yaml
   - elastic-helmrepository.yaml
+  - external-dns-helmrepository.yaml
   - homepage-helmrepository.yaml
   - kyverno-helmrepository.yaml
   - kyverno-policyreporter-helmrepository.yaml

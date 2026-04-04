@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: external-dns-values
+  namespace: external-dns
+  labels:
+    app: external-dns
+    env: production
+    category: networking
+data:
+  values.yaml: |
+    provider:
+      name: pihole
+
+    sources:
+      - ingress
+
+    # upsert-only: creates/updates records but never deletes.
+    # Switch to 'sync' after validating records are created correctly.
+    policy: upsert-only
+
+    # Pi-hole cannot store TXT ownership records.
+    registry: noop
+
+    interval: 1m
+
+    podLabels:
+      app: external-dns
+      env: production
+      category: networking
+
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
+
+    extraArgs:
+      - --pihole-server=http://192.168.100.2
+      - --pihole-api-version=6
+      - --domain-filter=vollminlab.com
+      - --log-level=info
+
+    env:
+      - name: EXTERNAL_DNS_PIHOLE_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: external-dns-pihole
+            key: EXTERNAL_DNS_PIHOLE_PASSWORD
