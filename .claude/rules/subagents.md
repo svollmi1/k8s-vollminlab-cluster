@@ -4,6 +4,27 @@ description: When and how to use parallel subagents when working in k8s-vollminl
 
 # Subagent Parallelization
 
+## Always plan before acting
+
+**Before starting any task that involves editing files, running commands, or making changes — spawn a Plan agent first.** Do not begin work inline.
+
+The only exceptions are:
+- A single-word or single-line fix where the location is already known and unambiguous
+- Answering a pure question (no edits, no commands)
+
+The Plan agent should return:
+- Which files need to be read or changed
+- The order of operations and any sequential dependencies
+- Any risks or constraints (Kyverno labels, sealed secret workflow, etc.)
+
+Once you have the plan, act on it — using parallel Explore agents for reads, then editing directly.
+
+## Always delegate file exploration to subagents
+
+Any task that requires reading files you haven't already seen in this session MUST use an Explore agent, not inline Read/Grep/Glob. The Explore agent runs in a separate context window and keeps the main session clean.
+
+Only use Read/Grep/Glob directly in the main context for a single, targeted file you are certain is correct (e.g. re-reading something already identified by a prior agent).
+
 ## When to spawn parallel agents
 
 This repo has many independent namespaces and files. Use parallel Explore agents aggressively for:
