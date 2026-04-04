@@ -48,13 +48,13 @@ spec:
         patchStrategicMerge:
           metadata:
             labels:
-              +(app): "{{ lookup('v1', 'Namespace', target.metadata.namespace).metadata.labels.app }}"
-              +(env): "{{ lookup('v1', 'Namespace', target.metadata.namespace).metadata.labels.env }}"
-              +(category): "{{ lookup('v1', 'Namespace', target.metadata.namespace).metadata.labels.category }}"
+              +(app): "{{ lookup('v1', 'Namespace', '', target.metadata.namespace).metadata.labels.app }}"
+              +(env): "{{ lookup('v1', 'Namespace', '', target.metadata.namespace).metadata.labels.env }}"
+              +(category): "{{ lookup('v1', 'Namespace', '', target.metadata.namespace).metadata.labels.category }}"
           spec:
             template:
               metadata:
                 labels:
-                  +(app): "{{ lookup('v1', 'Namespace', target.metadata.namespace).metadata.labels.app }}"
-                  +(env): "{{ lookup('v1', 'Namespace', target.metadata.namespace).metadata.labels.env }}"
-                  +(category): "{{ lookup('v1', 'Namespace', target.metadata.namespace).metadata.labels.category }}"
+                  +(app): "{{ lookup('v1', 'Namespace', '', target.metadata.namespace).metadata.labels.app }}"
+                  +(env): "{{ lookup('v1', 'Namespace', '', target.metadata.namespace).metadata.labels.env }}"
+                  +(category): "{{ lookup('v1', 'Namespace', '', target.metadata.namespace).metadata.labels.category }}"

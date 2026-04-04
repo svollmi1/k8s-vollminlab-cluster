@@ -12,8 +12,6 @@ metadata:
     meta.helm.sh/release-namespace: kyverno
 data:
   values.yaml: |
-    replicaCount: 3
-
     podLabels:
       app: kyverno
       env: production
@@ -42,7 +40,7 @@ data:
         app: kyverno-admission-controller
         env: production
         category: security
-      replicaCount: 3
+      replicas: 3
       priorityClassName: system-cluster-critical
       failurePolicy: Ignore
       timeoutSeconds: 30
@@ -100,6 +98,7 @@ data:
         app: kyverno-background-controller
         env: production
         category: security
+      replicas: 1
       resources:
         requests:
           cpu: 100m
