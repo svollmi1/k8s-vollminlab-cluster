@@ -30,8 +30,10 @@ Every HelmRelease and pod must use one of:
 | `storage` | Longhorn, local-path-provisioner, smb-csi-driver |
 | `networking` | ingress-nginx, MetalLB |
 | `observability` | metrics-server, ECK (Elasticsearch/Kibana) |
-| `apps` | mediastack (Radarr/Sonarr/etc.), homepage, portainer, shlink |
+| `apps` | homepage, portainer, shlink, renovate |
+| `media` | Radarr, Sonarr, Bazarr, Overseerr, Prowlarr, SABnzbd, Tautulli |
 | `gaming` | Minecraft (dmz namespace only) |
+| `ci` | actions-runner-system (GitHub ARC runners) |
 
 ## DMZ namespace rules
 
