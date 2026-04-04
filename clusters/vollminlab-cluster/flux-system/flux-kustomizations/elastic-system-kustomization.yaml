@@ -3,6 +3,10 @@ kind: Kustomization
 metadata:
   name: elastic-system
   namespace: flux-system
+  labels:
+    app: elastic
+    env: production
+    category: observability
 spec:
   interval: 10m
   path: ./clusters/vollminlab-cluster/elastic-system

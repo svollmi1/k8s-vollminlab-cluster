@@ -3,6 +3,10 @@ kind: Kustomization
 metadata:
   name: minio
   namespace: flux-system
+  labels:
+    app: minio
+    env: production
+    category: storage
 spec:
   interval: 10m
   path: ./clusters/vollminlab-cluster/minio

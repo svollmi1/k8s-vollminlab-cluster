@@ -3,6 +3,10 @@ kind: Kustomization
 metadata:
   name: dmz
   namespace: flux-system
+  labels:
+    app: dmz
+    env: production
+    category: gaming
 spec:
   interval: 5m
   path: ./clusters/vollminlab-cluster/dmz

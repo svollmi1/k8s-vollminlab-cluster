@@ -3,6 +3,10 @@ kind: Kustomization
 metadata:
   name: policy-reporter-patch
   namespace: flux-system
+  labels:
+    app: policy-reporter
+    env: production
+    category: security
 spec:
   interval: 10m
   path: ./clusters/vollminlab-cluster/kyverno/policyreporter/patches

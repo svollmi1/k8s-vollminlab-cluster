@@ -3,6 +3,10 @@ kind: Kustomization
 metadata:
   name: monitoring
   namespace: flux-system
+  labels:
+    app: monitoring
+    env: production
+    category: observability
 spec:
   interval: 10m
   path: ./clusters/vollminlab-cluster/monitoring

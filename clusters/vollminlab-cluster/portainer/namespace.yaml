@@ -3,8 +3,6 @@ kind: Namespace
 metadata:
   name: portainer
   labels:
-    name: portainer
-    app.kubernetes.io/name: portainer
-    app.kubernetes.io/instance: portainer
-    category: apps
+    app: portainer
     env: production
+    category: apps

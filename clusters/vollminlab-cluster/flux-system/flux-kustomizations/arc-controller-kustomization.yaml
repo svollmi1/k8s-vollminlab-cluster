@@ -6,7 +6,7 @@ metadata:
   labels:
     app: arc-controller
     env: production
-    category: apps
+    category: ci
 spec:
   interval: 10m
   path: ./clusters/vollminlab-cluster/arc-controller

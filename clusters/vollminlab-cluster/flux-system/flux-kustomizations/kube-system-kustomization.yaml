@@ -3,6 +3,10 @@ kind: Kustomization
 metadata:
   name: kube-system
   namespace: flux-system
+  labels:
+    app: kube-system
+    env: production
+    category: core
 spec:
   interval: 10m
   path: ./clusters/vollminlab-cluster/kube-system

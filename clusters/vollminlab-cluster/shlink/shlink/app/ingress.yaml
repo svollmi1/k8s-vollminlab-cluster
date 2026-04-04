@@ -3,6 +3,10 @@ kind: Ingress
 metadata:
   name: shlink
   namespace: shlink
+  labels:
+    app: shlink
+    env: production
+    category: apps
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
 spec:

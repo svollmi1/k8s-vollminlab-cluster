@@ -3,6 +3,10 @@ kind: Kustomization
 metadata:
   name: homepage
   namespace: flux-system
+  labels:
+    app: homepage
+    env: production
+    category: apps
 spec:
   interval: 10m
   path: ./clusters/vollminlab-cluster/homepage

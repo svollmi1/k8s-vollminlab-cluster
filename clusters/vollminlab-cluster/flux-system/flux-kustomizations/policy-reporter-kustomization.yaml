@@ -3,6 +3,10 @@ kind: Kustomization
 metadata:
   name: policy-reporter
   namespace: flux-system
+  labels:
+    app: policy-reporter
+    env: production
+    category: security
 spec:
   healthChecks:
     - apiVersion: apps/v1

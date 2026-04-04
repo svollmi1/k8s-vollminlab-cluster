@@ -3,6 +3,10 @@ kind: Kustomization
 metadata:
   name: ingress-nginx
   namespace: flux-system
+  labels:
+    app: ingress-nginx
+    env: production
+    category: networking
 spec:
   dependsOn:
     - name: cert-manager

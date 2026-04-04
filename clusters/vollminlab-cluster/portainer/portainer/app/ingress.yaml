@@ -1,28 +1,29 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: shlink-web
-  namespace: shlink
+  name: portainer-ingress
+  namespace: portainer
   labels:
-    app: shlink-web
+    app: portainer
     env: production
     category: apps
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - shlink.vollminlab.com
+        - portainer.vollminlab.com
       secretName: wildcard-tls
   rules:
-    - host: shlink.vollminlab.com
+    - host: portainer.vollminlab.com
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: shlink-web
+                name: portainer
                 port:
-                  number: 80
+                  number: 9000

@@ -3,6 +3,10 @@ kind: Kustomization
 metadata:
   name: kyverno
   namespace: flux-system
+  labels:
+    app: kyverno
+    env: production
+    category: security
 spec:
   healthChecks:
   - apiVersion: apps/v1

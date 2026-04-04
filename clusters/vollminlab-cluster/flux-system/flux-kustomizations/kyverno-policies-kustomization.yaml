@@ -3,6 +3,10 @@ kind: Kustomization
 metadata:
   name: kyverno-policies
   namespace: flux-system
+  labels:
+    app: kyverno
+    env: production
+    category: security
 spec:
   interval: 10m
   path: ./clusters/vollminlab-cluster/kyverno/kyverno/policies

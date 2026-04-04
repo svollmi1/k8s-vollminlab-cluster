@@ -3,6 +3,10 @@ kind: Kustomization
 metadata:
   name: capacitor
   namespace: flux-system
+  labels:
+    app: capacitor
+    env: production
+    category: core
 spec:
   interval: 10m
   path: ./clusters/vollminlab-cluster/flux-system/capacitor/app

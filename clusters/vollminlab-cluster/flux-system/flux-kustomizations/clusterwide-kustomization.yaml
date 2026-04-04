@@ -3,6 +3,10 @@ kind: Kustomization
 metadata:
   name: clusterwide
   namespace: flux-system
+  labels:
+    app: clusterwide
+    env: production
+    category: core
 spec:
   interval: 10m
   path: ./clusters/vollminlab-cluster/clusterwide
