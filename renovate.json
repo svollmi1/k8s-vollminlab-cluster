@@ -10,13 +10,18 @@
   "labels": ["renovate", "dependencies"],
   "commitMessagePrefix": "chore(deps):",
   "enabledManagers": ["flux", "github-actions"],
+  "ignorePaths": [
+    "clusters/vollminlab-cluster/flux-system/gotk-components.yaml"
+  ],
   "flux": {
     "fileMatch": [
-      "clusters/vollminlab-cluster/.+/app/helmrelease\\.yaml$"
+      "clusters/vollminlab-cluster/.+/app/helmrelease\\.yaml$",
+      "clusters/vollminlab-cluster/flux-system/repositories/.+-helmrepository\\.yaml$"
     ]
   },
   "registryAliases": {
-    "arc-repo": "oci://ghcr.io/actions/actions-runner-controller-charts",
+    "arc-controller-repo": "oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller",
+    "arc-runners-repo": "oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set",
     "bazarr-repo": "https://k8s-home-lab.github.io/helm-charts/",
     "capacitor-repo": "https://chart.onechart.dev",
     "cert-manager-repo": "https://charts.jetstack.io",

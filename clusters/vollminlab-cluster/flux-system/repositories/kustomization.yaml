@@ -7,7 +7,8 @@ metadata:
     env: production
     category: system
 resources:
-  - arc-helmrepository.yaml
+  - arc-controller-helmrepository.yaml
+  - arc-runners-helmrepository.yaml
   - bazarr-helmrepository.yaml
   - cert-manager-helmrepository.yaml
   - ingress-nginx-helmrepository.yaml
