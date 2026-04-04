@@ -22,15 +22,6 @@ data:
       env: production
       category: security
 
-    rbac:
-      create: true
-      backgroundController:
-        create: true
-        additionalPermissions:
-          - apiGroups: ["apps"]
-            resources: ["deployments", "statefulsets", "daemonsets"]
-            verbs: ["get", "list", "watch", "patch", "update"]
-
     admissionController:
       labels:
         app: kyverno-admission-controller
@@ -90,6 +81,12 @@ data:
               - flux-system
 
     backgroundController:
+      rbac:
+        clusterRole:
+          extraResources:
+            - apiGroups: ["apps"]
+              resources: ["deployments", "statefulsets", "daemonsets"]
+              verbs: ["get", "list", "watch", "patch", "update"]
       labels:
         app: kyverno-background-controller
         env: production
