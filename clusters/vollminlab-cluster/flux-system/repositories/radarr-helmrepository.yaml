@@ -11,4 +11,4 @@ spec:
   url: oci://oci.trueforge.org/truecharts/radarr
   interval: 5m
   ref:
-    tag: 23.26.0
+    tag: 23.28.0
