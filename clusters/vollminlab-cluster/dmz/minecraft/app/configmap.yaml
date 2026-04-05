@@ -27,9 +27,9 @@ data:
         value: "true"
         effect: "NoSchedule"
     podLabels:
-      app: minecraft
       env: production
       category: gaming
+      internet-egress: "true"
     podSecurityContext:
       runAsNonRoot: true
       fsGroup: 1000
