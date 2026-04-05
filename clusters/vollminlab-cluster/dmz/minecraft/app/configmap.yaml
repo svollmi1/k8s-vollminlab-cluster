@@ -27,7 +27,6 @@ data:
         value: "true"
         effect: "NoSchedule"
     podLabels:
-      app: minecraft
       env: production
       category: gaming
     podSecurityContext:
