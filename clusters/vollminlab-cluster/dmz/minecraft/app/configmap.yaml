@@ -29,7 +29,6 @@ data:
     podLabels:
       env: production
       category: gaming
-      internet-egress: "true"
     podSecurityContext:
       runAsNonRoot: true
       fsGroup: 1000
