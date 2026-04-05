@@ -9,8 +9,6 @@ metadata:
     category: apps
 spec:
   instances: 1
-  postgresql:
-    version: "16"
   storage:
     size: 5Gi
     storageClass: longhorn
