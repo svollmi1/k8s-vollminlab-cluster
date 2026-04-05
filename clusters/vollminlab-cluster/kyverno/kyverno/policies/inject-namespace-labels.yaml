@@ -7,9 +7,11 @@ metadata:
     policies.kyverno.io/category: Label Injection
     policies.kyverno.io/severity: medium
     policies.kyverno.io/description: >-
-      Adds app, env, and category labels from the namespace to Deployment,
-      StatefulSet, and DaemonSet objects and their pod templates at admission
-      time. Uses +(label) syntax to only inject if the label is absent.
+      Adds app, env, and category labels from the namespace to workloads and
+      pods at admission time. Uses +(label) syntax to only inject if the label
+      is absent, so explicit labels always win. Covers Deployment/StatefulSet/
+      DaemonSet (and their pod templates) plus bare Pod objects created by
+      operators (CNPG, ARC, ECK, etc.) that bypass controller specs.
       Calico and kube-system are excluded permanently. Runs admission-only
       (background: false) — request.object.metadata.namespace is only reliable
       in admission context, not in background mutateExisting processing.
@@ -56,3 +58,30 @@ spec:
                   +(app): "{{ nsLabels.app }}"
                   +(env): "{{ nsLabels.env }}"
                   +(category): "{{ nsLabels.category }}"
+    - name: inject-namespace-labels-pods
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaceSelector:
+                matchExpressions:
+                  - key: kubernetes.io/metadata.name
+                    operator: NotIn
+                    values:
+                      - kube-system
+                      - calico-system
+                      - calico-apiserver
+                      - tigera-operator
+      context:
+        - name: nsLabels
+          apiCall:
+            urlPath: "/api/v1/namespaces/{{ request.object.metadata.namespace }}"
+            jmesPath: "metadata.labels"
+      mutate:
+        patchStrategicMerge:
+          metadata:
+            labels:
+              +(app): "{{ nsLabels.app }}"
+              +(env): "{{ nsLabels.env }}"
+              +(category): "{{ nsLabels.category }}"
