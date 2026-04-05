@@ -9,6 +9,11 @@ metadata:
     category: apps
 spec:
   instances: 1
+  inheritedMetadata:
+    labels:
+      app: shlink-db
+      env: production
+      category: apps
   storage:
     size: 5Gi
     storageClass: longhorn
