@@ -10,7 +10,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app: minecraft-minecraft
+      app: minecraft
   policyTypes:
     - Ingress
     - Egress
