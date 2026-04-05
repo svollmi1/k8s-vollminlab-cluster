@@ -20,6 +20,6 @@ spec:
   timeout: 5m
   releaseName: sealed-secrets-controller
   valuesFrom:
-  - kind: ConfigMap
-    name: sealed-secrets-values
-    valuesKey: values.yaml
+    - kind: ConfigMap
+      name: sealed-secrets-values
+      valuesKey: values.yaml
