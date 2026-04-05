@@ -1,0 +1,12 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: cnpg-repo
+  namespace: flux-system
+  labels:
+    app: cnpg
+    env: production
+    category: storage
+spec:
+  interval: 1h
+  url: https://cloudnative-pg.github.io/charts
