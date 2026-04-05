@@ -6,6 +6,7 @@ metadata:
     policies.kyverno.io/title: Inject Namespace Labels
     policies.kyverno.io/category: Label Injection
     policies.kyverno.io/severity: medium
+    pod-policies.kyverno.io/autogen-controllers: none
     policies.kyverno.io/description: >-
       Adds app, env, and category labels from the namespace to workloads and
       pods at admission time. Uses +(label) syntax to only inject if the label
