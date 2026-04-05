@@ -161,6 +161,35 @@ See `kyverno.md` for valid `category` values.
 - **Never use `:latest`** chart version ranges or image tags.
 - `bootstrap/` is for DR reference only; changes there have no effect on the cluster.
 
+## Emergency: HelmRelease stuck in failure loop
+
+Symptom: HelmRelease shows `READY=False` with a stale error message even after the root cause is fixed. Flux keeps reporting the old failure reason on every reconcile attempt.
+
+This happens because Flux stores Helm release state in etcd (as `helm.sh/release.v1` Secrets). When an upgrade fails, the failed revision is recorded. Flux retries the upgrade but replays the stored failure reason in its status rather than issuing a live webhook call — making it appear the original problem persists.
+
+**Recovery procedure:**
+
+```bash
+# Step 1 — inspect Helm release history
+helm history <release-name> -n <namespace>
+# Identify the last "deployed" revision and any "failed" revision after it
+
+# Step 2 — roll back to the last good revision
+helm rollback <release-name> -n <namespace>
+# This moves the release to a new revision (e.g. rev 5 = "Rollback to 3")
+# with status "deployed" — clearing the failure state
+
+# Step 3 — reconcile fresh
+flux reconcile source helm <repo-name> -n flux-system   # refresh chart source
+flux reconcile helmrelease <release-name> -n <namespace>
+
+# Step 4 — verify
+flux get helmrelease <release-name> -n <namespace>
+# Should show: READY=True, MESSAGE="Helm upgrade succeeded"
+```
+
+**Key insight:** Retrying `flux reconcile` before `helm rollback` will continue to show the stale failure message. The rollback must come first.
+
 ## Useful commands
 
 ```bash
@@ -173,6 +202,9 @@ flux reconcile kustomization [name] --with-source
 
 # Check a specific HelmRelease
 flux get helmrelease [name] -n [namespace]
+
+# Helm release history (useful for diagnosing stuck upgrades)
+helm history [release-name] -n [namespace]
 
 # Debug events
 kubectl describe helmrelease [name] -n [namespace]
