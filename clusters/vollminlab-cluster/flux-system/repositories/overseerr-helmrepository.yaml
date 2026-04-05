@@ -11,4 +11,4 @@ spec:
   url: oci://oci.trueforge.org/truecharts/overseerr
   interval: 5m
   ref:
-    tag: 15.6.0
+    tag: 17.0.1
