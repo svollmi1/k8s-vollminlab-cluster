@@ -11,6 +11,7 @@ resources:
   - flux-exception.yaml
   - force-rescan.yaml
   - inject-namespace-labels.yaml
+  - inject-pod-labels.yaml
   - inject-resource-requirements.yaml
   - require-labels.yaml
   - require-resources.yaml
