@@ -11,4 +11,4 @@ spec:
   url: oci://oci.trueforge.org/truecharts/sonarr
   interval: 5m
   ref:
-    tag: 23.8.3
+    tag: 26.0.3
