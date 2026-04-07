@@ -9,6 +9,11 @@ metadata:
     category: apps
 spec:
   instances: 1
+  inheritedMetadata:
+    labels:
+      app: shlink-db
+      env: production
+      category: apps
   storage:
     size: 5Gi
     storageClass: longhorn
@@ -18,3 +23,8 @@ spec:
       owner: shlink
       secret:
         name: shlink-db-credentials
+      postInitSQL:
+        - GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO shlink
+        - GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO shlink
+        - ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO shlink
+        - ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO shlink
