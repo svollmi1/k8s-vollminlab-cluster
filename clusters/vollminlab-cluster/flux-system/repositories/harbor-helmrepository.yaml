@@ -1,0 +1,12 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: harbor-repo
+  namespace: flux-system
+  labels:
+    app: harbor
+    env: production
+    category: storage
+spec:
+  interval: 1h
+  url: https://goharbor.github.io/harbor-helm
