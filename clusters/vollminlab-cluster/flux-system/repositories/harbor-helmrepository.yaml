@@ -9,4 +9,4 @@ metadata:
     category: storage
 spec:
   interval: 1h
-  url: https://goharbor.github.io/harbor-helm
+  url: https://helm.goharbor.com
