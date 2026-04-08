@@ -9,7 +9,7 @@ metadata:
     category: apps
 data:
   values.yaml: |
-    githubConfigUrl: "https://github.com/svollmi1"
+    githubConfigUrl: "https://github.com/svollmi1/k8s-vollminlab-cluster"
     githubConfigSecret: arc-githubapp-secret
 
     runnerScaleSetName: "vollminlab"
