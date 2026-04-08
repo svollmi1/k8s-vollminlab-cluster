@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: harbor-values
+  namespace: harbor
+  labels:
+    app: harbor
+    env: production
+    category: storage
+data:
+  values.yaml: |
+    externalURL: https://harbor.vollminlab.com
+
+    expose:
+      type: clusterIP
+      tls:
+        enabled: false
+
+    existingSecretAdminPassword: harbor-admin-credentials
+    existingSecretAdminPasswordKey: HARBOR_ADMIN_PASSWORD
+
+    database:
+      type: external
+      external:
+        host: harbor-db-rw.harbor.svc.cluster.local
+        port: "5432"
+        username: harbor
+        coreDatabase: registry
+        existingSecret: harbor-db-credentials
+        sslmode: disable
+
+    redis:
+      type: internal
+
+    notary:
+      enabled: false
+
+    persistence:
+      enabled: true
+      resourcePolicy: keep
+      persistentVolumeClaim:
+        registry:
+          storageClass: longhorn
+          accessMode: ReadWriteOnce
+          size: 50Gi
+        jobservice:
+          jobLog:
+            storageClass: longhorn
+            accessMode: ReadWriteOnce
+            size: 2Gi
+        redis:
+          storageClass: longhorn
+          accessMode: ReadWriteOnce
+          size: 2Gi
+
+    registry:
+      credentials:
+        existingSecret: harbor-core-credentials
+
+    podLabels:
+      app: harbor
+      env: production
+      category: storage
