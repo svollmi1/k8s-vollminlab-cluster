@@ -36,7 +36,7 @@ data:
       config: |
         {
           "platform": "github",
-          "repositories": ["svollmi1/k8s-vollminlab-cluster"],
+          "repositories": ["vollminlab/k8s-vollminlab-cluster"],
           "gitAuthor": "Renovate Bot <bot@renovateapp.com>",
           "onboarding": false,
           "requireConfig": "optional",
