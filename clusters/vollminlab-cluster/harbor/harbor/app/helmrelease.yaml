@@ -1,24 +1,24 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: minecraft
-  namespace: dmz
+  name: harbor
+  namespace: harbor
   labels:
-    app: minecraft
+    app: harbor
     env: production
-    category: gaming
+    category: storage
 spec:
-  interval: 5m
-  timeout: 10m
+  interval: 10m
+  timeout: 15m
   chart:
     spec:
-      chart: minecraft
-      version: "4.26.4"
+      chart: harbor
+      version: 1.18.3
       sourceRef:
         kind: HelmRepository
-        name: minecraft-repo
+        name: harbor-repo
         namespace: flux-system
   valuesFrom:
     - kind: ConfigMap
-      name: minecraft-values
+      name: harbor-values
       valuesKey: values.yaml

@@ -6,11 +6,14 @@ GitOps-managed Kubernetes cluster using Flux CD. All workloads are Helm-based Fl
 
 ## Essential reading before working
 
-- `.claude/rules/flux.md` — repo layout, HelmRelease conventions, reconciliation commands
-- `.claude/rules/kyverno.md` — required labels, enforce/audit policies, DMZ rules
+- `.claude/rules/flux.md` — repo layout, HelmRelease conventions, reconciliation commands, stuck HelmRelease runbook
+- `.claude/rules/kyverno.md` — required labels, enforce/audit policies, DMZ rules, autogen danger, webhook block recovery
 - `.claude/rules/secrets.md` — SealedSecrets workflow, never plain Secrets
 - `.claude/rules/subagents.md` — when to spawn parallel agents
 - `.claude/rules/homepage.md` — auto-discovery via ingress annotations, widget support, credentials
+- `.claude/rules/external-dns.md` — Pi-hole constraint: policy: upsert-only only, DNS restore procedure
+- `.claude/rules/incidents.md` — when to write postmortems, format, existing incident index
+- `.claude/rules/storage.md` — Longhorn capacity check before PVC sizing, replica math, online resize
 
 ## Hard constraints
 
