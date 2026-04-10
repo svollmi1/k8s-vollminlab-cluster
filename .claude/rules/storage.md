@@ -42,3 +42,11 @@ If a PVC turns out to be too small after the fact, Longhorn supports online expa
 2. Longhorn expands the volume without downtime.
 
 **Start conservative. Expand later. Never provision speculatively large.**
+
+## Multipath must be blacklisted on all worker nodes
+
+Longhorn iSCSI volumes conflict with `multipathd` on Ubuntu 24.04 (multipath is enabled by default). This causes `exit status 32` stale mount failures. Every worker node — including DMZ workers — must have Longhorn devices blacklisted in `/etc/multipath.conf`.
+
+**Apply this to every new worker node before it joins the cluster.**
+
+Full procedure: `docs/runbooks/longhorn-multipath-blacklist.md`
