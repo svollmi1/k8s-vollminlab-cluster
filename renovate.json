@@ -14,9 +14,9 @@
     "clusters/vollminlab-cluster/flux-system/gotk-components.yaml"
   ],
   "flux": {
-    "fileMatch": [
-      "clusters/vollminlab-cluster/.+/app/helmrelease\\.yaml$",
-      "clusters/vollminlab-cluster/flux-system/repositories/.+-helmrepository\\.yaml$"
+    "managerFilePatterns": [
+      "/clusters/vollminlab-cluster/.+/app/helmrelease\.yaml$/",
+      "/clusters/vollminlab-cluster/flux-system/repositories/.+-helmrepository\.yaml$/"
     ]
   },
   "registryAliases": {

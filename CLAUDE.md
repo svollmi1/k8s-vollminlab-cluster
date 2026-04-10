@@ -13,6 +13,7 @@ GitOps-managed Kubernetes cluster using Flux CD. All workloads are Helm-based Fl
 - `.claude/rules/homepage.md` — auto-discovery via ingress annotations, widget support, credentials
 - `.claude/rules/external-dns.md` — Pi-hole constraint: policy: upsert-only only, DNS restore procedure
 - `.claude/rules/incidents.md` — when to write postmortems, format, existing incident index
+- `.claude/rules/storage.md` — Longhorn capacity check before PVC sizing, replica math, online resize
 
 ## Hard constraints
 
