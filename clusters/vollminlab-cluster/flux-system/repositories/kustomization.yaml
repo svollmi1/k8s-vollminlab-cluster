@@ -37,3 +37,4 @@ resources:
   - renovate-helmrepository.yaml
   - shlink-helmrepository.yaml
   - velero-helmrepository.yaml
+  - harbor-helmrepository.yaml

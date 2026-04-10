@@ -4,5 +4,5 @@ resources:
   - helmrelease.yaml
   - configmap.yaml
   - ingress.yaml
-  - ingress-s3.yaml
-  - minio-credentials-sealedsecret.yaml
+  - harbor-admin-sealedsecret.yaml
+  - harbor-core-sealedsecret.yaml

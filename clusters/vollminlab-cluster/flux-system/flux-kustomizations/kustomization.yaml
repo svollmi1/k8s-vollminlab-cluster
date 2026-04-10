@@ -32,3 +32,4 @@ resources:
   - minio-kustomization.yaml
   - renovate-kustomization.yaml
   - velero-kustomization.yaml
+  - harbor-kustomization.yaml
