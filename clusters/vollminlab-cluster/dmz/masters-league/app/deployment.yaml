@@ -30,7 +30,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: masters-league
-          image: harbor.vollminlab.com/homelab/masters-league:v1.0.0
+          image: harbor.vollminlab.com/homelab/masters-league:v1.1.0
           imagePullPolicy: Always
           ports:
             - containerPort: 8000
