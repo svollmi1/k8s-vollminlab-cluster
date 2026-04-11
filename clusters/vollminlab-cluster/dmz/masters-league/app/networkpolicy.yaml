@@ -1,0 +1,92 @@
+# NetworkPolicy for the masters-league app pod
+# Models the Minecraft network policy pattern:
+#   - Ingress only from HAProxy DMZ nodes on the app port
+#   - Egress to internet (ESPN API), Redis, and kube-dns
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: masters-league
+  namespace: dmz
+  labels:
+    app: masters-league
+    env: production
+    category: apps
+spec:
+  podSelector:
+    matchLabels:
+      app: masters-league
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - ipBlock:
+            cidr: 192.168.160.2/32  # haproxydmz01
+        - ipBlock:
+            cidr: 192.168.160.3/32  # haproxydmz02
+      ports:
+        - protocol: TCP
+          port: 8000
+  egress:
+    # ESPN API (HTTPS)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443
+    # Redis (internal)
+    - to:
+        - podSelector:
+            matchLabels:
+              app: masters-redis
+      ports:
+        - protocol: TCP
+          port: 6379
+    # kube-dns
+    - to:
+        - ipBlock:
+            cidr: 10.96.0.10/32  # kube-dns ClusterIP
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+# NetworkPolicy for the Redis pod
+# Only allows traffic from the masters-league app
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: masters-redis
+  namespace: dmz
+  labels:
+    app: masters-redis
+    env: production
+    category: apps
+spec:
+  podSelector:
+    matchLabels:
+      app: masters-redis
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: masters-league
+      ports:
+        - protocol: TCP
+          port: 6379
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 10.96.0.10/32  # kube-dns ClusterIP
+      ports:
+        - protocol: UDP
+          port: 53
