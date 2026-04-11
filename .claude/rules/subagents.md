@@ -4,54 +4,48 @@ description: When and how to use parallel subagents when working in k8s-vollminl
 
 # Subagent Parallelization
 
-## Always plan before acting
+## When to spawn a Plan agent
 
-**Before starting any task that involves editing files, running commands, or making changes — spawn a Plan agent first.** Do not begin work inline.
+Spawn a Plan agent before acting when **two or more** of these are true:
 
-The only exceptions are:
-- A single-word or single-line fix where the location is already known and unambiguous
-- Answering a pure question (no edits, no commands)
+- The task touches 3+ files across different namespaces or directories
+- You don't know which files need to change
+- The task involves risk (SealedSecrets, Kyverno policies, Flux bootstrap, RBAC)
+- There are sequential dependencies that aren't obvious
 
-The Plan agent should return:
-- Which files need to be read or changed
-- The order of operations and any sequential dependencies
-- Any risks or constraints (Kyverno labels, sealed secret workflow, etc.)
+**Skip the Plan agent for:** single-file edits, chart version bumps, label fixes, adding one resource to a known namespace — act directly.
 
-Once you have the plan, act on it — using parallel Explore agents for reads, then editing directly.
+## When to spawn an Explore agent
 
-## Always delegate file exploration to subagents
+Use an Explore agent when:
 
-Any task that requires reading files you haven't already seen in this session MUST use an Explore agent, not inline Read/Grep/Glob. The Explore agent runs in a separate context window and keeps the main session clean.
+- You need to search across multiple directories and aren't sure what you'll find
+- A cross-namespace audit requires reading many files simultaneously
+- The search is open-ended (e.g., "what version is X deployed at?")
 
-Only use Read/Grep/Glob directly in the main context for a single, targeted file you are certain is correct (e.g. re-reading something already identified by a prior agent).
+Use `Grep`/`Glob`/`Read` directly when:
 
-## When to spawn parallel agents
+- You know the file path or can find it with a single targeted search
+- You've already seen the file in this session
 
-This repo has many independent namespaces and files. Use parallel Explore agents aggressively for:
+## When to parallelize
 
-- **Cross-namespace queries** — e.g., "what version of chart X is deployed?" → spawn one agent per namespace or HelmRelease simultaneously
-- **Multi-app version audits** — checking all HelmReleases for outdated charts
-- **Comparing before/after** — reading the current state of N files before editing
-- **Independent concerns in one PR** — e.g., update chart version in namespace A while also updating ingress in namespace B
+Parallelize when work is genuinely independent:
 
-## When NOT to parallelize
+- Cross-namespace audits → one agent per namespace simultaneously
+- Reading N files before editing → spawn all reads in parallel
+- Independent concerns in one PR → parallel reads, then sequential edits
 
-- When step B depends on the output of step A (seal a secret → then commit it)
-- Simple single-file edits
-- When you need the cluster's live state (kubectl commands are sequential by nature)
+Never parallelize when step B depends on step A (e.g., seal a secret → then commit it).
 
-## Subagent types to use
+## Subagent types
 
-| Task | Agent type |
-|------|-----------|
-| Find files, search code | `Explore` |
-| Plan a multi-step implementation | `Plan` |
-| Research chart versions, Helm values docs | `general-purpose` |
+| Task                                    | Agent type        |
+| --------------------------------------- | ----------------- |
+| Find files, search code (open-ended)    | `Explore`         |
+| Plan a multi-step implementation        | `Plan`            |
+| Research chart versions, external docs  | `general-purpose` |
 
 ## Example: auditing all HelmRelease chart versions
 
 Spawn one Explore agent per namespace (`mediastack`, `shlink`, `dmz`, `cert-manager`, etc.) simultaneously, each reading `helmrelease.yaml` and returning the chart name + version. Collect results, then act.
-
-## Reminder
-
-The global `~/.claude/CLAUDE.md` also has parallelization guidance. The principle: if two things don't depend on each other, do them at the same time.
