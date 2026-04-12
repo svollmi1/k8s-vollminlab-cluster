@@ -35,6 +35,15 @@ data:
         anonymizeRemoteAddr: true
         trackOrphanVisits: true
 
+      database:
+        driver: postgres
+        host: shlink-db-rw.shlink.svc.cluster.local
+        port: 5432
+        auth:
+          database: shlink
+          username: shlink
+          existingSecret: shlink-credentials
+
     # Initial API key is injected from shlink-credentials secret at first startup.
     # After first run, manage API keys via the web UI.
     extraEnv:
@@ -45,23 +54,4 @@ data:
             key: initial-api-key
 
     postgresql:
-      enabled: true
-      auth:
-        database: shlink
-        username: shlink
-        existingSecret: shlink-credentials
-        secretKeys:
-          adminPasswordKey: postgresql-password
-          userPasswordKey: postgresql-password
-      primary:
-        podLabels:
-          app: shlink-postgresql
-          env: production
-          category: apps
-        resources:
-          requests:
-            cpu: 100m
-            memory: 256Mi
-          limits:
-            cpu: 500m
-            memory: 512Mi
+      enabled: false

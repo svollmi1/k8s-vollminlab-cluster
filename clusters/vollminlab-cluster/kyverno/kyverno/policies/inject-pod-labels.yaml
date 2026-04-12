@@ -1,0 +1,51 @@
+apiVersion: kyverno.io/v2beta1
+kind: ClusterPolicy
+metadata:
+  name: inject-pod-labels
+  annotations:
+    policies.kyverno.io/title: Inject Pod Labels
+    policies.kyverno.io/category: Label Injection
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/description: >-
+      Adds app, env, and category labels from the namespace onto bare Pod
+      objects at admission time. Targets operator-generated pods (CNPG, ARC
+      runners, ECK, etc.) that are created directly as Pods and bypass any
+      Deployment/StatefulSet spec. Uses +(label) syntax so explicit labels
+      always win. Kept as a separate policy from inject-namespace-labels
+      (which targets controllers) to prevent Kyverno autogen from generating
+      a broken controller variant of the Pod rule.
+    pod-policies.kyverno.io/autogen-controllers: none
+  labels:
+    app: kyverno
+    env: production
+    category: security
+spec:
+  background: false
+  rules:
+    - name: inject-pod-labels
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaceSelector:
+                matchExpressions:
+                  - key: kubernetes.io/metadata.name
+                    operator: NotIn
+                    values:
+                      - kube-system
+                      - calico-system
+                      - calico-apiserver
+                      - tigera-operator
+      context:
+        - name: nsLabels
+          apiCall:
+            urlPath: "/api/v1/namespaces/{{ request.object.metadata.namespace }}"
+            jmesPath: "metadata.labels"
+      mutate:
+        patchStrategicMerge:
+          metadata:
+            labels:
+              +(app): "{{ nsLabels.app }}"
+              +(env): "{{ nsLabels.env }}"
+              +(category): "{{ nsLabels.category }}"
