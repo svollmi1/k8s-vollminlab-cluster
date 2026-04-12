@@ -1,0 +1,30 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: harbor-db
+  namespace: harbor
+  labels:
+    app: harbor-db
+    env: production
+    category: storage
+spec:
+  instances: 1
+  inheritedMetadata:
+    labels:
+      app: harbor-db
+      env: production
+      category: storage
+  storage:
+    size: 10Gi
+    storageClass: longhorn
+  bootstrap:
+    initdb:
+      database: registry
+      owner: harbor
+      secret:
+        name: harbor-db-credentials
+      postInitSQL:
+        - GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO harbor
+        - GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO harbor
+        - ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO harbor
+        - ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO harbor

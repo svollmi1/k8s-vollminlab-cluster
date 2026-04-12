@@ -58,7 +58,7 @@ jobs:
       changed_files: ${{ steps.get-changed-files.outputs.changed_files }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -344,7 +344,7 @@ jobs:
         run: echo "No cluster YAML changed; job succeeds." && exit 0
       - name: Checkout code
         if: needs.validate-changes.outputs.changed == 'true'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -940,7 +940,7 @@ jobs:
         run: echo "No cluster YAML changed; job succeeds." && exit 0
       - name: Checkout code
         if: needs.validate-changes.outputs.changed == 'true'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -1162,7 +1162,7 @@ jobs:
         run: echo "No cluster YAML changed; job succeeds." && exit 0
       - name: Checkout code
         if: needs.validate-changes.outputs.changed == 'true'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -1256,12 +1256,20 @@ jobs:
               continue
             fi
             
-            # Build policy arguments, skipping policies with apiCall context (require live cluster)
+            # Build policy arguments, skipping policies that require a live cluster:
+            #   - apiCall: context (inject-namespace-labels, inject-pod-labels)
+            #   - mutate.targets: (mutateExisting policies like force-rescan) — these need
+            #     a real k8s client to look up/patch existing resources and will error with
+            #     "Handler factory requires a client but a nil client was passed" offline.
             args=()
             for p in "${POLICY_FILES[@]}"; do
               if [[ -f "$p" ]]; then
                 if grep -q "apiCall:" "$p" 2>/dev/null; then
                   echo "⚠️ Skipping policy (uses apiCall context - requires live cluster): $p"
+                  continue
+                fi
+                if grep -q "mutateExistingOnPolicyUpdate:" "$p" 2>/dev/null; then
+                  echo "⚠️ Skipping policy (mutateExisting - requires live cluster): $p"
                   continue
                 fi
                 args+=("$p")
