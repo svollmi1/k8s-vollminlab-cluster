@@ -6,3 +6,4 @@ resources:
   - namespace.yaml
   - ./networkpolicies
   - ./minecraft/app
+  - ./masters-league/app

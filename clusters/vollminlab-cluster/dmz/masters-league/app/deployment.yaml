@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: masters-league
+  namespace: dmz
+  labels:
+    app: masters-league
+    env: production
+    category: apps
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: masters-league
+  template:
+    metadata:
+      labels:
+        app: masters-league
+        env: production
+        category: apps
+    spec:
+      imagePullSecrets:
+        - name: harbor-pull-secret
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: masters-league
+          image: harbor.vollminlab.com/homelab/masters-league:v1.1.1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+          env:
+            - name: REDIS_URL
+              value: "redis://masters-redis:6379"
+            - name: CACHE_TTL
+              value: "30"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            failureThreshold: 3
