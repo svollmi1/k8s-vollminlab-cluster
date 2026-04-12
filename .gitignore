@@ -1,5 +1,6 @@
 # Claude Code — ignore local settings but commit rules/commands
 .claude/settings.local.json
+.claude/hookify.*.local.md
 
 # macOS
 .DS_Store

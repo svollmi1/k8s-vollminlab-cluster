@@ -16,5 +16,5 @@ spec:
       protocol: TCP
       nodePort: 32566
   selector:
-    app: minecraft-minecraft
+    app: minecraft
   externalTrafficPolicy: Local
