@@ -11,4 +11,4 @@ spec:
   url: oci://oci.trueforge.org/truecharts/sabnzbd
   interval: 5m
   ref:
-    tag: 21.9.5
+    tag: 21.9.6
