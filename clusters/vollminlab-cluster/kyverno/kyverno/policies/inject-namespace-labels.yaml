@@ -13,6 +13,7 @@ metadata:
       Calico and kube-system are excluded permanently. Runs admission-only
       (background: false) — request.object.metadata.namespace is only reliable
       in admission context, not in background mutateExisting processing.
+    pod-policies.kyverno.io/autogen-controllers: none
   labels:
     app: kyverno
     env: production

@@ -1,4 +1,4 @@
-# Homepage Dashboard Rules
+# Homepage Dashboard Runbook
 
 ## Auto-discovery via ingress annotations
 
@@ -31,9 +31,8 @@ Check what labels a pod actually has before configuring:
 kubectl get pod -n <namespace> --show-labels
 ```
 
-## Auto-discovery via ingress annotations
+## Adding a new service via ingress annotations
 
-To add a new service via auto-discovery, annotate its ingress:
 ```yaml
 annotations:
   gethomepage.dev/enabled: "true"
@@ -56,7 +55,7 @@ Longhorn is an **info widget** (top bar), not a service widget. Configure it und
 
 ## Credentials
 
-All API keys and passwords are stored in the `homepage-env-vars` SealedSecret in the `homepage` namespace. To add new keys, use:
+All API keys and passwords are stored in the `homepage-env-vars` SealedSecret in the `homepage` namespace. To add new keys:
 ```powershell
 .\scripts\update-sealedsecret-key.ps1 `
   -SecretName homepage-env-vars `

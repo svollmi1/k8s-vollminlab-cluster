@@ -177,7 +177,7 @@ data:
                 app: shlink-web
             - Homelab Repo:
                 description: This Kubernetes cluster repo
-                href: https://github.com/svollmi1/k8s-vollminlab-cluster
+                href: https://github.com/vollminlab/k8s-vollminlab-cluster
                 icon: github.png
             - ChatGPT:
                 description: AI Assistant

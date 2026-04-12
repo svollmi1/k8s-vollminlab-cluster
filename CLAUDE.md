@@ -7,10 +7,14 @@ GitOps-managed Kubernetes cluster using Flux CD. All workloads are Helm-based Fl
 ## Essential reading before working
 
 - `.claude/rules/flux.md` — repo layout, HelmRelease conventions, reconciliation commands
-- `.claude/rules/kyverno.md` — required labels, enforce/audit policies, DMZ rules
+- `.claude/rules/kyverno.md` — required labels, enforce/audit policies, DMZ rules, autogen danger
 - `.claude/rules/secrets.md` — SealedSecrets workflow, never plain Secrets
-- `.claude/rules/subagents.md` — when to spawn parallel agents
-- `.claude/rules/homepage.md` — auto-discovery via ingress annotations, widget support, credentials
+- `.claude/rules/subagents.md` — when to spawn agents vs. act directly
+- `.claude/rules/storage.md` — Longhorn capacity check before PVC sizing, replica math, online resize
+- `.claude/rules/git-workflow.md` — branch naming, session hygiene, /compact reminders
+
+**Operational runbooks** (reference when needed, not loaded every session):
+`docs/runbooks/` — flux-templates, kyverno-recovery, homepage, external-dns, incidents
 
 ## Hard constraints
 
@@ -19,6 +23,7 @@ GitOps-managed Kubernetes cluster using Flux CD. All workloads are Helm-based Fl
 - Never touch `bootstrap/calico/` with Flux. CNI changes are manual + verified.
 - Never use `:latest` image or chart version tags. Kyverno blocks them.
 - All pods require `app`, `env`, and `category` labels. Kyverno enforces in enforce mode.
+- Never set `policy: sync` in external-dns — shared Pi-hole backend, `upsert-only` only. `policy: sync` wiped all infrastructure DNS records on 2026-04-05.
 
 ## Bootstrap / DR
 

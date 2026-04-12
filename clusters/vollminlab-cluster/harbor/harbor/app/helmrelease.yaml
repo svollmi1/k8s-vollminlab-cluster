@@ -1,0 +1,24 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: harbor
+  namespace: harbor
+  labels:
+    app: harbor
+    env: production
+    category: storage
+spec:
+  interval: 10m
+  timeout: 15m
+  chart:
+    spec:
+      chart: harbor
+      version: 1.18.3
+      sourceRef:
+        kind: HelmRepository
+        name: harbor-repo
+        namespace: flux-system
+  valuesFrom:
+    - kind: ConfigMap
+      name: harbor-values
+      valuesKey: values.yaml
