@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shlink-ingress-controller-values
+  namespace: shlink
+  labels:
+    app: shlink-ingress-controller
+    env: production
+    category: apps
+data:
+  values.yaml: |
+    podLabels:
+      app: shlink-ingress-controller
+      env: production
+      category: apps
+
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 128Mi

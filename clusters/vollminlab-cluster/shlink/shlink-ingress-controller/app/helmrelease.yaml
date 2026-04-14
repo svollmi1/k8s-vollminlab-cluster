@@ -1,0 +1,23 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: shlink-ingress-controller
+  namespace: shlink
+  labels:
+    app: shlink-ingress-controller
+    env: production
+    category: apps
+spec:
+  interval: 10m
+  timeout: 10m
+  chart:
+    spec:
+      chart: shlink-ingress-controller
+      version: 0.3.2
+      sourceRef:
+        kind: HelmRepository
+        name: vollminlab-oci
+        namespace: flux-system
+  valuesFrom:
+    - kind: ConfigMap
+      name: shlink-ingress-controller-values

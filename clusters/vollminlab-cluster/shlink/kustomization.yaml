@@ -5,3 +5,4 @@ resources:
   - shlink/app
   - shlink-web/app
   - shlink-db/app
+  - shlink-ingress-controller/app

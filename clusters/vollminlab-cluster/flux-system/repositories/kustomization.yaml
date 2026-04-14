@@ -38,3 +38,4 @@ resources:
   - shlink-helmrepository.yaml
   - velero-helmrepository.yaml
   - harbor-helmrepository.yaml
+  - vollminlab-oci-helmrepository.yaml
