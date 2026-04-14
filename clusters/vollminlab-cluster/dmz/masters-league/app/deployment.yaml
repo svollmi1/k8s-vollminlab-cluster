@@ -19,8 +19,6 @@ spec:
         env: production
         category: apps
     spec:
-      imagePullSecrets:
-        - name: harbor-pull-secret
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -30,7 +28,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: masters-league
-          image: harbor.vollminlab.com/homelab/masters-league:v1.0.0
+          image: harbor.vollminlab.com/vollminlab/masters-league:v1.1.1
           imagePullPolicy: Always
           ports:
             - containerPort: 8000
