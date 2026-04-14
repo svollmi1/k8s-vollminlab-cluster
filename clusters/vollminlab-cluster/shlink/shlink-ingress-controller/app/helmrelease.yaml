@@ -13,7 +13,7 @@ spec:
   chart:
     spec:
       chart: shlink-ingress-controller
-      version: 0.3.2
+      version: 0.3.3
       sourceRef:
         kind: HelmRepository
         name: vollminlab-oci
