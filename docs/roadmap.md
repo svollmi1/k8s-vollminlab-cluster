@@ -94,6 +94,28 @@ Deploy the OpenTelemetry Operator + a collector pipeline:
 
 ## Phase 3 — Security & Access
 
+### 3.0 PKI — Automated Certificate Lifecycle
+**Status:** `deferred`
+
+Control plane certs issued by kubeadm expire annually and require manual renewal on each control plane node. This became an incident on 2026-04-14 when all certs expired simultaneously.
+
+**Interim:** Next expiry is **2027-04-14**. Until a proper solution is in place, renew manually on each control plane node when prompted:
+```bash
+sudo kubeadm certs renew all
+sudo systemctl restart kubelet
+sudo cp /etc/kubernetes/admin.conf ~/.kube/config && sudo chown $(id -u):$(id -g) ~/.kube/config
+```
+
+**Long-term options (in order of preference for this homelab):**
+
+1. **cert-manager** — already in-cluster, handles ingress TLS today. Extend it to manage cluster PKI via a `ClusterIssuer` backed by a self-signed or external CA. Certs would auto-rotate before expiry. Most natural fit with no new infrastructure.
+2. **HashiCorp Vault** — used in production at work; familiar. Heavier than needed for homelab alone, but worth reconsidering if Vault gets deployed for secrets management more broadly. 1Password already serves a similar role for some use cases.
+3. **1Password + cert-manager bridge** — if 1Password is the org-wide secrets store, a cert-manager external issuer or Vault-compatible API could bridge the two.
+
+**Relation to 3.1:** If Vault is chosen as the CA backend, deploy Authentik first for SSO on the Vault UI. The cert-manager path has no such dependency.
+
+---
+
 ### 3.1 Authentik — SSO / Identity Provider
 **Status:** `planned`
 
