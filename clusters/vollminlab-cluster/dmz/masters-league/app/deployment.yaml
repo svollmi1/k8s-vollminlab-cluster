@@ -19,8 +19,6 @@ spec:
         env: production
         category: apps
     spec:
-      imagePullSecrets:
-        - name: harbor-pull-secret
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
