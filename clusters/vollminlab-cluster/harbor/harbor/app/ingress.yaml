@@ -12,6 +12,7 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-body-size: "0"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "900"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "900"
+    shlink.vollminlab.com/slug: harbor
 spec:
   ingressClassName: nginx
   tls:

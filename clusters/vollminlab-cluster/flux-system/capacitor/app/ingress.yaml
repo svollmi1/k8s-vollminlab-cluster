@@ -16,6 +16,7 @@ metadata:
     gethomepage.dev/group: "Infrastructure"
     gethomepage.dev/icon: "flux-cd.png"
     gethomepage.dev/pod-selector: "app=capacitor"
+    shlink.vollminlab.com/slug: capacitor
 spec:
   ingressClassName: nginx
   rules:
