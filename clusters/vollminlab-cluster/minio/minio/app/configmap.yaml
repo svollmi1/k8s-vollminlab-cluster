@@ -43,6 +43,11 @@ data:
         purge: false
         versioning: false
         objectlocking: false
+      - name: loki
+        policy: none
+        purge: false
+        versioning: false
+        objectlocking: false
 
     makeBucketJob:
       resources:
