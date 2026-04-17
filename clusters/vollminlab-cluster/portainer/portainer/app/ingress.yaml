@@ -10,6 +10,7 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/rewrite-target: /
+    shlink.vollminlab.com/slug: portainer
 spec:
   ingressClassName: nginx
   tls:
