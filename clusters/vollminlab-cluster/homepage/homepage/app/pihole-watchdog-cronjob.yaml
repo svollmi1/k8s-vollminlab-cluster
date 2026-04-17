@@ -1,0 +1,178 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pihole-watchdog
+  namespace: homepage
+  labels:
+    app: homepage
+    env: production
+    category: apps
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pihole-watchdog
+  namespace: homepage
+  labels:
+    app: homepage
+    env: production
+    category: apps
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "patch"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["pods/log"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: pihole-watchdog
+  namespace: homepage
+  labels:
+    app: homepage
+    env: production
+    category: apps
+subjects:
+  - kind: ServiceAccount
+    name: pihole-watchdog
+    namespace: homepage
+roleRef:
+  kind: Role
+  name: pihole-watchdog
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pihole-watchdog-script
+  namespace: homepage
+  labels:
+    app: homepage
+    env: production
+    category: apps
+data:
+  watchdog.sh: |
+    #!/bin/sh
+    set -e
+
+    NAMESPACE="homepage"
+    DEPLOYMENT="homepage"
+    PIHOLE_URL="http://192.168.100.4:80"
+    WINDOW_SECONDS=300
+    POST_RESTART_WAIT=60
+
+    log() { echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] $*"; }
+
+    # Find homepage pod
+    POD=$(kubectl get pods -n "$NAMESPACE" -l app.kubernetes.io/name=homepage \
+      --field-selector=status.phase=Running -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+
+    if [ -z "$POD" ]; then
+      log "No running homepage pod found — skipping"
+      exit 0
+    fi
+
+    # Check for 401s in the last 5 minutes
+    SINCE=$(date -u -d "@$(($(date +%s) - WINDOW_SECONDS))" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null \
+      || date -u -r "$(($(date +%s) - WINDOW_SECONDS))" +%Y-%m-%dT%H:%M:%SZ)
+
+    COUNT=$(kubectl logs -n "$NAMESPACE" "$POD" --since="${WINDOW_SECONDS}s" 2>/dev/null \
+      | grep -c "401" || true)
+
+    if [ "$COUNT" -eq 0 ]; then
+      log "No 401 errors in last ${WINDOW_SECONDS}s — all good"
+      exit 0
+    fi
+
+    log "Found ${COUNT} 401 error(s) in last ${WINDOW_SECONDS}s — validating Pi-hole reachability"
+
+    # Validate Pi-hole is actually reachable before restarting
+    HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+      --max-time 10 "${PIHOLE_URL}/api/auth" \
+      -H "Content-Type: application/json" \
+      -d "{\"password\":\"${PIHOLE_API_KEY}\"}" 2>/dev/null || echo "000")
+
+    if [ "$HTTP_CODE" != "200" ] && [ "$HTTP_CODE" != "401" ]; then
+      log "Pi-hole unreachable (HTTP ${HTTP_CODE}) — skipping restart, not a session issue"
+      exit 0
+    fi
+
+    log "Pi-hole reachable (HTTP ${HTTP_CODE}) — restarting homepage deployment"
+
+    # Restart by patching the deployment annotation (triggers rollout without changing spec)
+    kubectl patch deployment "$DEPLOYMENT" -n "$NAMESPACE" \
+      -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"kubectl.kubernetes.io/restartedAt\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}}}}}"
+
+    log "Restart triggered — waiting ${POST_RESTART_WAIT}s for rollout"
+    sleep "$POST_RESTART_WAIT"
+
+    # Wait for rollout to complete
+    kubectl rollout status deployment/"$DEPLOYMENT" -n "$NAMESPACE" --timeout=120s
+
+    # Post-restart validation: check logs for 401s since restart
+    NEW_COUNT=$(kubectl logs -n "$NAMESPACE" \
+      -l app.kubernetes.io/name=homepage \
+      --since="${POST_RESTART_WAIT}s" 2>/dev/null \
+      | grep -c "401" || true)
+
+    if [ "$NEW_COUNT" -eq 0 ]; then
+      log "Post-restart validation passed — no 401 errors"
+    else
+      log "WARNING: ${NEW_COUNT} 401 error(s) still present after restart — may need investigation"
+    fi
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: pihole-watchdog
+  namespace: homepage
+  labels:
+    app: homepage
+    env: production
+    category: apps
+spec:
+  schedule: "*/5 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: homepage
+            env: production
+            category: apps
+        spec:
+          serviceAccountName: pihole-watchdog
+          restartPolicy: Never
+          containers:
+            - name: watchdog
+              image: docker.io/bitnami/kubectl:1.32
+              command: ["/bin/sh", "/scripts/watchdog.sh"]
+              env:
+                - name: PIHOLE_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: homepage-env-vars
+                      key: PIHOLE_API_KEY
+              volumeMounts:
+                - name: script
+                  mountPath: /scripts
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 32Mi
+                limits:
+                  cpu: 100m
+                  memory: 64Mi
+          volumes:
+            - name: script
+              configMap:
+                name: pihole-watchdog-script
+                defaultMode: 0755

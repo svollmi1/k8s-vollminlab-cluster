@@ -39,18 +39,9 @@ All updates require manual review (no automerge). Dependency Dashboard issue mai
 ---
 
 ### 1.4 Kyverno Policy Violations Cleanup
-**Status:** `in-progress` ← **NEXT ACTION**
-**Priority:** Complete before resuming chart updates
+**Status:** `done`
 
-Fix all outstanding Kyverno policy violations to establish a clean baseline. Known violations from audit on 2026-04-04:
-
-- `sonarr`, `sabnzbd`, `radarr`, `prowlarr` Deployments — missing `category` label on pod templates (TrueCharts charts don't inject custom labels onto pods; fix via chart values `podLabels`)
-- Flux Kustomization CRs — 25/27 missing `app`, `env`, `category` labels
-- `shlink` and `shlink-web` Ingress resources — missing all labels
-- `portainer` Namespace — non-standard label format
-- Verify `actions-runner-system` and `mediastack` Namespace categories are correct after adding `ci` and `media` to valid list
-
-Branch: `chore/fix-kyverno-violations`
+Fixed all outstanding Kyverno policy violations to establish a clean baseline (PRs #221, #229, 2026-04-04). Label injection via mutate policies, autogen disabled to prevent webhook breakage.
 
 ---
 
@@ -66,26 +57,32 @@ Renovate now covers OCI image tag updates via the `flux` manager on `OCIReposito
 **Goal:** Build a production-grade SRE observability platform to upskill and to support everything that follows (Istio, Chaos Mesh, SLOs).
 
 ### 2.1 Prometheus + Grafana (kube-prometheus-stack)
+
 **Status:** `planned`
 
 Deploy `kube-prometheus-stack` to a new `monitoring` namespace:
+
 - Prometheus for metrics scraping
 - Grafana for dashboards (behind Authentik SSO once available)
 - Alertmanager → delivery target TBD (Ntfy, PushOver, or email)
 - ServiceMonitors for existing apps (ingress-nginx, Longhorn, Flux, etc.)
 
 ### 2.2 Loki + Promtail
+
 **Status:** `planned`
 
 Log aggregation stack:
+
 - Loki for log storage (S3-backed via MinIO once backup stack is deployed)
 - Promtail DaemonSet for log shipping from all nodes
 - Grafana Loki data source (integrated with 2.1)
 
 ### 2.3 OpenTelemetry Collector
+
 **Status:** `planned`
 
 Deploy the OpenTelemetry Operator + a collector pipeline:
+
 - Receive OTLP traces from instrumented apps
 - Export to Jaeger or Tempo (Grafana Tempo preferred for Grafana integration)
 - Foundation for Istio distributed tracing
@@ -95,11 +92,13 @@ Deploy the OpenTelemetry Operator + a collector pipeline:
 ## Phase 3 — Security & Access
 
 ### 3.0 PKI — Automated Certificate Lifecycle
+
 **Status:** `deferred`
 
 Control plane certs issued by kubeadm expire annually and require manual renewal on each control plane node. This became an incident on 2026-04-14 when all certs expired simultaneously.
 
 **Interim:** Next expiry is **2027-04-14**. Until a proper solution is in place, renew manually on each control plane node when prompted:
+
 ```bash
 sudo kubeadm certs renew all
 sudo systemctl restart kubelet
@@ -117,9 +116,11 @@ sudo cp /etc/kubernetes/admin.conf ~/.kube/config && sudo chown $(id -u):$(id -g
 ---
 
 ### 3.1 Authentik — SSO / Identity Provider
+
 **Status:** `planned`
 
 Deploy Authentik as the central IdP:
+
 - OIDC/OAuth2 for all web UIs (Grafana, Longhorn, Capacitor, Homepage, etc.)
 - LDAP outpost for apps that don't support OIDC natively
 - Forward Auth proxy for apps with no built-in auth
@@ -127,9 +128,30 @@ Deploy Authentik as the central IdP:
 
 ---
 
-## Phase 4 — Service Mesh
+## Phase 4 — Infrastructure Diagrams
 
-### 4.1 Istio
+**Goal:** Create living architecture diagrams for every repo in the org once observability and security are settled — so diagrams reflect a stable system and don't need immediate revision.
+
+### 4.0 Diagram Creation — All Repos
+
+**Status:** `planned`
+
+Create an Excalidraw-based `diagrams/` folder in each repo with architecture diagrams covering the full system as it exists at that point. Scope:
+
+- `k8s-vollminlab-cluster` — cluster topology (nodes, namespaces, networking), Flux reconciliation flow, storage layout (Longhorn, MinIO), backup data path (Velero → B2), DMZ isolation
+- `homelab-infrastructure` — Terraform resource graph, network topology, VM/node inventory
+- `github-admin` — repo/branch protection structure
+- Any other repos as they exist
+
+**Format:** `.excalidraw` files (JSON, committable to Git and viewable in VS Code via Excalidraw extension or on excalidraw.com). Optionally export `.svg` alongside for quick previewing in GitHub.
+
+**Maintenance:** diagrams live in `<repo>/diagrams/` and are updated as the system changes — not generated, hand-authored.
+
+---
+
+## Phase 5 — Service Mesh
+
+### 5.1 Istio
 **Status:** `planned` (depends on Phase 2 observability being in place)
 
 Deploy Istio via the Helm-based install (not `istioctl`):
@@ -142,9 +164,9 @@ Note: Istio's sidecar injection will interact with Kyverno policies — review `
 
 ---
 
-## Phase 5 — SRE Practice
+## Phase 6 — SRE Practice
 
-### 5.1 SLOTH — SLO-based Alerting
+### 6.1 SLOTH — SLO-based Alerting
 **Status:** `planned` (depends on Phase 2.1 Prometheus)
 
 Use SLOTH to generate SLO alert rules from a declarative YAML spec:
@@ -152,7 +174,7 @@ Use SLOTH to generate SLO alert rules from a declarative YAML spec:
 - SLOTH generates Prometheus recording rules + multi-burn-rate alerts
 - Dashboards in Grafana
 
-### 5.2 Chaos Mesh
+### 6.2 Chaos Mesh
 **Status:** `planned` (depends on Phase 2 observability)
 
 Controlled fault injection for resilience testing:
@@ -162,7 +184,7 @@ Controlled fault injection for resilience testing:
 
 ---
 
-## Phase 6 — Node Maintenance Window
+## Phase 7 — Node Maintenance Window
 
 **Status:** `planned` (depends on Phase 2 observability being in place for monitoring during maintenance)
 **Risk:** Medium — rolling node reboots; cluster should stay available if done one node at a time
@@ -192,10 +214,10 @@ Do not bundle this with the Cilium migration — they should be separate mainten
 
 ---
 
-## Phase 7 — CNI Migration (Calico → Cilium)
+## Phase 8 — CNI Migration (Calico → Cilium)
 
 **Status:** `planned`
-**Depends on:** 1.1 test restore validated, 1.3 Renovate, 1.4 Flux Image Automation, Phase 2 observability (2.1 + 2.2 minimum), Phase 6 node maintenance complete
+**Depends on:** 1.1 test restore validated, Phase 2 observability (2.1 + 2.2 minimum), Phase 7 node maintenance complete
 **Risk:** High — CNI replacement requires a full cluster maintenance window
 
 Cilium offers significant advantages over Calico for this use case:
@@ -207,7 +229,7 @@ Cilium offers significant advantages over Calico for this use case:
 Migration approach:
 1. Confirm Velero backups are healthy and a test restore has been validated
 2. Confirm Phase 2 observability is in place (Prometheus + Loki at minimum)
-3. Confirm all nodes are on current, normalized versions (Phase 6)
+3. Confirm all nodes are on current, normalized versions (Phase 7)
 4. Plan a maintenance window
 5. Drain nodes, uninstall Calico, install Cilium
 6. Validate network policies and DMZ rules (especially DMZ namespace on k8sworker05)
@@ -232,6 +254,8 @@ This is a cluster rebuild risk event — do not attempt without working backups.
 
 | Item | PR / Notes |
 |---|---|
+| Kyverno policy violations cleanup | PRs #221, #229 — label injection via mutate policies, autogen disabled |
+| Shlink Ingress Controller | Custom Go controller: Ingress annotation → auto-create `vollm.in/<slug>` via Shlink API |
 | Shlink short link service | Deployed with `vollm.in`, `go.vollminlab.com`, `vl.vollminlab.com` |
 | Internal CA issuer | 10-year cert, `internal-ca` ClusterIssuer |
 | ARC runner pool cleanup | Removed pool-2, pool-1 bumped to 3 replicas |

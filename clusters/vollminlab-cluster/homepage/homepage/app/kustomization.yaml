@@ -9,3 +9,4 @@ resources:
   - ingress.yaml
   - homepage-env-vars-sealedsecret.yaml
   - rbac.yaml
+  - pihole-watchdog-cronjob.yaml
