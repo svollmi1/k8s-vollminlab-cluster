@@ -21,6 +21,12 @@ spec:
           restartPolicy: OnFailure
           serviceAccountName: kyverno-webhook-patch
           terminationGracePeriodSeconds: 10
+          tolerations:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
+          nodeSelector:
+            node-role.kubernetes.io/control-plane: ""
           containers:
             - name: kubectl
               image: docker.io/alpine/kubectl:1.33.4
@@ -66,16 +72,16 @@ spec:
                     fi
                   }
 
-                  # Patch all webhooks
-                  patch_webhook "validatingwebhookconfiguration" \
-                    "kyverno-policy-validating-webhook-cfg"
-                  patch_webhook "validatingwebhookconfiguration" \
-                    "kyverno-cleanup-validating-webhook-cfg"
-                  patch_webhook "validatingwebhookconfiguration" \
-                    "kyverno-ttl-validating-webhook-cfg"
-                  patch_webhook "validatingwebhookconfiguration" \
-                    "kyverno-resource-validating-webhook-cfg"
-                  patch_webhook "mutatingwebhookconfiguration" \
-                    "kyverno-policy-mutating-webhook-cfg"
+                  # Patch all Kyverno validating webhooks
+                  for name in $(kubectl get validatingwebhookconfigurations \
+                      -l webhook.kyverno.io/managed-by=kyverno -o name 2>/dev/null); do
+                    patch_webhook "validatingwebhookconfiguration" "${name#*/}"
+                  done
+
+                  # Patch all Kyverno mutating webhooks
+                  for name in $(kubectl get mutatingwebhookconfigurations \
+                      -l webhook.kyverno.io/managed-by=kyverno -o name 2>/dev/null); do
+                    patch_webhook "mutatingwebhookconfiguration" "${name#*/}"
+                  done
 
                   echo "All webhooks patched successfully"
