@@ -59,6 +59,9 @@ data:
         limits:
           cpu: 500m
           memory: 256Mi
+      plugins:
+        - grafana-lokiexplore-app
+
       additionalDataSources:
         - name: Loki
           type: loki
