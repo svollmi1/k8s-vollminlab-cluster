@@ -33,10 +33,28 @@ data:
           - name: runner
             image: ghcr.io/actions/actions-runner:2.332.0
             command: ["/home/runner/run.sh"]
+            env:
+              - name: DOCKER_HOST
+                value: tcp://localhost:2375
             resources:
               requests:
                 cpu: 500m
                 memory: 512Mi
+              limits:
+                cpu: 2000m
+                memory: 2Gi
+          - name: dind
+            image: docker:26-dind
+            securityContext:
+              privileged: true
+            env:
+              - name: DOCKER_TLS_CERTDIR
+                value: ""
+            args: ["--host=tcp://0.0.0.0:2375"]
+            resources:
+              requests:
+                cpu: 200m
+                memory: 256Mi
               limits:
                 cpu: 2000m
                 memory: 2Gi

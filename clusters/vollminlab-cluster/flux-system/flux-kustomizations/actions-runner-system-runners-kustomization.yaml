@@ -9,7 +9,7 @@ metadata:
     category: ci
 spec:
   interval: 10m
-  path: ./clusters/vollminlab-cluster/actions-runner-system/arc-runners
+  path: ./clusters/vollminlab-cluster/actions-runner-system/arc-runners/app
   prune: true
   sourceRef:
     kind: GitRepository

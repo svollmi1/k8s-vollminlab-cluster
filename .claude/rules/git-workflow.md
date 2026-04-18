@@ -37,7 +37,7 @@ Keep PRs tightly scoped. If a task touches unrelated concerns (e.g. a feature + 
 
 ## Never push to main
 
-Branch protection is enforced via Terraform. All changes go through a PR. Never use `--force` or bypass hooks.
+Branch protection is enforced via GitHub repository settings. All changes go through a PR. Never use `--force` or bypass hooks.
 
 ## Staging files
 

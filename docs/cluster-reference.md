@@ -875,9 +875,8 @@ The `dmz` namespace is a security boundary for internet-exposed workloads. Full 
 |---|---|---|
 | `ci.yaml` | PR + push to main | kustomize build validation, Kyverno policy checks, Trivy security scan |
 | `codeql.yml` | Schedule + push | CodeQL security analysis |
-| `terraform-branch-protection.yaml` | Push | Apply GitHub branch protection via Terraform |
 
-### Branch Protection (via Terraform)
+### Branch Protection
 
 | Rule | Value |
 |---|---|
@@ -888,7 +887,7 @@ The `dmz` namespace is a security boundary for internet-exposed workloads. Full 
 | Require conversation resolution | true |
 | Force push | blocked |
 | Branch deletion | blocked |
-| Config source | `terraform/github-branch-protection/` |
+| Config source | GitHub repository settings |
 
 ### Self-Hosted Runners (ARC)
 

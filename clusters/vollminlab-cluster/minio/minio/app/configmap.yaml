@@ -8,6 +8,9 @@ data:
     mode: standalone
     replicas: 1
 
+    deploymentUpdate:
+      type: Recreate
+
     existingSecret: "minio-credentials"
 
     podLabels:
@@ -39,6 +42,11 @@ data:
 
     buckets:
       - name: velero
+        policy: none
+        purge: false
+        versioning: false
+        objectlocking: false
+      - name: loki
         policy: none
         purge: false
         versioning: false

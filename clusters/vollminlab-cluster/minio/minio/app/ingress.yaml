@@ -12,6 +12,7 @@ metadata:
     gethomepage.dev/group: "Infrastructure"
     gethomepage.dev/icon: "minio.png"
     gethomepage.dev/pod-selector: "app=minio"
+    shlink.vollminlab.com/slug: minio
   labels:
     app: minio
     env: production
