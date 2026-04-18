@@ -107,6 +107,15 @@ data:
     kubeEtcd:
       enabled: false
 
+    kubeProxy:
+      enabled: false
+
+    kubeControllerManager:
+      enabled: false
+
+    kubeScheduler:
+      enabled: false
+
     defaultRules:
       rules:
         kubeApiserver: true
