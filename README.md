@@ -51,12 +51,11 @@ clusters/vollminlab-cluster/            # Everything Flux reconciles
   longhorn-system/                      # Distributed block storage
   mediastack/                           # Sonarr, Radarr, Bazarr, Prowlarr, SABnzbd, Overseerr, Tautulli
   metallb-system/                       # Bare-metal load balancer
-  monitoring/                           # Monitoring stack (planned)
+  monitoring/                           # Monitoring stack (in progress)
   portainer/                            # Container management UI
   sealed-secrets/                       # Sealed secrets controller
 
 scripts/                                # Utility scripts
-terraform/github-branch-protection/    # Branch protection rules as code
 ```
 
 ---
@@ -132,8 +131,8 @@ For a full cluster rebuild, follow this order exactly:
 | Pod CIDR | `172.18.0.0/16` |
 | CNI | Calico (IPIP encapsulation, BGP enabled) |
 | Dataplane | iptables |
-| Control plane replicas | 2 |
-| DMZ node | `k8sworker05` (taint: `dmz=true:NoSchedule`) |
+| Control plane replicas | 3 |
+| DMZ nodes | `k8sworker05`, `k8sworker06` (taint: `dmz=true:NoSchedule`) |
 
 ---
 
@@ -158,7 +157,7 @@ For a full cluster rebuild, follow this order exactly:
 
 The `dmz/` namespace is a security boundary for internet-exposed workloads. See [clusters/vollminlab-cluster/dmz/README.md](clusters/vollminlab-cluster/dmz/README.md) for the full security model.
 
-- Dedicated node (`k8sworker05`) with `dmz=true:NoSchedule` taint
+- Dedicated nodes (`k8sworker05`, `k8sworker06`) with `dmz=true:NoSchedule` taint
 - Kyverno auto-enforces node placement for all dmz pods
 - Default-deny NetworkPolicy with explicit allow rules only
 - Dedicated `longhorn-dmz` StorageClass for node-local storage isolation
@@ -179,7 +178,7 @@ All secrets are encrypted as `SealedSecret` resources before committing to Git. 
 5. Merge to main — Flux reconciles within 10 minutes
 ```
 
-Direct pushes to `main` are blocked. Branch protection is enforced via Terraform in `terraform/github-branch-protection/`.
+Direct pushes to `main` are blocked. Branch protection is enforced via GitHub repository settings.
 
 ---
 
