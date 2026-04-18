@@ -13,7 +13,6 @@ resources:
   - capacitor-helmrepository.yaml
   - cert-manager-helmrepository.yaml
   - cnpg-helmrepository.yaml
-  - elastic-helmrepository.yaml
   - external-dns-helmrepository.yaml
   - grafana-helmrepository.yaml
   - harbor-helmrepository.yaml
