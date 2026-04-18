@@ -12,7 +12,7 @@ spec:
   timeout: 10m
   chartRef:
     kind: OCIRepository
-    name: vollminlab-oci
+    name: vollminlab-repo
     namespace: flux-system
   valuesFrom:
     - kind: ConfigMap

@@ -497,6 +497,13 @@ jobs:
                   fi
                 done
 
+                # If the source was already deployed as an OCIRepository in the first pass,
+                # skip HelmRepository validation — the OCIRepository sync wait loop handles it.
+                if grep -q "^${SOURCE_REF}:" "$OCI_MAPPING_FILE" 2>/dev/null; then
+                  echo "ℹ️ $SOURCE_REF was deployed as OCIRepository in first pass — skipping HelmRepository lookup"
+                  continue
+                fi
+
                 # Check if HelmRepository exists in source namespace OR was changed in this PR
                 if kubectl get helmrepository "$SOURCE_REF" -n "$SOURCE_NAMESPACE" >/dev/null 2>&1 || [[ -n "$CHANGED_REPO_FILE" ]]; then
                   # OCI-type HelmRepositories don't reconcile Ready in ad-hoc test namespaces

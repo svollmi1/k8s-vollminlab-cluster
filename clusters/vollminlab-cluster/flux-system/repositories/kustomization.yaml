@@ -8,8 +8,8 @@ metadata:
     category: system
 resources:
   - cnpg-helmrepository.yaml
-  - arc-controller-helmrepository.yaml
-  - arc-runners-helmrepository.yaml
+  - arc-controller-ocirepository.yaml
+  - arc-runners-ocirepository.yaml
   - bazarr-helmrepository.yaml
   - cert-manager-helmrepository.yaml
   - ingress-nginx-helmrepository.yaml
@@ -24,18 +24,18 @@ resources:
   - metallb-helmrepository.yaml
   - metrics-server-helmrepository.yaml
   - minecraft-helmrepository.yaml
-  - overseerr-helmrepository.yaml
+  - overseerr-ocirepository.yaml
   - portainer-helmrepository.yaml
-  - prowlarr-helmrepository.yaml
-  - radarr-helmrepository.yaml
-  - sabnzbd-helmrepository.yaml
+  - prowlarr-ocirepository.yaml
+  - radarr-ocirepository.yaml
+  - sabnzbd-ocirepository.yaml
   - sealed-secrets-helmrepository.yaml
   - smb-csi-driver-helmrepository.yaml
-  - sonarr-helmrepository.yaml
+  - sonarr-ocirepository.yaml
   - tautulli-helmrepository.yaml
   - minio-helmrepository.yaml
-  - renovate-helmrepository.yaml
+  - renovate-ocirepository.yaml
   - shlink-helmrepository.yaml
   - velero-helmrepository.yaml
   - harbor-helmrepository.yaml
-  - vollminlab-oci-helmrepository.yaml
+  - vollminlab-ocirepository.yaml

@@ -1,10 +1,10 @@
 apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: OCIRepository
 metadata:
-  name: vollminlab-oci
+  name: vollminlab-repo
   namespace: flux-system
   labels:
-    app: vollminlab-oci
+    app: vollminlab-repo
     env: production
     category: apps
 spec:
