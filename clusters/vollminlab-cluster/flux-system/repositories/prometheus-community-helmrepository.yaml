@@ -1,0 +1,13 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: prometheus-community-repo
+  namespace: flux-system
+  labels:
+    app: prometheus-community
+    env: production
+    category: observability
+spec:
+  interval: 5m
+  url: https://prometheus-community.github.io/helm-charts
+  timeout: 3m

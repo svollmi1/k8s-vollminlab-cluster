@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: promtail-values
+  namespace: monitoring
+  labels:
+    app: promtail
+    env: production
+    category: observability
+data:
+  values.yaml: |
+    config:
+      clients:
+        - url: http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push
+
+    tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
+      - key: dmz
+        operator: Equal
+        value: "true"
+        effect: NoSchedule
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+
+    podLabels:
+      app: promtail
+      env: production
+      category: observability
