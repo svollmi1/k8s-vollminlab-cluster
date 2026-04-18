@@ -8,10 +8,10 @@ The DMZ namespace is designed for services that need to be accessible from the i
 
 ## Node Configuration
 
-**DMZ Node**: `k8sworker05`
+**DMZ Nodes**: `k8sworker05`, `k8sworker06`
 - **Label**: `role=dmz`
 - **Taint**: `dmz=true:NoSchedule`
-- **IP**: `192.168.152.15`
+- **IPs**: see `homelab-infrastructure/hosts/k8s/` for node addresses
 
 ## Security Model
 
@@ -80,7 +80,7 @@ spec:
   #       effect: NoSchedule
   containers:
     - name: minecraft
-      image: itzg/minecraft-server:latest
+      image: itzg/minecraft-server:2025.3.0  # pin to a specific tag — :latest is blocked by Kyverno
       ports:
         - containerPort: 25565
           protocol: TCP
