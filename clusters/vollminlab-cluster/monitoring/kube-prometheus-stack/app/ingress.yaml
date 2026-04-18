@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grafana-ingress
+  namespace: monitoring
+  labels:
+    app: grafana
+    env: production
+    category: observability
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    shlink.vollminlab.com/slug: grafana
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: grafana.vollminlab.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kube-prometheus-stack-grafana
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - grafana.vollminlab.com
+      secretName: wildcard-tls

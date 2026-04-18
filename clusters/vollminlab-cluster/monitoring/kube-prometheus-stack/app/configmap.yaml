@@ -1,0 +1,111 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kube-prometheus-stack-values
+  namespace: monitoring
+  labels:
+    app: kube-prometheus-stack
+    env: production
+    category: observability
+data:
+  values.yaml: |
+    fullnameOverride: kube-prometheus-stack
+
+    prometheus:
+      prometheusSpec:
+        scrapeInterval: 30s
+        retention: 15d
+        serviceMonitorSelectorNilUsesHelmValues: false
+        serviceMonitorSelector: {}
+        serviceMonitorNamespaceSelector: {}
+        podMetadata:
+          labels:
+            app: prometheus
+            env: production
+            category: observability
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: longhorn
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 5Gi
+
+    grafana:
+      enabled: true
+      ingress:
+        enabled: false
+      admin:
+        existingSecret: grafana-admin-credentials
+        userKey: admin-user
+        passwordKey: admin-password
+      podLabels:
+        app: grafana
+        env: production
+        category: observability
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 500m
+          memory: 256Mi
+      additionalDataSources:
+        - name: Loki
+          type: loki
+          url: http://loki.monitoring.svc.cluster.local:3100
+          access: proxy
+
+    alertmanager:
+      alertmanagerSpec:
+        configSecret: alertmanager-pushover-config
+        podMetadata:
+          labels:
+            app: alertmanager
+            env: production
+            category: observability
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: longhorn
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 1Gi
+
+    prometheus-node-exporter:
+      tolerations:
+        - key: dmz
+          operator: Equal
+          value: "true"
+          effect: NoSchedule
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      podLabels:
+        app: node-exporter
+        env: production
+        category: observability
+
+    kube-state-metrics:
+      podLabels:
+        app: kube-state-metrics
+        env: production
+        category: observability
