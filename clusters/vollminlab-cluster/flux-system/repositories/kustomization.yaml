@@ -7,16 +7,18 @@ metadata:
     env: production
     category: system
 resources:
-  - cnpg-helmrepository.yaml
   - arc-controller-ocirepository.yaml
   - arc-runners-ocirepository.yaml
   - bazarr-helmrepository.yaml
-  - cert-manager-helmrepository.yaml
-  - ingress-nginx-helmrepository.yaml
   - capacitor-helmrepository.yaml
+  - cert-manager-helmrepository.yaml
+  - cnpg-helmrepository.yaml
   - elastic-helmrepository.yaml
   - external-dns-helmrepository.yaml
+  - grafana-helmrepository.yaml
+  - harbor-helmrepository.yaml
   - homepage-helmrepository.yaml
+  - ingress-nginx-helmrepository.yaml
   - kyverno-helmrepository.yaml
   - kyverno-policyreporter-helmrepository.yaml
   - local-path-provisioner-gitrepository.yaml
@@ -24,18 +26,18 @@ resources:
   - metallb-helmrepository.yaml
   - metrics-server-helmrepository.yaml
   - minecraft-helmrepository.yaml
+  - minio-helmrepository.yaml
   - overseerr-ocirepository.yaml
   - portainer-helmrepository.yaml
+  - prometheus-community-helmrepository.yaml
   - prowlarr-ocirepository.yaml
   - radarr-ocirepository.yaml
+  - renovate-ocirepository.yaml
   - sabnzbd-ocirepository.yaml
   - sealed-secrets-helmrepository.yaml
+  - shlink-helmrepository.yaml
   - smb-csi-driver-helmrepository.yaml
   - sonarr-ocirepository.yaml
   - tautulli-helmrepository.yaml
-  - minio-helmrepository.yaml
-  - renovate-ocirepository.yaml
-  - shlink-helmrepository.yaml
   - velero-helmrepository.yaml
-  - harbor-helmrepository.yaml
   - vollminlab-ocirepository.yaml
