@@ -10,14 +10,10 @@ metadata:
 spec:
   interval: 10m
   timeout: 10m
-  chart:
-    spec:
-      chart: shlink-ingress-controller
-      version: 0.3.5
-      sourceRef:
-        kind: HelmRepository
-        name: vollminlab-oci
-        namespace: flux-system
+  chartRef:
+    kind: OCIRepository
+    name: vollminlab-repo
+    namespace: flux-system
   valuesFrom:
     - kind: ConfigMap
       name: shlink-ingress-controller-values
