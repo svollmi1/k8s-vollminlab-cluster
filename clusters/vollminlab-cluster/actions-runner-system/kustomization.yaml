@@ -4,4 +4,3 @@ metadata:
   name: actions-runner-system
 resources:
   - namespace.yaml
-  - ./arc-runners/app

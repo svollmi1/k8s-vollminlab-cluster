@@ -75,7 +75,7 @@ See `kyverno.md` for valid `category` values.
 ## Critical rules
 
 - **Never manually apply** manifests under `clusters/` — Flux reconciles from `main` within 10 minutes.
-- **Never push directly to `main`** — branch protection enforced via Terraform, PR required.
+- **Never push directly to `main`** — branch protection enforced via GitHub repository settings, PR required.
 - **Never use `:latest`** chart version ranges or image tags.
 - `bootstrap/` is for DR reference only; changes there have no effect on the cluster.
 

@@ -19,7 +19,7 @@ GitOps-managed Kubernetes cluster using Flux CD. All workloads are Helm-based Fl
 ## Hard constraints
 
 - Never commit a plain `kind: Secret`. Use `SealedSecret` only.
-- Never push directly to `main`. PR required (branch protection via Terraform).
+- Never push directly to `main`. PR required (branch protection enforced via GitHub repository settings).
 - Never touch `bootstrap/calico/` with Flux. CNI changes are manual + verified.
 - Never use `:latest` image or chart version tags. Kyverno blocks them.
 - All pods require `app`, `env`, and `category` labels. Kyverno enforces in enforce mode.
