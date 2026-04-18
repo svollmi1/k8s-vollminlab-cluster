@@ -8,6 +8,9 @@ data:
     mode: standalone
     replicas: 1
 
+    deploymentUpdate:
+      type: Recreate
+
     existingSecret: "minio-credentials"
 
     podLabels:
