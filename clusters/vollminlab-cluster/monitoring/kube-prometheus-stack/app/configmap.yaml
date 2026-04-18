@@ -104,6 +104,15 @@ data:
         env: production
         category: observability
 
+    kubeEtcd:
+      enabled: false
+
+    defaultRules:
+      rules:
+        kubeApiserver: true
+      disabled:
+        KubeClientCertificateExpiration: true
+
     kube-state-metrics:
       podLabels:
         app: kube-state-metrics
