@@ -163,6 +163,12 @@ data:
                 icon: homepage.png
                 namespace: homepage
                 app: homepage
+            - Headlamp:
+                description: Kubernetes + Flux dashboard
+                href: https://headlamp.vollminlab.com
+                icon: kubernetes.png
+                namespace: flux-system
+                app: headlamp
             - Shlink:
                 description: URL shortener dashboard
                 href: https://shlink.vollminlab.com
