@@ -11,7 +11,7 @@ data:
   values.yaml: |
     image:
       repository: ghcr.io/gimlet-io/capacitor
-      tag: v0.4.8
+      tag: v0.14.0
     containerPort: 9000
     probe:
       enabled: true
