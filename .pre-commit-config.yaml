@@ -1,0 +1,5 @@
+repos:
+  - repo: https://github.com/tarioch/flux-check-hook
+    rev: v0.8.0
+    hooks:
+      - id: check-flux-helm-values

@@ -14,6 +14,7 @@ on:
       - 'docs/**'
       - '*.md'
       - 'renovate.json'
+      - '.pre-commit-config.yaml'
   pull_request:
     branches: [ main, develop ]
     types: [opened, synchronize, reopened, ready_for_review]
@@ -27,6 +28,7 @@ on:
       - 'docs/**'
       - '*.md'
       - 'renovate.json'
+      - '.pre-commit-config.yaml'
   workflow_dispatch:
 
 concurrency:
