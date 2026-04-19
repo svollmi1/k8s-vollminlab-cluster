@@ -16,6 +16,7 @@ resources:
   - external-dns-helmrepository.yaml
   - grafana-helmrepository.yaml
   - harbor-helmrepository.yaml
+  - headlamp-helmrepository.yaml
   - homepage-helmrepository.yaml
   - ingress-nginx-helmrepository.yaml
   - kyverno-helmrepository.yaml
