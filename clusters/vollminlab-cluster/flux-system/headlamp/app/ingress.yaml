@@ -1,0 +1,35 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: headlamp-ingress
+  namespace: flux-system
+  labels:
+    app: headlamp
+    env: production
+    category: core
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "Headlamp"
+    gethomepage.dev/description: "Kubernetes + Flux dashboard"
+    gethomepage.dev/group: "Infrastructure"
+    gethomepage.dev/icon: "kubernetes.png"
+    gethomepage.dev/pod-selector: "app=headlamp"
+    shlink.vollminlab.com/slug: headlamp
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: headlamp.vollminlab.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: headlamp
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - headlamp.vollminlab.com
+      secretName: wildcard-tls
