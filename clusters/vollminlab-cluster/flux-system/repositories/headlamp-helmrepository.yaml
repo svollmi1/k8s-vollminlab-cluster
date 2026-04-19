@@ -1,0 +1,12 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: headlamp-repo
+  namespace: flux-system
+  labels:
+    app: headlamp
+    env: production
+    category: core
+spec:
+  url: https://kubernetes-sigs.github.io/headlamp/
+  interval: 5m
