@@ -157,12 +157,6 @@ data:
                 namespace: monitoring
                 app: prometheus
         - Documentation & Tools:
-            - BookStack:
-                description: Wiki and documentation
-                href: https://bookstack.vollminlab.com
-                icon: bookstack.png
-                namespace: bookstack
-                app: bookstack
             - Homepage:
                 description: This dashboard
                 href: https://homepage.vollminlab.com
