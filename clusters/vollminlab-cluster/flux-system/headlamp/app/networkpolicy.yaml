@@ -12,7 +12,7 @@ spec:
     - Ingress
   ingress:
     - from:
-      - namespaceSelector: {}
+        - namespaceSelector: {}
   podSelector:
     matchLabels:
       app.kubernetes.io/instance: headlamp
