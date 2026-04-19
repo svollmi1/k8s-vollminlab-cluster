@@ -146,5 +146,9 @@ data:
         cpu: 200m
         memory: 256Mi
 
+    config:
+      resourceFilters:
+        - '[GlobalNetworkPolicy,projectcalico.org/v3,*]'
+
     serviceMonitor:
       enabled: true
