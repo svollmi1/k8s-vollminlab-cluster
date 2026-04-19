@@ -24,6 +24,14 @@ spec:
                 - Deployment
                 - StatefulSet
                 - DaemonSet
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - kube-system
+                - tigera-operator
+                - calico-system
+                - calico-apiserver
       mutate:
         targets:
           - apiVersion: apps/v1
