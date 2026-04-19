@@ -70,6 +70,7 @@ data:
 
     alertmanager:
       alertmanagerSpec:
+        replicas: 3
         configSecret: alertmanager-pushover-config
         podMetadata:
           labels:
