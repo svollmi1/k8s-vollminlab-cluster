@@ -149,6 +149,12 @@ data:
     config:
       resourceFilters:
         - '[GlobalNetworkPolicy,*,*]'
+        - '[NetworkPolicy,*,*]'
+        - '[Tier,*,*]'
+        - '[StagedGlobalNetworkPolicy,*,*]'
+        - '[StagedNetworkPolicy,*,*]'
+        - '[StagedKubernetesNetworkPolicy,*,*]'
+        - '[GlobalNetworkSet,*,*]'
 
     serviceMonitor:
       enabled: true
