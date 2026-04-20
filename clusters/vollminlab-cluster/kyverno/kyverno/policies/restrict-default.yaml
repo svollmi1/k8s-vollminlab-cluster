@@ -45,6 +45,12 @@ spec:
                 - ClusterIssuer
                 - Event
                 - EphemeralReport
+                - PolicyReport
+                - ClusterPolicyReport
+                - AdmissionReport
+                - ClusterAdmissionReport
+                - BackgroundScanReport
+                - ClusterBackgroundScanReport
       validate:
         message: "Do not deploy resources into the 'default' namespace."
         deny: {}
