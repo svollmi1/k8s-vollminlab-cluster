@@ -15,6 +15,9 @@ data:
     sources:
       - ingress
 
+    image:
+      tag: v0.21.0
+
     policy: upsert-only
 
     # Pi-hole cannot store TXT ownership records.
