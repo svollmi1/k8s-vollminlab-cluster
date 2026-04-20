@@ -22,8 +22,6 @@ data:
       env: production
       category: security
 
-    webhookTimeout: 30
-
     admissionController:
       labels:
         app: kyverno-admission-controller
@@ -36,6 +34,8 @@ data:
       replicas: 3
       priorityClassName: system-cluster-critical
       failurePolicy: Ignore
+      extraArgs:
+        webhookTimeout: "30"
       namespaceSelector:
         matchExpressions:
           - key: kubernetes.io/metadata.name
