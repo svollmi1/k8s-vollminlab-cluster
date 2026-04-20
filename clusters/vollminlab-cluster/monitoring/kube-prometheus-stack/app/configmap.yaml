@@ -110,20 +110,36 @@ data:
         category: observability
 
     kubeEtcd:
-      enabled: false
-
-    kubeProxy:
-      enabled: false
+      enabled: true
+      endpoints:
+        - 192.168.152.8
+        - 192.168.152.9
+        - 192.168.152.10
+      service:
+        port: 2381
+        targetPort: 2381
 
     kubeControllerManager:
-      enabled: false
+      enabled: true
+      endpoints:
+        - 192.168.152.8
+        - 192.168.152.9
+        - 192.168.152.10
 
     kubeScheduler:
-      enabled: false
+      enabled: true
+      endpoints:
+        - 192.168.152.8
+        - 192.168.152.9
+        - 192.168.152.10
+
+    kubeProxy:
+      enabled: true
 
     defaultRules:
       rules:
         kubeApiserver: true
+        etcd: true
       disabled:
         KubeClientCertificateExpiration: true
 
