@@ -148,7 +148,7 @@ data:
 
     config:
       resourceFilters:
-        - '[GlobalNetworkPolicy,projectcalico.org/v3,*]'
+        - '[GlobalNetworkPolicy,*,*]'
 
     serviceMonitor:
       enabled: true
