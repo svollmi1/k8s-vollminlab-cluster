@@ -52,14 +52,10 @@ spec:
           kinds:
             - Pod
       exclude:
-        any:
-          - resources:
-              namespaces:
-                - kube-system
-                - kyverno
-          - resources:
-              names:
-                - "kyverno-migrate-resources-*"
+        resources:
+          namespaces:
+            - kube-system
+            - kyverno
       validate:
         message: "Required labels: app, env, category"
         pattern:
