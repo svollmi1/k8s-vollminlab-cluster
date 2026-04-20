@@ -105,6 +105,13 @@ data:
           memory: 256Mi
 
     cleanupController:
+      # Disabled: cleanup controller scans all CRDs including Calico tiered
+      # policy CRDs (globalnetworkpolicies.projectcalico.org) which Calico's
+      # webhook rejects for non-Enterprise users. Kyverno's resourceFilters
+      # do not apply to the cleanup controller, and it has no exclude mechanism.
+      # Re-enable when TTL policies are needed; check if a newer Kyverno version
+      # resolves the Calico webhook conflict first.
+      enabled: false
       labels:
         app: kyverno-cleanup-controller
         env: production
