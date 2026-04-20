@@ -89,6 +89,48 @@ Deploy the OpenTelemetry Operator + a collector pipeline:
 
 ---
 
+## Phase 2.5 — Flux Upgrade (v2.4 → v2.8)
+
+**Status:** `planned` (after Phase 2 observability)
+**Depends on:** Phase 2 monitoring stable (want visibility during the upgrade)
+**Risk:** Medium — two-hop upgrade with API removals; requires `flux migrate` between hops
+
+Current cluster runs **Flux v2.4.0**. Latest stable is **v2.8.5**. Several deprecated Flux API versions produce log noise and will be hard-removed in newer releases. Direct upgrade is not possible — must hop through v2.7 first.
+
+### Why two hops
+
+| Removed in | APIs dropped |
+| --- | --- |
+| v2.7.0 | `Kustomization v1beta1`, `Provider v1beta2/v2beta1` |
+| v2.8.0 | `OCIRepository v1beta2`, `HelmChart v1beta2`, `GitRepository v1beta2`, `Provider v2beta2` |
+
+### Procedure
+
+#### Hop 1: v2.4 → v2.7
+
+```bash
+# Rewrite deprecated apiVersions in Git manifests
+flux migrate -f ./clusters/ --from 2.4.0 --to 2.7.0
+# Commit + PR the migrated files, then upgrade components:
+flux install --version v2.7.5 --export > clusters/vollminlab-cluster/flux-system/gotk-components.yaml
+# Commit + PR, verify cluster stable before proceeding
+```
+
+#### Hop 2: v2.7 → v2.8
+
+```bash
+flux migrate -f ./clusters/ --from 2.7.0 --to 2.8.0
+flux install --version v2.8.5 --export > clusters/vollminlab-cluster/flux-system/gotk-components.yaml
+# Commit + PR
+```
+
+### Known pre-work in this repo
+
+- 11 `OCIRepository` files still on `source.toolkit.fluxcd.io/v1beta2` — `flux migrate` handles these automatically on hop 2
+- Kubernetes v1.32.3 meets the v2.8 minimum requirement
+
+---
+
 ## Phase 3 — Security & Access
 
 ### 3.0 PKI — Automated Certificate Lifecycle
@@ -243,6 +285,7 @@ This is a cluster rebuild risk event — do not attempt without working backups.
 
 | Item | Notes |
 |---|---|
+| Longhorn dedicated disks per worker | `/var/lib/longhorn` sits on root LVM (`ubuntu-vg/ubuntu-lv`); Longhorn can't resolve the LVM device in sysfs from inside its container, producing periodic `collectNodeDiskCount` warnings. Fix: provision a dedicated partition or disk on each worker and configure it as a Longhorn disk. Node-level change, not a Helm fix. |
 | Dynatrace / Dash0 | Evaluate after homegrown observability stack is established |
 | Tekton | Not needed for dependency updates (Renovate covers that); revisit if building/pushing custom images |
 | ELK (Elasticsearch/Kibana) | ECK is already deployed; evaluate whether Loki replaces it or both coexist |
