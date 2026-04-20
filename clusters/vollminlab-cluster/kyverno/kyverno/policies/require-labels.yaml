@@ -75,6 +75,7 @@ spec:
         resources:
           names:
             - kube-system
+            - "ci-test-*"
       validate:
         message: "Required labels: app, env, category"
         pattern:
