@@ -34,8 +34,9 @@ data:
       replicas: 3
       priorityClassName: system-cluster-critical
       failurePolicy: Ignore
-      extraArgs:
-        webhookTimeout: "30"
+      container:
+        extraArgs:
+          webhookTimeout: "30"
       namespaceSelector:
         matchExpressions:
           - key: kubernetes.io/metadata.name
