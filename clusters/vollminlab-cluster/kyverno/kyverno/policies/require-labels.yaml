@@ -46,24 +46,35 @@ spec:
                   app: "?*"
                   env: "?*"
                   category: "?*"
-    - name: require-labels-on-pods-and-namespaces
+    - name: require-labels-on-pods
       match:
         resources:
           kinds:
             - Pod
+      exclude:
+        resources:
+          namespaces:
+            - kube-system
+            - kyverno
+          names:
+            - "kyverno-migrate-resources-*"
+      validate:
+        message: "Required labels: app, env, category"
+        pattern:
+          metadata:
+            labels:
+              app: "?*"
+              env: "?*"
+              category: "?*"
+    - name: require-labels-on-namespaces
+      match:
+        resources:
+          kinds:
             - Namespace
       exclude:
-        any:
-          - resources:
-              namespaces:
-                - kube-system
-          - resources:
-              kinds:
-                - Pod
-              namespaces:
-                - kyverno
-              names:
-                - "kyverno-migrate-resources-*"
+        resources:
+          names:
+            - kube-system
       validate:
         message: "Required labels: app, env, category"
         pattern:

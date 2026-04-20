@@ -21,4 +21,4 @@ spec:
   exceptions:
     - policyName: require-standard-labels
       ruleNames:
-        - require-labels-on-pods-and-namespaces
+        - require-labels-on-namespaces

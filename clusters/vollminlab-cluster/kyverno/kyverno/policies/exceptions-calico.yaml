@@ -28,7 +28,7 @@ spec:
     - policyName: require-standard-labels
       ruleNames:
         - require-labels-on-controllers
-        - require-labels-on-pods-and-namespaces
+        - require-labels-on-pods
     - policyName: require-resources
       ruleNames:
         - require-limits
