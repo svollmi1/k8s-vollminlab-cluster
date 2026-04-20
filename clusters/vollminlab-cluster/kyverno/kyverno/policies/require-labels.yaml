@@ -56,8 +56,6 @@ spec:
           namespaces:
             - kube-system
             - kyverno
-          names:
-            - "kyverno-migrate-resources-*"
       validate:
         message: "Required labels: app, env, category"
         pattern:
