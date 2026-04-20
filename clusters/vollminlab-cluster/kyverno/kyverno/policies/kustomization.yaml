@@ -7,6 +7,7 @@ resources:
   - dmz-enforce-node-placement.yaml
   - dmz-restrict-external-access.yaml
   - exceptions-calico.yaml
+  - exceptions-ci-test-namespaces.yaml
   - exceptions-kyverno-hooks.yaml
   - exceptions-longhorn-dynamic.yaml
   - flux-exception.yaml
