@@ -36,3 +36,4 @@ Required sections:
 | Date | File | Summary |
 |---|---|---|
 | 2026-04-05 | [2026-04-05-external-dns-kyverno-outage.md](../incidents/2026-04-05-external-dns-kyverno-outage.md) | external-dns `policy: sync` wiped all Pi-hole DNS records; Kyverno autogen broke fail-closed webhook and blocked all cluster mutations for ~2 hours |
+| 2026-04-20 | [2026-04-20-external-dns-pihole-instability.md](../incidents/2026-04-20-external-dns-pihole-instability.md) | external-dns crash loop traced to Pi-hole API session exhaustion, FTL restarts, and corrupted Pi-hole query databases on both nodes |
