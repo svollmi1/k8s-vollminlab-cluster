@@ -1,0 +1,26 @@
+apiVersion: kyverno.io/v2
+kind: PolicyException
+metadata:
+  name: ignore-kyverno-hook-pods
+  namespace: kyverno
+  labels:
+    app: kyverno
+    env: production
+    category: security
+spec:
+  # Kyverno's Helm upgrade hook creates short-lived migration pods that do not
+  # carry the standard app/env/category labels. They complete successfully and
+  # are not GitOps-managed workload specs we can label directly.
+  match:
+    any:
+      - resources:
+          kinds:
+            - Pod
+          namespaces:
+            - kyverno
+          names:
+            - "kyverno-migrate-resources-*"
+  exceptions:
+    - policyName: require-standard-labels
+      ruleNames:
+        - require-labels-on-pods-and-namespaces
