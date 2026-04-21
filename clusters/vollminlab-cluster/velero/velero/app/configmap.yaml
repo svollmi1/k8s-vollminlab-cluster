@@ -70,8 +70,9 @@ data:
             key: cloud
 
     # node-agent DaemonSet runs kopia on every node for file-system PVC backups
+    deployNodeAgent: true
+
     nodeAgent:
-      enabled: true
       podLabels:
         app: velero-node-agent
         env: production
