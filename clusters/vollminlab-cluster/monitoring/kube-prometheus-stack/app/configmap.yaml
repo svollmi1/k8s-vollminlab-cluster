@@ -13,6 +13,7 @@ data:
 
     prometheus:
       prometheusSpec:
+        externalUrl: https://prometheus.vollminlab.com
         scrapeInterval: 30s
         retention: 15d
         retentionSize: 9GB
@@ -72,6 +73,7 @@ data:
     alertmanager:
       alertmanagerSpec:
         replicas: 3
+        externalUrl: https://alertmanager.vollminlab.com
         configSecret: alertmanager-pushover-config
         podMetadata:
           labels:
