@@ -77,6 +77,11 @@ data:
         app: velero-node-agent
         env: production
         category: storage
+      tolerations:
+        - key: dmz
+          operator: Equal
+          value: "true"
+          effect: NoSchedule
       resources:
         requests:
           cpu: 100m
