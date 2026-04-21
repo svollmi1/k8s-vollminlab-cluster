@@ -99,7 +99,7 @@ data:
           ttl: 720h
           storageLocation: minio
           defaultVolumesToFsBackup: true
-          resourcePolicies:
+          resourcePolicy:
             kind: ConfigMap
             name: velero-skip-smb-policy
       daily-b2:
@@ -110,6 +110,6 @@ data:
           ttl: 720h
           storageLocation: b2
           defaultVolumesToFsBackup: true
-          resourcePolicies:
+          resourcePolicy:
             kind: ConfigMap
             name: velero-skip-smb-policy
