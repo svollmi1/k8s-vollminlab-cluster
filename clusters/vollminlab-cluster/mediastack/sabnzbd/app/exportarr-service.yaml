@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sabnzbd-exportarr
+  namespace: mediastack
+  labels:
+    app: sabnzbd-exportarr
+    env: production
+    category: media
+spec:
+  type: ClusterIP
+  selector:
+    app: sabnzbd-exportarr
+  ports:
+    - name: metrics
+      port: 9707
+      targetPort: metrics
+      protocol: TCP
