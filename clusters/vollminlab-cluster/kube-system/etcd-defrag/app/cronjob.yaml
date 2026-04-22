@@ -1,0 +1,57 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: etcd-defrag
+  namespace: kube-system
+  labels:
+    app: etcd-defrag
+    env: production
+    category: core
+spec:
+  schedule: "0 3 * * 0"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 3600
+      backoffLimit: 0
+      template:
+        metadata:
+          labels:
+            app: etcd-defrag
+            env: production
+            category: core
+        spec:
+          serviceAccountName: etcd-defrag
+          restartPolicy: Never
+          containers:
+            - name: etcd-defrag
+              image: docker.io/alpine/kubectl:1.33.4
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  CERTS="--cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key"
+                  echo "etcd defrag started at $(date)"
+
+                  echo "Defragging k8scp01 (follower)..."
+                  kubectl exec -n kube-system etcd-k8scp01 -- etcdctl --endpoints=https://192.168.152.8:2379 $CERTS defrag
+                  sleep 10
+
+                  echo "Defragging k8scp03 (follower)..."
+                  kubectl exec -n kube-system etcd-k8scp03 -- etcdctl --endpoints=https://192.168.152.10:2379 $CERTS defrag
+                  sleep 10
+
+                  echo "Defragging k8scp02 (leader)..."
+                  kubectl exec -n kube-system etcd-k8scp02 -- etcdctl --endpoints=https://192.168.152.9:2379 $CERTS defrag
+
+                  echo "etcd defrag complete at $(date)"
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 32Mi
+                limits:
+                  cpu: 50m
+                  memory: 64Mi
