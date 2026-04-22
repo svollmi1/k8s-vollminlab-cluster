@@ -464,7 +464,7 @@ jobs:
             yq eval "
               .metadata.namespace = \"$TEST_NAMESPACE\" |
                 .metadata.name = \"$TEST_NAME\"
-            " "$file" | kubectl apply -f - || {
+            " "$file" | kubectl apply --validate=false -f - || {
               echo "❌ Failed to deploy OCIRepository: $file"
               exit 1
             }
