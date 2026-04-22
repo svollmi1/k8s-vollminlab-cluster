@@ -11,6 +11,7 @@ GitOps-managed Kubernetes cluster using Flux CD. All workloads are Helm-based Fl
 - `.claude/rules/secrets.md` — SealedSecrets workflow, never plain Secrets
 - `.claude/rules/subagents.md` — when to spawn agents vs. act directly
 - `.claude/rules/storage.md` — Longhorn capacity check before PVC sizing, replica math, online resize
+- `.claude/rules/velero.md` — backup schedules, circular backup check, kopia GC, status commands
 - `.claude/rules/git-workflow.md` — branch naming, session hygiene, /compact reminders
 
 **Operational runbooks** (reference when needed, not loaded every session):
