@@ -4530,9 +4530,6 @@ spec:
         app.kubernetes.io/instance: flux-system
         app.kubernetes.io/part-of: flux
         app.kubernetes.io/version: v2.7.5
-    app: flux
-    env: production
-    category: core
     spec:
       containers:
       - args:
@@ -6029,9 +6026,6 @@ spec:
         app.kubernetes.io/instance: flux-system
         app.kubernetes.io/part-of: flux
         app.kubernetes.io/version: v2.7.5
-    app: flux
-    env: production
-    category: core
     spec:
       containers:
       - args:
@@ -8778,9 +8772,6 @@ spec:
         app.kubernetes.io/instance: flux-system
         app.kubernetes.io/part-of: flux
         app.kubernetes.io/version: v2.7.5
-    app: flux
-    env: production
-    category: core
     spec:
       containers:
       - args:
@@ -10229,9 +10220,6 @@ spec:
         app.kubernetes.io/instance: flux-system
         app.kubernetes.io/part-of: flux
         app.kubernetes.io/version: v2.7.5
-    app: flux
-    env: production
-    category: core
     spec:
       containers:
       - args:
