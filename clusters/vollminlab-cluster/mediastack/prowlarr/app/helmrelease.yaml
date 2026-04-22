@@ -17,3 +17,12 @@ spec:
     - kind: ConfigMap
       name: prowlarr-values
       valuesKey: values.yaml
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: ConfigMap
+              name: prowlarr-dashboard
+            patch: |
+              - op: remove
+                path: /metadata/labels/grafana_dashboard

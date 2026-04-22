@@ -9,9 +9,6 @@ metadata:
     category: media
 data:
   values.yaml: |
-    grafana:
-      main:
-        enabled: false
     persistence:
       config:
         enabled: true
