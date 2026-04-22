@@ -6741,6 +6741,28 @@ data:
             "skipUrlSync": false,
             "sort": 0,
             "type": "query"
+          },
+          {
+            "current": {},
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "definition": "label_values({__name__=~\"bazarr_.*\"},instance)",
+            "hide": 0,
+            "includeAll": false,
+            "label": "Bazarr Instance",
+            "multi": false,
+            "name": "bazarr_instance",
+            "options": [],
+            "query": {
+              "query": "label_values({__name__=~\"bazarr_.*\"},instance)",
+              "refId": "PrometheusVariableQueryEditor-queryType"
+            },
+            "refresh": 2,
+            "regex": "",
+            "sort": 1,
+            "type": "query"
           }
         ]
       },
