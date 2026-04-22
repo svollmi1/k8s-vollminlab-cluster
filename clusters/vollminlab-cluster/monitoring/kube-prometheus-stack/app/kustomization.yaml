@@ -15,3 +15,4 @@ resources:
   - grafana-admin-sealedsecret.yaml
   - prometheusrule-custom.yaml
   - nodes-dashboard-configmap.yaml
+  - longhorn-dashboard-configmap.yaml
