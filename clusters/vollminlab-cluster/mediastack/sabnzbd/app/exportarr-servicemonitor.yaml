@@ -1,0 +1,17 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: sabnzbd-exportarr
+  namespace: mediastack
+  labels:
+    app: sabnzbd-exportarr
+    env: production
+    category: media
+spec:
+  endpoints:
+    - path: /metrics
+      port: metrics
+  jobLabel: app
+  selector:
+    matchLabels:
+      app: sabnzbd-exportarr
