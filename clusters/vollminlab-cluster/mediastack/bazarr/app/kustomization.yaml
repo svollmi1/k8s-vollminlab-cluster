@@ -5,8 +5,10 @@ metadata:
 resources:
   - configmap.yaml
   - exportarr-apikey-sealedsecret.yaml
+  - exportarr-dashboard-configmap.yaml
   - exportarr-deployment.yaml
   - exportarr-service.yaml
+  - exportarr-servicemonitor.yaml
   - helmrelease.yaml
   - ingress.yaml
   - pvc-bazarr-config.yaml
