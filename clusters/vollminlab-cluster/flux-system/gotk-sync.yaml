@@ -11,9 +11,9 @@ metadata:
     category: core
 spec:
   interval: 1m0s
+  provider: github
   ref:
     branch: main
-  provider: github
   secretRef:
     name: flux-system
   url: https://github.com/vollminlab/k8s-vollminlab-cluster.git
