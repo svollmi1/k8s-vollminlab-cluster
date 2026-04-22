@@ -17,7 +17,6 @@ data:
         scrapeInterval: 30s
         retention: 15d
         retentionSize: 9GB
-        enableAdminAPI: true
         serviceMonitorSelectorNilUsesHelmValues: false
         serviceMonitorSelector: {}
         serviceMonitorNamespaceSelector: {}
