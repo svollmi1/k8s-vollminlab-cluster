@@ -702,7 +702,8 @@ data:
             "refresh": 2,
             "type": "query",
             "definition": "query_result(node_uname_info{job=\"node-exporter\", sysname!=\"Darwin\"})",
-            "regex": "/instance=\"([^\"]+)\"/"
+            "regex": "/instance=\"([^\"]+)\"/",
+            "sort": 1
           }
         ]
       },
