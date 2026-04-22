@@ -4,5 +4,6 @@ metadata:
   name: kube-system
 resources:
   - namespace.yaml
+  - ./etcd-defrag/app
   - ./metrics-server/app
   - ./smb-csi-driver/app
