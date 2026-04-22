@@ -2005,87 +2005,6 @@ data:
                   "color": {
                     "mode": "thresholds"
                   },
-                  "mappings": [
-                    {
-                      "options": {
-                        "0": {
-                          "color": "red",
-                          "index": 1,
-                          "text": "Down"
-                        },
-                        "1": {
-                          "color": "green",
-                          "index": 0,
-                          "text": "Up"
-                        }
-                      },
-                      "type": "value"
-                    }
-                  ],
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "color": "green"
-                      },
-                      {
-                        "color": "red",
-                        "value": 80
-                      }
-                    ]
-                  }
-                },
-                "overrides": []
-              },
-              "gridPos": {
-                "h": 4,
-                "w": 3,
-                "x": 0,
-                "y": 35
-              },
-              "options": {
-                "colorMode": "background",
-                "graphMode": "area",
-                "justifyMode": "auto",
-                "orientation": "auto",
-                "reduceOptions": {
-                  "calcs": [
-                    "lastNotNull"
-                  ],
-                  "fields": "",
-                  "values": false
-                },
-                "text": {},
-                "textMode": "auto"
-              },
-              "pluginVersion": "9.5.2",
-              "targets": [
-                {
-                  "datasource": {
-                    "type": "prometheus",
-                    "uid": "${DS_PROMETHEUS}"
-                  },
-                  "editorMode": "code",
-                  "exemplar": false,
-                  "expr": "up{job=\"sabnzbd\"}",
-                  "instant": true,
-                  "legendFormat": "Status",
-                  "range": false,
-                  "refId": "A"
-                }
-              ],
-              "type": "stat"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "color": {
-                    "mode": "thresholds"
-                  },
                   "mappings": [],
                   "thresholds": {
                     "mode": "absolute",
@@ -7267,7 +7186,7 @@ data:
             "datasource": {
               "type": "prometheus"
             },
-            "definition": "label_values({__name__=~\"prowlarr_.*\"},instance)",
+            "definition": "query_result(prowlarr_system_status)",
             "hide": 0,
             "includeAll": true,
             "label": "Prowlarr Instance",
@@ -7275,13 +7194,13 @@ data:
             "name": "prowlarr_instance",
             "options": [],
             "query": {
-              "query": "label_values({__name__=~\"prowlarr_.*\"},instance)",
+              "query": "query_result(prowlarr_system_status)",
               "refId": "PrometheusVariableQueryEditor-VariableQuery"
             },
-            "refresh": 1,
-            "regex": "",
+            "refresh": 2,
+            "regex": "/instance=\"([^\"]+)\"/",
             "skipUrlSync": false,
-            "sort": 0,
+            "sort": 1,
             "type": "query"
           },
           {
@@ -7297,7 +7216,7 @@ data:
             "datasource": {
               "type": "prometheus"
             },
-            "definition": "label_values({__name__=~\"sabnzbd_.*\"},instance)",
+            "definition": "query_result(sabnzbd_queue_length)",
             "hide": 0,
             "includeAll": true,
             "label": "SABnzbd Instance",
@@ -7305,13 +7224,13 @@ data:
             "name": "sabnzbd_instance",
             "options": [],
             "query": {
-              "query": "label_values({__name__=~\"sabnzbd_.*\"},instance)",
+              "query": "query_result(sabnzbd_queue_length)",
               "refId": "PrometheusVariableQueryEditor-VariableQuery"
             },
-            "refresh": 1,
-            "regex": "",
+            "refresh": 2,
+            "regex": "/instance=\"([^\"]+)\"/",
             "skipUrlSync": false,
-            "sort": 0,
+            "sort": 1,
             "type": "query"
           },
           {
@@ -7327,7 +7246,7 @@ data:
             "datasource": {
               "type": "prometheus"
             },
-            "definition": "label_values({__name__=~\"radarr_.*\"},instance)",
+            "definition": "query_result(radarr_system_status)",
             "hide": 0,
             "includeAll": true,
             "label": "Radarr Instance",
@@ -7335,13 +7254,13 @@ data:
             "name": "radarr_instance",
             "options": [],
             "query": {
-              "query": "label_values({__name__=~\"radarr_.*\"},instance)",
+              "query": "query_result(radarr_system_status)",
               "refId": "PrometheusVariableQueryEditor-VariableQuery"
             },
-            "refresh": 1,
-            "regex": "",
+            "refresh": 2,
+            "regex": "/instance=\"([^\"]+)\"/",
             "skipUrlSync": false,
-            "sort": 0,
+            "sort": 1,
             "type": "query"
           },
           {
@@ -7357,7 +7276,7 @@ data:
             "datasource": {
               "type": "prometheus"
             },
-            "definition": "label_values({__name__=~\"sonarr_.*\"},instance)",
+            "definition": "query_result(sonarr_system_status)",
             "hide": 0,
             "includeAll": true,
             "label": "Sonarr Instance",
@@ -7365,13 +7284,13 @@ data:
             "name": "sonarr_instance",
             "options": [],
             "query": {
-              "query": "label_values({__name__=~\"sonarr_.*\"},instance)",
+              "query": "query_result(sonarr_system_status)",
               "refId": "PrometheusVariableQueryEditor-VariableQuery"
             },
-            "refresh": 1,
-            "regex": "",
+            "refresh": 2,
+            "regex": "/instance=\"([^\"]+)\"/",
             "skipUrlSync": false,
-            "sort": 0,
+            "sort": 1,
             "type": "query"
           },
           {
@@ -7387,7 +7306,7 @@ data:
             "datasource": {
               "type": "prometheus"
             },
-            "definition": "label_values({__name__=~\"lidarr_.*\"},instance)",
+            "definition": "query_result(lidarr_system_status)",
             "hide": 0,
             "includeAll": true,
             "label": "Lidarr Instance",
@@ -7395,13 +7314,13 @@ data:
             "name": "lidarr_instance",
             "options": [],
             "query": {
-              "query": "label_values({__name__=~\"lidarr_.*\"},instance)",
+              "query": "query_result(lidarr_system_status)",
               "refId": "PrometheusVariableQueryEditor-VariableQuery"
             },
-            "refresh": 1,
-            "regex": "",
+            "refresh": 2,
+            "regex": "/instance=\"([^\"]+)\"/",
             "skipUrlSync": false,
-            "sort": 0,
+            "sort": 1,
             "type": "query"
           },
           {
@@ -7417,7 +7336,7 @@ data:
             "datasource": {
               "type": "prometheus"
             },
-            "definition": "label_values({__name__=~\"readarr_.*\"},instance)",
+            "definition": "query_result(readarr_system_status)",
             "hide": 0,
             "includeAll": true,
             "label": "Readarr Instance",
@@ -7425,13 +7344,13 @@ data:
             "name": "readarr_instance",
             "options": [],
             "query": {
-              "query": "label_values({__name__=~\"readarr_.*\"},instance)",
+              "query": "query_result(readarr_system_status)",
               "refId": "PrometheusVariableQueryEditor-VariableQuery"
             },
-            "refresh": 1,
-            "regex": "",
+            "refresh": 2,
+            "regex": "/instance=\"([^\"]+)\"/",
             "skipUrlSync": false,
-            "sort": 0,
+            "sort": 1,
             "type": "query"
           },
           {
@@ -7440,7 +7359,7 @@ data:
               "type": "prometheus",
               "uid": "${DS_PROMETHEUS}"
             },
-            "definition": "label_values({__name__=~\"bazarr_.*\"},instance)",
+            "definition": "query_result(bazarr_system_health_issues)",
             "hide": 0,
             "includeAll": false,
             "label": "Bazarr Instance",
@@ -7448,11 +7367,11 @@ data:
             "name": "bazarr_instance",
             "options": [],
             "query": {
-              "query": "label_values({__name__=~\"bazarr_.*\"},instance)",
+              "query": "query_result(bazarr_system_health_issues)",
               "refId": "PrometheusVariableQueryEditor-queryType"
             },
             "refresh": 2,
-            "regex": "",
+            "regex": "/instance=\"([^\"]+)\"/",
             "sort": 1,
             "type": "query"
           }
