@@ -4464,15 +4464,29 @@ data:
                   },
                   "editorMode": "code",
                   "exemplar": false,
-                  "expr": "sonarr_episode_quality_total{instance=~\"${sonarr_instance}\"}",
+                  "expr": "sonarr_episode_downloaded_total{instance=~\"${sonarr_instance}\"}",
                   "format": "time_series",
                   "instant": true,
-                  "legendFormat": "{{quality}}",
+                  "legendFormat": "Downloaded",
                   "range": false,
                   "refId": "A"
+                },
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "${DS_PROMETHEUS}"
+                  },
+                  "editorMode": "code",
+                  "exemplar": false,
+                  "expr": "sonarr_episode_missing_total{instance=~\"${sonarr_instance}\"}",
+                  "format": "time_series",
+                  "instant": true,
+                  "legendFormat": "Missing",
+                  "range": false,
+                  "refId": "B"
                 }
               ],
-              "title": "Qualities",
+              "title": "Episode Status",
               "type": "bargauge"
             },
             {
