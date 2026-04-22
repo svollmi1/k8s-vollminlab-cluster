@@ -3,6 +3,10 @@ kind: ConfigMap
 metadata:
   name: velero-values
   namespace: velero
+  labels:
+    app: velero
+    env: production
+    category: storage
 data:
   values.yaml: |
     podLabels:
@@ -89,6 +93,13 @@ data:
         limits:
           cpu: 1000m
           memory: 1Gi
+
+    metrics:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+      nodeAgentPodMonitor:
+        enabled: true
 
     schedules:
       daily-full:

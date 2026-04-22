@@ -87,3 +87,6 @@ data:
         app: longhorn-support-bundle-kit
         env: production
         category: storage
+    metrics:
+      serviceMonitor:
+        enabled: true

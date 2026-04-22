@@ -110,6 +110,11 @@ data:
         app: node-exporter
         env: production
         category: observability
+      prometheus:
+        monitor:
+          relabelings:
+            - sourceLabels: [__meta_kubernetes_node_name]
+              targetLabel: instance
 
     kubeEtcd:
       enabled: true
