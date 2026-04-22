@@ -14,3 +14,4 @@ resources:
   - alertmanager-sealedsecret.yaml
   - grafana-admin-sealedsecret.yaml
   - prometheusrule-custom.yaml
+  - nodes-dashboard-configmap.yaml
