@@ -65,6 +65,6 @@ kubectl logs -n velero $(kubectl get pods -n velero --sort-by=.metadata.creation
   | grep "<namespace>-minio-kopia-maintain" | tail -1 | awk '{print $1}')
 ```
 
-## Gate for Observability PR 2
+## Gate for Cilium migration (Phase 8)
 
-Do not start Observability PR 2 (Longhorn/Velero/cert-manager ServiceMonitors + PrometheusRules) until a `daily-full` backup shows `Completed` status. First expected clean run: **2026-04-23 at 2am UTC**.
+Do not start the Cilium CNI migration until a `daily-full` backup shows `Completed` status and a test restore has been validated. First expected clean backup: **2026-04-23 at 2am UTC** (after circular backup fix in PR #410).
