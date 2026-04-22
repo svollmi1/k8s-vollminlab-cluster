@@ -8,6 +8,7 @@ metadata:
     env: production
     category: observability
     grafana_dashboard: "1"
+# yamllint disable rule:line-length
 data:
   nodes.json: |
     {
