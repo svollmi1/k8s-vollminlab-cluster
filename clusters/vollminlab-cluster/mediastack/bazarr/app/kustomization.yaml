@@ -4,6 +4,9 @@ metadata:
   name: bazarr-app
 resources:
   - configmap.yaml
+  - exportarr-apikey-sealedsecret.yaml
+  - exportarr-deployment.yaml
+  - exportarr-service.yaml
   - helmrelease.yaml
   - ingress.yaml
   - pvc-bazarr-config.yaml
