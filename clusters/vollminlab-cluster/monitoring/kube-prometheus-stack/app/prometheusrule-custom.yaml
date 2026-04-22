@@ -1,0 +1,75 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: vollminlab-custom-rules
+  namespace: monitoring
+  labels:
+    app: kube-prometheus-stack
+    env: production
+    category: observability
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: cert-manager
+      rules:
+        - alert: CertManagerCertificateExpiringSoon
+          expr: |
+            certmanager_certificate_expiration_timestamp_seconds - time() < 14 * 24 * 3600
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: "Certificate {{ $labels.name }} in {{ $labels.namespace }} expires soon"
+            description: "Certificate {{ $labels.name }} (namespace {{ $labels.namespace }}) expires in {{ $value | humanizeDuration }}."
+
+        - alert: CertManagerCertificateExpiringCritical
+          expr: |
+            certmanager_certificate_expiration_timestamp_seconds - time() < 24 * 3600
+          for: 15m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Certificate {{ $labels.name }} in {{ $labels.namespace }} expires in < 24 hours"
+            description: "Certificate {{ $labels.name }} (namespace {{ $labels.namespace }}) expires in {{ $value | humanizeDuration }}. Immediate action required."
+
+    - name: velero
+      rules:
+        - alert: VeleroScheduledBackupOverdue
+          expr: |
+            time() - velero_backup_last_successful_timestamp{schedule="daily-full"} > 90000
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Velero minio backup last succeeded > 25 hours ago"
+            description: "The daily-full (minio) backup last succeeded at {{ $value | humanizeTimestamp }}. Check Velero logs."
+
+        - alert: VeleroBackupFailed
+          expr: |
+            increase(velero_backup_failure_total{schedule="daily-full"}[26h]) > 0
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Velero daily-full backup failed"
+            description: "A daily-full backup has Failed in the last 26 hours. Check velero backup get."
+
+        - alert: VeleroBackupPartiallyFailed
+          expr: |
+            increase(velero_backup_partial_failure_total{schedule="daily-full"}[26h]) > 0
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Velero daily-full backup partially failed"
+            description: "A daily-full backup has PartiallyFailed in the last 26 hours. Check velero backup describe."
+
+        - alert: VeleroBackupMetricMissing
+          expr: |
+            absent(velero_backup_last_successful_timestamp{schedule="daily-full"}) == 1
+          for: 30m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Velero daily-full backup metric absent — Velero may not be running"
+            description: "velero_backup_last_successful_timestamp for schedule=daily-full is missing. Velero may be down or no backup has ever completed."
