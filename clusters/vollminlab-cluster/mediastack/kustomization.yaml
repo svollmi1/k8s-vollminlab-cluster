@@ -4,6 +4,7 @@ metadata:
   name: mediastack
 resources:
   - namespace.yaml
+  - arr-media-dashboard-configmap.yaml
   - ./secrets
   - ./bazarr/app
   - ./overseerr/app

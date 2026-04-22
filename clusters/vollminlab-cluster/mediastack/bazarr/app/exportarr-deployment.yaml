@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bazarr-exportarr
+  namespace: mediastack
+  labels:
+    app: bazarr-exportarr
+    env: production
+    category: media
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bazarr-exportarr
+  template:
+    metadata:
+      labels:
+        app: bazarr-exportarr
+        env: production
+        category: media
+    spec:
+      containers:
+        - name: exportarr
+          image: ghcr.io/onedr0p/exportarr:v2.2.0@sha256:320b0ea7399f4b9af4741dcdddd7d40c05c36b0359679305d8a54df4e97065df
+          args: ["bazarr"]
+          env:
+            - name: URL
+              value: "http://bazarr:6767"
+            - name: PORT
+              value: "9707"
+            - name: INTERFACE
+              value: "0.0.0.0"
+            - name: APIKEY
+              valueFrom:
+                secretKeyRef:
+                  name: bazarr-exportarr-apikey
+                  key: api-key
+          ports:
+            - name: metrics
+              containerPort: 9707
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 50m
+              memory: 64Mi
