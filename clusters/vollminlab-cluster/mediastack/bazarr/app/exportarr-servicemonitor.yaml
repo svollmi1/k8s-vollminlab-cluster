@@ -1,10 +1,10 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: bazarr-exportarr
+  name: exportarr
   namespace: mediastack
   labels:
-    app: bazarr-exportarr
+    app: exportarr
     env: production
     category: media
 spec:
@@ -14,4 +14,4 @@ spec:
   jobLabel: app
   selector:
     matchLabels:
-      app: bazarr-exportarr
+      app: exportarr
