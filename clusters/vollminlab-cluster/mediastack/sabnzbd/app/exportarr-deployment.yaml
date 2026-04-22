@@ -25,7 +25,7 @@ spec:
           args: ["sabnzbd"]
           env:
             - name: URL
-              value: "http://sabnzbd:8080"
+              value: "http://sabnzbd:10097"
             - name: PORT
               value: "9707"
             - name: INTERFACE
