@@ -16,3 +16,4 @@ resources:
   - prometheusrule-custom.yaml
   - nodes-dashboard-configmap.yaml
   - longhorn-dashboard-configmap.yaml
+  - velero-dashboard-configmap.yaml
