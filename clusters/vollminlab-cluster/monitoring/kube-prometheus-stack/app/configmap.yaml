@@ -97,6 +97,13 @@ data:
                 requests:
                   storage: 1Gi
 
+    nodeExporter:
+      operatingSystems:
+        aix:
+          enabled: false
+        darwin:
+          enabled: false
+
     prometheus-node-exporter:
       tolerations:
         - key: dmz
