@@ -3,7 +3,6 @@ kind: Kustomization
 metadata:
   name: clusterwide
 resources:
-  - capacitor-rbac.yaml
   - kyverno-patch-clusterrole.yaml
   - kyverno-patch-clusterrolebinding.yaml
   - pv-completed-downloads.yaml
