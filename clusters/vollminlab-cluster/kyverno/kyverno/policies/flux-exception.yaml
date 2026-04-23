@@ -18,7 +18,7 @@ spec:
       - resources:
           kinds: ["Deployment"]
           namespaces: ["flux-system"]
-          names: ["helm-controller", "kustomize-controller", "notification-controller", "source-controller", "capacitor"]
+          names: ["helm-controller", "kustomize-controller", "notification-controller", "source-controller"]
   exceptions:
     - policyName: '*'
       ruleNames: ['*']
