@@ -10,7 +10,6 @@ resources:
   - arc-controller-ocirepository.yaml
   - arc-runners-ocirepository.yaml
   - bazarr-helmrepository.yaml
-  - capacitor-helmrepository.yaml
   - cert-manager-helmrepository.yaml
   - cnpg-helmrepository.yaml
   - external-dns-helmrepository.yaml
