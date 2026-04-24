@@ -15,8 +15,8 @@ data:
       prometheusSpec:
         externalUrl: https://prometheus.vollminlab.com
         scrapeInterval: 30s
-        retention: 15d
-        retentionSize: 9GB
+        retention: 7d
+        retentionSize: 15GB
         serviceMonitorSelectorNilUsesHelmValues: false
         serviceMonitorSelector: {}
         serviceMonitorNamespaceSelector: {}
@@ -40,7 +40,7 @@ data:
                 - ReadWriteOnce
               resources:
                 requests:
-                  storage: 10Gi
+                  storage: 20Gi
 
     grafana:
       enabled: true
@@ -149,6 +149,13 @@ data:
 
     kubeProxy:
       enabled: true
+
+    kubeApiServer:
+      serviceMonitor:
+        metricRelabelings:
+          - sourceLabels: [__name__]
+            regex: apiserver_request_body_size_bytes_bucket
+            action: drop
 
     defaultRules:
       rules:

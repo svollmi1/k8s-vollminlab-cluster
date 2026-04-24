@@ -10,6 +10,39 @@ metadata:
     release: kube-prometheus-stack
 spec:
   groups:
+    # Pre-aggregate high-cardinality control-plane histograms.
+    # Raw series are retained for ~2h (head block); aggregates carry the long-term signal.
+    # Drops: instance, scope, subresource, component, group, version — keeps verb+resource+le.
+    - name: apiserver.recording.rules
+      interval: 2m
+      rules:
+        - record: verb_resource:apiserver_request_duration_seconds_bucket:rate5m
+          expr: |
+            sum without (instance, scope, subresource, component, group, version) (
+              rate(apiserver_request_duration_seconds_bucket{job="apiserver"}[5m])
+            )
+
+        - record: verb_resource:apiserver_request_sli_duration_seconds_bucket:rate5m
+          expr: |
+            sum without (instance, scope, subresource, component, group, version) (
+              rate(apiserver_request_sli_duration_seconds_bucket{job="apiserver"}[5m])
+            )
+
+        - record: verb_resource:apiserver_watch_list_duration_seconds_bucket:rate5m
+          expr: |
+            sum without (instance, component, group, version) (
+              rate(apiserver_watch_list_duration_seconds_bucket{job="apiserver"}[5m])
+            )
+
+    - name: etcd.recording.rules
+      interval: 2m
+      rules:
+        - record: operation_type:etcd_request_duration_seconds_bucket:rate5m
+          expr: |
+            sum without (instance, grpc_service, grpc_method) (
+              rate(etcd_request_duration_seconds_bucket{job="kube-etcd"}[5m])
+            )
+
     - name: cert-manager
       rules:
         - alert: CertManagerCertificateExpiringSoon
