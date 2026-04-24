@@ -34,19 +34,21 @@ spec:
 
     - name: velero
       rules:
-        - alert: VeleroScheduledBackupOverdue
+        # velero_backup_last_successful_timestamp was removed in Velero 12.
+        # Schedule CRs are named velero-<schedule-name> by Helm, so the label is velero-daily-full.
+        - alert: VeleroBackupNotAttempted
           expr: |
-            time() - velero_backup_last_successful_timestamp{schedule="daily-full"} > 90000
-          for: 15m
+            increase(velero_backup_attempt_total{schedule="velero-daily-full"}[26h]) == 0
+          for: 30m
           labels:
             severity: warning
           annotations:
-            summary: "Velero minio backup last succeeded > 25 hours ago"
-            description: "The daily-full (minio) backup last succeeded at {{ $value | humanizeTimestamp }}. Check Velero logs."
+            summary: "Velero daily-full backup has not run in 26 hours"
+            description: "No daily-full backup attempt detected in the past 26 hours. Check the Velero schedule."
 
         - alert: VeleroBackupFailed
           expr: |
-            increase(velero_backup_failure_total{schedule="daily-full"}[26h]) > 0
+            increase(velero_backup_failure_total{schedule="velero-daily-full"}[26h]) > 0
           for: 15m
           labels:
             severity: warning
@@ -56,7 +58,7 @@ spec:
 
         - alert: VeleroBackupPartiallyFailed
           expr: |
-            increase(velero_backup_partial_failure_total{schedule="daily-full"}[26h]) > 0
+            increase(velero_backup_partial_failure_total{schedule="velero-daily-full"}[26h]) > 0
           for: 15m
           labels:
             severity: warning
@@ -66,10 +68,10 @@ spec:
 
         - alert: VeleroBackupMetricMissing
           expr: |
-            absent(velero_backup_last_successful_timestamp{schedule="daily-full"}) == 1
+            absent(velero_backup_last_status{schedule="velero-daily-full"}) == 1
           for: 30m
           labels:
             severity: critical
           annotations:
             summary: "Velero daily-full backup metric absent — Velero may not be running"
-            description: "velero_backup_last_successful_timestamp for schedule=daily-full is missing. Velero may be down or no backup has ever completed."
+            description: "velero_backup_last_status for schedule=velero-daily-full is missing. Velero may be down or metrics scraping has failed."
