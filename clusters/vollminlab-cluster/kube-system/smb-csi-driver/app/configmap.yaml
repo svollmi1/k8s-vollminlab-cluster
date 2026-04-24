@@ -9,4 +9,5 @@ metadata:
     category: storage
 data:
   values.yaml: |
-    {}
+    podAnnotations:
+      backup.velero.io/backup-volumes-excludes: "socket-dir"

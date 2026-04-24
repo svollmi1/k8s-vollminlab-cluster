@@ -22,6 +22,8 @@ data:
           memory: 128Mi
     speaker:
       enabled: true
+      podAnnotations:
+        backup.velero.io/backup-volumes-excludes: "frr-sockets,frr-conf,reloader,metrics,frr-tmp,frr-lib,frr-log"
       tolerations:
         - key: dmz
           operator: Exists
