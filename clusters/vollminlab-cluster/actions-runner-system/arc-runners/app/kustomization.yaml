@@ -7,3 +7,4 @@ resources:
   - configmap.yaml
   - rbac.yaml
   - arc-githubapp-secret-sealedsecret.yaml
+  - networkpolicy.yaml
