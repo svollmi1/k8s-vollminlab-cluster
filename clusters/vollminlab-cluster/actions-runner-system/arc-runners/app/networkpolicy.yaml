@@ -10,9 +10,7 @@ metadata:
 spec:
   podSelector: {}
   policyTypes:
-    - Ingress
     - Egress
-  ingress: []
   egress:
     # DNS via kube-dns
     - to:
