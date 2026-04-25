@@ -6223,39 +6223,11 @@ data:
                     ]
                   }
                 },
-                "overrides": [
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "Health Issues"
-                    },
-                    "properties": [
-                      {
-                        "id": "mappings",
-                        "value": []
-                      },
-                      {
-                        "id": "thresholds",
-                        "value": {
-                          "mode": "absolute",
-                          "steps": [
-                            {
-                              "color": "green"
-                            },
-                            {
-                              "color": "red",
-                              "value": 1
-                            }
-                          ]
-                        }
-                      }
-                    ]
-                  }
-                ]
+                "overrides": []
               },
               "gridPos": {
                 "h": 4,
-                "w": 6,
+                "w": 3,
                 "x": 0,
                 "y": 36
               },
@@ -6288,7 +6260,62 @@ data:
                   "legendFormat": "Status",
                   "range": false,
                   "refId": "A"
+                }
+              ],
+              "title": "Status",
+              "type": "stat"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green"
+                      },
+                      {
+                        "color": "red",
+                        "value": 1
+                      }
+                    ]
+                  }
                 },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 4,
+                "w": 3,
+                "x": 3,
+                "y": 36
+              },
+              "options": {
+                "colorMode": "background",
+                "graphMode": "none",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "text": {
+                  "valueSize": 60
+                },
+                "textMode": "auto"
+              },
+              "pluginVersion": "9.5.2",
+              "targets": [
                 {
                   "datasource": {
                     "type": "prometheus",
@@ -6303,7 +6330,7 @@ data:
                   "refId": "A"
                 }
               ],
-              "title": "Status",
+              "title": "Health Issues",
               "type": "stat"
             },
             {
