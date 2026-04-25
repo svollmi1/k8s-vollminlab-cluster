@@ -587,7 +587,6 @@ velero restore create --from-backup <backup-name>
 | Hostname | Internal target |
 |---|---|
 | `plex.vollminlab.com` | `http://plex.mediastack.svc.cluster.local:32400` |
-| `overseerr.vollminlab.com` | `http://overseerr.mediastack.svc.cluster.local:5055` |
 
 **DNS split:** Internal requests resolve via Pi-hole to `192.168.152.244` (ingress VIP). External requests hit Cloudflare edge → tunnel → cluster service. No inbound ports on the router.
 
