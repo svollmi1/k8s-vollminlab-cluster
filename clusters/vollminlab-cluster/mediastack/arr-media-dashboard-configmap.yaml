@@ -313,7 +313,7 @@ data:
           },
           "gridPos": {
             "h": 4,
-            "w": 5,
+            "w": 6,
             "x": 6,
             "y": 1
           },
@@ -437,7 +437,7 @@ data:
           "gridPos": {
             "h": 4,
             "w": 6,
-            "x": 11,
+            "x": 12,
             "y": 1
           },
           "options": {
@@ -579,8 +579,8 @@ data:
           },
           "gridPos": {
             "h": 4,
-            "w": 4,
-            "x": 17,
+            "w": 6,
+            "x": 18,
             "y": 1
           },
           "options": {
@@ -613,20 +613,6 @@ data:
               "legendFormat": "Response Time",
               "range": false,
               "refId": "B"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "sum(increase(prowlarr_indexer_failed_queries_total{instance=~\"${prowlarr_instance}\"}[$__range])) / sum(prowlarr_indexer_queries_total{instance=~\"${prowlarr_instance}\"})",
-              "hide": false,
-              "instant": true,
-              "legendFormat": "Failed Queries",
-              "range": false,
-              "refId": "D"
             }
           ],
           "type": "stat"
@@ -1132,8 +1118,8 @@ data:
           },
           "gridPos": {
             "h": 7,
-            "w": 12,
-            "x": 12,
+            "w": 24,
+            "x": 0,
             "y": 23
           },
           "options": {
