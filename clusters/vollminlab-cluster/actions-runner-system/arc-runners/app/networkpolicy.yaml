@@ -1,0 +1,56 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: arc-runners-egress
+  namespace: actions-runner-system
+  labels:
+    app: arc-runners
+    env: production
+    category: ci
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    # DNS — target CoreDNS pods directly so the rule matches post-DNAT destinations.
+    # ipBlock on the kube-dns service VIP (10.96.0.10) does not work: Calico evaluates
+    # egress rules after kube-proxy rewrites the destination to the actual CoreDNS pod IP.
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+    # Kubernetes API server — use actual control plane node IPs on 6443.
+    # In-cluster kubectl targets the kubernetes service VIP (10.96.0.1:443) which
+    # kube-proxy DNATs to these node IPs. ipBlock on the real endpoints works.
+    - to:
+        - ipBlock:
+            cidr: 192.168.152.8/32
+        - ipBlock:
+            cidr: 192.168.152.9/32
+        - ipBlock:
+            cidr: 192.168.152.10/32
+      ports:
+        - port: 6443
+          protocol: TCP
+    # Public internet — GitHub, OCI registries, apt mirrors, etc.
+    # All RFC 1918 ranges blocked to prevent accessing internal cluster services.
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - port: 443
+          protocol: TCP
+        - port: 80
+          protocol: TCP
