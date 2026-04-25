@@ -18,6 +18,7 @@ resources:
   - headlamp-helmrepository.yaml
   - homepage-helmrepository.yaml
   - ingress-nginx-helmrepository.yaml
+  - jellyfin-helmrepository.yaml
   - kyverno-helmrepository.yaml
   - kyverno-policyreporter-helmrepository.yaml
   - local-path-provisioner-gitrepository.yaml

@@ -8,8 +8,10 @@ resources:
   - ./secrets
   - ./bazarr/app
   - ./cloudflared/app
+  - ./cloudflared-jellyfin/app
   - ./exportarr/app
   - ./overseerr/app
+  - ./jellyfin/app
   - ./plex/app
   - ./prowlarr/app
   - ./radarr/app
