@@ -182,6 +182,7 @@ data:
         # Deprecated Kyverno / Flux CRDs — removed in newer API versions
         - '[Alert,*,*]'
         - '[CleanupPolicy,*,*]'
+        - '[ClusterCleanupPolicy,*,*]'
         - '[GlobalContextEntry,*,*]'
         - '[ImageValidatingPolicy,*,*]'
         - '[PolicyException,*,*]'
