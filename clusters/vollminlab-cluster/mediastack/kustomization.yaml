@@ -7,8 +7,10 @@ resources:
   - arr-media-dashboard-configmap.yaml
   - ./secrets
   - ./bazarr/app
+  - ./cloudflared/app
   - ./exportarr/app
   - ./overseerr/app
+  - ./plex/app
   - ./prowlarr/app
   - ./radarr/app
   - ./sabnzbd/app
