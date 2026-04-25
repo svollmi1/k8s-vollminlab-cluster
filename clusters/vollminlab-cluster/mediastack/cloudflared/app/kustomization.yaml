@@ -3,6 +3,5 @@ kind: Kustomization
 metadata:
   name: cloudflared-app
 resources:
-  - configmap.yaml
-  - helmrelease.yaml
   - cloudflared-tunnel-sealedsecret.yaml
+  - deployment.yaml
