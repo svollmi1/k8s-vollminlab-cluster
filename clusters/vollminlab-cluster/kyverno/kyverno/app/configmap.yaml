@@ -129,6 +129,11 @@ data:
           memory: 256Mi
 
     reportsController:
+      featuresOverride:
+        backgroundScan:
+          # Let the reports controller honor config.resourceFilters so it does
+          # not list deprecated served CRD versions during background scans.
+          skipResourceFilters: false
       labels:
         app: kyverno-reports-controller
         env: production
@@ -162,6 +167,12 @@ data:
         - '[StagedNetworkPolicy,*,*]'
         - '[StagedKubernetesNetworkPolicy,*,*]'
         - '[GlobalNetworkSet,*,*]'
+        - '[Alert,*,*]'
+        - '[CleanupPolicy,*,*]'
+        - '[GlobalContextEntry,*,*]'
+        - '[ImageValidatingPolicy,*,*]'
+        - '[PolicyException,*,*]'
+        - '[ValidatingPolicy,*,*]'
 
     serviceMonitor:
       enabled: true
