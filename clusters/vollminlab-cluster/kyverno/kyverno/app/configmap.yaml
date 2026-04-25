@@ -160,6 +160,7 @@ data:
 
     config:
       resourceFilters:
+        # Calico / Tigera CRDs — reports controller SA has no RBAC for these
         - '[GlobalNetworkPolicy,*,*]'
         - '[NetworkPolicy,*,*]'
         - '[Tier,*,*]'
@@ -167,12 +168,64 @@ data:
         - '[StagedNetworkPolicy,*,*]'
         - '[StagedKubernetesNetworkPolicy,*,*]'
         - '[GlobalNetworkSet,*,*]'
+        - '[BGPPeer,*,*]'
+        - '[BlockAffinity,*,*]'
+        - '[ClusterInformation,*,*]'
+        - '[FelixConfiguration,*,*]'
+        - '[HostEndpoint,*,*]'
+        - '[IPAMHandle,*,*]'
+        - '[IPPool,*,*]'
+        - '[IPReservation,*,*]'
+        - '[KubeControllersConfiguration,*,*]'
+        - '[Installation,*,*]'
+        - '[TigeraStatus,*,*]'
+        # Deprecated Kyverno / Flux CRDs — removed in newer API versions
         - '[Alert,*,*]'
         - '[CleanupPolicy,*,*]'
         - '[GlobalContextEntry,*,*]'
         - '[ImageValidatingPolicy,*,*]'
         - '[PolicyException,*,*]'
         - '[ValidatingPolicy,*,*]'
+        - '[DeletingPolicy,*,*]'
+        # Longhorn internal CRDs — no policies target these
+        - '[BackupBackingImage,*,*]'
+        - '[Backup,*,*]'
+        - '[EngineImage,*,*]'
+        - '[Orphan,*,*]'
+        - '[Setting,*,*]'
+        - '[ShareManager,*,*]'
+        - '[Snapshot,*,*]'
+        - '[SupportBundle,*,*]'
+        # MetalLB CRDs — no policies target these
+        - '[BFDProfile,*,*]'
+        - '[L2Advertisement,*,*]'
+        # Prometheus Operator / Grafana Agent CRDs — no policies target these
+        - '[Alertmanager,*,*]'
+        - '[AlertmanagerConfig,*,*]'
+        - '[ServiceMonitor,*,*]'
+        - '[ThanosRuler,*,*]'
+        - '[GrafanaAgent,*,*]'
+        - '[MetricsInstance,*,*]'
+        # CNPG CRDs — no policies target these
+        - '[Database,*,*]'
+        - '[ImageCatalog,*,*]'
+        - '[Subscription,*,*]'
+        # Velero CRDs — no policies target these
+        - '[PodVolumeBackup,*,*]'
+        # Elastic / ECK CRDs — no policies target these
+        - '[AutoOpsAgentPolicy,*,*]'
+        - '[ElasticsearchAutoscaler,*,*]'
+        - '[EnterpriseSearch,*,*]'
+        # Kubernetes built-ins with no applicable policies
+        - '[Secret,*,*]'
+        - '[PodTemplate,*,*]'
+        - '[ClusterRoleBinding,*,*]'
+        - '[StorageClass,*,*]'
+        - '[CSIStorageCapacity,*,*]'
+        - '[CustomResourceDefinition,*,*]'
+        - '[PriorityClass,*,*]'
+        - '[RuntimeClass,*,*]'
+        - '[Lease,*,*]'
 
     serviceMonitor:
       enabled: true
