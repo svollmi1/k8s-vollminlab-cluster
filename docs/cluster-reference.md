@@ -390,6 +390,7 @@ All ingresses use `ingressClassName: nginx`, TLS termination via `wildcard-tls`,
 | `prowlarr.vollminlab.com` | prowlarr | 9696 | mediastack | wildcard-tls |
 | `bazarr.vollminlab.com` | bazarr | 6767 | mediastack | wildcard-tls |
 | `overseerr.vollminlab.com` | overseerr | 5055 | mediastack | wildcard-tls |
+| `jellyfin.vollminlab.com` | jellyfin | 8096 | mediastack | wildcard-tls |
 | `plex.vollminlab.com` | plex | 32400 | mediastack | wildcard-tls |
 | `tautulli.vollminlab.com` | tautulli | 8181 | mediastack | wildcard-tls |
 | `go.vollminlab.com` | shlink-shlink-backend | 8080 | shlink | wildcard-tls |
@@ -447,6 +448,7 @@ All ingresses use `ingressClassName: nginx`, TLS termination via `wildcard-tls`,
 | `pvc-prowlarr-config` | mediastack | 5Gi | longhorn | RWO |
 | `pvc-bazarr-config` | mediastack | 5Gi | longhorn | RWO |
 | `pvc-overseerr-config` | mediastack | 5Gi | longhorn | RWO |
+| `pvc-jellyfin-config` | mediastack | 20Gi | longhorn | RWO |
 | `pvc-plex-config` | mediastack | 20Gi | longhorn | RWO |
 | `pvc-tautulli-config` | mediastack | 1Gi | longhorn | RWO |
 | `pvc-minecraft-datadir` | dmz | 20Gi | longhorn-dmz | RWX |
@@ -584,11 +586,31 @@ velero restore create --from-backup <backup-name>
 | CPU | req: 50m, limits: 200m |
 | Memory | req: 64Mi, limits: 128Mi |
 
-**Public hostnames (configured in Cloudflare Zero Trust dashboard):**
+Two separate tunnels are deployed — one per externally-accessible media service, for independent blast-radius and revocability.
+
+#### cloudflared (Plex tunnel)
+
+| Parameter | Value |
+|---|---|
+| Deployment | `cloudflared` in `mediastack` |
+| Tunnel token | SealedSecret `cloudflared-tunnel-credentials` (1Password: "Cloudflare Tunnel Token - vollminlab") |
 
 | Hostname | Internal target |
 |---|---|
 | `plex.vollminlab.com` | `http://plex.mediastack.svc.cluster.local:32400` |
+
+#### cloudflared-jellyfin (Jellyfin tunnel)
+
+| Parameter | Value |
+|---|---|
+| Deployment | `cloudflared-jellyfin` in `mediastack` |
+| Tunnel token | SealedSecret `cloudflared-jellyfin-tunnel-credentials` (1Password: store after sealing) |
+| CPU | req: 50m, limits: 200m |
+| Memory | req: 64Mi, limits: 128Mi |
+
+| Hostname | Internal target |
+|---|---|
+| `jellyfin.vollminlab.com` | `http://jellyfin.mediastack.svc.cluster.local:8096` |
 
 **DNS split:** Internal requests resolve via Pi-hole to `192.168.152.244` (ingress VIP). External requests hit Cloudflare edge → tunnel → cluster service. No inbound ports on the router.
 
@@ -768,6 +790,22 @@ All apps in the `mediastack` namespace. Shared SMB storage mounted at the namesp
 | Ingress | `overseerr.vollminlab.com` |
 | Port | 5055 |
 | Config PVC | 5Gi Longhorn RWO |
+
+### Jellyfin (Media server)
+
+| Parameter | Value |
+|---|---|
+| Chart | jellyfin/jellyfin 3.2.0 (HelmRepository: <https://jellyfin.github.io/jellyfin-helm/>) |
+| App version | 10.11.8 |
+| Ingress | `jellyfin.vollminlab.com` |
+| Port | 8096 |
+| Config PVC | `pvc-jellyfin-config` 20Gi Longhorn RWO |
+| Volumes | `pvc-movies` at `/movies` (RWX), `pvc-tv` at `/tv` (RWX) |
+| UID/GID | 568 |
+| External access | Cloudflare Tunnel via `cloudflared-jellyfin` Deployment (separate from Plex tunnel) |
+| Security gate | Jellyfin built-in auth only — no Cloudflare Access (native apps require no browser challenge) |
+| Public signup | Disabled — accounts created manually by admin |
+| Hardware transcoding | Deferred — CPU only for initial deployment |
 
 ### Plex (Media server)
 

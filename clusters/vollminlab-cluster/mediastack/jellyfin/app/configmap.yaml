@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jellyfin-values
+  namespace: mediastack
+  labels:
+    app: jellyfin
+    env: production
+    category: media
+data:
+  values.yaml: |
+    persistence:
+      config:
+        existingClaim: pvc-jellyfin-config
+      media:
+        enabled: false
+    volumes:
+      - name: movies
+        persistentVolumeClaim:
+          claimName: pvc-movies
+      - name: tv
+        persistentVolumeClaim:
+          claimName: pvc-tv
+    volumeMounts:
+      - name: movies
+        mountPath: /movies
+      - name: tv
+        mountPath: /tv
+    securityContext:
+      runAsUser: 568
+      runAsGroup: 568
+    podSecurityContext:
+      fsGroup: 568
+      fsGroupChangePolicy: "OnRootMismatch"
+    podLabels:
+      app: jellyfin
+      env: production
+      category: media
+    resources:
+      requests:
+        cpu: 500m
+        memory: 512Mi
+      limits:
+        cpu: 2000m
+        memory: 2Gi

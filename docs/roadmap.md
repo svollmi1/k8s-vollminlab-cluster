@@ -170,7 +170,24 @@ Deploy Authentik as the central IdP:
 - Pi-hole DNS updated: `plex.vollminlab.com → 192.168.152.244`. TrueNAS Plex shut down.
 - Overseerr remains internal-only. Can be added to tunnel via Cloudflare dashboard with no code changes.
 
-### 3.4 Tautulli / Plex Metrics Dashboard
+### 3.4 Jellyfin — Free External Streaming for Friends
+
+**Status:** `done`
+
+- Jellyfin deployed in `mediastack` alongside Plex. Official `jellyfin/jellyfin` chart v3.2.0.
+- Shares `pvc-movies` and `pvc-tv` SMB RWX mounts with Plex (read-only access, UID/GID 568).
+- Dedicated `pvc-jellyfin-config` 20Gi Longhorn RWO.
+- Separate `cloudflared-jellyfin` Deployment with its own tunnel — independent blast-radius from Plex.
+- Route: `jellyfin.vollminlab.com → http://jellyfin.mediastack.svc.cluster.local:8096`.
+- Security gate: Jellyfin built-in auth only. No Cloudflare Access policy (native apps cannot complete browser auth challenge). Public signup disabled; accounts managed manually.
+- Hardware transcoding deferred — CPU only. See roadmap for follow-up.
+
+**Deferred follow-ups:**
+
+- Hardware transcoding (`/dev/dri` device mount) — requires evaluating Kyverno `hostPath` audit policy impact
+- Jellyfin metrics / Grafana dashboard (parallel to Tautulli work in 3.5)
+
+### 3.5 Tautulli / Plex Metrics Dashboard
 
 **Status:** `planned`
 
