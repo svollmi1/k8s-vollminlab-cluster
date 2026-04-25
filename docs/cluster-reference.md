@@ -390,6 +390,7 @@ All ingresses use `ingressClassName: nginx`, TLS termination via `wildcard-tls`,
 | `prowlarr.vollminlab.com` | prowlarr | 9696 | mediastack | wildcard-tls |
 | `bazarr.vollminlab.com` | bazarr | 6767 | mediastack | wildcard-tls |
 | `overseerr.vollminlab.com` | overseerr | 5055 | mediastack | wildcard-tls |
+| `plex.vollminlab.com` | plex | 32400 | mediastack | wildcard-tls |
 | `tautulli.vollminlab.com` | tautulli | 8181 | mediastack | wildcard-tls |
 | `go.vollminlab.com` | shlink-shlink-backend | 8080 | shlink | wildcard-tls |
 | `vl.vollminlab.com` | shlink-shlink-backend | 8080 | shlink | wildcard-tls |
@@ -446,6 +447,7 @@ All ingresses use `ingressClassName: nginx`, TLS termination via `wildcard-tls`,
 | `pvc-prowlarr-config` | mediastack | 5Gi | longhorn | RWO |
 | `pvc-bazarr-config` | mediastack | 5Gi | longhorn | RWO |
 | `pvc-overseerr-config` | mediastack | 5Gi | longhorn | RWO |
+| `pvc-plex-config` | mediastack | 20Gi | longhorn | RWO |
 | `pvc-tautulli-config` | mediastack | 1Gi | longhorn | RWO |
 | `pvc-minecraft-datadir` | dmz | 20Gi | longhorn-dmz | RWX |
 | `portainer` | portainer | 10Gi | local-path | RWO |
@@ -766,6 +768,19 @@ All apps in the `mediastack` namespace. Shared SMB storage mounted at the namesp
 | Ingress | `overseerr.vollminlab.com` |
 | Port | 5055 |
 | Config PVC | 5Gi Longhorn RWO |
+
+### Plex (Media server)
+
+| Parameter | Value |
+|---|---|
+| Chart | TrueCharts plex 22.1.2 (OCIRepository) |
+| Ingress | `plex.vollminlab.com` |
+| Port | 32400 |
+| Config PVC | 20Gi Longhorn RWO |
+| Volumes | pvc-movies (RWX), pvc-tv (RWX) |
+| Allowed networks | `172.16.0.0/12, 10.0.0.0/8, 192.168.0.0/16` |
+| External access | Cloudflare Tunnel via cloudflared (see Infrastructure Services) |
+| Notes | Claim server via web UI on first launch from same-LAN browser |
 
 ### Tautulli (Plex monitoring)
 

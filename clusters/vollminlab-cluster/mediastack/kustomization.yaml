@@ -10,6 +10,7 @@ resources:
   - ./cloudflared/app
   - ./exportarr/app
   - ./overseerr/app
+  - ./plex/app
   - ./prowlarr/app
   - ./radarr/app
   - ./sabnzbd/app

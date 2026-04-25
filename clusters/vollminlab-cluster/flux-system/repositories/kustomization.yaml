@@ -27,6 +27,7 @@ resources:
   - minecraft-helmrepository.yaml
   - minio-helmrepository.yaml
   - overseerr-ocirepository.yaml
+  - plex-ocirepository.yaml
   - portainer-helmrepository.yaml
   - prometheus-community-helmrepository.yaml
   - prowlarr-ocirepository.yaml

@@ -16,9 +16,9 @@ Living document tracking planned infrastructure work. Update status as projects 
 - Velero with two BackupStorageLocations: `minio` (default, daily at 02:00 UTC) and `b2` (off-site, daily at 04:00 UTC)
 - Backblaze B2 bucket: `vollminlab-k8s-backups`, region `us-west-000`
 - Credentials in SealedSecrets; validation frequency tuned to 1h to limit B2 Class C API calls
-- Circular backup fixed (PR #410): `minio` namespace excluded from FSB on both schedules; first clean `Completed` backup expected 2026-04-23 02:00 UTC
-- **Still needed:** run a test restore and document the procedure in `docs/`
-- **Still needed:** scoped MinIO access key for Velero (currently uses root credentials) — tracked in `chore/velero-minio-access-key`
+- Circular backup fixed (PR #410): `minio` namespace excluded from FSB on both schedules
+- Scoped MinIO access key for Velero deployed (PR #362) — root credentials no longer used
+- **Still needed:** run a test restore and document the procedure in `docs/` (gate for Phase 8)
 
 ---
 
@@ -99,20 +99,13 @@ Deploy the OpenTelemetry Operator + a collector pipeline:
 
 ## Phase 2.5 — Flux Upgrade (v2.4 → v2.8)
 
-**Status:** `planned`
-**Depends on:** Phase 2 observability complete (done)
-**Risk:** Low — two-hop upgrade with manifest migration; cluster stays up throughout
+**Status:** `done`
 
-Cluster currently runs Flux v2.4.0. Latest stable is v2.8.x. Deprecated APIs generate continuous Kyverno log warnings about invalid `apiVersion` values, and will be hard-removed in future releases.
+Cluster upgraded from Flux v2.4.0 to v2.8.6 via two hops (PRs #423, #426, #428).
 
-**Two hops required** (cannot skip):
-
-1. v2.4 → v2.7: removes `Kustomization v1beta1`, `Provider v1beta2/v2beta1` — run `flux migrate` first
-2. v2.7 → v2.8: removes `OCIRepository v1beta2`, `HelmChart v1beta2`, `GitRepository v1beta2` — 11 `OCIRepository` files in this repo need migration (handled by `flux migrate` automatically)
-
-**Kubernetes compatibility:** v1.32.3 meets v2.8 minimum.
-
-**Procedure per hop:** migrate manifests PR → merge → upgrade `gotk-components.yaml` PR → merge → verify reconciliation before next hop. Do not bundle with other work.
+- 9 OCIRepository files migrated from `source.toolkit.fluxcd.io/v1beta2` → `v1`
+- Both hops required manually applying `gotk-components.yaml` with `--server-side --field-manager=kustomize-controller --force-conflicts` to break the bootstrap deadlock (old controller can't apply config that removes its own internal API references)
+- Post-hop: patched `ocirepositories` CRD `status.storedVersions` via `--subresource=status` to clear stale `v1beta2` entry
 
 ---
 
@@ -167,64 +160,26 @@ Deploy Authentik as the central IdP:
 
 ---
 
-### 3.3 Personal Media Services — External Access (Plex + Overseerr)
+### 3.3 Personal Media Services — External Access (Plex)
 
-**Status:** `planned` (architectural decision required — DMZ isolation constraint applies)
+**Status:** `in-progress` (PRs #439, #440)
 
-**Goal:** Make Plex and Overseerr accessible to friends and family externally, without disrupting local use.
+**Approach chosen:** Cloudflare Tunnel (outbound-only, no inbound router ports, no DMZ involvement).
 
-**Hard constraint:** The DMZ is fully isolated from the internal network by design. No DMZ pod may initiate connections to internal LAN hosts or internal-cluster namespaces. This rules out any approach that puts Plex or Overseerr in the DMZ and has them reach back to TrueNAS (media) or the arr stack (Radarr/Sonarr/Prowlarr). Any solution must work with that isolation preserved.
+**What was decided:**
 
-#### The core problem
+- Plex migrated from TrueNAS into `mediastack` namespace — same TrueCharts OCIRepository pattern as the arr stack. Media files stay on TrueNAS via existing SMB CSI mounts (`pvc-movies`, `pvc-tv`). 20Gi Longhorn PVC for Plex config/metadata.
+- `cloudflared` deployed in `mediastack` alongside Plex. Tunnel connects outbound to Cloudflare edge; Cloudflare routes `plex.vollminlab.com` to `http://plex.mediastack.svc.cluster.local:32400`.
+- Plex's own auth (myPlex accounts) is the sole access gate — no Cloudflare Access policy needed.
+- Overseerr is internal-only for now (external requests → uncontrolled downloads). Can be added to tunnel via Cloudflare dashboard later with no code changes.
+- DMZ isolation unaffected — cloudflared is an outbound connection from the trusted internal network.
 
-Both services have hard dependencies on internal resources:
+**Remaining steps:**
 
-- **Plex** needs direct filesystem access to the media library on TrueNAS
-- **Overseerr** needs to call Radarr, Sonarr, Prowlarr, and Plex — all in `mediastack`
-
-Neither can run in an isolated DMZ without solving this. The viable approaches are:
-
----
-
-##### Option A — Cloudflare Tunnel (recommended)
-
-Run `cloudflared` as a Deployment inside the internal cluster (in `mediastack` or a new `cloudflared` namespace). It creates an outbound-only connection to Cloudflare's edge — no inbound ports, no DMZ involvement, no internal network exposure. Visitors hit `plex.vollminlab.com` → Cloudflare edge → tunnel → internal Plex on TrueNAS (or Overseerr in mediastack).
-
-- Cloudflare Access gates both services with SSO (email-based invites for friends/family)
-- Zero impact on DMZ isolation — cloudflared runs inside the trusted internal network
-- No dependency on Authentik being ready
-- Plex stays on TrueNAS; Overseerr stays in mediastack — no migration needed
-- Tradeoff: Cloudflare sits in the traffic path; free tier has bandwidth limits on some features
-
----
-
-##### Option B — Dedicated storage VLAN
-
-Add TrueNAS to a separate storage VLAN that DMZ workers (k8sworker05/06) also have access to. Plex and Overseerr run in the `dmz` namespace; media mounts come over the storage VLAN, not the main internal LAN. Arr stack connections from Overseerr → mediastack would still require a separate solution (either a storage VLAN for data + a message queue for requests, or accepting Overseerr can't be fully in DMZ).
-
-- Requires UDM VLAN configuration and TrueNAS network interface changes
-- True isolation preserved: DMZ workers connect to a dedicated storage network, not the internal LAN
-- High complexity for what is essentially a personal use case
-- Better long-term fit if storage VLAN is needed for other reasons anyway
-
----
-
-##### Option C — UDM port forward (simple, no K8s changes)
-
-Port forward 32400 on the UDM directly to TrueNAS. Friends connect to your external IP or a dynamic DNS hostname. No DMZ, no cluster involvement.
-
-- No security model changes, no migration
-- Exposes TrueNAS directly to the internet — depends entirely on Plex's own auth
-- Overseerr would need a separate port forward; no SSO gating
-- Fine as a stopgap but not the right long-term answer given the security posture of this cluster
-
----
-
-#### Decision needed before implementation
-
-1. **Preferred approach:** Cloudflare Tunnel (Option A) is the most consistent with the existing security model and requires the least new infrastructure. Decide whether to run `cloudflared` in-cluster (Flux-managed) or on TrueNAS directly.
-2. **Overseerr capacity gate:** Before enabling external requests, audit TrueNAS free space and set per-user request quotas in Overseerr to prevent runaway downloads.
-3. **Plex migration question:** Regardless of which option is chosen for external access, decide independently whether Plex should eventually migrate from TrueNAS into the cluster (better metrics, GitOps management) or stay on TrueNAS permanently.
+1. Merge PR #439 (Plex in cluster) → claim server via web UI → verify libraries scan
+2. Create Cloudflare Tunnel in Zero Trust dashboard, seal token, add to PR #440 → merge
+3. Update Pi-hole DNS: `plex.vollminlab.com` → `192.168.152.244` (ingress VIP)
+4. Stop TrueNAS Plex once cluster instance is verified
 
 ---
 
@@ -378,3 +333,5 @@ This is a cluster rebuild risk event — do not attempt without working backups.
 | Grafana dashboards | Arr-media consolidated, Longhorn custom sidecar (PR #419), Velero custom sidecar (PR #420) |
 | Etcd defrag CronJob | Weekly defrag job in `kube-system` (PR #413) |
 | Velero circular backup fix | `minio` namespace excluded from FSB on both schedules; node-agents healthy on all 6 nodes (PR #410) |
+| Velero scoped MinIO access key | Replaced root credentials with a least-privilege `velero-svc` MinIO key (PR #362) |
+| Flux upgrade v2.4 → v2.8 | Two-hop upgrade via PRs #423, #426, #428; 9 OCIRepository files migrated to v1; bootstrap deadlock fix documented |
