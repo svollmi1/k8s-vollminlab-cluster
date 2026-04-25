@@ -11,4 +11,4 @@ spec:
   url: oci://oci.trueforge.org/truecharts/plex
   interval: 5m
   ref:
-    tag: 22.1.2
+    tag: 22.0.6
