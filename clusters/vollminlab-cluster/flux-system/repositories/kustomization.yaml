@@ -11,6 +11,7 @@ resources:
   - arc-runners-ocirepository.yaml
   - bazarr-helmrepository.yaml
   - cert-manager-helmrepository.yaml
+  - cloudflared-ocirepository.yaml
   - cnpg-helmrepository.yaml
   - external-dns-helmrepository.yaml
   - grafana-helmrepository.yaml
