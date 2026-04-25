@@ -54,13 +54,16 @@ data:
         app: grafana
         env: production
         category: observability
+      grafana.ini:
+        feature_toggles:
+          kubernetesDashboards: false
       resources:
         requests:
           cpu: 100m
-          memory: 128Mi
+          memory: 256Mi
         limits:
           cpu: 500m
-          memory: 256Mi
+          memory: 512Mi
       plugins:
         - grafana-lokiexplore-app
 
