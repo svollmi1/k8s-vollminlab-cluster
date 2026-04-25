@@ -313,7 +313,7 @@ data:
           },
           "gridPos": {
             "h": 4,
-            "w": 5,
+            "w": 6,
             "x": 6,
             "y": 1
           },
@@ -437,7 +437,7 @@ data:
           "gridPos": {
             "h": 4,
             "w": 6,
-            "x": 11,
+            "x": 12,
             "y": 1
           },
           "options": {
@@ -579,8 +579,8 @@ data:
           },
           "gridPos": {
             "h": 4,
-            "w": 4,
-            "x": 17,
+            "w": 6,
+            "x": 18,
             "y": 1
           },
           "options": {
@@ -613,20 +613,6 @@ data:
               "legendFormat": "Response Time",
               "range": false,
               "refId": "B"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "sum(increase(prowlarr_indexer_failed_queries_total{instance=~\"${prowlarr_instance}\"}[$__range])) / sum(prowlarr_indexer_queries_total{instance=~\"${prowlarr_instance}\"})",
-              "hide": false,
-              "instant": true,
-              "legendFormat": "Failed Queries",
-              "range": false,
-              "refId": "D"
             }
           ],
           "type": "stat"
@@ -1132,8 +1118,8 @@ data:
           },
           "gridPos": {
             "h": 7,
-            "w": 12,
-            "x": 12,
+            "w": 24,
+            "x": 0,
             "y": 23
           },
           "options": {
@@ -6223,39 +6209,11 @@ data:
                     ]
                   }
                 },
-                "overrides": [
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "Health Issues"
-                    },
-                    "properties": [
-                      {
-                        "id": "mappings",
-                        "value": []
-                      },
-                      {
-                        "id": "thresholds",
-                        "value": {
-                          "mode": "absolute",
-                          "steps": [
-                            {
-                              "color": "green"
-                            },
-                            {
-                              "color": "red",
-                              "value": 1
-                            }
-                          ]
-                        }
-                      }
-                    ]
-                  }
-                ]
+                "overrides": []
               },
               "gridPos": {
                 "h": 4,
-                "w": 6,
+                "w": 3,
                 "x": 0,
                 "y": 36
               },
@@ -6288,7 +6246,62 @@ data:
                   "legendFormat": "Status",
                   "range": false,
                   "refId": "A"
+                }
+              ],
+              "title": "Status",
+              "type": "stat"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green"
+                      },
+                      {
+                        "color": "red",
+                        "value": 1
+                      }
+                    ]
+                  }
                 },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 4,
+                "w": 3,
+                "x": 3,
+                "y": 36
+              },
+              "options": {
+                "colorMode": "background",
+                "graphMode": "none",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "text": {
+                  "valueSize": 60
+                },
+                "textMode": "auto"
+              },
+              "pluginVersion": "9.5.2",
+              "targets": [
                 {
                   "datasource": {
                     "type": "prometheus",
@@ -6303,7 +6316,7 @@ data:
                   "refId": "A"
                 }
               ],
-              "title": "Status",
+              "title": "Health Issues",
               "type": "stat"
             },
             {
