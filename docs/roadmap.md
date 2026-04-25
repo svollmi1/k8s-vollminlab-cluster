@@ -162,24 +162,24 @@ Deploy Authentik as the central IdP:
 
 ### 3.3 Personal Media Services — External Access (Plex)
 
-**Status:** `in-progress` (PRs #439, #440)
+**Status:** `done`
 
-**Approach chosen:** Cloudflare Tunnel (outbound-only, no inbound router ports, no DMZ involvement).
+- Plex migrated from TrueNAS into `mediastack` namespace (PRs #439, #442). Media files via existing SMB CSI mounts (`pvc-movies`, `pvc-tv`). 20Gi Longhorn PVC for config/metadata.
+- `cloudflared` deployed as a plain Deployment in `mediastack` (PR #440). Tunnel connects outbound to Cloudflare edge; routes `plex.vollminlab.com → http://plex.mediastack.svc.cluster.local:32400`.
+- Plex's own auth (myPlex accounts) is the sole access gate — no Cloudflare Access policy. Remote access disabled in Plex; port 32400 confirmed closed on public IP.
+- Pi-hole DNS updated: `plex.vollminlab.com → 192.168.152.244`. TrueNAS Plex shut down.
+- Overseerr remains internal-only. Can be added to tunnel via Cloudflare dashboard with no code changes.
 
-**What was decided:**
+### 3.4 Tautulli / Plex Metrics Dashboard
 
-- Plex migrated from TrueNAS into `mediastack` namespace — same TrueCharts OCIRepository pattern as the arr stack. Media files stay on TrueNAS via existing SMB CSI mounts (`pvc-movies`, `pvc-tv`). 20Gi Longhorn PVC for Plex config/metadata.
-- `cloudflared` deployed in `mediastack` alongside Plex. Tunnel connects outbound to Cloudflare edge; Cloudflare routes `plex.vollminlab.com` to `http://plex.mediastack.svc.cluster.local:32400`.
-- Plex's own auth (myPlex accounts) is the sole access gate — no Cloudflare Access policy needed.
-- Overseerr is internal-only for now (external requests → uncontrolled downloads). Can be added to tunnel via Cloudflare dashboard later with no code changes.
-- DMZ isolation unaffected — cloudflared is an outbound connection from the trusted internal network.
+**Status:** `planned`
 
-**Remaining steps:**
+Add a Grafana dashboard for Plex playback activity via Tautulli (already deployed in `mediastack`):
 
-1. Merge PR #439 (Plex in cluster) → claim server via web UI → verify libraries scan
-2. Create Cloudflare Tunnel in Zero Trust dashboard, seal token, add to PR #440 → merge
-3. Update Pi-hole DNS: `plex.vollminlab.com` → `192.168.152.244` (ingress VIP)
-4. Stop TrueNAS Plex once cluster instance is verified
+- Deploy a `tautulli-exporter` sidecar/deployment to scrape Tautulli's API and expose Prometheus metrics
+- Add a ServiceMonitor in `mediastack`
+- Create a dedicated Grafana dashboard (separate from the arr-media dashboard — different concern)
+- Metrics of interest: active streams, play counts by media type, user activity, transcoding vs. direct play
 
 ---
 
@@ -335,3 +335,4 @@ This is a cluster rebuild risk event — do not attempt without working backups.
 | Velero circular backup fix | `minio` namespace excluded from FSB on both schedules; node-agents healthy on all 6 nodes (PR #410) |
 | Velero scoped MinIO access key | Replaced root credentials with a least-privilege `velero-svc` MinIO key (PR #362) |
 | Flux upgrade v2.4 → v2.8 | Two-hop upgrade via PRs #423, #426, #428; 9 OCIRepository files migrated to v1; bootstrap deadlock fix documented |
+| Plex in-cluster + Cloudflare Tunnel | Plex migrated from TrueNAS (PRs #439, #440, #442); outbound-only tunnel, no open ports, Plex auth as sole gate |
