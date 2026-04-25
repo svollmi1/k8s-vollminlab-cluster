@@ -574,6 +574,26 @@ velero restore create --from-backup <backup-name>
 
 ## Infrastructure Services
 
+### cloudflared (Cloudflare Tunnel)
+
+| Parameter | Value |
+|---|---|
+| Chart | TrueCharts cloudflared 16.1.1 (OCIRepository) |
+| Namespace | `mediastack` |
+| Tunnel token | SealedSecret `cloudflared-tunnel-credentials` (1Password: "Cloudflare Tunnel Token - vollminlab") |
+| CPU | req: 50m, limits: 200m |
+| Memory | req: 64Mi, limits: 128Mi |
+
+**Public hostnames (configured in Cloudflare Zero Trust dashboard):**
+
+| Hostname | Internal target |
+|---|---|
+| `plex.vollminlab.com` | `http://plex.mediastack.svc.cluster.local:32400` |
+
+**DNS split:** Internal requests resolve via Pi-hole to `192.168.152.244` (ingress VIP). External requests hit Cloudflare edge → tunnel → cluster service. No inbound ports on the router.
+
+---
+
 ### metrics-server
 
 | Parameter | Value |
