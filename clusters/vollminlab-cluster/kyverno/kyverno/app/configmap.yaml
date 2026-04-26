@@ -227,6 +227,10 @@ data:
         - '[PriorityClass,*,*]'
         - '[RuntimeClass,*,*]'
         - '[Lease,*,*]'
+      # namespaceSelector can't exclude cluster-scoped resources; CEL evaluated by apiserver before any Kyverno connection
+      matchConditions:
+        - name: exclude-auth-review-resources
+          expression: "!(request.resource.resource in ['subjectaccessreviews', 'selfsubjectaccessreviews', 'selfsubjectrulesreviews', 'tokenreviews'])"
 
     serviceMonitor:
       enabled: true
