@@ -210,17 +210,16 @@ All volumes are `ReadWriteMany`, `100Gi`, backed by SMB shares at `192.168.150.2
 | Policy | Mode | Action | Rule |
 |---|---|---|---|
 | `restrict-default` | enforce | validate | Block all workloads in `default` namespace |
-| `restrict-privileged` | audit | validate | Block privileged containers; exempts: kube-system, calico-system, longhorn-system, metallb-system, csi-driver, tigera-operator, ingress-nginx |
-| `restrict-hostpath-usage` | audit | validate | Block hostPath volumes; exempts: kube-system, calico-system, longhorn-system, monitoring, tigera-operator |
-| `restrict-latest-tag` | audit | validate | Block `:latest` image tags on Deployment/StatefulSet/DaemonSet |
-| `restrict-loadbalancer-services` | audit | validate | LoadBalancer type only allowed in `ingress-nginx` and `dmz` namespaces |
+| `restrict-privileged` | enforce | validate | Block privileged containers; exempts: kube-system, calico-system, longhorn-system, metallb-system, csi-driver, tigera-operator, ingress-nginx |
+| `restrict-hostpath-usage` | enforce | validate | Block hostPath volumes; exempts: kube-system, calico-system, longhorn-system, monitoring, tigera-operator |
+| `restrict-latest-tag` | enforce | validate | Block `:latest` image tags on Deployment/StatefulSet/DaemonSet |
+| `restrict-loadbalancer-services` | enforce | validate | LoadBalancer type only allowed in `ingress-nginx` and `dmz` namespaces |
 | `require-standard-labels` | audit | validate | Require `app`, `env`, `category` labels on Deployments, StatefulSets, DaemonSets, Pods, Namespaces, Services; exempts: kube-system, default |
-| `require-resources` | audit | validate | Require CPU/memory requests and limits on all containers; exempts Flux deployments |
+| `require-resources` | enforce | validate | Require CPU/memory requests and limits on all containers; exempts Flux deployments |
 | `dmz-enforce-node-placement` | enforce | mutate | Auto-inject `nodeSelector: role=dmz` and toleration `dmz=Exists:NoSchedule` on all pods in `dmz` namespace |
 | `dmz-restrict-external-access` | enforce | validate | Block `external-access=true` and `internet-egress=true` labels outside `dmz` namespace |
 | `inject-namespace-labels` | — | mutate | Auto-copy `app`, `env`, `category` labels from namespace to workloads; exempts: longhorn-system, flux-system, monitoring |
 | `inject-resource-requirements` | — | mutate | Auto-inject resource limits for Longhorn sidecar containers (CSI attacher, provisioner, resizer, snapshotter, UI, manager, driver) |
-| `force-rescan-on-rollout` | — | mutate | Annotate Deployments/StatefulSets/DaemonSets with `policy.kyverno.io/kyverno-force-rescan` |
 
 **PolicyException: `ignore-flux-core`** — Exempts all Flux controllers and the `kyverno` HelmRelease from all policies.
 

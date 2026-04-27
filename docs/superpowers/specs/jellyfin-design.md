@@ -102,7 +102,7 @@ resources:
     memory: 2Gi
 ```
 
-CPU transcoding only for initial deployment. Hardware transcoding deferred (requires hostPath or device mount — Kyverno audit-mode violation; must be evaluated separately).
+CPU transcoding only for initial deployment. Hardware transcoding deferred (requires hostPath or device mount — blocked by Kyverno enforce policy; must be evaluated separately).
 
 ## Ingress
 
@@ -168,7 +168,7 @@ docs/roadmap.md                                  — add Jellyfin entry
 
 ## Deferred: hardware transcoding
 
-Requires a device mount (e.g. `/dev/dri`) via hostPath or device plugin. `hostPath` is a Kyverno audit-mode violation in this cluster. Evaluate separately; document the policy impact before enabling.
+Requires a device mount (e.g. `/dev/dri`) via hostPath or device plugin. `hostPath` is blocked by Kyverno enforce policy in this cluster. Evaluate separately; document the policy exception required before enabling.
 
 ## Deferred: Cloudflare Access for browser access
 

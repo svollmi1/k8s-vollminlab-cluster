@@ -213,10 +213,6 @@ data:
         - '[Subscription,*,*]'
         # Velero CRDs — no policies target these
         - '[PodVolumeBackup,*,*]'
-        # Elastic / ECK CRDs — no policies target these
-        - '[AutoOpsAgentPolicy,*,*]'
-        - '[ElasticsearchAutoscaler,*,*]'
-        - '[EnterpriseSearch,*,*]'
         # Kubernetes built-ins with no applicable policies
         - '[Secret,*,*]'
         - '[PodTemplate,*,*]'
