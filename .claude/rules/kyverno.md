@@ -25,11 +25,11 @@ Every HelmRelease and pod must use one of:
 
 | Category        | Apps                                                           |
 | --------------- | -------------------------------------------------------------- |
-| `core`          | Flux, Capacitor, Kyverno                                       |
+| `core`          | Flux, Headlamp, Kyverno                                        |
 | `security`      | cert-manager, sealed-secrets, Kyverno policy-reporter          |
 | `storage`       | Longhorn, local-path-provisioner, smb-csi-driver               |
-| `networking`    | ingress-nginx, MetalLB                                         |
-| `observability` | metrics-server, ECK (Elasticsearch/Kibana)                     |
+| `networking`    | ingress-nginx, MetalLB, external-dns                           |
+| `observability` | metrics-server, kube-prometheus-stack, Grafana, Loki           |
 | `apps`          | homepage, portainer, shlink, renovate                          |
 | `media`         | Radarr, Sonarr, Bazarr, Overseerr, Prowlarr, SABnzbd, Tautulli |
 | `gaming`        | Minecraft (dmz namespace only)                                 |

@@ -13,7 +13,7 @@ data:
       type: ClusterIP
       annotations: {}
     ingress:
-      enabled: false  # Set to true if you want to expose via ingress
+      enabled: false
     persistence:
       enabled: true
       existingClaim: portainer
@@ -24,18 +24,15 @@ data:
       requests:
         cpu: 100m
         memory: 128Mi
-    # Preserve existing configuration
     serviceAccount:
       create: true
       name: portainer-sa-clusteradmin
       annotations: {}
     rbac:
       enabled: true
-    # Edge agent configuration
     edge:
       enabled: true
       tunnelPort: 30776
-    # Security settings
     securityContext:
       runAsNonRoot: false
       runAsUser: 0
