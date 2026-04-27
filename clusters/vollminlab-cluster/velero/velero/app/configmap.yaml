@@ -116,6 +116,7 @@ data:
           excludedNamespaces:
             - minio
             - monitoring
+            - velero
           resourcePolicy:
             kind: ConfigMap
             name: velero-skip-smb-policy
@@ -130,6 +131,7 @@ data:
           excludedNamespaces:
             - minio
             - monitoring
+            - velero
           resourcePolicy:
             kind: ConfigMap
             name: velero-skip-smb-policy

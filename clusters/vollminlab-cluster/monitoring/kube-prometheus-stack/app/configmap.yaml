@@ -173,6 +173,7 @@ data:
         etcd: true
       disabled:
         KubeClientCertificateExpiration: true
+        KubeJobFailed: true
 
     kube-state-metrics:
       podLabels:

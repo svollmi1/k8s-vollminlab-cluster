@@ -99,6 +99,18 @@ spec:
             summary: "Velero daily-full backup partially failed"
             description: "A daily-full backup has PartiallyFailed in the last 26 hours. Check velero backup describe."
 
+        - alert: KubeJobFailed
+          expr: |
+            (kube_job_failed{namespace!="velero"} > 0)
+              or
+            (kube_job_failed{namespace="velero", job_name!~".*-kopia-maintain.*"} > 0)
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Job {{ $labels.namespace }}/{{ $labels.job_name }} failed to complete"
+            description: "Job {{ $labels.namespace }}/{{ $labels.job_name }} failed. Removing failed job after investigation should clear this alert."
+
         - alert: VeleroBackupMetricMissing
           expr: |
             absent(velero_backup_last_status{schedule="velero-daily-full"}) == 1
