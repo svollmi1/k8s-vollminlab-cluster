@@ -115,6 +115,7 @@ data:
           defaultVolumesToFsBackup: true
           excludedNamespaces:
             - minio
+            - monitoring
           resourcePolicy:
             kind: ConfigMap
             name: velero-skip-smb-policy
@@ -128,6 +129,7 @@ data:
           defaultVolumesToFsBackup: true
           excludedNamespaces:
             - minio
+            - monitoring
           resourcePolicy:
             kind: ConfigMap
             name: velero-skip-smb-policy
