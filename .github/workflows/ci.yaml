@@ -1,6 +1,5 @@
 name: CI Pipeline
 
-# Force workflow update for PR trigger
 on:
   push:
     branches: [ main, develop ]

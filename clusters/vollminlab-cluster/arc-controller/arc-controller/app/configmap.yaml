@@ -6,7 +6,7 @@ metadata:
   labels:
     app: arc-controller
     env: production
-    category: apps
+    category: ci
 data:
   values.yaml: |
     replicaCount: 2
@@ -16,7 +16,7 @@ data:
     podLabels:
       app: arc-controller
       env: production
-      category: apps
+      category: ci
 
     resources:
       requests:
