@@ -12,6 +12,7 @@ on:
       - '.claude/**'
       - 'docs/**'
       - '*.md'
+      - '.gitignore'
       - 'renovate.json'
       - '.pre-commit-config.yaml'
   pull_request:
@@ -26,6 +27,7 @@ on:
       - '.claude/**'
       - 'docs/**'
       - '*.md'
+      - '.gitignore'
       - 'renovate.json'
       - '.pre-commit-config.yaml'
   workflow_dispatch:
