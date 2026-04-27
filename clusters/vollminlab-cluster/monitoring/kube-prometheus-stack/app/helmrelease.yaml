@@ -18,6 +18,7 @@ spec:
         kind: HelmRepository
         name: prometheus-community-repo
         namespace: flux-system
+# yamllint disable rule:line-length
   postRenderers:
     - kustomize:
         patches:
