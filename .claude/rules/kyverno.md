@@ -8,16 +8,16 @@ description: Kyverno policy rules, required labels, DMZ constraints, and enforce
 
 | Policy               | Rule                                                                      |
 | -------------------- | ------------------------------------------------------------------------- |
-| Required labels      | Every pod must have `app`, `env`, and `category` labels                   |
+| Resource limits      | Every pod must have CPU + memory requests and limits                      |
+| No `:latest` tags    | Image tags must be pinned — `:latest` is blocked                          |
+| No privileged        | Privileged containers are blocked                                         |
+| No `hostPath`        | `hostPath` volumes are blocked                                            |
 | No default namespace | Pods may not run in the `default` namespace                               |
 | DMZ placement        | DMZ pods must run on `k8sworker05`/`k8sworker06` (injected automatically) |
 
 ## Audit-mode policies (violations logged, not blocked)
 
-- Resource limits required (CPU + memory requests/limits)
-- No `:latest` image tags
-- No privileged containers
-- No `hostPath` volumes
+- Required labels (`app`, `env`, `category`) — pods missing these labels are logged but not blocked
 
 ## Valid `category` label values
 
