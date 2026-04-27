@@ -170,8 +170,6 @@ All volumes are `ReadWriteMany`, `100Gi`, backed by SMB shares at `192.168.150.2
 
 ### RBAC
 
-**`capacitor`** ClusterRole — grants the Capacitor dashboard read access to: pods, ingresses, deployments, services, secrets, events, configmaps, and all Flux resources (patch).
-
 **`disk-cleanup`** ClusterRole — grants the maintenance CronJob: read nodes/pods, delete pods, read deployments/daemonsets/replicasets.
 
 **Kyverno webhook patch** ClusterRole — grants Kyverno permission to patch `mutatingwebhookconfigurations` and `validatingwebhookconfigurations`.
@@ -195,7 +193,7 @@ All volumes are `ReadWriteMany`, `100Gi`, backed by SMB shares at `192.168.150.2
 
 | Parameter | Value |
 |---|---|
-| Chart version | v3.4.1 |
+| Chart version | 3.7.2 |
 | Helm repo | https://kyverno.github.io/kyverno/ |
 | Replicas | 3 |
 | Admission controller replicas | 3 |
@@ -274,13 +272,16 @@ All Kustomizations use `interval: 10m`, `prune: true`, source `flux-system` GitR
 
 | Kustomization | Path | Notes |
 |---|---|---|
-| `actions-runner-system` | `./clusters/vollminlab-cluster/actions-runner-system` | |
-| `actions-runner-system-patch` | patch only | Webhook patches |
-| `capacitor` | `flux-system/capacitor` | dependsOn: flux-system |
+| `actions-runner-system` | `./clusters/vollminlab-cluster/actions-runner-system` | ARC runner scale set workloads |
+| `actions-runner-system-runners` | `./clusters/vollminlab-cluster/actions-runner-system` | |
+| `arc-controller` | `./clusters/vollminlab-cluster/arc-controller` | ARC scale set controller |
 | `cert-manager` | `./clusters/vollminlab-cluster/cert-manager` | |
 | `clusterwide` | `./clusters/vollminlab-cluster/clusterwide` | |
+| `cnpg-system` | `./clusters/vollminlab-cluster/cnpg-system` | |
 | `dmz` | `./clusters/vollminlab-cluster/dmz` | |
-| `elastic-system` | `./clusters/vollminlab-cluster/elastic-system` | |
+| `external-dns` | `./clusters/vollminlab-cluster/external-dns` | |
+| `harbor` | `./clusters/vollminlab-cluster/harbor` | |
+| `headlamp` | `./clusters/vollminlab-cluster/flux-system/headlamp/app` | Kubernetes UI with Flux plugin |
 | `homepage` | `./clusters/vollminlab-cluster/homepage` | |
 | `ingress-nginx` | `./clusters/vollminlab-cluster/ingress-nginx` | |
 | `kube-system` | `./clusters/vollminlab-cluster/kube-system` | |
@@ -291,54 +292,67 @@ All Kustomizations use `interval: 10m`, `prune: true`, source `flux-system` GitR
 | `longhorn-system` | `./clusters/vollminlab-cluster/longhorn-system` | |
 | `mediastack` | `./clusters/vollminlab-cluster/mediastack` | |
 | `metallb-system` | `./clusters/vollminlab-cluster/metallb-system` | |
-| `monitoring` | `./clusters/vollminlab-cluster/monitoring` | Placeholder — not deployed |
+| `minio` | `./clusters/vollminlab-cluster/minio` | |
+| `monitoring` | `./clusters/vollminlab-cluster/monitoring` | kube-prometheus-stack, Loki, Promtail |
 | `policy-reporter` | `./clusters/vollminlab-cluster/kyverno` | |
 | `policy-reporter-patch` | patch only | |
 | `portainer` | `./clusters/vollminlab-cluster/portainer` | |
+| `renovate` | `./clusters/vollminlab-cluster/renovate` | |
 | `sealed-secrets` | `./clusters/vollminlab-cluster/sealed-secrets` | |
+| `shlink` | `./clusters/vollminlab-cluster/shlink` | |
+| `velero` | `./clusters/vollminlab-cluster/velero` | |
 
-### Capacitor (Flux UI Dashboard)
+### Headlamp (Kubernetes UI)
 
 | Parameter | Value |
 |---|---|
-| Image | `ghcr.io/gimlet-io/capacitor:v0.4.8` |
-| Chart | onechart v0.73.0 (gimlet.io) |
-| Ingress | `capacitor.vollminlab.com` |
+| Chart | headlamp v0.41.0 (kubernetes-sigs.github.io/headlamp) |
+| Namespace | flux-system |
+| Ingress | `headlamp.vollminlab.com` |
 | TLS | wildcard-tls |
-| Port | 9000 |
-| CPU | req: 100m, limits: 200m |
+| Plugin | headlamp-plugin-flux v0.6.0 (init container) |
+| CPU | req: 150m, limits: 500m |
 | Memory | req: 256Mi, limits: 512Mi |
-| Security | runAsNonRoot, runAsUser=100, readOnlyRootFilesystem, drop=ALL, seccompProfile=RuntimeDefault |
 
-### HelmRepositories
+### Repository Sources
 
-| Name | Type | URL |
+| Name | Type | URL / OCI ref |
 |---|---|---|
-| arc-repo | HelmRepository | https://actions-runner-controller.github.io/actions-runner-controller |
-| capacitor-repo | HelmRepository | https://gimlet.io/onechart/ |
+| arc-controller-repo | OCIRepository | oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller (tag: 0.14.0) |
+| arc-runners-repo | OCIRepository | oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set (tag: 0.14.0) |
+| bazarr-repo | HelmRepository | https://k8s-home-lab.github.io/helm-charts/ |
 | cert-manager-repo | HelmRepository | https://charts.jetstack.io |
-| elastic-repo | HelmRepository | https://helm.elastic.co |
-| homepage-repo | HelmRepository | https://jameswynn.github.io/helm-charts/ |
+| cnpg-repo | HelmRepository | https://cloudnative-pg.github.io/charts |
+| external-dns-repo | HelmRepository | https://kubernetes-sigs.github.io/external-dns/ |
+| grafana-repo | HelmRepository | https://grafana.github.io/helm-charts |
+| harbor-repo | HelmRepository | https://helm.goharbor.io |
+| headlamp-repo | HelmRepository | https://kubernetes-sigs.github.io/headlamp/ |
+| homepage-repo | HelmRepository | https://jameswynn.github.io/helm-charts |
 | ingress-nginx-repo | HelmRepository | https://kubernetes.github.io/ingress-nginx |
-| kyverno-repo | HelmRepository | https://kyverno.github.io/kyverno/ |
-| kyverno-policyreporter-repo | HelmRepository | https://kyverno.github.io/policy-reporter/ |
+| jellyfin-repo | HelmRepository | https://jellyfin.github.io/jellyfin-helm/ |
+| kyverno-repo | HelmRepository | https://kyverno.github.io/kyverno |
+| kyverno-policyreporter-repo | HelmRepository | https://kyverno.github.io/policy-reporter |
 | local-path-provisioner-repo | GitRepository | https://github.com/rancher/local-path-provisioner (tag: v0.0.35) |
 | longhorn-repo | HelmRepository | https://charts.longhorn.io |
-| metallb-repo | HelmRepository | https://metallb.universe.tf |
+| metallb-repo | HelmRepository | https://metallb.github.io/metallb |
 | metrics-server-repo | HelmRepository | https://kubernetes-sigs.github.io/metrics-server/ |
 | minecraft-repo | HelmRepository | https://itzg.github.io/minecraft-server-charts/ |
-| overseerr-repo | OCIRepository | — |
-| portainer-repo | HelmRepository | https://portainer.io/helm |
-| prowlarr-repo | OCIRepository | — |
-| radarr-repo | OCIRepository | — |
-| sabnzbd-repo | OCIRepository | — |
-| sealed-secrets-repo | HelmRepository | https://sealed-secrets.dev |
+| minio-repo | HelmRepository | https://charts.min.io/ |
+| overseerr-repo | OCIRepository | oci://oci.trueforge.org/truecharts/overseerr |
+| plex-repo | OCIRepository | oci://oci.trueforge.org/truecharts/plex |
+| portainer-repo | HelmRepository | https://portainer.github.io/k8s |
+| prometheus-community-repo | HelmRepository | https://prometheus-community.github.io/helm-charts |
+| prowlarr-repo | OCIRepository | oci://oci.trueforge.org/truecharts/prowlarr |
+| radarr-repo | OCIRepository | oci://oci.trueforge.org/truecharts/radarr |
+| renovate-repo | OCIRepository | oci://ghcr.io/renovatebot/charts/renovate |
+| sabnzbd-repo | OCIRepository | oci://oci.trueforge.org/truecharts/sabnzbd |
+| sealed-secrets-repo | HelmRepository | https://bitnami-labs.github.io/sealed-secrets |
+| shlink-repo | HelmRepository | https://charts.christianhuth.de |
 | smb-csi-driver-repo | HelmRepository | https://raw.githubusercontent.com/kubernetes-csi/csi-driver-smb/master/charts |
-| sonarr-repo | OCIRepository | — |
-| tautulli-repo | HelmRepository | — |
-| bazarr-repo | HelmRepository | — |
-| bitnami-repo | HelmRepository | — |
-| minecraft-repo | HelmRepository | https://itzg.github.io/minecraft-server-charts/ |
+| sonarr-repo | OCIRepository | oci://oci.trueforge.org/truecharts/sonarr |
+| tautulli-repo | HelmRepository | https://k8s-at-home.com/charts/ |
+| velero-repo | HelmRepository | https://vmware-tanzu.github.io/helm-charts |
+| vollminlab-repo | OCIRepository | oci://harbor.vollminlab.com/vollminlab/charts/shlink-ingress-controller |
 
 ---
 
@@ -348,7 +362,7 @@ All Kustomizations use `interval: 10m`, `prune: true`, source `flux-system` GitR
 
 | Parameter | Value |
 |---|---|
-| Chart version | v4.12.0 |
+| Chart version | 4.15.1 |
 | Helm repo | https://kubernetes.github.io/ingress-nginx |
 | Default SSL certificate | `cert-manager/wildcard-tls` |
 
@@ -356,7 +370,7 @@ All Kustomizations use `interval: 10m`, `prune: true`, source `flux-system` GitR
 
 | Parameter | Value |
 |---|---|
-| Chart version | v1.16.3 |
+| Chart version | v1.20.2 |
 | Helm repo | https://charts.jetstack.io |
 | DNS01 recursive nameservers only | true |
 | DNS01 recursive nameservers | `10.96.0.10:53` |
@@ -381,7 +395,7 @@ All ingresses use `ingressClassName: nginx`, TLS termination via `wildcard-tls`,
 | Hostname | Backend | Port | Namespace | TLS Secret |
 |---|---|---|---|---|
 | `homepage.vollminlab.com` | homepage | 3000 | homepage | wildcard-tls |
-| `capacitor.vollminlab.com` | capacitor | 9000 | flux-system | wildcard-tls |
+| `headlamp.vollminlab.com` | headlamp | 4466 | flux-system | wildcard-tls |
 | `longhorn.vollminlab.com` | longhorn-frontend | 80 | longhorn-system | wildcard-tls |
 | `policyreporter.vollminlab.com` | policy-reporter-ui | 8080 | kyverno | wildcard-tls |
 | `radarr.vollminlab.com` | radarr | 7878 | mediastack | wildcard-tls |
@@ -418,7 +432,7 @@ All ingresses use `ingressClassName: nginx`, TLS termination via `wildcard-tls`,
 
 | Parameter | Value |
 |---|---|
-| Chart version | v1.17.0 |
+| Chart version | 1.20.1 |
 | Helm repo | https://raw.githubusercontent.com/kubernetes-csi/csi-driver-smb/master/charts |
 | NAS address | `192.168.150.2` |
 | SMB shares | movies, tv, completed-downloads, incomplete-downloads |
@@ -620,22 +634,13 @@ Two separate tunnels are deployed — one per externally-accessible media servic
 
 | Parameter | Value |
 |---|---|
-| Chart version | v3.12.2 |
+| Chart version | 3.13.0 |
 | Helm repo | https://kubernetes-sigs.github.io/metrics-server/ |
 | kubelet-insecure-tls | true |
 | kubelet preferred address types | InternalIP, Hostname, InternalDNS |
 | Metric resolution | 15s |
 | CPU | req: 50m, limits: 200m |
 | Memory | req: 64Mi, limits: 128Mi |
-
-### ECK Operator (Elasticsearch)
-
-| Parameter | Value |
-|---|---|
-| Chart version | v2.16.1 |
-| Helm repo | https://helm.elastic.co |
-| Webhook | enabled |
-| Log verbosity | 1 |
 
 ### Shlink (URL Shortener)
 
@@ -667,7 +672,7 @@ Two separate tunnels are deployed — one per externally-accessible media servic
 | Slug | Destination |
 |---|---|
 | homepage | https://homepage.vollminlab.com |
-| capacitor | https://capacitor.vollminlab.com |
+| headlamp | https://headlamp.vollminlab.com |
 | longhorn | https://longhorn.vollminlab.com |
 | policyreporter | https://policyreporter.vollminlab.com |
 | radarr | https://radarr.vollminlab.com |
@@ -702,30 +707,32 @@ Two separate tunnels are deployed — one per externally-accessible media servic
 
 ---
 
-### Actions Runner Controller
+### Actions Runner Controller (ARC v2)
+
+**Controller** (`arc-controller` namespace):
 
 | Parameter | Value |
 |---|---|
-| Chart version | v0.23.7 |
-| Helm repo | https://actions-runner-controller.github.io/actions-runner-controller |
+| Chart | gha-runner-scale-set-controller v0.14.0 (OCIRepository) |
+| Replicas | 2 |
+| Watches namespace | actions-runner-system |
+| Controller CPU | req: 50m, limits: 500m |
+| Controller memory | req: 64Mi, limits: 256Mi |
+
+**Runner scale set** (`actions-runner-system` namespace):
+
+| Parameter | Value |
+|---|---|
+| Chart | gha-runner-scale-set v0.14.0 (OCIRepository) |
+| Scale set name | vollminlab |
+| GitHub scope | org (github.com/vollminlab) |
 | Auth | GitHub App (sealed secret: `arc-githubapp-secret`) |
-| Sync period | 1m |
-| Leader election | enabled |
-| Manager replicas | 3 |
-| Manager resources | req: 50m/64Mi, limits: 200m/128Mi |
-| Container mode | kubernetes |
-| Anti-affinity | preferred (weight 100) |
-
-**RunnerDeployments** — 2 pools, 5 total replicas:
-
-| Pool | Runner label | Replicas | Repository | Image | CPU | Memory |
-|---|---|---|---|---|---|---|
-| pool-1 | vollminlab-1 | 3 | svollmi1/k8s-vollminlab-cluster | summerwind/actions-runner:ubuntu-22.04 | req 500m / limits 2000m | req 512Mi / limits 2Gi |
-| pool-3 | vollminlab-3 | 2 | svollmi1/k8s-vollminlab-cluster | summerwind/actions-runner:ubuntu-22.04 | req 500m / limits 2000m | req 512Mi / limits 2Gi |
-
-Pool-1 has 3 replicas to support concurrent CI jobs. Pool-2 (`vollminlab-2`) was removed — no CI jobs used that label.
-
-Runners are ephemeral (`RUNNER_EPHEMERAL=true`). `RUNNER_WAIT_FOR_DOCKERD_SECONDS=120`.
+| Min runners | 4 |
+| Max runners | 10 |
+| Runner image | `ghcr.io/actions/actions-runner:2.332.0` |
+| DinD sidecar | `docker:26-dind` (privileged, tcp://localhost:2375) |
+| Runner CPU | req: 500m, limits: 2000m |
+| Runner memory | req: 512Mi, limits: 2Gi |
 
 ---
 
@@ -964,4 +971,4 @@ The `dmz` namespace is a security boundary for internet-exposed workloads. Full 
 
 ### Self-Hosted Runners (ARC)
 
-CI runs on self-hosted runners in `actions-runner-system`. 2 pools, 5 total replicas. Jobs target runner labels `vollminlab-1` (pool-1, 3 replicas) and `vollminlab-3` (pool-3, 2 replicas).
+CI runs on self-hosted runners via ARC v2 (gha-runner-scale-set) in `actions-runner-system`. Scale set name: `vollminlab`. Min 4 / max 10 runners. Jobs target the `vollminlab` runner group label.

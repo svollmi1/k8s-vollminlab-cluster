@@ -35,25 +35,32 @@ bootstrap/                              # Manual bootstrap only — NOT Flux-man
 
 clusters/vollminlab-cluster/            # Everything Flux reconciles
   flux-system/
-    repositories/                       # 24 HelmRepositories + 1 GitRepository
+    repositories/                       # 24 HelmRepositories + 10 OCIRepositories + 1 GitRepository
     flux-kustomizations/                # Flux Kustomization CRs (one per app/namespace)
-  actions-runner-system/                # GitHub Actions self-hosted runners
+  actions-runner-system/                # GitHub Actions ARC runners (scale set workloads)
+  arc-controller/                       # GitHub ARC scale set controller
   cert-manager/                         # TLS certificate automation
   clusterwide/                          # PersistentVolumes, StorageClasses, RBAC
+  cnpg-system/                          # CloudNative PG operator
   dmz/                                  # Internet-exposed workloads (Minecraft)
-  elastic-system/                       # ECK Operator
-  flux-system/                          # Flux controllers + sync config
+  external-dns/                         # Automated DNS record management
+  flux-system/                          # Flux controllers + Headlamp (Flux UI)
+  harbor/                               # Container registry
   homepage/                             # Homepage dashboard
   ingress-nginx/                        # Ingress controller
   kube-system/                          # metrics-server, smb-csi-driver
-  kyverno/                              # Policy engine + 12 ClusterPolicies + policy-reporter
+  kyverno/                              # Policy engine + ClusterPolicies + policy-reporter
   local-path-storage/                   # Node-local storage provisioner
   longhorn-system/                      # Distributed block storage
   mediastack/                           # Sonarr, Radarr, Bazarr, Prowlarr, SABnzbd, Overseerr, Tautulli
   metallb-system/                       # Bare-metal load balancer
-  monitoring/                           # Monitoring stack (in progress)
+  minio/                                # S3-compatible object storage (Velero backend)
+  monitoring/                           # Prometheus, Grafana, Loki, Promtail
   portainer/                            # Container management UI
+  renovate/                             # Automated dependency updates
   sealed-secrets/                       # Sealed secrets controller
+  shlink/                               # Short URL service + ingress annotation controller
+  velero/                               # Cluster backup
 
 scripts/                                # Utility scripts
 ```
@@ -67,30 +74,35 @@ scripts/                                # Utility scripts
 | App | Namespace | Chart Version | Purpose |
 |---|---|---|---|
 | Flux CD | flux-system | — | GitOps reconciliation |
-| Capacitor | flux-system | latest | Flux UI dashboard |
-| Kyverno | kyverno | v3.4.1 | Policy enforcement |
-| Policy Reporter | kyverno | ~v16 | Policy violation reporting |
-| ingress-nginx | ingress-nginx | v4.12.0 | Ingress controller |
-| cert-manager | cert-manager | v1.16.3 | TLS certificates |
+| Headlamp | flux-system | 0.41.0 | Kubernetes UI with Flux plugin |
+| Kyverno | kyverno | 3.7.2 | Policy enforcement |
+| Policy Reporter | kyverno | — | Policy violation reporting |
+| ingress-nginx | ingress-nginx | 4.15.1 | Ingress controller |
+| cert-manager | cert-manager | v1.20.2 | TLS certificates |
 | MetalLB | metallb-system | — | LoadBalancer IPs |
 | Sealed Secrets | sealed-secrets | — | Git-safe secrets |
-| metrics-server | kube-system | v3.12.2 | Resource metrics API |
-| ECK Operator | elastic-system | v2.16.1 | Elasticsearch on K8s |
+| metrics-server | kube-system | 3.13.0 | Resource metrics API |
+| External DNS | external-dns | — | Automated DNS records (Pi-hole) |
+| CNPG Operator | cnpg-system | — | CloudNative PostgreSQL |
 
 ### Storage
 
 | App | Namespace | Purpose |
 |---|---|---|
 | Longhorn | longhorn-system | Distributed block storage (RWO + RWX) |
-| SMB CSI Driver | kube-system | v1.17.0 — SMB/CIFS network shares |
+| SMB CSI Driver | kube-system | 1.20.1 — SMB/CIFS network shares |
 | Local Path Provisioner | local-path-storage | Node-local ephemeral storage |
+| MinIO | minio | S3-compatible object storage (Velero backend) |
 
 ### Applications
 
 | App | Namespace | Purpose |
 |---|---|---|
-| Homepage | homepage | v2.1.0 — Cluster dashboard |
+| Homepage | homepage | Cluster dashboard |
 | Portainer | portainer | Container management UI |
+| Harbor | harbor | Container registry |
+| Shlink | shlink | Short URL service (vollm.in) |
+| Renovate | renovate | Automated dependency updates |
 | Overseerr | mediastack | Media request management |
 | Sonarr | mediastack | TV series automation |
 | Radarr | mediastack | Movie automation |
@@ -104,7 +116,8 @@ scripts/                                # Utility scripts
 
 | App | Namespace | Purpose |
 |---|---|---|
-| Actions Runner Controller | actions-runner-system | v0.23.7 — Self-hosted GitHub Actions runners |
+| ARC Scale Set Controller | arc-controller | 0.14.0 — Self-hosted GitHub Actions runners (ARC v2) |
+| Velero | velero | Cluster backup to MinIO + Backblaze B2 |
 
 ---
 
@@ -143,7 +156,7 @@ For a full cluster rebuild, follow this order exactly:
 | Policy | Action | Rule |
 |---|---|---|
 | restrict-default | Block | No workloads in `default` namespace |
-| require-labels | Block | All pods need `app`, `env`, `category` labels |
+| require-labels | Audit | All pods need `app`, `env`, `category` labels (logged, not blocked) |
 | require-resources | Block | CPU/memory requests and limits required |
 | inject-resource-requirements | Mutate | Auto-inject default limits |
 | restrict-privileged | Block | No privileged containers |
