@@ -141,7 +141,7 @@ sudo cp /etc/kubernetes/admin.conf ~/.kube/config && sudo chown $(id -u):$(id -g
 
 Deploy Authentik as the central IdP:
 
-- OIDC/OAuth2 for all web UIs (Grafana, Longhorn, Capacitor, Homepage, etc.)
+- OIDC/OAuth2 for all web UIs (Grafana, Longhorn, Headlamp, Homepage, etc.)
 - LDAP outpost for apps that don't support OIDC natively
 - Forward Auth proxy for apps with no built-in auth
 - Requires PostgreSQL (Bitnami subchart or shared instance TBD)
