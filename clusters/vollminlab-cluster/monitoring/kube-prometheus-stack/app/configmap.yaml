@@ -67,6 +67,13 @@ data:
       plugins:
         - grafana-lokiexplore-app
 
+      persistence:
+        enabled: true
+        storageClassName: longhorn
+        size: 1Gi
+        accessModes:
+          - ReadWriteOnce
+
       additionalDataSources:
         - name: Loki
           type: loki
