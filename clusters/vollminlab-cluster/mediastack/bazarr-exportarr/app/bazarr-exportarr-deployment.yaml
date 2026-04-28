@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: exportarr
+  name: bazarr-exportarr
   namespace: mediastack
   labels:
-    app: exportarr
+    app: bazarr-exportarr
     env: production
     category: media
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: exportarr
+      app: bazarr-exportarr
   template:
     metadata:
       labels:
-        app: exportarr
+        app: bazarr-exportarr
         env: production
         category: media
     spec:

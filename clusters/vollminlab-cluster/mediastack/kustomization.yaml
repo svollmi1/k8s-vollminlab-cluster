@@ -6,10 +6,12 @@ resources:
   - namespace.yaml
   - arr-media-dashboard-configmap.yaml
   - ./secrets
+  - ./audiobookshelf/app
   - ./bazarr/app
   - ./cloudflared/app
+  - ./cloudflared-audiobookshelf/app
   - ./cloudflared-jellyfin/app
-  - ./exportarr/app
+  - ./bazarr-exportarr/app
   - ./overseerr/app
   - ./jellyfin/app
   - ./plex/app
