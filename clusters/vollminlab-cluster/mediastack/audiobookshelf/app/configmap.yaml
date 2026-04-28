@@ -18,6 +18,10 @@ data:
         enabled: true
         existingClaim: pvc-audiobooks
         mountPath: /audiobooks
+      books:
+        enabled: true
+        existingClaim: pvc-books
+        mountPath: /books
       metadata:
         enabled: true
         existingClaim: pvc-audiobookshelf-metadata

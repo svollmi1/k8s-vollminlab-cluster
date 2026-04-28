@@ -4,6 +4,7 @@ metadata:
   name: mediastack-pvcs
 resources:
   - pvc-audiobooks.yaml
+  - pvc-books.yaml
   - pvc-completed-downloads.yaml
   - pvc-incomplete-downloads.yaml
   - pvc-movies.yaml
