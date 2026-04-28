@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: audiobookshelf-ingress
+  namespace: mediastack
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    shlink.vollminlab.com/slug: audiobookshelf
+  labels:
+    app: audiobookshelf
+    env: production
+    category: media
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: audiobookshelf.vollminlab.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: audiobookshelf
+                port:
+                  number: 10223
+  tls:
+    - hosts:
+        - audiobookshelf.vollminlab.com
+      secretName: wildcard-tls
