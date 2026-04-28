@@ -1,0 +1,19 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: audiobookshelf
+  namespace: mediastack
+  labels:
+    app: audiobookshelf
+    env: production
+    category: media
+spec:
+  interval: 5m
+  chartRef:
+    kind: OCIRepository
+    name: audiobookshelf-repo
+    namespace: flux-system
+  valuesFrom:
+    - kind: ConfigMap
+      name: audiobookshelf-values
+      valuesKey: values.yaml
