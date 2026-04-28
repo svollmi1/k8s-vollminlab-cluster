@@ -11,4 +11,4 @@ spec:
   url: oci://oci.trueforge.org/truecharts/audiobookshelf
   interval: 5m
   ref:
-    tag: "12.20.14"
+    tag: "12.20.11"
