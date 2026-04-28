@@ -6,6 +6,7 @@ resources:
   - kyverno-patch-clusterrole.yaml
   - kyverno-patch-clusterrolebinding.yaml
   - pv-audiobooks.yaml
+  - pv-books.yaml
   - pv-completed-downloads.yaml
   - pv-incomplete-downloads.yaml
   - pv-movies.yaml
