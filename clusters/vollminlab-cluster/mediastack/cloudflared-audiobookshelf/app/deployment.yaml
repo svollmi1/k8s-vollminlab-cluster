@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudflared-audiobookshelf
+  namespace: mediastack
+  labels:
+    app: cloudflared-audiobookshelf
+    env: production
+    category: networking
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloudflared-audiobookshelf
+  template:
+    metadata:
+      labels:
+        app: cloudflared-audiobookshelf
+        env: production
+        category: networking
+    spec:
+      containers:
+        - name: cloudflared
+          image: cloudflare/cloudflared:2026.3.0
+          args:
+            - tunnel
+            - --no-autoupdate
+            - run
+          env:
+            - name: TUNNEL_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: cloudflared-audiobookshelf-tunnel-credentials
+                  key: tunnel-token
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
