@@ -1,0 +1,14 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: audiobookshelf-repo
+  namespace: flux-system
+  labels:
+    app: audiobookshelf
+    env: production
+    category: media
+spec:
+  url: oci://oci.trueforge.org/truecharts/audiobookshelf
+  interval: 5m
+  ref:
+    tag: "12.20.11"

@@ -9,6 +9,7 @@ metadata:
 resources:
   - arc-controller-ocirepository.yaml
   - arc-runners-ocirepository.yaml
+  - audiobookshelf-ocirepository.yaml
   - bazarr-helmrepository.yaml
   - cert-manager-helmrepository.yaml
   - cnpg-helmrepository.yaml
