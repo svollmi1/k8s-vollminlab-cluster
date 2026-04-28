@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: audiobookshelf-values
+  namespace: mediastack
+  labels:
+    app: audiobookshelf
+    env: production
+    category: media
+data:
+  values.yaml: |
+    persistence:
+      config:
+        enabled: true
+        existingClaim: pvc-audiobookshelf-config
+        mountPath: /config
+      audiobooks:
+        enabled: true
+        existingClaim: pvc-audiobooks
+        mountPath: /audiobooks
+      metadata:
+        enabled: true
+        existingClaim: pvc-audiobookshelf-metadata
+        mountPath: /metadata
+    securityContext:
+      container:
+        runAsUser: 0
+        runAsGroup: 0
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 750Mi
+    podLabels:
+      app: audiobookshelf
+      env: production
+      category: media
