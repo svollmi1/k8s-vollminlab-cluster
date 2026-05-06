@@ -32,3 +32,4 @@ resources:
   - renovate-kustomization.yaml
   - velero-kustomization.yaml
   - harbor-kustomization.yaml
+  - authentik-kustomization.yaml
