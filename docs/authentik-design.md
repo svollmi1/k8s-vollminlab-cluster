@@ -13,18 +13,9 @@ Deploy Authentik as the central identity provider for the vollminlab cluster, re
 
 ### New namespaces
 
-| Namespace | Purpose |
-|---|---|
-| `redis` | Shared Redis for the cluster (Authentik consumer; available to future apps) |
-| `authentik` | Authentik server, worker, proxy outpost, CNPG Cluster CR |
-
-### Redis (`redis` namespace)
-
-- **Chart:** Bitnami Redis (`bitnami/redis`)
-- **Mode:** Standalone (Sentinel mode available later for HA)
-- **Category:** `core` — shared infrastructure, not a storage provisioner
-- **Credentials:** Redis password in a SealedSecret
-- **Intended consumers:** Authentik now; shared for future apps needing Redis
+| Namespace   | Purpose                                                    |
+|-------------|------------------------------------------------------------|
+| `authentik` | Authentik server, worker, proxy outpost, CNPG Cluster CR   |
 
 ### PostgreSQL (`authentik` namespace)
 
@@ -42,11 +33,11 @@ Deploy Authentik as the central identity provider for the vollminlab cluster, re
   - Secret key (cryptographic signing — must be generated once and never rotated without planning)
   - Bootstrap admin password (initial setup only)
   - PostgreSQL connection credentials
-  - Redis connection password
-- **Ingress:** `auth.vollminlab.com` → nginx → Authentik server port 9000
+- **Note:** Authentik 2025.10+ removed Redis entirely. No Redis dependency.
+- **Ingress:** `authentik.vollminlab.com` → nginx → Authentik server port 9000
 - **TLS:** `wildcard-tls` (existing pattern)
-- **Shlink slug:** `auth`
-- **External access:** Cloudflared route added to the existing Cloudflare Tunnel pointing at `auth.vollminlab.com`
+- **Shlink slug:** `authentik`
+- **External access:** Cloudflared route added to the existing Cloudflare Tunnel pointing at `authentik.vollminlab.com`
 
 ### Proxy outpost (`authentik` namespace)
 
@@ -60,8 +51,8 @@ Deploy Authentik as the central identity provider for the vollminlab cluster, re
 
 Both index files updated in the same PR as the app files (enforced convention):
 
-- `flux-system/repositories/kustomization.yaml` — add `authentik-helmrepository.yaml`, `redis-helmrepository.yaml`
-- `flux-system/flux-kustomizations/kustomization.yaml` — add `authentik-kustomization.yaml`, `redis-kustomization.yaml`
+- `flux-system/repositories/kustomization.yaml` — add `authentik-helmrepository.yaml`
+- `flux-system/flux-kustomizations/kustomization.yaml` — add `authentik-kustomization.yaml`
 
 ---
 
@@ -133,7 +124,7 @@ All forward-auth ingresses get these annotations (pointing at the proxy outpost 
 
 ```yaml
 nginx.ingress.kubernetes.io/auth-url: "http://authentik-proxy.authentik.svc.cluster.local:9000/outpost.goauthentik.io/auth/nginx"
-nginx.ingress.kubernetes.io/auth-signin: "https://auth.vollminlab.com/outpost.goauthentik.io/start?rd=$scheme://$http_host$escaped_request_uri"
+nginx.ingress.kubernetes.io/auth-signin: "https://authentik.vollminlab.com/outpost.goauthentik.io/start?rd=$scheme://$http_host$escaped_request_uri"
 nginx.ingress.kubernetes.io/auth-response-headers: "Set-Cookie,X-authentik-username,X-authentik-groups,X-authentik-email,X-authentik-name,X-authentik-uid"
 nginx.ingress.kubernetes.io/auth-snippet: |
   proxy_set_header X-Original-URL $scheme://$http_host$request_uri;
@@ -146,12 +137,11 @@ nginx.ingress.kubernetes.io/auth-snippet: |
 ### Phase 1 — Core infrastructure (PR 1)
 
 **Deliverables:**
-- `redis` namespace, HelmRelease, SealedSecret
-- `authentik` namespace, CNPG Cluster CR, Authentik HelmRelease, ingress, cloudflared route, SealedSecrets
+- `authentik` namespace, CNPG Cluster CR, Authentik HelmRelease, ingress, cloudflared Deployment, SealedSecrets
 - Both Flux index files updated
 
 **Manual step after Phase 1 deploys:**
-1. Log into `auth.vollminlab.com` with the bootstrap admin credentials
+1. Log into `authentik.vollminlab.com` with the bootstrap admin credentials
 2. Enforce MFA on the admin account before proceeding
 3. Create an Authentik Proxy Provider for the forward-auth outpost
 4. Create an Outpost of type "Proxy" using that provider
@@ -172,14 +162,15 @@ nginx.ingress.kubernetes.io/auth-snippet: |
 ### Phase 3 — OIDC apps (PR 3)
 
 **Deliverables:**
-- Grafana OAuth2 (kube-prometheus-stack ConfigMap values update)
-- Harbor OIDC (ConfigMap values update)
-- Headlamp OIDC (ConfigMap values update)
-- Portainer OAuth2 (ConfigMap values update)
-- Audiobookshelf OIDC (ConfigMap values update)
-- MinIO Console OIDC (ConfigMap values update)
 
-No new deployments — all changes are Helm values updates.
+- Grafana OAuth2 (ConfigMap values update + SealedSecret for client_secret)
+- Harbor OIDC (UI configuration — no file changes)
+- Headlamp OIDC (ConfigMap values update + SealedSecret for client_secret)
+- Portainer OAuth2 (UI configuration — no file changes)
+- Audiobookshelf OIDC (UI configuration — no file changes)
+- MinIO Console OIDC (ConfigMap values update + SealedSecret for client_secret)
+
+Client secrets must never go in ConfigMaps — each app that requires a secret in Helm values gets a SealedSecret.
 
 ### Phase 4 — Forward-auth sweep (PR 4)
 
@@ -195,14 +186,6 @@ No new deployments — all changes are Helm values updates.
 
 ```
 clusters/vollminlab-cluster/
-  redis/
-    namespace.yaml
-    kustomization.yaml
-    redis/app/
-      helmrelease.yaml
-      configmap.yaml
-      kustomization.yaml
-      redis-credentials-sealedsecret.yaml
   authentik/
     namespace.yaml
     kustomization.yaml
@@ -216,16 +199,18 @@ clusters/vollminlab-cluster/
       ingress.yaml
       kustomization.yaml
       authentik-credentials-sealedsecret.yaml
-    authentik-proxy/app/
+    cloudflared-authentik/app/
+      deployment.yaml
+      kustomization.yaml
+      cloudflared-authentik-tunnel-sealedsecret.yaml
+    authentik-proxy/app/                              ← added in Phase 2
       deployment.yaml
       service.yaml
       kustomization.yaml
-      authentik-proxy-token-sealedsecret.yaml   ← added after Phase 1 manual step
+      authentik-proxy-token-sealedsecret.yaml        ← added after Phase 1 manual step
 flux-system/
   repositories/
     authentik-helmrepository.yaml
-    redis-helmrepository.yaml
   flux-kustomizations/
     authentik-kustomization.yaml
-    redis-kustomization.yaml
 ```
