@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: authentik-values
+  namespace: authentik
+  labels:
+    app: authentik
+    env: production
+    category: security
+data:
+  values.yaml: |
+    authentik:
+      error_reporting:
+        enabled: false
+      postgresql:
+        host: authentik-db-rw.authentik.svc.cluster.local
+        name: authentik
+        user: authentik
+
+    server:
+      ingress:
+        enabled: false
+      podLabels:
+        app: authentik
+        env: production
+        category: security
+      resources:
+        requests:
+          cpu: 100m
+          memory: 768Mi
+        limits:
+          cpu: 500m
+          memory: 1Gi
+
+    worker:
+      podLabels:
+        app: authentik
+        env: production
+        category: security
+      resources:
+        requests:
+          cpu: 100m
+          memory: 512Mi
+        limits:
+          cpu: 500m
+          memory: 768Mi

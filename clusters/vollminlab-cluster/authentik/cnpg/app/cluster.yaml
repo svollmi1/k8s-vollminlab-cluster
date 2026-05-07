@@ -1,0 +1,30 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: authentik-db
+  namespace: authentik
+  labels:
+    app: authentik-db
+    env: production
+    category: security
+spec:
+  instances: 1
+  inheritedMetadata:
+    labels:
+      app: authentik-db
+      env: production
+      category: security
+  storage:
+    size: 5Gi
+    storageClass: longhorn
+  bootstrap:
+    initdb:
+      database: authentik
+      owner: authentik
+      secret:
+        name: authentik-db-credentials
+      postInitSQL:
+        - GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO authentik
+        - GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO authentik
+        - ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO authentik
+        - ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO authentik
