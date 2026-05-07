@@ -14,7 +14,7 @@ spec:
     # Raw series are retained for ~2h (head block); aggregates carry the long-term signal.
     # Drops: instance, scope, subresource, component, group, version — keeps verb+resource+le.
     - name: apiserver.recording.rules
-      interval: 2m
+      interval: 5m
       rules:
         - record: verb_resource:apiserver_request_duration_seconds_bucket:rate5m
           expr: |
@@ -35,7 +35,7 @@ spec:
             )
 
     - name: etcd.recording.rules
-      interval: 2m
+      interval: 5m
       rules:
         - record: operation_type:etcd_request_duration_seconds_bucket:rate5m
           expr: |
