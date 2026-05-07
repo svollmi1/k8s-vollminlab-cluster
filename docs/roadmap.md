@@ -137,14 +137,18 @@ sudo cp /etc/kubernetes/admin.conf ~/.kube/config && sudo chown $(id -u):$(id -g
 
 ### 3.1 Authentik — SSO / Identity Provider
 
-**Status:** `planned`
+**Status:** `in-progress` — design complete, implementation plan ready
 
-Deploy Authentik as the central IdP:
+Design doc: `docs/authentik-design.md`. Implementation plan: `docs/superpowers/plans/authentik.md` (local).
 
-- OIDC/OAuth2 for all web UIs (Grafana, Longhorn, Headlamp, Homepage, etc.)
-- LDAP outpost for apps that don't support OIDC natively
-- Forward Auth proxy for apps with no built-in auth
-- Requires PostgreSQL (Bitnami subchart or shared instance TBD)
+Four-phase rollout:
+
+- Phase 1: Core infra — shared Redis (`redis` ns), CNPG Cluster CR, Authentik server+worker, cloudflared tunnel for `auth.vollminlab.com`
+- Phase 2: External proxy outpost + Jellyseerr (replaces Overseerr) + Jellyfin OIDC
+- Phase 3: Native OIDC — Grafana, Harbor, Headlamp, Portainer, Audiobookshelf, MinIO
+- Phase 4: Forward-auth sweep — Longhorn, Homepage, arr stack, Tautulli, Shlink Web, Policy Reporter
+
+Plex → Jellyfin migration is part of Phase 2 (Jellyseerr replaces Overseerr; Plex decommissioned after Jellyfin stable).
 
 ---
 
@@ -189,14 +193,9 @@ Deploy Authentik as the central IdP:
 
 ### 3.5 Tautulli / Plex Metrics Dashboard
 
-**Status:** `planned`
+**Status:** `done`
 
-Add a Grafana dashboard for Plex playback activity via Tautulli (already deployed in `mediastack`):
-
-- Deploy a `tautulli-exporter` sidecar/deployment to scrape Tautulli's API and expose Prometheus metrics
-- Add a ServiceMonitor in `mediastack`
-- Create a dedicated Grafana dashboard (separate from the arr-media dashboard — different concern)
-- Metrics of interest: active streams, play counts by media type, user activity, transcoding vs. direct play
+Tautulli deployed in `mediastack`. Metrics dashboard complete.
 
 ---
 

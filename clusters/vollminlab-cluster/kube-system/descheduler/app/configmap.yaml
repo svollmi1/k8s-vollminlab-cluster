@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: descheduler-values
+  namespace: kube-system
+  labels:
+    app: descheduler
+    env: production
+    category: core
+data:
+  values.yaml: |
+    kind: CronJob
+    schedule: "*/30 * * * *"
+
+    podLabels:
+      app: descheduler
+      env: production
+      category: core
+
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 128Mi
+
+    deschedulerPolicy:
+      profiles:
+        - name: default
+          pluginConfig:
+            - name: DefaultEvictor
+              args:
+                evictLocalStoragePods: false
+                nodeFit: true
+            - name: LowNodeUtilization
+              args:
+                thresholds:
+                  cpu: 40
+                  memory: 50
+                  pods: 20
+                targetThresholds:
+                  cpu: 70
+                  memory: 75
+                  pods: 50
+          plugins:
+            balance:
+              enabled:
+                - LowNodeUtilization
+            filter:
+              enabled:
+                - DefaultEvictor
