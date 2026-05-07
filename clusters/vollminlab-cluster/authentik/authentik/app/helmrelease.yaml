@@ -1,25 +1,26 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: longhorn
-  namespace: longhorn-system
+  name: authentik
+  namespace: authentik
   labels:
-    app: longhorn
+    app: authentik
     env: production
-    category: storage
+    category: security
 spec:
   interval: 5m
   chart:
     spec:
-      chart: longhorn
-      version: 1.11.2
+      chart: authentik
+      version: "2026.2.2"
       sourceRef:
         kind: HelmRepository
-        name: longhorn-repo
+        name: authentik-repo
         namespace: flux-system
-  install:
-    createNamespace: false
   valuesFrom:
     - kind: ConfigMap
-      name: longhorn-values
+      name: authentik-values
+      valuesKey: values.yaml
+    - kind: Secret
+      name: authentik-credentials
       valuesKey: values.yaml

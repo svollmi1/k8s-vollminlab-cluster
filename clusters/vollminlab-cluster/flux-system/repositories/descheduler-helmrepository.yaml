@@ -1,0 +1,12 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: descheduler-repo
+  namespace: flux-system
+  labels:
+    app: descheduler
+    env: production
+    category: core
+spec:
+  url: https://kubernetes-sigs.github.io/descheduler/
+  interval: 12h
