@@ -28,7 +28,7 @@ data:
     persistence:
       enabled: true
       storageClass: "longhorn"
-      size: 20Gi
+      size: 60Gi
 
     service:
       type: ClusterIP
