@@ -57,6 +57,15 @@ data:
       credentials:
         existingSecret: harbor-core-credentials
 
+    trivy:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 64Mi
+        limits:
+          cpu: 500m
+          memory: 256Mi
+
     podLabels:
       app: harbor
       env: production
