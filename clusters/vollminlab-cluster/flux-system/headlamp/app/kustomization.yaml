@@ -6,5 +6,6 @@ metadata:
 resources:
   - configmap.yaml
   - helmrelease.yaml
+  - headlamp-oidc-sealedsecret.yaml
   - ingress.yaml
   - networkpolicy.yaml

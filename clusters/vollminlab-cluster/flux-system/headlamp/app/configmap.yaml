@@ -13,20 +13,12 @@ data:
       inCluster: true
       inClusterContextName: "main"
       pluginsDir: "/headlamp/plugins"
-      # OIDC disabled — issuerURL empty means no OIDC auth.
-      # Uncomment and populate when Authentik is deployed:
-      # oidc:
-      #   clientID: ""
-      #   clientSecret: ""
-      #   issuerURL: "https://authentik.vollminlab.com/application/o/<slug>/"
-      #   scopes: "openid profile email"
       oidc:
+        externalSecret:
+          enabled: true
+          name: headlamp-oidc-credentials
         secret:
           create: false
-        clientID: ""
-        clientSecret: ""
-        issuerURL: ""
-        scopes: ""
 
     initContainers:
       - name: headlamp-plugin-flux

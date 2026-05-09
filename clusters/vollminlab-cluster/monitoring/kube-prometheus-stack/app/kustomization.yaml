@@ -13,6 +13,7 @@ resources:
   - ingress.yaml
   - alertmanager-sealedsecret.yaml
   - grafana-admin-sealedsecret.yaml
+  - grafana-oauth-sealedsecret.yaml
   - prometheusrule-custom.yaml
   - nodes-dashboard-configmap.yaml
   - longhorn-dashboard-configmap.yaml
