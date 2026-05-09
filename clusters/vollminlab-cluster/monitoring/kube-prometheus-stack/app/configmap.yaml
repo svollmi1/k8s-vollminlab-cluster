@@ -25,12 +25,13 @@ data:
             app: prometheus
             env: production
             category: observability
+        evaluationInterval: 2m
         resources:
           requests:
             cpu: 500m
             memory: 1Gi
           limits:
-            cpu: 1000m
+            cpu: 2000m
             memory: 2Gi
         storageSpec:
           volumeClaimTemplate:
