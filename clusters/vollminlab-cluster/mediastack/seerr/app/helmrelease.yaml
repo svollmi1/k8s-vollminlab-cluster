@@ -1,19 +1,19 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: overseerr
+  name: seerr
   namespace: mediastack
   labels:
-    app: overseerr
+    app: seerr
     env: production
     category: media
 spec:
   interval: 5m
   chartRef:
     kind: OCIRepository
-    name: overseerr-repo
+    name: seerr-repo
     namespace: flux-system
   valuesFrom:
     - kind: ConfigMap
-      name: overseerr-values
+      name: seerr-values
       valuesKey: values.yaml

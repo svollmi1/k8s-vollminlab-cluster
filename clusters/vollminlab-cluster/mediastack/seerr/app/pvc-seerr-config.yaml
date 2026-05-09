@@ -1,15 +1,16 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: pvc-overseerr-config
+  name: pvc-seerr-config
   namespace: mediastack
   labels:
-    app: overseerr
+    app: seerr
     env: production
     category: media
 spec:
   accessModes:
     - ReadWriteOnce
+  storageClassName: longhorn
   resources:
     requests:
-      storage: 5Gi
+      storage: 2Gi
