@@ -30,7 +30,6 @@ resources:
   - metrics-server-helmrepository.yaml
   - minecraft-helmrepository.yaml
   - minio-helmrepository.yaml
-  - overseerr-ocirepository.yaml
   - plex-ocirepository.yaml
   - portainer-helmrepository.yaml
   - prometheus-community-helmrepository.yaml
@@ -38,6 +37,7 @@ resources:
   - radarr-ocirepository.yaml
   - renovate-ocirepository.yaml
   - sabnzbd-ocirepository.yaml
+  - seerr-ocirepository.yaml
   - sealed-secrets-helmrepository.yaml
   - shlink-helmrepository.yaml
   - smb-csi-driver-helmrepository.yaml
