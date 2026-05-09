@@ -57,6 +57,32 @@ data:
       credentials:
         existingSecret: harbor-core-credentials
 
+    core:
+      extraEnvVars:
+        - name: AUTH_MODE
+          value: "oidc_auth"
+        - name: OIDC_NAME
+          value: "Authentik"
+        - name: OIDC_ENDPOINT
+          value: "https://authentik.vollminlab.com/application/o/harbor/"
+        - name: OIDC_CLIENT_ID
+          value: "61knXoFusnE1LOVJLSSRZkLtnLFak5NylhhOxDBx" # gitleaks:allow
+        - name: OIDC_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: harbor-oidc-credentials
+              key: OIDC_CLIENT_SECRET
+        - name: OIDC_SCOPE
+          value: "openid,profile,email,groups"
+        - name: OIDC_GROUPS_CLAIM
+          value: "groups"
+        - name: OIDC_ADMIN_GROUP
+          value: "Harbor Admins"
+        - name: OIDC_VERIFY_CERT
+          value: "true"
+        - name: OIDC_AUTO_ONBOARD
+          value: "true"
+
     trivy:
       resources:
         requests:

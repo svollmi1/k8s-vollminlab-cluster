@@ -52,6 +52,17 @@ data:
         versioning: false
         objectlocking: false
 
+    oidc:
+      enabled: true
+      configUrl: "https://authentik.vollminlab.com/application/o/minio/.well-known/openid-configuration"
+      clientId: "GKq5oNsz9lgsa1kIOCM7uTa4qIBVe6SUsfVjeFCN" # gitleaks:allow
+      existingClientSecretName: "minio-oidc-credentials"
+      existingClientSecretKey: "MINIO_IDENTITY_OPENID_CLIENT_SECRET"
+      claimName: "policy"
+      scopes: "openid,profile,email"
+      redirectUri: "https://minio.vollminlab.com/oauth_callback"
+      displayName: "Authentik"
+
     makeBucketJob:
       resources:
         requests:

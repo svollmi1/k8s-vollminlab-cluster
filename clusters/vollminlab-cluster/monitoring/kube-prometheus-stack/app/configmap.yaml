@@ -55,9 +55,23 @@ data:
         app: grafana
         env: production
         category: observability
+      envFromSecret: grafana-oauth-credentials
       grafana.ini:
         feature_toggles:
           kubernetesDashboards: false
+        server:
+          root_url: https://grafana.vollminlab.com
+        auth.generic_oauth:
+          enabled: true
+          name: Authentik
+          allow_sign_up: true
+          client_id: rArLch2402M3G4HWq4eqmyt0B2EThCIyX5M6CHFG # gitleaks:allow
+          scopes: openid profile email groups
+          auth_url: https://authentik.vollminlab.com/application/o/authorize/
+          token_url: https://authentik.vollminlab.com/application/o/token/
+          api_url: https://authentik.vollminlab.com/application/o/userinfo/
+          role_attribute_path: "contains(groups, 'Grafana Admins') && 'Admin' || 'Viewer'"
+          signout_redirect_url: https://authentik.vollminlab.com/application/o/grafana/end-session/
       resources:
         requests:
           cpu: 100m
