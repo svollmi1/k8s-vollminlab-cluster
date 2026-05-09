@@ -52,7 +52,7 @@ This is what causes Flux to sync the chart source. Without it the HelmRelease ca
 - `metadata.name: [app-name]-repo` — always suffix with `-repo`, no exceptions
 - Named after the **app being deployed**, not the chart author
 - HTTP registry → `kind: HelmRepository` (`source.toolkit.fluxcd.io/v1`)
-- OCI registry → `kind: OCIRepository` (`source.toolkit.fluxcd.io/v1beta2`) — **do not use `HelmRepository type: oci`, it is in maintenance mode**
+- OCI registry → `kind: OCIRepository` (`source.toolkit.fluxcd.io/v1`) — **do not use `HelmRepository type: oci`, it is in maintenance mode**
 - Version is pinned in the `OCIRepository` `spec.ref.tag`, not in the HelmRelease
 
 Copy-paste templates: `docs/runbooks/flux-templates.md`
