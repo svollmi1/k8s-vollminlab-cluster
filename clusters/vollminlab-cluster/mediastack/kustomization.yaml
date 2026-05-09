@@ -12,7 +12,7 @@ resources:
   - ./cloudflared-audiobookshelf/app
   - ./cloudflared-jellyfin/app
   - ./bazarr-exportarr/app
-  - ./overseerr/app
+  - ./seerr/app
   - ./jellyfin/app
   - ./plex/app
   - ./prowlarr/app

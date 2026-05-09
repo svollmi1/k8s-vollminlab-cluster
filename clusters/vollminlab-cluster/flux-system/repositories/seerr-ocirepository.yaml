@@ -1,0 +1,14 @@
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: OCIRepository
+metadata:
+  name: seerr-repo
+  namespace: flux-system
+  labels:
+    app: seerr
+    env: production
+    category: media
+spec:
+  url: oci://ghcr.io/seerr-team/seerr/seerr-chart
+  interval: 5m
+  ref:
+    tag: 3.6.0

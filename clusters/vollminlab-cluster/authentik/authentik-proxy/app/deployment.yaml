@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authentik-proxy
+  namespace: authentik
+  labels:
+    app: authentik-proxy
+    env: production
+    category: security
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: authentik-proxy
+  template:
+    metadata:
+      labels:
+        app: authentik-proxy
+        env: production
+        category: security
+    spec:
+      containers:
+        - name: proxy
+          image: ghcr.io/goauthentik/proxy:2026.2.2
+          env:
+            - name: AUTHENTIK_HOST
+              value: http://authentik-server.authentik.svc.cluster.local:80
+            - name: AUTHENTIK_INSECURE
+              value: "true"
+            - name: AUTHENTIK_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: authentik-proxy-token
+                  key: token
+          ports:
+            - name: http
+              containerPort: 9000
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
