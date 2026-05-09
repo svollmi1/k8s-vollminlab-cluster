@@ -30,7 +30,6 @@ resources:
   - metrics-server-helmrepository.yaml
   - minecraft-helmrepository.yaml
   - minio-helmrepository.yaml
-  - plex-ocirepository.yaml
   - portainer-helmrepository.yaml
   - prometheus-community-helmrepository.yaml
   - prowlarr-ocirepository.yaml
