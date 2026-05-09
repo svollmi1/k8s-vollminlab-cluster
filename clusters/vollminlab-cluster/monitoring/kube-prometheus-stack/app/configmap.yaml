@@ -32,7 +32,7 @@ data:
             memory: 1Gi
           limits:
             cpu: 2000m
-            memory: 2Gi
+            memory: 3Gi
         storageSpec:
           volumeClaimTemplate:
             spec:
