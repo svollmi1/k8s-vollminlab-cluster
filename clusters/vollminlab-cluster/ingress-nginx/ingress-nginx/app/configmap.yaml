@@ -10,5 +10,7 @@ metadata:
 data:
   values.yaml: |
     controller:
+      config:
+        allow-snippet-annotations: "true"
       extraArgs:
         default-ssl-certificate: cert-manager/wildcard-tls
