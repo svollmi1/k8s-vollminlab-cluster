@@ -473,14 +473,9 @@ jobs:
                 .metadata.namespace = \"$TEST_NAMESPACE\" |
                   .metadata.name = \"$TEST_NAME\"
               " "$file" | kubectl apply --validate=false -f - 2>&1) || {
-                if echo "$APPLY_OUTPUT" | grep -q "no matches for kind"; then
-                  echo "⚠️ Skipping $file: apiVersion $(yq eval '.apiVersion' "$file") not yet served by cluster (expected during Flux component upgrade)"
-                  sed -i "/^${ORIG_NAME}:/d" "$OCI_MAPPING_FILE"
-                else
-                  echo "❌ Failed to deploy OCIRepository: $file"
-                  echo "$APPLY_OUTPUT"
-                  exit 1
-                fi
+                echo "❌ Failed to deploy OCIRepository: $file"
+                echo "$APPLY_OUTPUT"
+                exit 1
               }
             fi
           done
