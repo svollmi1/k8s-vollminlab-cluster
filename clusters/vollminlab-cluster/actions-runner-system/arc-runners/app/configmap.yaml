@@ -38,7 +38,7 @@ data:
                 value: tcp://localhost:2375
             resources:
               requests:
-                cpu: 500m
+                cpu: 100m
                 memory: 512Mi
               limits:
                 cpu: 2000m
@@ -53,7 +53,7 @@ data:
             args: ["--host=tcp://0.0.0.0:2375"]
             resources:
               requests:
-                cpu: 200m
+                cpu: 50m
                 memory: 256Mi
               limits:
                 cpu: 2000m
