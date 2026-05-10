@@ -73,7 +73,6 @@ data:
           role_attribute_path: "contains(groups, 'Grafana Admins') && 'Admin' || 'Viewer'"
           signout_redirect_url: https://authentik.vollminlab.com/application/o/grafana/end-session/
           use_pkce: true
-          oauth_allow_insecure_email_lookup: true
       resources:
         requests:
           cpu: 100m
