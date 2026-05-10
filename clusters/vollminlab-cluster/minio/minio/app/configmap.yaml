@@ -63,6 +63,10 @@ data:
       redirectUri: "https://minio.vollminlab.com/oauth_callback"
       displayName: "Authentik"
 
+    extraEnvVars:
+      - name: MINIO_IDENTITY_OPENID_PKCE_ENABLED
+        value: "on"
+
     makeBucketJob:
       resources:
         requests:
