@@ -28,3 +28,18 @@ spec:
         - GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO harbor
         - ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO harbor
         - ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO harbor
+  backup:
+    barmanObjectStore:
+      destinationPath: "s3://cnpg-backups/harbor-db"
+      endpointURL: "http://minio.minio.svc.cluster.local:9000"
+      s3Credentials:
+        accessKeyId:
+          name: cnpg-minio-credentials
+          key: ACCESS_KEY_ID
+        secretAccessKey:
+          name: cnpg-minio-credentials
+          key: ACCESS_SECRET_KEY
+      wal:
+        compression: gzip
+        maxParallel: 2
+    retentionPolicy: "30d"

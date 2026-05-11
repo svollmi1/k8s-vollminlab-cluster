@@ -3,3 +3,5 @@ kind: Kustomization
 resources:
   - cluster.yaml
   - shlink-db-credentials-sealedsecret.yaml
+  - cnpg-minio-credentials-sealedsecret.yaml
+  - scheduled-backup.yaml

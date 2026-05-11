@@ -5,3 +5,5 @@ metadata:
 resources:
   - cluster.yaml
   - authentik-db-credentials-sealedsecret.yaml
+  - cnpg-minio-credentials-sealedsecret.yaml
+  - scheduled-backup.yaml
