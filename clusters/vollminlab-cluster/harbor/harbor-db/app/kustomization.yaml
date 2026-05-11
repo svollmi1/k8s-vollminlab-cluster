@@ -3,3 +3,5 @@ kind: Kustomization
 resources:
   - cluster.yaml
   - harbor-db-credentials-sealedsecret.yaml
+  - cnpg-minio-credentials-sealedsecret.yaml
+  - scheduled-backup.yaml

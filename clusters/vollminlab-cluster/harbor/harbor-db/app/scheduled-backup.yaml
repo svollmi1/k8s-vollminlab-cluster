@@ -1,0 +1,14 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: harbor-db-backup
+  namespace: harbor
+  labels:
+    app: harbor-db
+    env: production
+    category: storage
+spec:
+  schedule: "15 1 * * *"
+  backupOwnerReference: self
+  cluster:
+    name: harbor-db
