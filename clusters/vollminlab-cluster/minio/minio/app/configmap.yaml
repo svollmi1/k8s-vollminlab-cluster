@@ -66,6 +66,8 @@ data:
     extraEnvVars:
       - name: MINIO_IDENTITY_OPENID_PKCE_ENABLED
         value: "on"
+      - name: MINIO_PROMETHEUS_AUTH_TYPE
+        value: "public"
 
     makeBucketJob:
       resources:
