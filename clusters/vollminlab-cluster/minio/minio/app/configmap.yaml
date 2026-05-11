@@ -38,7 +38,24 @@ data:
       type: ClusterIP
       port: "9001"
 
-    users: []
+    policies:
+      - name: cnpg-policy
+        statements:
+          - resources:
+              - "arn:aws:s3:::cnpg-backups"
+              - "arn:aws:s3:::cnpg-backups/*"
+            actions:
+              - "s3:GetObject"
+              - "s3:PutObject"
+              - "s3:DeleteObject"
+              - "s3:ListBucket"
+              - "s3:GetBucketLocation"
+
+    users:
+      - accessKey: cnpg-svc
+        existingSecret: cnpg-minio-user
+        existingSecretKey: secretKey
+        policy: cnpg-policy
 
     buckets:
       - name: velero
@@ -47,6 +64,11 @@ data:
         versioning: false
         objectlocking: false
       - name: loki
+        policy: none
+        purge: false
+        versioning: false
+        objectlocking: false
+      - name: cnpg-backups
         policy: none
         purge: false
         versioning: false
