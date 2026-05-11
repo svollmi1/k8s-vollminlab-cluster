@@ -33,6 +33,8 @@ data:
       app: sonarr
       env: production
       category: media
+    env:
+      SONARR__AUTH__METHOD: "External"
     securityContext:
       runAsUser: 568
       runAsGroup: 568
