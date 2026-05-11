@@ -11,6 +11,7 @@ spec:
   selector:
     matchLabels:
       app: minio
+      monitoring: "true"
   endpoints:
     - port: http
       path: /minio/v2/metrics/cluster
