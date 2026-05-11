@@ -4,6 +4,7 @@ metadata:
   name: headlamp-app
   namespace: flux-system
 resources:
+  - clusterrolebinding.yaml
   - configmap.yaml
   - helmrelease.yaml
   - headlamp-oidc-sealedsecret.yaml
