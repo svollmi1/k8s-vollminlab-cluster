@@ -38,6 +38,8 @@ data:
       app: radarr
       env: production
       category: media
+    env:
+      RADARR__AUTH__METHOD: "External"
     securityContext:
       runAsUser: 568
       runAsGroup: 568

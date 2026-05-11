@@ -36,3 +36,7 @@ data:
     env:
       - name: SABNZBD__HOST_WHITELIST_ENTRIES
         value: sabnzbd.vollminlab.com,localhost,127.0.0.1
+      - name: SABNZBD__USERNAME
+        value: ""
+      - name: SABNZBD__PASSWORD
+        value: ""
