@@ -60,6 +60,8 @@ data:
       serviceType: NodePort
       nodePort: 32565
       externalTrafficPolicy: Local
+      whitelist: "svollmi1,Brainsteen,FenycFur,mattgutkin,Dirtbikedemon01,Forgonploxi,Gurty,Plasmaticmofo2"
+      ops: "svollmi1"
       # Set maxWorldSize to prevent duplicate MAX_WORLD_SIZE env var in Helm deployment
       # NOTE: This sets the env var, but server.properties must be manually set to 29999984
       # The server.properties file is in a PVC and persists across restarts
@@ -71,6 +73,7 @@ data:
     extraEnv:
       SIMULATION_DISTANCE: "6"
       PLUGINS: "https://cdn.modrinth.com/data/swbUV1cr/versions/lfk408pd/bluemap-5.13-spigot.jar"
+      OVERRIDE_WHITELIST: "TRUE"
     # RCON password from secret (itzg/minecraft-server supports RCON_PASSWORD env var)
     # Note: The Helm chart may need extraEnvVars or envFrom instead - check chart docs
     extraEnvVars:
