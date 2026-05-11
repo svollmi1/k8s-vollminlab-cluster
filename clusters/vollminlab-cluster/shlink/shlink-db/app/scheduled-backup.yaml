@@ -1,0 +1,14 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: shlink-db-backup
+  namespace: shlink
+  labels:
+    app: shlink-db
+    env: production
+    category: apps
+spec:
+  schedule: "30 1 * * *"
+  backupOwnerReference: self
+  cluster:
+    name: shlink-db
