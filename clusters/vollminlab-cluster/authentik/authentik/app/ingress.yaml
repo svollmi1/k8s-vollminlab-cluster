@@ -17,6 +17,13 @@ spec:
     - host: authentik.vollminlab.com
       http:
         paths:
+          - path: /outpost.goauthentik.io
+            pathType: Prefix
+            backend:
+              service:
+                name: authentik-proxy
+                port:
+                  number: 9000
           - path: /
             pathType: Prefix
             backend:
