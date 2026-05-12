@@ -163,7 +163,7 @@ data:
                 icon: prometheus.png
                 namespace: monitoring
                 app: prometheus
-        - Documentation & Tools:
+        - Tools:
             - Homepage:
                 description: This dashboard
                 href: https://homepage.vollminlab.com
@@ -186,6 +186,7 @@ data:
                 description: This Kubernetes cluster repo
                 href: https://github.com/vollminlab/k8s-vollminlab-cluster
                 icon: github.png
+        - Web Links:
             - ChatGPT:
                 description: AI Assistant
                 href: https://chatgpt.com
@@ -229,6 +230,28 @@ data:
         title: "VollminLab Dashboard"
         subtitle: "HomeLab Services & Infrastructure"
         logo: null
+        layout:
+          Media Stack:
+            style: row
+            columns: 3
+          Infrastructure:
+            style: row
+            columns: 3
+          Networking:
+            style: row
+            columns: 5
+          Monitoring & Observability:
+            style: row
+            columns: 3
+          Tools:
+            style: row
+            columns: 4
+          Web Links:
+            style: row
+            columns: 4
+          Personal/External:
+            style: row
+            columns: 5
         providers:
           longhorn:
             url: https://longhorn.vollminlab.com
