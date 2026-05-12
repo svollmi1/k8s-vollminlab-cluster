@@ -8,8 +8,10 @@ metadata:
     env: production
     category: media
 spec:
-  type: ExternalName
-  externalName: jellystat-db-rw.mediastack.svc.cluster.local
+  type: ClusterIP
+  selector:
+    cnpg.io/cluster: jellystat-db
+    cnpg.io/instanceRole: primary
   ports:
     - port: 5432
       targetPort: 5432
