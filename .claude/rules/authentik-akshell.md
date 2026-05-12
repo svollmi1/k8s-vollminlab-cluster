@@ -18,9 +18,14 @@ kubectl exec -n authentik $AUTHENTIK_POD -- ak shell -c "<python>"
 ## Architecture: how forward-auth works here
 
 - **`vollminlab-forward-auth`** — a single `forward_domain` ProxyProvider covering all `*.vollminlab.com`. Assigned to the `vollminlab-proxy` outpost alongside `Prometheus` and `Alertmanager` (which use `forward_single`).
+- **Critical**: the `external_host` for this provider must be `https://vollminlab.com` (root domain), NOT `https://authentik.vollminlab.com`. The outpost registers the provider using the `external_host` hostname. If set to `authentik.vollminlab.com`, only requests for that exact hostname match — all other subdomains get 400 → nginx 500.
 - Every host protected by Authentik nginx annotations **must have an Application entry** in Authentik, even if that Application has `provider_id=None`. Without it the outpost returns 400 → nginx converts to 500.
 - Applications using native SSO (Grafana, Harbor, Headlamp, Jellyfin, MinIO, Portainer, Audiobookshelf) have dedicated OAuth2/OIDC providers (`provider_id != None`).
 - Applications using forward-proxy auth only (Bazarr, Homepage, Longhorn, Policy Reporter, Prowlarr, Radarr, SABnzbd, Shlink, Sonarr, Seerr, Tautulli) have `provider_id=None` — they rely on the domain-wide `vollminlab-forward-auth`.
+
+## Known limitation: skip_path_regex does not work for forward-auth
+
+`ProxyProvider.skip_path_regex` only applies when the outpost is acting as an embedded proxy. It has no effect on the `auth/nginx` endpoint that nginx calls via `auth_request`. To bypass authentication for specific paths (e.g., WebSocket/socket.io long-poll), use a **path-split ingress**: create a second Ingress object for that path without any Authentik annotations. The more specific path takes precedence in nginx routing.
 
 ## Common operations
 
