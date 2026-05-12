@@ -44,7 +44,7 @@ data:
                 app: jellystat
                 widget:
                   type: jellystat
-                  url: https://jellystat.vollminlab.com
+                  url: http://jellystat.mediastack.svc.cluster.local:3000
                   key: "{{HOMEPAGE_VAR_JELLYSTAT_API_KEY}}"
             - Sonarr:
                 description: TV show collection manager
