@@ -16,3 +16,5 @@ spec:
     name: flux-system
   targetNamespace: actions-runner-system
   timeout: 2m
+  dependsOn:
+    - name: sealed-secrets

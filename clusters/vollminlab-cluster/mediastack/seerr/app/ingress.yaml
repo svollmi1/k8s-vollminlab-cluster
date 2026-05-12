@@ -26,7 +26,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: seerr
+                name: seerr-seerr-chart
                 port:
                   number: 80
   tls:

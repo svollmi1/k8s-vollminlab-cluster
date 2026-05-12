@@ -18,3 +18,4 @@ spec:
   dependsOn:
     - name: cnpg-system
     - name: longhorn-system
+    - name: sealed-secrets
