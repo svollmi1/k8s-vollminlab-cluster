@@ -14,20 +14,27 @@ data:
         mode: cluster
       services:
         - Media Stack:
-            - Plex:
+            - Jellyfin:
                 description: Media streaming server
-                href: https://plex.vollminlab.com
-                icon: plex.png
-                ping: https://plex.vollminlab.com
-            - Overseerr:
+                href: https://jellyfin.vollminlab.com
+                icon: jellyfin.png
+                namespace: mediastack
+                app: jellyfin
+            - Audiobookshelf:
+                description: Audiobook and podcast server
+                href: https://audiobookshelf.vollminlab.com
+                icon: audiobookshelf.png
+                namespace: mediastack
+                app: audiobookshelf
+            - Seerr:
                 description: Media request management
-                href: https://overseerr.vollminlab.com
+                href: https://seerr.vollminlab.com
                 icon: overseerr.png
                 namespace: mediastack
-                app: overseerr
+                app: seerr
                 widget:
                   type: overseerr
-                  url: https://overseerr.vollminlab.com
+                  url: http://seerr-seerr-chart.mediastack.svc.cluster.local
                   key: "{{HOMEPAGE_VAR_OVERSEERR_API_KEY}}"
             - Tautulli:
                 description: Plex monitoring and analytics
@@ -37,7 +44,7 @@ data:
                 app: tautulli
                 widget:
                   type: tautulli
-                  url: https://tautulli.vollminlab.com
+                  url: http://tautulli.mediastack.svc.cluster.local:8181
                   key: "{{HOMEPAGE_VAR_TAUTULLI_API_KEY}}"
             - Sonarr:
                 description: TV show collection manager
@@ -47,7 +54,7 @@ data:
                 app: sonarr
                 widget:
                   type: sonarr
-                  url: https://sonarr.vollminlab.com
+                  url: http://sonarr.mediastack.svc.cluster.local:8989
                   key: "{{HOMEPAGE_VAR_SONARR_API_KEY}}"
             - Radarr:
                 description: Movie collection manager
@@ -57,7 +64,7 @@ data:
                 app: radarr
                 widget:
                   type: radarr
-                  url: https://radarr.vollminlab.com
+                  url: http://radarr.mediastack.svc.cluster.local:7878
                   key: "{{HOMEPAGE_VAR_RADARR_API_KEY}}"
             - Prowlarr:
                 description: Indexer manager
@@ -67,7 +74,7 @@ data:
                 app: prowlarr
                 widget:
                   type: prowlarr
-                  url: https://prowlarr.vollminlab.com
+                  url: http://prowlarr.mediastack.svc.cluster.local:9696
                   key: "{{HOMEPAGE_VAR_PROWLARR_API_KEY}}"
             - SABnzbd:
                 description: Usenet downloader
@@ -77,7 +84,7 @@ data:
                 app: sabnzbd
                 widget:
                   type: sabnzbd
-                  url: https://sabnzbd.vollminlab.com
+                  url: http://sabnzbd.mediastack.svc.cluster.local:10097
                   key: "{{HOMEPAGE_VAR_SABNZBD_API_KEY}}"
             - Bazarr:
                 description: Subtitle manager
@@ -87,7 +94,7 @@ data:
                 app: bazarr
                 widget:
                   type: bazarr
-                  url: https://bazarr.vollminlab.com
+                  url: http://bazarr.mediastack.svc.cluster.local:6767
                   key: "{{HOMEPAGE_VAR_BAZARR_API_KEY}}"
         - Infrastructure:
             - TrueNAS:
@@ -275,11 +282,6 @@ data:
           secretKeyRef:
             name: homepage-env-vars
             key: WEATHER_LONGITUDE
-      - name: HOMEPAGE_VAR_PLEX_TOKEN
-        valueFrom:
-          secretKeyRef:
-            name: homepage-env-vars
-            key: PLEX_TOKEN
       - name: HOMEPAGE_VAR_TRUENAS_USERNAME
         valueFrom:
           secretKeyRef:
