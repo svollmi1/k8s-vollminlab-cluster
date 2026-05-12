@@ -29,7 +29,8 @@ The Authentik outpost (2026.2.2+) uses `X-Forwarded-Host` to match the incoming 
 ## Architecture: how forward-auth works here
 
 - **`vollminlab-forward-auth`** — a single `forward_domain` ProxyProvider covering all `*.vollminlab.com`. Assigned to the `vollminlab-proxy` outpost alongside `Prometheus` and `Alertmanager` (which use `forward_single`).
-- **Critical**: the `external_host` for this provider must be `https://vollminlab.com` (root domain), NOT `https://authentik.vollminlab.com`. The outpost registers the provider using the `external_host` hostname. If set to `authentik.vollminlab.com`, only requests for that exact hostname match — all other subdomains get 400 → nginx 500.
+- **Critical**: `external_host` for this provider must be `https://authentik.vollminlab.com`. This controls the OAuth2 callback URL (`https://authentik.vollminlab.com/outpost.goauthentik.io/callback`), which already has an ingress. Do NOT set it to the root domain — the root domain has no ingress and no TLS cert, so the OAuth2 callback would be unreachable.
+- **Domain matching uses `cookie_domain`, not `external_host`**: The outpost matches `*.vollminlab.com` requests because `cookie_domain=vollminlab.com`. Changing `external_host` to `vollminlab.com` is wrong and breaks OAuth2 callbacks.
 - Every host protected by Authentik nginx annotations **must have an Application entry** in Authentik, even if that Application has `provider_id=None`. Without it the outpost returns 400 → nginx converts to 500.
 - Applications using native SSO (Grafana, Harbor, Headlamp, Jellyfin, MinIO, Portainer, Audiobookshelf) have dedicated OAuth2/OIDC providers (`provider_id != None`).
 - Applications using forward-proxy auth only (Bazarr, Homepage, Longhorn, Policy Reporter, Prowlarr, Radarr, SABnzbd, Shlink, Sonarr, Seerr, Tautulli) have `provider_id=None` — they rely on the domain-wide `vollminlab-forward-auth`.
