@@ -6,4 +6,5 @@ resources:
   - configmap.yaml
   - helmrelease.yaml
   - ingress.yaml
+  - ingress-socketio.yaml
   - pvc-bazarr-config.yaml
