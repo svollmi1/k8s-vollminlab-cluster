@@ -1,0 +1,14 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: jellystat-db-backup
+  namespace: mediastack
+  labels:
+    app: jellystat-db
+    env: production
+    category: media
+spec:
+  schedule: "0 3 * * *"
+  backupOwnerReference: self
+  cluster:
+    name: jellystat-db

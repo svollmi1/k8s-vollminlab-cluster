@@ -17,4 +17,5 @@ spec:
   targetNamespace: mediastack
   timeout: 2m
   dependsOn:
+    - name: cnpg-system
     - name: sealed-secrets
