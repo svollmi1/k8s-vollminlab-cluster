@@ -15,6 +15,17 @@ kubectl exec -n authentik $AUTHENTIK_POD -- ak shell -c "<python>"
 # Ignore the JSON bootstrap noise — your output appears after "authentik shell" banner.
 ```
 
+## Required nginx ingress annotation on every protected Ingress
+
+Every Ingress with `auth-url` pointing to the Authentik outpost **must also have**:
+
+```yaml
+nginx.ingress.kubernetes.io/auth-snippet: |
+  proxy_set_header X-Forwarded-Host $http_host;
+```
+
+The Authentik outpost (2026.2.2+) uses `X-Forwarded-Host` to match the incoming auth request to a registered provider. nginx ingress always sets `Host: authentik-proxy.authentik.svc.cluster.local` in auth_request sub-locations — without `X-Forwarded-Host`, the outpost cannot find the app and returns 400 → nginx 500.
+
 ## Architecture: how forward-auth works here
 
 - **`vollminlab-forward-auth`** — a single `forward_domain` ProxyProvider covering all `*.vollminlab.com`. Assigned to the `vollminlab-proxy` outpost alongside `Prometheus` and `Alertmanager` (which use `forward_single`).
