@@ -36,16 +36,12 @@ data:
                   type: overseerr
                   url: http://seerr-seerr-chart.mediastack.svc.cluster.local
                   key: "{{HOMEPAGE_VAR_OVERSEERR_API_KEY}}"
-            - Tautulli:
-                description: Plex monitoring and analytics
-                href: https://tautulli.vollminlab.com
-                icon: tautulli.png
+            - Jellystat:
+                description: Jellyfin statistics and analytics
+                href: https://jellystat.vollminlab.com
+                icon: jellystat.png
                 namespace: mediastack
-                app: tautulli
-                widget:
-                  type: tautulli
-                  url: http://tautulli.mediastack.svc.cluster.local:8181
-                  key: "{{HOMEPAGE_VAR_TAUTULLI_API_KEY}}"
+                app: jellystat
             - Sonarr:
                 description: TV show collection manager
                 href: https://sonarr.vollminlab.com
