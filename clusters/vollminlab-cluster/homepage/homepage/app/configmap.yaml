@@ -31,11 +31,11 @@ data:
                 href: https://seerr.vollminlab.com
                 icon: overseerr.png
                 namespace: mediastack
-                app: seerr
+                app: seerr-chart
                 widget:
                   type: overseerr
                   url: http://seerr-seerr-chart.mediastack.svc.cluster.local
-                  key: "{{HOMEPAGE_VAR_OVERSEERR_API_KEY}}"
+                  key: "{{HOMEPAGE_VAR_SEERR_API_KEY}}"
             - Jellystat:
                 description: Jellyfin statistics and analytics
                 href: https://jellystat.vollminlab.com
@@ -292,11 +292,11 @@ data:
           secretKeyRef:
             name: homepage-env-vars
             key: TRUENAS_PASSWORD
-      - name: HOMEPAGE_VAR_OVERSEERR_API_KEY
+      - name: HOMEPAGE_VAR_SEERR_API_KEY
         valueFrom:
           secretKeyRef:
             name: homepage-env-vars
-            key: OVERSEERR_API_KEY
+            key: SEERR_API_KEY
       - name: HOMEPAGE_VAR_SONARR_API_KEY
         valueFrom:
           secretKeyRef:
@@ -322,7 +322,6 @@ data:
           secretKeyRef:
             name: homepage-env-vars
             key: JELLYSTAT_API_KEY
-            optional: true
       - name: HOMEPAGE_VAR_PIHOLE_API_KEY
         valueFrom:
           secretKeyRef:
