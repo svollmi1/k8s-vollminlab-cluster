@@ -19,7 +19,7 @@ spec:
     storageClass: longhorn
   bootstrap:
     initdb:
-      database: jellystat
+      database: jfstat
       owner: jellystat
       secret:
         name: jellystat-db-credentials
