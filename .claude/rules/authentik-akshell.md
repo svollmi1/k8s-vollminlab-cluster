@@ -28,12 +28,13 @@ The Authentik outpost (2026.2.2+) uses `X-Forwarded-Host` to match the incoming 
 
 ## Architecture: how forward-auth works here
 
-- **`vollminlab-forward-auth`** — a single `forward_domain` ProxyProvider covering all `*.vollminlab.com`. Assigned to the `vollminlab-proxy` outpost alongside `Prometheus` and `Alertmanager` (which use `forward_single`).
+- **`vollminlab-forward-auth`** — a single `forward_domain` ProxyProvider covering all `*.vollminlab.com`. The only provider assigned to the `vollminlab-proxy` outpost.
 - **Critical**: `external_host` for this provider must be `https://authentik.vollminlab.com`. This controls the OAuth2 callback URL (`https://authentik.vollminlab.com/outpost.goauthentik.io/callback`), which already has an ingress. Do NOT set it to the root domain (`vollminlab.com`) — that domain has no ingress and no TLS cert, so the OAuth2 callback would be unreachable.
 - **Domain matching uses `cookie_domain`, not `external_host`**: The outpost matches `*.vollminlab.com` requests because `cookie_domain=vollminlab.com`. Changing `external_host` to `vollminlab.com` is wrong and breaks OAuth2 callbacks.
 - Every host protected by Authentik nginx annotations **must have an Application entry** in Authentik, even if that Application has `provider_id=None`. Without it the outpost returns 400 → nginx converts to 500.
 - Applications using native SSO (Grafana, Harbor, Headlamp, Jellyfin, MinIO, Portainer, Audiobookshelf) have dedicated OAuth2/OIDC providers (`provider_id != None`).
-- Applications using forward-proxy auth only (Bazarr, Homepage, Longhorn, Policy Reporter, Prowlarr, Radarr, SABnzbd, Shlink, Sonarr, Seerr, Tautulli) have `provider_id=None` — they rely on the domain-wide `vollminlab-forward-auth`.
+- Applications using forward-proxy auth only (Alertmanager, Bazarr, Homepage, Longhorn, Policy Reporter, Prometheus, Prowlarr, Radarr, SABnzbd, Shlink, Sonarr, Seerr, Tautulli) have `provider_id=None` — they rely on the domain-wide `vollminlab-forward-auth`.
+- **Never use `forward_single` ProxyProviders for services behind nginx forward-auth.** The OAuth callback URL (`https://<service>/outpost.goauthentik.io/callback`) hits the auth-annotated ingress, nginx tries to authenticate the callback, gets 401, and loops. Stick to `forward_domain` (`vollminlab-forward-auth`) for all nginx forward-auth services.
 
 ## Known limitation: skip_path_regex does not work for forward-auth
 
