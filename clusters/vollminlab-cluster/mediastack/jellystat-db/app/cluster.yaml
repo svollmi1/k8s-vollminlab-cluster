@@ -1,0 +1,45 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: jellystat-db
+  namespace: mediastack
+  labels:
+    app: jellystat-db
+    env: production
+    category: media
+spec:
+  instances: 1
+  inheritedMetadata:
+    labels:
+      app: jellystat-db
+      env: production
+      category: media
+  storage:
+    size: 5Gi
+    storageClass: longhorn
+  bootstrap:
+    initdb:
+      database: jellystat
+      owner: jellystat
+      secret:
+        name: jellystat-db-credentials
+      postInitSQL:
+        - GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO jellystat
+        - GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO jellystat
+        - ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO jellystat
+        - ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO jellystat
+  backup:
+    barmanObjectStore:
+      destinationPath: "s3://cnpg-backups/jellystat-db"
+      endpointURL: "http://minio.minio.svc.cluster.local:9000"
+      s3Credentials:
+        accessKeyId:
+          name: cnpg-minio-credentials
+          key: ACCESS_KEY_ID
+        secretAccessKey:
+          name: cnpg-minio-credentials
+          key: ACCESS_SECRET_KEY
+      wal:
+        compression: gzip
+        maxParallel: 2
+    retentionPolicy: "30d"

@@ -22,6 +22,7 @@ resources:
   - homepage-helmrepository.yaml
   - ingress-nginx-helmrepository.yaml
   - jellyfin-helmrepository.yaml
+  - jellystat-helmrepository.yaml
   - kyverno-helmrepository.yaml
   - kyverno-policyreporter-helmrepository.yaml
   - local-path-provisioner-gitrepository.yaml
@@ -41,6 +42,5 @@ resources:
   - shlink-helmrepository.yaml
   - smb-csi-driver-helmrepository.yaml
   - sonarr-ocirepository.yaml
-  - tautulli-helmrepository.yaml
   - velero-helmrepository.yaml
   - vollminlab-ocirepository.yaml

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: jellystat-postgresql
+  namespace: mediastack
+  labels:
+    app: jellystat
+    env: production
+    category: media
+spec:
+  type: ExternalName
+  externalName: jellystat-db-rw.mediastack.svc.cluster.local
+  ports:
+    - port: 5432
+      targetPort: 5432

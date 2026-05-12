@@ -14,9 +14,10 @@ resources:
   - ./bazarr-exportarr/app
   - ./seerr/app
   - ./jellyfin/app
+  - ./jellystat-db/app
+  - ./jellystat/app
   - ./prowlarr/app
   - ./radarr/app
   - ./sabnzbd/app
   - ./sonarr/app
-  - ./tautulli/app
   - ./pvcs
