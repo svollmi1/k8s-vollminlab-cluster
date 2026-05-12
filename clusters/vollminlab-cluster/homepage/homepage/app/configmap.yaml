@@ -42,6 +42,10 @@ data:
                 icon: jellystat.png
                 namespace: mediastack
                 app: jellystat
+                widget:
+                  type: jellystat
+                  url: https://jellystat.vollminlab.com
+                  key: "{{HOMEPAGE_VAR_JELLYSTAT_API_KEY}}"
             - Sonarr:
                 description: TV show collection manager
                 href: https://sonarr.vollminlab.com
@@ -313,11 +317,12 @@ data:
           secretKeyRef:
             name: homepage-env-vars
             key: SABNZBD_API_KEY
-      - name: HOMEPAGE_VAR_TAUTULLI_API_KEY
+      - name: HOMEPAGE_VAR_JELLYSTAT_API_KEY
         valueFrom:
           secretKeyRef:
             name: homepage-env-vars
-            key: TAUTULLI_API_KEY
+            key: JELLYSTAT_API_KEY
+            optional: true
       - name: HOMEPAGE_VAR_PIHOLE_API_KEY
         valueFrom:
           secretKeyRef:
