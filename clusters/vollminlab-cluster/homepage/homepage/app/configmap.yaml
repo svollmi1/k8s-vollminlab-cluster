@@ -201,7 +201,7 @@ data:
             - Policy Reporter:
                 description: Kubernetes policy reporting
                 href: https://policyreporter.vollminlab.com
-                icon: kyverno.png
+                icon: https://raw.githubusercontent.com/kyverno/kyverno/main/img/logo.png
                 namespace: kyverno
                 app: policy-reporter-ui
             - Grafana:
