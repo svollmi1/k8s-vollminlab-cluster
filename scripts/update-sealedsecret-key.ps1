@@ -188,7 +188,7 @@ foreach ($key in $KeysToUpdate) {
     if ($key -in $newKeys) { continue }  # already handled above
     $newVal = $KeyValues[$key]
     $newB64 = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($newVal))
-    $secretYaml = $secretYaml -replace "(?m)^(\s+$([regex]::Escape($key))\s*)[A-Za-z0-9+/=]+", "`${1}$newB64"
+    $secretYaml = $secretYaml -replace "(?m)^(\s+$([regex]::Escape($key))\s*:\s*)[A-Za-z0-9+/=]+", "`${1}$newB64"
     $countAfter = ([regex]::Matches($secretYaml, "(?m)^\s+$([regex]::Escape($key))\s*:")).Count
     if ($countAfter -ne 1) {
         Write-Error "After replacing key '$key', line count is $countAfter (expected 1). Aborting."
