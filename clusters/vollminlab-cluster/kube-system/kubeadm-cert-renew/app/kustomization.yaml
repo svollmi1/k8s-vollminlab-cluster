@@ -3,6 +3,7 @@ kind: Kustomization
 metadata:
   name: kubeadm-cert-renew
 resources:
+  - rbac.yaml
   - cronjob-k8scp01.yaml
   - cronjob-k8scp02.yaml
   - cronjob-k8scp03.yaml

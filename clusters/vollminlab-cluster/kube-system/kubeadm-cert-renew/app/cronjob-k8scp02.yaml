@@ -28,7 +28,7 @@ spec:
             env: production
             category: core
         spec:
-          serviceAccountName: default
+          serviceAccountName: kubeadm-cert-renew
           restartPolicy: Never
           hostPID: true
           nodeSelector:
@@ -46,6 +46,7 @@ spec:
                 - /bin/sh
                 - -c
                 - |
+                  set -e
                   apk add --no-cache util-linux curl
 
                   NODE_NAME="k8scp02"
