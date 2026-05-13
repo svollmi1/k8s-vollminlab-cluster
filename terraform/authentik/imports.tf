@@ -1,3 +1,19 @@
+# Users
+import {
+  to = authentik_user.vollmin
+  id = "8"
+}
+
+import {
+  to = authentik_user.jvollmin
+  id = "9"
+}
+
+import {
+  to = authentik_user.gkroner
+  id = "11"
+}
+
 # Groups
 import {
   to = authentik_group.audiobookshelf_admins
