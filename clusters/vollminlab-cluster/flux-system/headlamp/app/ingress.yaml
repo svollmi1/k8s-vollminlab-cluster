@@ -9,12 +9,6 @@ metadata:
     category: core
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    gethomepage.dev/enabled: "true"
-    gethomepage.dev/name: "Headlamp"
-    gethomepage.dev/description: "Kubernetes + Flux dashboard"
-    gethomepage.dev/group: "Infrastructure"
-    gethomepage.dev/icon: "kubernetes.png"
-    gethomepage.dev/pod-selector: "app=headlamp"
     shlink.vollminlab.com/slug: headlamp
 spec:
   ingressClassName: nginx
