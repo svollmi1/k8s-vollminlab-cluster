@@ -166,12 +166,20 @@ data:
                 icon: grafana.png
                 namespace: monitoring
                 app: grafana
+                widget:
+                  type: grafana
+                  url: http://kube-prometheus-stack-grafana.monitoring.svc.cluster.local:80
+                  username: "{{HOMEPAGE_VAR_GRAFANA_USERNAME}}"
+                  password: "{{HOMEPAGE_VAR_GRAFANA_PASSWORD}}"
             - Prometheus:
                 description: Metrics collection
                 href: https://prometheus.vollminlab.com
                 icon: prometheus.png
                 namespace: monitoring
                 app: prometheus
+                widget:
+                  type: prometheus
+                  url: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
         - Tools:
             - Homepage:
                 description: This dashboard
@@ -376,6 +384,16 @@ data:
           secretKeyRef:
             name: homepage-env-vars
             key: AUDIOBOOKSHELF_API_KEY
+      - name: HOMEPAGE_VAR_GRAFANA_USERNAME
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: GRAFANA_USERNAME
+      - name: HOMEPAGE_VAR_GRAFANA_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: GRAFANA_PASSWORD
       - name: HOMEPAGE_ALLOWED_HOSTS
         value: "homepage.vollminlab.com,localhost,127.0.0.1"
     resources:
