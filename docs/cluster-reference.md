@@ -466,7 +466,7 @@ All ingresses use `ingressClassName: nginx`, TLS termination via `wildcard-tls`,
 | `pvc-tautulli-config` | mediastack | 1Gi | longhorn | RWO |
 | `pvc-minecraft-datadir` | dmz | 20Gi | longhorn-dmz | RWX |
 | `portainer` | portainer | 10Gi | local-path | RWO |
-| `minio` | minio | 50Gi | longhorn | RWO |
+| `minio` | minio | 75Gi | longhorn | RWO |
 
 ---
 
@@ -490,7 +490,7 @@ Kubernetes manifests are **not** backed up by Velero — they are restored by Fl
 | Helm repo | https://charts.bitnami.com/bitnami |
 | Namespace | `minio` |
 | Mode | standalone |
-| Storage | 50Gi Longhorn PVC |
+| Storage | 75Gi Longhorn PVC |
 | API endpoint (in-cluster) | `http://minio.minio.svc.cluster.local:9000` |
 | Console | `minio.vollminlab.com` (port 9001) |
 | Root user | `root` (password in 1Password: **MinIO**) |
@@ -509,7 +509,9 @@ Kubernetes manifests are **not** backed up by Velero — they are restored by Fl
 | B2 bucket | `vollminlab-k8s-backups` |
 | B2 endpoint | `https://s3.us-west-000.backblazeb2.com` |
 | B2 credentials | 1Password: **Backblaze B2 - vollminlab-k8s-velero** |
-| Schedule | `daily-full` — 02:00 daily, 30-day retention |
+| Schedule: `daily-full` | 02:00 daily → MinIO, 14-day retention |
+| Schedule: `daily-b2` | 04:00 daily → B2, 90-day retention |
+| Schedule: `monthly-b2` | 06:00 on 1st of month → B2, 1-year retention |
 
 ### Checking backup status
 
