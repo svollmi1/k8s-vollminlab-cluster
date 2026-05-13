@@ -129,18 +129,18 @@ Control plane certs issued by kubeadm expire annually and require manual renewal
 
 ### 3.1 Authentik — SSO / Identity Provider
 
-**Status:** `in-progress` — design complete, implementation plan ready
+**Status:** `in-progress` — phases 1–5b complete, 5c and 6 remaining
 
-Design doc: `docs/authentik-design.md`. Implementation plan: `docs/superpowers/plans/authentik.md` (local).
+Design doc: `docs/authentik-design.md`.
 
-Four-phase rollout:
-
-- Phase 1: Core infra — shared Redis (`redis` ns), CNPG Cluster CR, Authentik server+worker, cloudflared tunnel for `auth.vollminlab.com`
-- Phase 2: External proxy outpost + Jellyseerr (replaces Overseerr) + Jellyfin OIDC
-- Phase 3: Native OIDC — Grafana, Harbor, Headlamp, Portainer, Audiobookshelf, MinIO
-- Phase 4: Forward-auth sweep — Longhorn, Homepage, arr stack, Tautulli, Shlink Web, Policy Reporter
-
-Plex → Jellyfin migration is part of Phase 2 (Jellyseerr replaces Overseerr; Plex decommissioned after Jellyfin stable).
+- **Phase 1** `done` — Core infra: shared Redis (`redis` ns), CNPG Cluster CR, Authentik server+worker, cloudflared tunnel for `auth.vollminlab.com`
+- **Phase 2** `done` — External proxy outpost + Jellyseerr (replaces Overseerr) + Jellyfin OIDC. Plex decommissioned; Jellyfin stable.
+- **Phase 3** `done` — Native OIDC: Grafana, Harbor, Headlamp, Portainer, Audiobookshelf, MinIO
+- **Phase 4** `done` — Forward-auth sweep: Longhorn, Homepage, arr stack, Tautulli, Shlink Web, Policy Reporter
+- **Phase 5a** `done` — tofu-controller deployed in `tofu` ns; MinIO `terraform-state` bucket + scoped IAM user (PRs #539)
+- **Phase 5b** `done` — Full Authentik config under OpenTofu IaC: groups, users, OAuth2/proxy providers, scope mappings, applications, outpost, Portainer OAuth settings. All existing objects imported into state. Client secrets sealed. (PRs #542, #546)
+- **Phase 5c** `planned` — Extend IaC to MinIO (buckets, IAM), Harbor (OIDC, projects, robot accounts), and Grafana (OAuth, notification policies, contact points). Add `terraform fmt` + `tofu validate` CI workflow for `terraform/` PRs (self-hosted provider handling required for `portainer/portainer`).
+- **Phase 6** `planned` — NPM-proxied external services via Authentik `auth_request`: Pi-hole, TrueNAS, HAProxy, NPM itself. vCenter via native OIDC.
 
 ---
 
