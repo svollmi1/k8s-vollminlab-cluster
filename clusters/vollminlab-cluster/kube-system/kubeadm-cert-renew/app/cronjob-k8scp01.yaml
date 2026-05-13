@@ -37,10 +37,6 @@ spec:
             - key: node-role.kubernetes.io/control-plane
               operator: Exists
               effect: NoSchedule
-          volumes:
-            - name: host-proc
-              hostPath:
-                path: /proc
           containers:
             - name: kubeadm-cert-renew
               image: docker.io/alpine/kubectl:1.33.4
@@ -50,25 +46,43 @@ spec:
                 - /bin/sh
                 - -c
                 - |
-                  set -e
                   apk add --no-cache util-linux curl
 
                   NODE_NAME="k8scp01"
                   echo "Starting kubeadm cert renewal on $NODE_NAME at $(date)"
 
-                  echo "Running: kubeadm certs renew all"
-                  nsenter -t 1 --mount --pid --uts --ipc --net -- kubeadm certs renew all
+                  if ! nsenter -t 1 --mount --pid --uts --ipc --net -- kubeadm certs renew all; then
+                    echo "ERROR: kubeadm certs renew all failed on $NODE_NAME"
+                    curl -s \
+                      --form-string "token=$PUSHOVER_TOKEN" \
+                      --form-string "user=$PUSHOVER_USER_KEY" \
+                      --form-string "title=Kubernetes cert renewal FAILED" \
+                      --form-string "message=kubeadm certs renew all FAILED on $NODE_NAME. Kubelet NOT restarted. Manual intervention required." \
+                      --form-string "priority=1" \
+                      https://api.pushover.net/1/messages.json
+                    exit 1
+                  fi
 
-                  echo "Restarting kubelet"
-                  nsenter -t 1 --mount --pid --uts --ipc --net -- systemctl restart kubelet
+                  echo "Cert renewal succeeded. Restarting kubelet..."
 
-                  echo "Renewal complete on $NODE_NAME at $(date)"
+                  if ! nsenter -t 1 --mount --pid --uts --ipc --net -- systemctl restart kubelet; then
+                    echo "WARNING: kubelet restart FAILED on $NODE_NAME after successful cert renewal"
+                    curl -s \
+                      --form-string "token=$PUSHOVER_TOKEN" \
+                      --form-string "user=$PUSHOVER_USER_KEY" \
+                      --form-string "title=Kubernetes cert renewal WARNING" \
+                      --form-string "message=Certs renewed on $NODE_NAME but kubelet restart FAILED. Run: systemctl restart kubelet" \
+                      --form-string "priority=1" \
+                      https://api.pushover.net/1/messages.json
+                    exit 1
+                  fi
 
+                  echo "Renewal and kubelet restart complete on $NODE_NAME at $(date)"
                   curl -s \
                     --form-string "token=$PUSHOVER_TOKEN" \
                     --form-string "user=$PUSHOVER_USER_KEY" \
                     --form-string "title=Kubernetes cert renewal complete" \
-                    --form-string "message=kubeadm certs renewed on $NODE_NAME at $(date). kubelet restarted." \
+                    --form-string "message=kubeadm certs renewed on $NODE_NAME at $(date). kubelet restarted successfully." \
                     --form-string "priority=0" \
                     https://api.pushover.net/1/messages.json
 
@@ -91,6 +105,3 @@ spec:
                 limits:
                   cpu: 200m
                   memory: 64Mi
-              volumeMounts:
-                - name: host-proc
-                  mountPath: /proc
