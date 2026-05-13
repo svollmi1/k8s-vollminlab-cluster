@@ -110,7 +110,7 @@ data:
         schedule: "0 2 * * *"
         useOwnerReferencesInBackup: false
         template:
-          ttl: 720h
+          ttl: 336h
           storageLocation: minio
           defaultVolumesToFsBackup: true
           excludedNamespaces:
@@ -125,7 +125,22 @@ data:
         schedule: "0 4 * * *"
         useOwnerReferencesInBackup: false
         template:
-          ttl: 720h
+          ttl: 2160h
+          storageLocation: b2
+          defaultVolumesToFsBackup: true
+          excludedNamespaces:
+            - minio
+            - monitoring
+            - velero
+          resourcePolicy:
+            kind: ConfigMap
+            name: velero-skip-smb-policy
+      monthly-b2:
+        disabled: false
+        schedule: "0 6 1 * *"
+        useOwnerReferencesInBackup: false
+        template:
+          ttl: 8760h
           storageLocation: b2
           defaultVolumesToFsBackup: true
           excludedNamespaces:
