@@ -6,5 +6,6 @@ resources:
   - gotk-components.yaml
   - gotk-sync.yaml
   - flux-system-sealedsecret.yaml
+  - allow-tofu-source-controller-networkpolicy.yaml
   - ./repositories
   - ./flux-kustomizations
