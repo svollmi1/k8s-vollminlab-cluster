@@ -5,7 +5,9 @@ resource "authentik_user" "vollmin" {
   is_active = true
 
   lifecycle {
-    ignore_changes = [password]
+    # password: users set their own via Authentik's reset flow, Terraform never touches it
+    # groups: managed from the authentik_group side; ignore here to avoid conflict
+    ignore_changes = [password, groups]
   }
 }
 
@@ -16,7 +18,7 @@ resource "authentik_user" "jvollmin" {
   is_active = true
 
   lifecycle {
-    ignore_changes = [password]
+    ignore_changes = [password, groups]
   }
 }
 
@@ -27,6 +29,6 @@ resource "authentik_user" "gkroner" {
   is_active = true
 
   lifecycle {
-    ignore_changes = [password]
+    ignore_changes = [password, groups]
   }
 }
