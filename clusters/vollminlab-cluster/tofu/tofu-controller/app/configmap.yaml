@@ -10,6 +10,7 @@ metadata:
 data:
   values.yaml: |
     replicaCount: 1
+    allowCrossNamespaceRefs: true
 
     podLabels:
       app: tofu-controller
