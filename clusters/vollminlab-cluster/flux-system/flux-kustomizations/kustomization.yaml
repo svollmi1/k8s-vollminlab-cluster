@@ -33,3 +33,4 @@ resources:
   - velero-kustomization.yaml
   - harbor-kustomization.yaml
   - authentik-kustomization.yaml
+  - tofu-kustomization.yaml

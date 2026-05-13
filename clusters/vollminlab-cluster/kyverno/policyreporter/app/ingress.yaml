@@ -12,12 +12,6 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
     nginx.ingress.kubernetes.io/auth-snippet: |
       proxy_set_header X-Forwarded-Host $http_host;
-    gethomepage.dev/enabled: "true"
-    gethomepage.dev/name: "Policy Reporter"
-    gethomepage.dev/description: "Kubernetes policy reporting"
-    gethomepage.dev/group: "Monitoring & Observability"
-    gethomepage.dev/icon: "mdi-shield-check"
-    gethomepage.dev/pod-selector: "app.kubernetes.io/name=policy-reporter-ui"
     shlink.vollminlab.com/slug: policyreporter
   labels:
     app: policy-reporter
