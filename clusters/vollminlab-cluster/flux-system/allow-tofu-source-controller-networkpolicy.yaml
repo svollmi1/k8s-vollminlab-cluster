@@ -8,7 +8,9 @@ metadata:
     env: production
     category: core
 spec:
-  podSelector: {}
+  podSelector:
+    matchLabels:
+      app: source-controller
   policyTypes:
     - Ingress
   ingress:
@@ -16,3 +18,6 @@ spec:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: tofu
+      ports:
+        - protocol: TCP
+          port: 9090
