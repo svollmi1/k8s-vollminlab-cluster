@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+metadata:
+  name: terraform-authentik
+  labels:
+    app: tofu-controller
+    env: production
+    category: core
+resources:
+  - authentik-tf-credentials-sealedsecret.yaml
+  - authentik-oauth-client-secrets-sealedsecret.yaml
+  - portainer-tf-credentials-sealedsecret.yaml
+  - tofu-minio-credentials-sealedsecret.yaml
+  - terraform-cr.yaml
