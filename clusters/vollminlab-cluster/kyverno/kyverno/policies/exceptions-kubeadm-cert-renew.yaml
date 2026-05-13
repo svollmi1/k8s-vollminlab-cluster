@@ -11,13 +11,14 @@ spec:
   # kubeadm-cert-renew CronJob pods run in kube-system and require privileged
   # mode to access the kubeadm binary and PKI directories on the host.
   # The restrict-privileged and restrict-hostpath-usage policies are currently
-  # Audit mode but will be promoted to Enforce — this exception ensures the
-  # renewal pods are not blocked after policy hardening.
+  # Enforce mode — this exception ensures the renewal Jobs and Pods are not
+  # blocked if kube-system is ever removed from the policy exclude list.
   match:
     any:
       - resources:
           kinds:
             - Pod
+            - Job
           namespaces:
             - kube-system
           names:
