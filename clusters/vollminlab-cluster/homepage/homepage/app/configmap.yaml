@@ -20,12 +20,21 @@ data:
                 icon: jellyfin.png
                 namespace: mediastack
                 app: jellyfin
+                widget:
+                  type: jellyfin
+                  url: http://jellyfin.mediastack.svc.cluster.local:8096
+                  key: "{{HOMEPAGE_VAR_JELLYFIN_API_KEY}}"
+                  enableBlocks: true
             - Audiobookshelf:
                 description: Audiobook and podcast server
                 href: https://audiobookshelf.vollminlab.com
                 icon: audiobookshelf.png
                 namespace: mediastack
                 app: audiobookshelf
+                widget:
+                  type: audiobookshelf
+                  url: http://audiobookshelf.mediastack.svc.cluster.local:10223
+                  key: "{{HOMEPAGE_VAR_AUDIOBOOKSHELF_API_KEY}}"
             - Seerr:
                 description: Media request management
                 href: https://seerr.vollminlab.com
@@ -357,6 +366,16 @@ data:
           secretKeyRef:
             name: homepage-env-vars
             key: BAZARR_API_KEY
+      - name: HOMEPAGE_VAR_JELLYFIN_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: JELLYFIN_API_KEY
+      - name: HOMEPAGE_VAR_AUDIOBOOKSHELF_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: AUDIOBOOKSHELF_API_KEY
       - name: HOMEPAGE_ALLOWED_HOSTS
         value: "homepage.vollminlab.com,localhost,127.0.0.1"
     resources:
