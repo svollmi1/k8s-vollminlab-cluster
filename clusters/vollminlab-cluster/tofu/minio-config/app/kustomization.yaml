@@ -1,13 +1,11 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 metadata:
-  name: tofu
+  name: minio-config
   labels:
     app: tofu-controller
     env: production
     category: core
 resources:
-  - namespace.yaml
-  - minio-config/app
-  - terraform-authentik/app
-  - tofu-controller/app
+  - minio-tf-credentials-sealedsecret.yaml
+  - terraform-cr.yaml
