@@ -9,3 +9,4 @@ metadata:
 resources:
   - namespace.yaml
   - tofu-controller/app
+  - terraform-authentik/app
