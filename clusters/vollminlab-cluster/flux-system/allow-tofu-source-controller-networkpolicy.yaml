@@ -20,4 +20,4 @@ spec:
               kubernetes.io/metadata.name: tofu
       ports:
         - protocol: TCP
-          port: 80
+          port: 9090
