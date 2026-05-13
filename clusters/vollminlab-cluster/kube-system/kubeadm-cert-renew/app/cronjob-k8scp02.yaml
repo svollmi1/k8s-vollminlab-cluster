@@ -1,0 +1,96 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: kubeadm-cert-renew-k8scp02
+  namespace: kube-system
+  labels:
+    app: kubeadm-cert-renew
+    env: production
+    category: core
+spec:
+  schedule: "0 2 14 4,10 *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    metadata:
+      labels:
+        app: kubeadm-cert-renew
+        env: production
+        category: core
+    spec:
+      ttlSecondsAfterFinished: 3600
+      backoffLimit: 0
+      template:
+        metadata:
+          labels:
+            app: kubeadm-cert-renew
+            env: production
+            category: core
+        spec:
+          serviceAccountName: default
+          restartPolicy: Never
+          hostPID: true
+          nodeSelector:
+            kubernetes.io/hostname: k8scp02
+          tolerations:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
+          volumes:
+            - name: host-proc
+              hostPath:
+                path: /proc
+          containers:
+            - name: kubeadm-cert-renew
+              image: docker.io/alpine/kubectl:1.33.4
+              securityContext:
+                privileged: true
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  apk add --no-cache util-linux curl
+
+                  NODE_NAME="k8scp02"
+                  echo "Starting kubeadm cert renewal on $NODE_NAME at $(date)"
+
+                  echo "Running: kubeadm certs renew all"
+                  nsenter -t 1 --mount --pid --uts --ipc --net -- kubeadm certs renew all
+
+                  echo "Restarting kubelet"
+                  nsenter -t 1 --mount --pid --uts --ipc --net -- systemctl restart kubelet
+
+                  echo "Renewal complete on $NODE_NAME at $(date)"
+
+                  curl -s \
+                    --form-string "token=$PUSHOVER_TOKEN" \
+                    --form-string "user=$PUSHOVER_USER_KEY" \
+                    --form-string "title=Kubernetes cert renewal complete" \
+                    --form-string "message=kubeadm certs renewed on $NODE_NAME at $(date). kubelet restarted." \
+                    --form-string "priority=0" \
+                    https://api.pushover.net/1/messages.json
+
+                  echo "Pushover notification sent"
+              env:
+                - name: PUSHOVER_USER_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: kubeadm-cert-pushover
+                      key: user-key
+                - name: PUSHOVER_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: kubeadm-cert-pushover
+                      key: token
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 32Mi
+                limits:
+                  cpu: 200m
+                  memory: 64Mi
+              volumeMounts:
+                - name: host-proc
+                  mountPath: /proc
