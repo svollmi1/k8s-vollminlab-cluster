@@ -6,6 +6,7 @@ on:
     paths:
       - 'clusters/**'
       - 'bootstrap/**'
+      - 'terraform/**'
       - '.github/workflows/**'
       - '.vscode/**'
       - 'scripts/**'
@@ -21,6 +22,7 @@ on:
     paths:
       - 'clusters/**'
       - 'bootstrap/**'
+      - 'terraform/**'
       - '.github/workflows/**'
       - '.vscode/**'
       - 'scripts/**'

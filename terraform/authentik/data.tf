@@ -2,6 +2,10 @@ data "authentik_flow" "default_authorization_implicit" {
   slug = "default-provider-authorization-implicit-consent"
 }
 
+data "authentik_flow" "default_provider_invalidation" {
+  slug = "default-provider-invalidation-flow"
+}
+
 data "authentik_certificate_key_pair" "self_signed" {
   name = "authentik Self-signed Certificate"
 }
