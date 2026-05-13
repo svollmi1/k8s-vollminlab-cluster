@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tofu-controller-values
+  namespace: tofu
+  labels:
+    app: tofu-controller
+    env: production
+    category: core
+data:
+  values.yaml: |
+    replicaCount: 1
+
+    podLabels:
+      app: tofu-controller
+      env: production
+      category: core
+
+    resources:
+      requests:
+        cpu: 200m
+        memory: 256Mi
+      limits:
+        cpu: 1000m
+        memory: 512Mi
+
+    runner:
+      serviceAccount:
+        create: true
+        name: tf-runner
+      podLabels:
+        app: tf-runner
+        env: production
+        category: core
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
