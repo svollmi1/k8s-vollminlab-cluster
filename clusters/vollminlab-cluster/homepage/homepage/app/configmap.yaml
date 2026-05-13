@@ -149,6 +149,10 @@ data:
                 href: https://udm.vollminlab.com
                 icon: unifi.png
                 ping: https://udm.vollminlab.com
+                widget:
+                  type: unifi
+                  url: https://udm.vollminlab.com
+                  key: "{{HOMEPAGE_VAR_UDM_API_KEY}}"
             - Nginx Proxy Manager:
                 description: Reverse proxy management
                 href: https://npm.vollminlab.com
@@ -419,6 +423,11 @@ data:
           secretKeyRef:
             name: homepage-env-vars
             key: NPM_PASSWORD
+      - name: HOMEPAGE_VAR_UDM_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: UDM_API_KEY
       - name: HOMEPAGE_ALLOWED_HOSTS
         value: "homepage.vollminlab.com,localhost,127.0.0.1"
     resources:
