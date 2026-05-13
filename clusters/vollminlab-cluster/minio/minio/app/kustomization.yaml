@@ -6,6 +6,7 @@ resources:
   - ingress.yaml
   - ingress-s3.yaml
   - cnpg-minio-user-sealedsecret.yaml
+  - tofu-minio-user-sealedsecret.yaml
   - minio-credentials-sealedsecret.yaml
   - minio-oidc-sealedsecret.yaml
   - servicemonitor.yaml
