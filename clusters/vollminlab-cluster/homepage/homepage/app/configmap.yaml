@@ -117,6 +117,17 @@ data:
                   username: "{{HOMEPAGE_VAR_TRUENAS_USERNAME}}"
                   password: "{{HOMEPAGE_VAR_TRUENAS_PASSWORD}}"
                   enablePools: true
+            - Authentik:
+                description: Identity provider and SSO
+                href: https://authentik.vollminlab.com/if/admin/
+                icon: authentik.png
+                namespace: authentik
+                app: authentik
+                widget:
+                  type: authentik
+                  url: http://authentik-server.authentik.svc.cluster.local
+                  key: "{{HOMEPAGE_VAR_AUTHENTIK_API_KEY}}"
+                  version: 2
             - vCenter:
                 description: VMware vCenter Server
                 href: https://vcenter.vollminlab.com
@@ -140,17 +151,6 @@ data:
                 icon: minio.png
                 namespace: minio
                 app: minio
-            - Authentik:
-                description: Identity provider and SSO
-                href: https://authentik.vollminlab.com/if/admin/
-                icon: authentik.png
-                namespace: authentik
-                app: authentik
-                widget:
-                  type: authentik
-                  url: http://authentik-server.authentik.svc.cluster.local
-                  key: "{{HOMEPAGE_VAR_AUTHENTIK_API_KEY}}"
-                  version: 2
             - Longhorn:
                 description: Kubernetes storage management
                 href: https://longhorn.vollminlab.com
@@ -274,7 +274,7 @@ data:
                 description: Package manager community
                 href: https://community.chocolatey.org
                 icon: mdi-package-variant
-        - Personal/External:
+        - Personal:
             - Yahoo Fantasy Football:
                 description: Yahoo Fantasy Football
                 href: https://football.fantasysports.yahoo.com/
@@ -320,7 +320,7 @@ data:
           Web Links:
             style: row
             columns: 4
-          Personal/External:
+          Personal:
             style: row
             columns: 5
         providers:

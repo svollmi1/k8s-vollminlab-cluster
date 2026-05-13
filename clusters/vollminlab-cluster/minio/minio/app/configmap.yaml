@@ -14,6 +14,7 @@ data:
     existingSecret: "minio-credentials"
 
     podLabels:
+      app.kubernetes.io/name: minio
       env: production
       category: storage
 
