@@ -282,6 +282,8 @@ data:
             units: imperial
             cache: 5
       enableRbac: true
+    image:
+      tag: "v1.13.1"
     serviceAccount:
       create: true
       name: homepage
