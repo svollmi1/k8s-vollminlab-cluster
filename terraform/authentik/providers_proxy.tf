@@ -6,7 +6,4 @@ resource "authentik_provider_proxy" "vollminlab_forward_auth" {
   mode               = "forward_domain"
   cookie_domain      = "vollminlab.com"
 
-  lifecycle {
-    ignore_changes = [client_secret]
-  }
 }
