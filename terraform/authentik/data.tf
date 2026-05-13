@@ -22,10 +22,3 @@ data "authentik_property_mapping_provider_scope" "offline_access" {
   managed = "goauthentik.io/providers/oauth2/scope-offline_access"
 }
 
-data "authentik_user" "vollmin" {
-  username = "vollmin"
-}
-
-data "authentik_user" "jvollmin" {
-  username = "jvollmin"
-}
