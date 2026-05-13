@@ -128,11 +128,6 @@ data:
                 icon: portainer.png
                 namespace: portainer
                 app: portainer
-                widget:
-                  type: portainer
-                  url: http://portainer.portainer.svc.cluster.local:9000
-                  env: 1
-                  key: "{{HOMEPAGE_VAR_PORTAINER_API_KEY}}"
             - Harbor:
                 description: Container image registry
                 href: https://harbor.vollminlab.com
@@ -151,6 +146,11 @@ data:
                 icon: authentik.png
                 namespace: authentik
                 app: authentik
+                widget:
+                  type: authentik
+                  url: http://authentik-server.authentik.svc.cluster.local
+                  key: "{{HOMEPAGE_VAR_AUTHENTIK_API_KEY}}"
+                  version: 2
             - Longhorn:
                 description: Kubernetes storage management
                 href: https://longhorn.vollminlab.com
@@ -494,6 +494,11 @@ data:
           secretKeyRef:
             name: homepage-env-vars
             key: MINIO_SECRET_KEY
+      - name: HOMEPAGE_VAR_AUTHENTIK_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: AUTHENTIK_API_KEY
       - name: HOMEPAGE_ALLOWED_HOSTS
         value: "homepage.vollminlab.com,localhost,127.0.0.1"
     resources:
