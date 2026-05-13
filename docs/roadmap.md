@@ -113,7 +113,7 @@ Cluster upgraded from Flux v2.4.0 to v2.8.6 via two hops (PRs #423, #426, #428).
 
 ### 3.0 PKI — Automated Certificate Lifecycle
 
-**Status:** `in-progress`
+**Status:** `done` — PR #540
 
 Control plane certs issued by kubeadm expire annually and require manual renewal on each control plane node. This became an incident on 2026-04-14 when all certs expired simultaneously.
 
