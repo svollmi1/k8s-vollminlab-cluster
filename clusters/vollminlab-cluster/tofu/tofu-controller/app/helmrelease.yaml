@@ -1,26 +1,23 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: authentik
-  namespace: authentik
+  name: tofu-controller
+  namespace: tofu
   labels:
-    app: authentik
+    app: tofu-controller
     env: production
-    category: security
+    category: core
 spec:
   interval: 5m
   chart:
     spec:
-      chart: authentik
-      version: "2026.2.3"
+      chart: tofu-controller
+      version: "0.16.3"
       sourceRef:
         kind: HelmRepository
-        name: authentik-repo
+        name: tofu-controller-repo
         namespace: flux-system
   valuesFrom:
     - kind: ConfigMap
-      name: authentik-values
-      valuesKey: values.yaml
-    - kind: Secret
-      name: authentik-credentials
+      name: tofu-controller-values
       valuesKey: values.yaml

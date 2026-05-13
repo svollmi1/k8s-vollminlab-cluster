@@ -6,12 +6,6 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    gethomepage.dev/enabled: "true"
-    gethomepage.dev/name: "MinIO"
-    gethomepage.dev/description: "S3-compatible object storage"
-    gethomepage.dev/group: "Infrastructure"
-    gethomepage.dev/icon: "minio.png"
-    gethomepage.dev/pod-selector: "app=minio"
     shlink.vollminlab.com/slug: minio
   labels:
     app: minio

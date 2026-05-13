@@ -9,6 +9,7 @@ resources:
   - exceptions-calico.yaml
   - exceptions-ci-test-namespaces.yaml
   - exceptions-kyverno-hooks.yaml
+  - exceptions-kubeadm-cert-renew.yaml
   - exceptions-longhorn-dynamic.yaml
   - flux-exception.yaml
   - inject-namespace-labels.yaml
