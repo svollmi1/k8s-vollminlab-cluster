@@ -4,7 +4,7 @@ provider "authentik" {
 }
 
 provider "portainer" {
-  endpoint = "https://portainer.vollminlab.com/api"
-  username = "vollmin"
-  password = var.portainer_password
+  endpoint     = "https://portainer.vollminlab.com/api"
+  api_user     = "vollmin"
+  api_password = var.portainer_password
 }
