@@ -1,0 +1,108 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: kubeadm-cert-renew-k8scp03
+  namespace: kube-system
+  labels:
+    app: kubeadm-cert-renew
+    env: production
+    category: core
+spec:
+  schedule: "30 2 14 4,10 *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    metadata:
+      labels:
+        app: kubeadm-cert-renew
+        env: production
+        category: core
+    spec:
+      ttlSecondsAfterFinished: 3600
+      backoffLimit: 0
+      template:
+        metadata:
+          labels:
+            app: kubeadm-cert-renew
+            env: production
+            category: core
+        spec:
+          serviceAccountName: kubeadm-cert-renew
+          restartPolicy: Never
+          hostPID: true
+          nodeSelector:
+            kubernetes.io/hostname: k8scp03
+          tolerations:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
+          containers:
+            - name: kubeadm-cert-renew
+              image: docker.io/alpine/kubectl:1.33.4
+              securityContext:
+                privileged: true
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  apk add --no-cache util-linux curl
+
+                  NODE_NAME="k8scp03"
+                  echo "Starting kubeadm cert renewal on $NODE_NAME at $(date)"
+
+                  if ! nsenter -t 1 --mount --pid --uts --ipc --net -- kubeadm certs renew all; then
+                    echo "ERROR: kubeadm certs renew all failed on $NODE_NAME"
+                    curl -s \
+                      --form-string "token=$PUSHOVER_TOKEN" \
+                      --form-string "user=$PUSHOVER_USER_KEY" \
+                      --form-string "title=Kubernetes cert renewal FAILED" \
+                      --form-string "message=kubeadm certs renew all FAILED on $NODE_NAME. Kubelet NOT restarted. Manual intervention required." \
+                      --form-string "priority=1" \
+                      https://api.pushover.net/1/messages.json
+                    exit 1
+                  fi
+
+                  echo "Cert renewal succeeded. Restarting kubelet..."
+
+                  if ! nsenter -t 1 --mount --pid --uts --ipc --net -- systemctl restart kubelet; then
+                    echo "WARNING: kubelet restart FAILED on $NODE_NAME after successful cert renewal"
+                    curl -s \
+                      --form-string "token=$PUSHOVER_TOKEN" \
+                      --form-string "user=$PUSHOVER_USER_KEY" \
+                      --form-string "title=Kubernetes cert renewal WARNING" \
+                      --form-string "message=Certs renewed on $NODE_NAME but kubelet restart FAILED. Run: systemctl restart kubelet" \
+                      --form-string "priority=1" \
+                      https://api.pushover.net/1/messages.json
+                    exit 1
+                  fi
+
+                  echo "Renewal and kubelet restart complete on $NODE_NAME at $(date)"
+                  curl -s \
+                    --form-string "token=$PUSHOVER_TOKEN" \
+                    --form-string "user=$PUSHOVER_USER_KEY" \
+                    --form-string "title=Kubernetes cert renewal complete" \
+                    --form-string "message=kubeadm certs renewed on $NODE_NAME at $(date). kubelet restarted successfully." \
+                    --form-string "priority=0" \
+                    https://api.pushover.net/1/messages.json
+
+                  echo "Pushover notification sent"
+              env:
+                - name: PUSHOVER_USER_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: kubeadm-cert-pushover
+                      key: user-key
+                - name: PUSHOVER_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: kubeadm-cert-pushover
+                      key: token
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 32Mi
+                limits:
+                  cpu: 200m
+                  memory: 64Mi

@@ -11,12 +11,6 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
     nginx.ingress.kubernetes.io/auth-snippet: |
       proxy_set_header X-Forwarded-Host $http_host;
-    gethomepage.dev/enabled: "true"
-    gethomepage.dev/name: "Longhorn"
-    gethomepage.dev/description: "Kubernetes storage management"
-    gethomepage.dev/group: "Infrastructure"
-    gethomepage.dev/icon: "longhorn.png"
-    gethomepage.dev/pod-selector: "app=longhorn-ui"
     shlink.vollminlab.com/slug: longhorn
   labels:
     app: longhorn

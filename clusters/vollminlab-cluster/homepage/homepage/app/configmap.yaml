@@ -20,12 +20,21 @@ data:
                 icon: jellyfin.png
                 namespace: mediastack
                 app: jellyfin
+                widget:
+                  type: jellyfin
+                  url: http://jellyfin.mediastack.svc.cluster.local:8096
+                  key: "{{HOMEPAGE_VAR_JELLYFIN_API_KEY}}"
+                  enableBlocks: true
             - Audiobookshelf:
                 description: Audiobook and podcast server
                 href: https://audiobookshelf.vollminlab.com
                 icon: audiobookshelf.png
                 namespace: mediastack
                 app: audiobookshelf
+                widget:
+                  type: audiobookshelf
+                  url: http://audiobookshelf.mediastack.svc.cluster.local:10223
+                  key: "{{HOMEPAGE_VAR_AUDIOBOOKSHELF_API_KEY}}"
             - Seerr:
                 description: Media request management
                 href: https://seerr.vollminlab.com
@@ -119,6 +128,35 @@ data:
                 icon: portainer.png
                 namespace: portainer
                 app: portainer
+            - Harbor:
+                description: Container image registry
+                href: https://harbor.vollminlab.com
+                icon: harbor.png
+                namespace: harbor
+                app: harbor
+            - MinIO:
+                description: S3-compatible object storage
+                href: https://minio.vollminlab.com
+                icon: minio.png
+                namespace: minio
+                app: minio
+            - Authentik:
+                description: Identity provider and SSO
+                href: https://authentik.vollminlab.com/if/admin/
+                icon: authentik.png
+                namespace: authentik
+                app: authentik
+                widget:
+                  type: authentik
+                  url: http://authentik-server.authentik.svc.cluster.local
+                  key: "{{HOMEPAGE_VAR_AUTHENTIK_API_KEY}}"
+                  version: 2
+            - Longhorn:
+                description: Kubernetes storage management
+                href: https://longhorn.vollminlab.com
+                icon: longhorn.png
+                namespace: longhorn-system
+                app: longhorn
         - Networking:
             - Pi-hole:
                 description: DNS sinkhole and ad blocker
@@ -135,11 +173,20 @@ data:
                 href: https://udm.vollminlab.com
                 icon: unifi.png
                 ping: https://udm.vollminlab.com
+                widget:
+                  type: unifi
+                  url: https://udm.vollminlab.com
+                  key: "{{HOMEPAGE_VAR_UDM_API_KEY}}"
             - Nginx Proxy Manager:
                 description: Reverse proxy management
                 href: https://npm.vollminlab.com
                 icon: nginx-proxy-manager.png
                 ping: https://npm.vollminlab.com
+                widget:
+                  type: npm
+                  url: https://npm.vollminlab.com
+                  username: "{{HOMEPAGE_VAR_NPM_USERNAME}}"
+                  password: "{{HOMEPAGE_VAR_NPM_PASSWORD}}"
             - HAProxy Internal Stats:
                 description: Load balancer statistics
                 href: http://haproxyvip.vollminlab.com:8404/stats
@@ -151,18 +198,38 @@ data:
                 icon: haproxy.png
                 ping: http://haproxydmzvip.vollminlab.com:8404/stats
         - Monitoring & Observability:
+            - Policy Reporter:
+                description: Kubernetes policy reporting
+                href: https://policyreporter.vollminlab.com
+                icon: mdi-shield-check
+                namespace: kyverno
+                app: policy-reporter-ui
             - Grafana:
                 description: Metrics visualization
                 href: https://grafana.vollminlab.com
                 icon: grafana.png
                 namespace: monitoring
                 app: grafana
+                widget:
+                  type: grafana
+                  url: http://kube-prometheus-stack-grafana.monitoring.svc.cluster.local:80
+                  username: "{{HOMEPAGE_VAR_GRAFANA_USERNAME}}"
+                  password: "{{HOMEPAGE_VAR_GRAFANA_PASSWORD}}"
             - Prometheus:
                 description: Metrics collection
                 href: https://prometheus.vollminlab.com
                 icon: prometheus.png
                 namespace: monitoring
                 app: prometheus
+                widget:
+                  type: prometheus
+                  url: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
+            - AlertManager:
+                description: Prometheus alert management
+                href: https://alertmanager.vollminlab.com
+                icon: alertmanager.png
+                namespace: monitoring
+                app: alertmanager
         - Tools:
             - Homepage:
                 description: This dashboard
@@ -186,6 +253,10 @@ data:
                 description: This Kubernetes cluster repo
                 href: https://github.com/vollminlab/k8s-vollminlab-cluster
                 icon: github.png
+            - Renovate:
+                description: Dependency update automation
+                href: https://github.com/vollminlab/k8s-vollminlab-cluster/issues?q=is%3Aopen+Dependency+Dashboard
+                icon: renovate.png
         - Web Links:
             - ChatGPT:
                 description: AI Assistant
@@ -236,16 +307,16 @@ data:
             columns: 3
           Infrastructure:
             style: row
-            columns: 3
+            columns: 4
           Networking:
             style: row
             columns: 5
           Monitoring & Observability:
             style: row
-            columns: 3
+            columns: 4
           Tools:
             style: row
-            columns: 4
+            columns: 5
           Web Links:
             style: row
             columns: 4
@@ -254,7 +325,7 @@ data:
             columns: 5
         providers:
           longhorn:
-            url: https://longhorn.vollminlab.com
+            url: http://longhorn-frontend.longhorn-system.svc.cluster.local
       widgets:
         - search:
             provider: google
@@ -281,6 +352,7 @@ data:
             longitude: "{{HOMEPAGE_VAR_WEATHER_LONGITUDE}}"
             units: imperial
             cache: 5
+      bookmarks: []
       enableRbac: true
     image:
       tag: "v1.13.1"
@@ -357,6 +429,76 @@ data:
           secretKeyRef:
             name: homepage-env-vars
             key: BAZARR_API_KEY
+      - name: HOMEPAGE_VAR_JELLYFIN_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: JELLYFIN_API_KEY
+      - name: HOMEPAGE_VAR_AUDIOBOOKSHELF_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: AUDIOBOOKSHELF_API_KEY
+      - name: HOMEPAGE_VAR_GRAFANA_USERNAME
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: GRAFANA_USERNAME
+      - name: HOMEPAGE_VAR_GRAFANA_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: GRAFANA_PASSWORD
+      - name: HOMEPAGE_VAR_PORTAINER_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: PORTAINER_API_KEY
+      - name: HOMEPAGE_VAR_NPM_USERNAME
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: NPM_USERNAME
+      - name: HOMEPAGE_VAR_NPM_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: NPM_PASSWORD
+      - name: HOMEPAGE_VAR_UDM_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: UDM_API_KEY
+      - name: HOMEPAGE_VAR_SHLINK_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: SHLINK_API_KEY
+      - name: HOMEPAGE_VAR_HARBOR_USERNAME
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: HARBOR_USERNAME
+      - name: HOMEPAGE_VAR_HARBOR_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: HARBOR_PASSWORD
+      - name: HOMEPAGE_VAR_MINIO_ACCESS_KEY
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: MINIO_ACCESS_KEY
+      - name: HOMEPAGE_VAR_MINIO_SECRET_KEY
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: MINIO_SECRET_KEY
+      - name: HOMEPAGE_VAR_AUTHENTIK_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: AUTHENTIK_API_KEY
       - name: HOMEPAGE_ALLOWED_HOSTS
         value: "homepage.vollminlab.com,localhost,127.0.0.1"
     resources:
