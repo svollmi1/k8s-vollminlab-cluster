@@ -42,5 +42,6 @@ resources:
   - shlink-helmrepository.yaml
   - smb-csi-driver-helmrepository.yaml
   - sonarr-ocirepository.yaml
+  - tofu-controller-helmrepository.yaml
   - velero-helmrepository.yaml
   - vollminlab-ocirepository.yaml
