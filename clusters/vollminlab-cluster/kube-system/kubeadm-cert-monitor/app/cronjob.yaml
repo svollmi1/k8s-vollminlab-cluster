@@ -38,16 +38,18 @@ spec:
                 - -c
                 - |-
                   set -e
-                  apk add --no-cache openssl curl -q
+                  apk add --no-cache openssl curl
 
-                  # Check a cert via kubectl exec and return days until expiry
+                  # Check a cert via kubectl exec and return days until expiry on stdout.
+                  # All human-readable output goes to stderr.
+                  # On kubectl exec failure, prints 9999 (safe sentinel) and returns without aborting.
                   check_cert() {
                     local pod="$1" cert_path="$2" label="$3"
-                    expiry=$(kubectl exec -n kube-system "$pod" -- openssl x509 -in "$cert_path" -noout -enddate 2>/dev/null | cut -d= -f2)
+                    expiry=$(kubectl exec -n kube-system "$pod" -- openssl x509 -in "$cert_path" -noout -enddate 2>/dev/null | cut -d= -f2) || { echo "$label: kubectl exec failed, skipping" >&2; echo "9999"; return; }
                     expiry_epoch=$(date -d "$expiry" +%s)
                     now_epoch=$(date +%s)
                     days=$(( (expiry_epoch - now_epoch) / 86400 ))
-                    echo "$label: expires $expiry ($days days)"
+                    echo "$label: expires $expiry (${days}d remaining)" >&2
                     echo "$days"
                   }
 
@@ -56,7 +58,7 @@ spec:
 
                   check_and_flag() {
                     local pod="$1" cert_path="$2" label="$3"
-                    days=$(check_cert "$pod" "$cert_path" "$label" | tail -1)
+                    days=$(check_cert "$pod" "$cert_path" "$label")
                     if [ "$days" -lt 30 ]; then
                       ALERT_MSG="${ALERT_MSG}CRITICAL: $label expires in ${days}d\n"
                       SEVERITY="critical"
@@ -66,10 +68,14 @@ spec:
                     fi
                   }
 
-                  check_and_flag kube-apiserver-k8scp01 /etc/kubernetes/pki/apiserver.crt "apiserver"
-                  check_and_flag kube-apiserver-k8scp01 /etc/kubernetes/pki/apiserver-kubelet-client.crt "apiserver-kubelet-client"
-                  check_and_flag etcd-k8scp01 /etc/kubernetes/pki/etcd/server.crt "etcd-server"
-                  check_and_flag etcd-k8scp01 /etc/kubernetes/pki/etcd/peer.crt "etcd-peer"
+                  check_and_flag kube-apiserver-k8scp01 /etc/kubernetes/pki/apiserver.crt "apiserver-cp01"
+                  check_and_flag kube-apiserver-k8scp01 /etc/kubernetes/pki/apiserver-kubelet-client.crt "apiserver-kubelet-client-cp01"
+                  check_and_flag etcd-k8scp01 /etc/kubernetes/pki/etcd/server.crt "etcd-server-cp01"
+                  check_and_flag etcd-k8scp01 /etc/kubernetes/pki/etcd/peer.crt "etcd-peer-cp01"
+                  check_and_flag kube-apiserver-k8scp02 /etc/kubernetes/pki/apiserver.crt "apiserver-cp02"
+                  check_and_flag etcd-k8scp02 /etc/kubernetes/pki/etcd/server.crt "etcd-server-cp02"
+                  check_and_flag kube-apiserver-k8scp03 /etc/kubernetes/pki/apiserver.crt "apiserver-cp03"
+                  check_and_flag etcd-k8scp03 /etc/kubernetes/pki/etcd/server.crt "etcd-server-cp03"
 
                   if [ -n "$ALERT_MSG" ]; then
                     echo "Sending Pushover alert (severity=$SEVERITY)"
