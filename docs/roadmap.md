@@ -113,25 +113,17 @@ Cluster upgraded from Flux v2.4.0 to v2.8.6 via two hops (PRs #423, #426, #428).
 
 ### 3.0 PKI — Automated Certificate Lifecycle
 
-**Status:** `planned`
+**Status:** `in-progress`
 
 Control plane certs issued by kubeadm expire annually and require manual renewal on each control plane node. This became an incident on 2026-04-14 when all certs expired simultaneously.
 
-**Hard deadline:** Next expiry is **2027-04-14**. Emergency renewal procedure until automated:
+**Next expiry: 2027-04-14.** cert-manager cannot write to the control plane node filesystem, so the approach keeps kubeadm as the issuer and wraps the renewal in GitOps-managed CronJobs.
 
-```bash
-sudo kubeadm certs renew all
-sudo systemctl restart kubelet
-sudo cp /etc/kubernetes/admin.conf ~/.kube/config && sudo chown $(id -u):$(id -g) ~/.kube/config
-```
+**Implementation (kube-system namespace):**
 
-**Long-term options (in order of preference for this homelab):**
-
-1. **cert-manager** — already in-cluster, handles ingress TLS today. Extend it to manage cluster PKI via a `ClusterIssuer` backed by a self-signed or external CA. Certs would auto-rotate before expiry. Most natural fit with no new infrastructure.
-2. **HashiCorp Vault** — used in production at work; familiar. Heavier than needed for homelab alone, but worth reconsidering if Vault gets deployed for secrets management more broadly. 1Password already serves a similar role for some use cases.
-3. **1Password + cert-manager bridge** — if 1Password is the org-wide secrets store, a cert-manager external issuer or Vault-compatible API could bridge the two.
-
-**Relation to 3.1:** If Vault is chosen as the CA backend, deploy Authentik first for SSO on the Vault UI. The cert-manager path has no such dependency.
+- `kubeadm-cert-monitor` — monthly CronJob (1st of each month, 09:00 UTC). Uses `kubectl exec` into `kube-apiserver-*` and `etcd-*` static pods to check cert expiry via openssl. Sends Pushover alert at 90-day warning / 30-day critical. No hostPath required.
+- `kubeadm-cert-renew-k8scp01/02/03` — three bi-annual CronJobs (April 14 + October 14, staggered 15 min apart). Uses `nsenter -t 1` to enter host namespaces and run `kubeadm certs renew all` + `systemctl restart kubelet`. Sends Pushover notification on success or differentiated alerts on partial failure.
+- `exceptions-kubeadm-cert-renew` Kyverno `PolicyException` — preemptively exempts renewal pods from `restrict-privileged` and `restrict-hostpath-usage` policies in case `kube-system` is ever removed from those policies' exclude lists.
 
 ---
 

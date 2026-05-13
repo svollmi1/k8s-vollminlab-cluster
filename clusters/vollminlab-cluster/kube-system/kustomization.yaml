@@ -6,5 +6,7 @@ resources:
   - namespace.yaml
   - ./descheduler/app
   - ./etcd-defrag/app
+  - ./kubeadm-cert-monitor/app
+  - ./kubeadm-cert-renew/app
   - ./metrics-server/app
   - ./smb-csi-driver/app

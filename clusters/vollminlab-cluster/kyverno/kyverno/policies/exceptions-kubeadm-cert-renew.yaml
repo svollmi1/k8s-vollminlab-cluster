@@ -1,0 +1,32 @@
+apiVersion: kyverno.io/v2
+kind: PolicyException
+metadata:
+  name: ignore-kubeadm-cert-renew
+  namespace: kyverno
+  labels:
+    app: kyverno
+    env: production
+    category: security
+spec:
+  # kubeadm-cert-renew CronJob pods run in kube-system and require privileged
+  # mode to access the kubeadm binary and PKI directories on the host.
+  # The restrict-privileged and restrict-hostpath-usage policies are currently
+  # Enforce mode — this exception ensures the renewal Jobs and Pods are not
+  # blocked if kube-system is ever removed from the policy exclude list.
+  match:
+    any:
+      - resources:
+          kinds:
+            - Pod
+            - Job
+          namespaces:
+            - kube-system
+          names:
+            - kubeadm-cert-renew-*
+  exceptions:
+    - policyName: restrict-privileged
+      ruleNames:
+        - block-privileged
+    - policyName: restrict-hostpath-usage
+      ruleNames:
+        - disallow-hostpath-except-system
