@@ -129,7 +129,7 @@ Control plane certs issued by kubeadm expire annually and require manual renewal
 
 ### 3.1 Authentik — SSO / Identity Provider
 
-**Status:** `in-progress` — phases 1–5b complete, 5c and 6 remaining
+**Status:** `in-progress` — phases 1–5c complete, 6 remaining; follow-up migration PRs pending (Harbor extraEnvVars, Grafana OAuth ini)
 
 Design doc: `docs/authentik-design.md`.
 
@@ -139,7 +139,7 @@ Design doc: `docs/authentik-design.md`.
 - **Phase 4** `done` — Forward-auth sweep: Longhorn, Homepage, arr stack, Tautulli, Shlink Web, Policy Reporter
 - **Phase 5a** `done` — tofu-controller deployed in `tofu` ns; MinIO `terraform-state` bucket + scoped IAM user (PRs #539)
 - **Phase 5b** `done` — Full Authentik config under OpenTofu IaC: groups, users, OAuth2/proxy providers, scope mappings, applications, outpost, Portainer OAuth settings. All existing objects imported into state. Client secrets sealed. Post-merge fixes: cross-namespace refs (`allowCrossNamespaceRefs: true`, PR #547), flux-system NetworkPolicy for tofu→source-controller (PR #548, #549), Authentik provider 2026.2.x schema (`invalidation_flow` required, `redirect_uris`→`allowed_redirect_uris`, portainer `api_user`/`api_password`, PR #550, #551). tofu-controller reconciling cleanly. (PRs #542, #546–#551)
-- **Phase 5c** `planned` — Extend IaC to MinIO (buckets, IAM users/policies), Harbor (OIDC config, projects, robot accounts), and Grafana (OAuth, notification policies, contact points). Add `terraform fmt --check` + `tofu validate` CI workflow for `terraform/**` PRs.
+- **Phase 5c** `done` — `terraform fmt --check` + `tofu validate` CI job for `terraform/**` PRs (PR #558). MinIO IaC: `terraform/minio/` module managing 4 buckets, 4 IAM users, 3 custom policies via `aminueza/minio` provider (PR #559). Harbor IaC: `terraform/harbor/` module managing OIDC config and 2 projects via `goharbor/harbor` provider (PR #560). Grafana IaC: `terraform/grafana/` module managing SSO settings, Pushover contact point, and default notification policy via `grafana/grafana` provider (PR #561). All existing objects imported into state. Pending: remove Harbor `extraEnvVars` OIDC config (after harbor-config CR shows Applied), remove Grafana `[auth.generic_oauth]` from `grafana.ini` (after grafana-config CR shows Applied).
 - **Phase 6** `planned` — NPM-proxied external services via Authentik `auth_request`: Pi-hole, TrueNAS, HAProxy, NPM itself. vCenter via native OIDC.
 
 ---
