@@ -201,7 +201,7 @@ data:
             - Policy Reporter:
                 description: Kubernetes policy reporting
                 href: https://policyreporter.vollminlab.com
-                icon: mdi-shield-check
+                icon: kyverno.png
                 namespace: kyverno
                 app: policy-reporter-ui
             - Grafana:
