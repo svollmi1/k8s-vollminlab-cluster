@@ -50,8 +50,8 @@ resource "radarr_quality_profile" "any" {
       qualities = [{ id = 23, name = "DVD-R", source = "dvd", resolution = 480 }]
     },
     {
-      id        = 1000
-      name      = "WEB 480p"
+      id   = 1000
+      name = "WEB 480p"
       qualities = [
         { id = 8, name = "WEBDL-480p", source = "webdl", resolution = 480 },
         { id = 12, name = "WEBRip-480p", source = "webrip", resolution = 480 },
@@ -70,8 +70,8 @@ resource "radarr_quality_profile" "any" {
       qualities = [{ id = 4, name = "HDTV-720p", source = "tv", resolution = 720 }]
     },
     {
-      id        = 1001
-      name      = "WEB 720p"
+      id   = 1001
+      name = "WEB 720p"
       qualities = [
         { id = 5, name = "WEBDL-720p", source = "webdl", resolution = 720 },
         { id = 14, name = "WEBRip-720p", source = "webrip", resolution = 720 },
@@ -86,8 +86,8 @@ resource "radarr_quality_profile" "any" {
       qualities = [{ id = 9, name = "HDTV-1080p", source = "tv", resolution = 1080 }]
     },
     {
-      id        = 1002
-      name      = "WEB 1080p"
+      id   = 1002
+      name = "WEB 1080p"
       qualities = [
         { id = 3, name = "WEBDL-1080p", source = "webdl", resolution = 1080 },
         { id = 15, name = "WEBRip-1080p", source = "webrip", resolution = 1080 },
@@ -106,8 +106,8 @@ resource "radarr_quality_profile" "any" {
       qualities = [{ id = 16, name = "HDTV-2160p", source = "tv", resolution = 2160 }]
     },
     {
-      id        = 1003
-      name      = "WEB 2160p"
+      id   = 1003
+      name = "WEB 2160p"
       qualities = [
         { id = 18, name = "WEBDL-2160p", source = "webdl", resolution = 2160 },
         { id = 17, name = "WEBRip-2160p", source = "webrip", resolution = 2160 },
@@ -168,8 +168,8 @@ resource "radarr_quality_profile" "sd" {
       qualities = [{ id = 2, name = "DVD", source = "dvd", resolution = 0 }]
     },
     {
-      id        = 1000
-      name      = "WEB 480p"
+      id   = 1000
+      name = "WEB 480p"
       qualities = [
         { id = 8, name = "WEBDL-480p", source = "webdl", resolution = 480 },
         { id = 12, name = "WEBRip-480p", source = "webrip", resolution = 480 },
@@ -202,8 +202,8 @@ resource "radarr_quality_profile" "hd_720p" {
       qualities = [{ id = 4, name = "HDTV-720p", source = "tv", resolution = 720 }]
     },
     {
-      id        = 1001
-      name      = "WEB 720p"
+      id   = 1001
+      name = "WEB 720p"
       qualities = [
         { id = 5, name = "WEBDL-720p", source = "webdl", resolution = 720 },
         { id = 14, name = "WEBRip-720p", source = "webrip", resolution = 720 },
@@ -232,8 +232,8 @@ resource "radarr_quality_profile" "hd_1080p" {
       qualities = [{ id = 9, name = "HDTV-1080p", source = "tv", resolution = 1080 }]
     },
     {
-      id        = 1002
-      name      = "WEB 1080p"
+      id   = 1002
+      name = "WEB 1080p"
       qualities = [
         { id = 3, name = "WEBDL-1080p", source = "webdl", resolution = 1080 },
         { id = 15, name = "WEBRip-1080p", source = "webrip", resolution = 1080 },
@@ -266,8 +266,8 @@ resource "radarr_quality_profile" "ultra_hd" {
       qualities = [{ id = 16, name = "HDTV-2160p", source = "tv", resolution = 2160 }]
     },
     {
-      id        = 1003
-      name      = "WEB 2160p"
+      id   = 1003
+      name = "WEB 2160p"
       qualities = [
         { id = 18, name = "WEBDL-2160p", source = "webdl", resolution = 2160 },
         { id = 17, name = "WEBRip-2160p", source = "webrip", resolution = 2160 },
@@ -300,8 +300,8 @@ resource "radarr_quality_profile" "hd_720p_1080p" {
       qualities = [{ id = 4, name = "HDTV-720p", source = "tv", resolution = 720 }]
     },
     {
-      id        = 1001
-      name      = "WEB 720p"
+      id   = 1001
+      name = "WEB 720p"
       qualities = [
         { id = 5, name = "WEBDL-720p", source = "webdl", resolution = 720 },
         { id = 14, name = "WEBRip-720p", source = "webrip", resolution = 720 },
@@ -316,8 +316,8 @@ resource "radarr_quality_profile" "hd_720p_1080p" {
       qualities = [{ id = 9, name = "HDTV-1080p", source = "tv", resolution = 1080 }]
     },
     {
-      id        = 1002
-      name      = "WEB 1080p"
+      id   = 1002
+      name = "WEB 1080p"
       qualities = [
         { id = 3, name = "WEBDL-1080p", source = "webdl", resolution = 1080 },
         { id = 15, name = "WEBRip-1080p", source = "webrip", resolution = 1080 },
