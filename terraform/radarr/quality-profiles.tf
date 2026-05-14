@@ -122,6 +122,9 @@ resource "radarr_quality_profile" "any" {
       qualities = [{ id = 31, name = "Remux-2160p", source = "bluray", resolution = 2160 }]
     },
   ]
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 # Profile: SD (id=2) — SD and WEB 480p / Bluray 480p/576p allowed, no upgrade
@@ -184,6 +187,9 @@ resource "radarr_quality_profile" "sd" {
       qualities = [{ id = 21, name = "Bluray-576p", source = "bluray", resolution = 576 }]
     },
   ]
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 # Profile: HD-720p (id=3) — 720p qualities only, no upgrade
@@ -214,6 +220,9 @@ resource "radarr_quality_profile" "hd_720p" {
       qualities = [{ id = 6, name = "Bluray-720p", source = "bluray", resolution = 720 }]
     },
   ]
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 # Profile: HD-1080p (id=4) — 1080p qualities only, no upgrade
@@ -248,6 +257,9 @@ resource "radarr_quality_profile" "hd_1080p" {
       qualities = [{ id = 30, name = "Remux-1080p", source = "bluray", resolution = 1080 }]
     },
   ]
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 # Profile: Ultra-HD (id=5) — 4K qualities only, no upgrade
@@ -282,6 +294,9 @@ resource "radarr_quality_profile" "ultra_hd" {
       qualities = [{ id = 31, name = "Remux-2160p", source = "bluray", resolution = 2160 }]
     },
   ]
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 # Profile: HD - 720p/1080p (id=6) — 720p and 1080p qualities, no upgrade
@@ -332,4 +347,7 @@ resource "radarr_quality_profile" "hd_720p_1080p" {
       qualities = [{ id = 30, name = "Remux-1080p", source = "bluray", resolution = 1080 }]
     },
   ]
+  lifecycle {
+    ignore_changes = all
+  }
 }

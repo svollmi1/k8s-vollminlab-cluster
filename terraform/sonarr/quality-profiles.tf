@@ -101,6 +101,9 @@ resource "sonarr_quality_profile" "any" {
       qualities = [{ id = 21, name = "Bluray-2160p Remux", source = "blurayRaw", resolution = 2160 }]
     },
   ]
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 # Profile: SD (id=2) — SD qualities allowed (SDTV, WEB 480p, DVD, Bluray 480p/576p), no upgrade
@@ -199,6 +202,9 @@ resource "sonarr_quality_profile" "sd" {
       qualities = [{ id = 21, name = "Bluray-2160p Remux", source = "blurayRaw", resolution = 2160 }]
     },
   ]
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 # Profile: HD-720p (id=3) — 720p qualities allowed (HDTV-720p, WEB 720p, Bluray-720p), no upgrade
@@ -297,6 +303,9 @@ resource "sonarr_quality_profile" "hd_720p" {
       qualities = [{ id = 21, name = "Bluray-2160p Remux", source = "blurayRaw", resolution = 2160 }]
     },
   ]
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 # Profile: HD-1080p (id=4) — 1080p qualities allowed (HDTV-1080p, WEB 1080p, Bluray-1080p), no upgrade
@@ -395,6 +404,9 @@ resource "sonarr_quality_profile" "hd_1080p" {
       qualities = [{ id = 21, name = "Bluray-2160p Remux", source = "blurayRaw", resolution = 2160 }]
     },
   ]
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 # Profile: Ultra-HD (id=5) — 4K qualities allowed (HDTV-2160p, WEB 2160p, Bluray-2160p), no upgrade
@@ -493,6 +505,9 @@ resource "sonarr_quality_profile" "ultra_hd" {
       qualities = [{ id = 21, name = "Bluray-2160p Remux", source = "blurayRaw", resolution = 2160 }]
     },
   ]
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 # Profile: HD - 720p/1080p (id=6) — 720p and 1080p qualities allowed, no upgrade
@@ -591,4 +606,7 @@ resource "sonarr_quality_profile" "hd_720p_1080p" {
       qualities = [{ id = 21, name = "Bluray-2160p Remux", source = "blurayRaw", resolution = 2160 }]
     },
   ]
+  lifecycle {
+    ignore_changes = all
+  }
 }
