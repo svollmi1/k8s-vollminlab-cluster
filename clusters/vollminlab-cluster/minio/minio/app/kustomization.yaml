@@ -8,5 +8,5 @@ resources:
   - cnpg-minio-user-sealedsecret.yaml
   - tofu-minio-user-sealedsecret.yaml
   - minio-credentials-sealedsecret.yaml
-  - minio-oidc-sealedsecret.yaml
+  - minio-oidc-credentials-sealedsecret.yaml
   - servicemonitor.yaml
