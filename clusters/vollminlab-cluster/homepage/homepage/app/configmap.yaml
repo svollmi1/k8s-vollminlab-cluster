@@ -240,7 +240,7 @@ data:
             - Headlamp:
                 description: Kubernetes + Flux dashboard
                 href: https://headlamp.vollminlab.com
-                icon: kubernetes.png
+                icon: headlamp.png
                 namespace: flux-system
                 app: headlamp
             - Shlink:
