@@ -9,6 +9,8 @@ metadata:
     category: media
 data:
   values.yaml: |
+    deploymentStrategy:
+      type: Recreate
     persistence:
       config:
         existingClaim: pvc-jellyfin-config

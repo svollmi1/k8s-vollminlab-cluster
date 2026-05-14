@@ -45,6 +45,8 @@ data:
 
     grafana:
       enabled: true
+      deploymentStrategy:
+        type: Recreate
       ingress:
         enabled: false
       admin:
