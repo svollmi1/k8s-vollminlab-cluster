@@ -11,5 +11,5 @@ resources:
   - grafana-config/app
   - harbor-config/app
   - minio-config/app
-  - terraform-authentik/app
+  - authentik-config/app
   - tofu-controller/app

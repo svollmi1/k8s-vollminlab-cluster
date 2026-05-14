@@ -9,6 +9,7 @@ metadata:
     category: apps
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    shlink.vollminlab.com/slug: shlink
 spec:
   ingressClassName: nginx
   tls:
