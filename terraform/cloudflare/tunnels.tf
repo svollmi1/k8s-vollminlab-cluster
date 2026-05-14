@@ -28,14 +28,16 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "vollminlab_authentik
   account_id = var.cloudflare_account_id
   tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.vollminlab_authentik.id
 
-  config {
-    ingress_rule {
-      hostname = "authentik.vollminlab.com"
-      service  = "http://authentik-server.authentik.svc.cluster.local:80"
-    }
-    ingress_rule {
-      service = "http_status:404"
-    }
+  config = {
+    ingress_rule = [
+      {
+        hostname = "authentik.vollminlab.com"
+        service  = "http://authentik-server.authentik.svc.cluster.local:80"
+      },
+      {
+        service = "http_status:404"
+      },
+    ]
   }
 }
 
@@ -43,14 +45,16 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "vollminlab_audiobook
   account_id = var.cloudflare_account_id
   tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.vollminlab_audiobookshelf.id
 
-  config {
-    ingress_rule {
-      hostname = "audiobookshelf.vollminlab.com"
-      service  = "http://audiobookshelf.mediastack.svc.cluster.local:10223"
-    }
-    ingress_rule {
-      service = "http_status:404"
-    }
+  config = {
+    ingress_rule = [
+      {
+        hostname = "audiobookshelf.vollminlab.com"
+        service  = "http://audiobookshelf.mediastack.svc.cluster.local:10223"
+      },
+      {
+        service = "http_status:404"
+      },
+    ]
   }
 }
 
@@ -58,14 +62,16 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "vollminlab_jellyfin"
   account_id = var.cloudflare_account_id
   tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.vollminlab_jellyfin.id
 
-  config {
-    ingress_rule {
-      hostname = "jellyfin.vollminlab.com"
-      service  = "http://jellyfin.mediastack.svc.cluster.local:8096"
-    }
-    ingress_rule {
-      service = "http_status:404"
-    }
+  config = {
+    ingress_rule = [
+      {
+        hostname = "jellyfin.vollminlab.com"
+        service  = "http://jellyfin.mediastack.svc.cluster.local:8096"
+      },
+      {
+        service = "http_status:404"
+      },
+    ]
   }
 }
 
