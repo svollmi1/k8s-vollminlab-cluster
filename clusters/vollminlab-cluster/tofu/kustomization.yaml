@@ -13,4 +13,5 @@ resources:
   - grafana-config/app
   - harbor-config/app
   - minio-config/app
+  - radarr-config/app
   - tofu-controller/app
