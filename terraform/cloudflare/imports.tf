@@ -24,22 +24,6 @@ import {
   id = "9013108406ddceed8abc1a3e2e21907d/51eeb142-e2fe-4153-8ed2-585d3c5ac018"
 }
 
-# Tunnel configurations
-import {
-  to = cloudflare_zero_trust_tunnel_cloudflared_config.vollminlab_authentik
-  id = "9013108406ddceed8abc1a3e2e21907d/d5a68ca0-0460-47f0-b17b-a4043f9fe69c"
-}
-
-import {
-  to = cloudflare_zero_trust_tunnel_cloudflared_config.vollminlab_audiobookshelf
-  id = "9013108406ddceed8abc1a3e2e21907d/01ca47d0-b545-4ee4-9fb0-2ae1f74c0e9c"
-}
-
-import {
-  to = cloudflare_zero_trust_tunnel_cloudflared_config.vollminlab_jellyfin
-  id = "9013108406ddceed8abc1a3e2e21907d/51eeb142-e2fe-4153-8ed2-585d3c5ac018"
-}
-
 # DNS CNAME records
 import {
   to = cloudflare_dns_record.authentik
