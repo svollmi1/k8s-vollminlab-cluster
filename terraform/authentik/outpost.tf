@@ -7,18 +7,18 @@ resource "authentik_outpost" "vollminlab_proxy" {
   ]
 
   config = jsonencode({
-    authentik_host               = "https://authentik.vollminlab.com/"
-    authentik_host_insecure      = false
-    authentik_host_browser       = ""
-    log_level                    = "info"
-    object_naming_template       = "ak-outpost-%(name)s"
-    refresh_interval             = "minutes=5"
-    container_image              = null
-    docker_network               = null
-    docker_map_ports             = true
-    docker_labels                = null
-    kubernetes_replicas          = 1
-    kubernetes_namespace         = "authentik"
+    authentik_host                   = "https://authentik.vollminlab.com/"
+    authentik_host_insecure          = false
+    authentik_host_browser           = ""
+    log_level                        = "info"
+    object_naming_template           = "ak-outpost-%(name)s"
+    refresh_interval                 = "minutes=5"
+    container_image                  = null
+    docker_network                   = null
+    docker_map_ports                 = true
+    docker_labels                    = null
+    kubernetes_replicas              = 1
+    kubernetes_namespace             = "authentik"
     kubernetes_ingress_annotations   = {}
     kubernetes_ingress_secret_name   = "authentik-outpost-tls"
     kubernetes_ingress_class_name    = null

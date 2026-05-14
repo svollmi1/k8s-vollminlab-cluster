@@ -1366,12 +1366,99 @@ jobs:
           done
           
           echo "✅ All resources comply with Kyverno policies"
-          
+
+
+  validate-terraform:
+    name: Validate Terraform Modules
+    runs-on: vollminlab
+    needs: [validate-changes]
+    if: needs.validate-changes.result == 'success'
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Detect terraform changes
+        id: tf-changes
+        run: |
+          set -euo pipefail
+          echo "🔍 Checking for changes in terraform/..."
+
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          else
+            BASE_SHA="${{ github.event.before }}"
+            if [[ -z "$BASE_SHA" || "$BASE_SHA" == "0000000000000000000000000000000000000000" ]]; then
+              BASE_SHA="$(git rev-list --max-parents=0 HEAD | tail -1)"
+            fi
+            HEAD_SHA="HEAD"
+          fi
+
+          TF_CHANGED=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" | grep '^terraform/' || echo "")
+
+          if [[ -n "$TF_CHANGED" ]]; then
+            echo "📋 Terraform files changed:"
+            echo "$TF_CHANGED"
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "No terraform changes detected; skipping validation"
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install OpenTofu
+        if: steps.tf-changes.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+          if command -v tofu >/dev/null 2>&1; then
+            echo "✅ OpenTofu already installed: $(tofu version | head -1)"
+          else
+            echo "📦 Installing OpenTofu..."
+            curl -fsSL https://get.opentofu.org/install-opentofu.sh | sudo sh -s -- --install-method standalone
+            tofu version
+          fi
+
+      - name: Run tofu fmt -check on all modules
+        if: steps.tf-changes.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+          fmt_failed=0
+          for dir in terraform/*/; do
+            if [[ -d "$dir" ]]; then
+              echo "🔍 Checking fmt: $dir"
+              if ! tofu fmt -check -recursive "$dir"; then
+                echo "❌ fmt check failed: $dir"
+                fmt_failed=1
+              else
+                echo "✅ fmt OK: $dir"
+              fi
+            fi
+          done
+          if [[ $fmt_failed -ne 0 ]]; then
+            echo "❌ One or more modules failed tofu fmt -check. Run 'tofu fmt' to fix."
+            exit 1
+          fi
+          echo "✅ All modules passed fmt check"
+
+      - name: Run tofu init + validate on all modules
+        if: steps.tf-changes.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+          for dir in terraform/*/; do
+            if [[ -d "$dir" ]]; then
+              echo "🔍 Validating: $dir"
+              (cd "$dir" && tofu init -backend=false -input=false && tofu validate)
+              echo "✅ validate OK: $dir"
+            fi
+          done
+          echo "✅ All modules passed tofu validate"
 
   notify-success:
     name: Notify Success
     runs-on: vollminlab
-    needs: [validate-changes, integration-test, security-scan, policy-validation]
+    needs: [validate-changes, integration-test, security-scan, policy-validation, validate-terraform]
     if: success()
     steps:
       - name: Success notification
@@ -1383,7 +1470,7 @@ jobs:
   notify-failure:
     name: Notify Failure
     runs-on: vollminlab
-    needs: [validate-changes, integration-test, security-scan, policy-validation]
+    needs: [validate-changes, integration-test, security-scan, policy-validation, validate-terraform]
     if: failure()
     steps:
       - name: Failure notification
