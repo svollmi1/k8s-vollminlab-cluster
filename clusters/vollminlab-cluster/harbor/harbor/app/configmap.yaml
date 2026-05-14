@@ -9,6 +9,9 @@ metadata:
     category: storage
 data:
   values.yaml: |
+    updateStrategy:
+      type: Recreate
+
     externalURL: https://harbor.vollminlab.com
 
     expose:
