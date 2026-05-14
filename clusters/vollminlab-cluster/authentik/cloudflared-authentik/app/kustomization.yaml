@@ -3,5 +3,5 @@ kind: Kustomization
 metadata:
   name: cloudflared-authentik-app
 resources:
-  - cloudflared-authentik-tunnel-sealedsecret.yaml
+  - cloudflared-authentik-tunnel-credentials-sealedsecret.yaml
   - deployment.yaml

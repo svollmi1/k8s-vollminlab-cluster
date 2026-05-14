@@ -60,5 +60,10 @@ extraEnv:
 
 ## Naming convention
 
-Sealed secret files: `[app-name]-[purpose]-sealedsecret.yaml`
-Secret name matches: `[app-name]-[purpose]` or `[app-name]-credentials`
+- `metadata.name`: `{app-name}-{purpose}` — never use `-secret` as a suffix (it's redundant; the kind already says Secret)
+- Filename: `{metadata.name}-sealedsecret.yaml` — the filename base **must exactly equal** `metadata.name`
+- Common purpose suffixes: `-credentials`, `-token`, `-apikey`, `-config`, `-env-vars`
+
+Examples: `harbor-db-credentials`, `renovate-token`, `alertmanager-pushover-config`
+
+Wrong: `harbor-admin-sealedsecret.yaml` containing `metadata.name: harbor-admin-credentials` — the base (`harbor-admin`) doesn't match the name (`harbor-admin-credentials`).

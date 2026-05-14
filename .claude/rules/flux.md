@@ -72,6 +72,22 @@ Every resource in this repo must have these three labels. Kyverno enforces on po
 
 See `kyverno.md` for valid `category` values.
 
+## Naming conventions — `metadata.name` and filename
+
+Every resource kind follows a predictable pattern. Use this table when creating any new resource.
+
+| Kind | `metadata.name` | Filename |
+|------|----------------|----------|
+| HelmRelease | `{app-name}` | `helmrelease.yaml` |
+| HelmRepository / OCIRepository | `{app-name}-repo` | `{app-name}-helmrepository.yaml` |
+| Namespace | `{namespace-dir}` | `namespace.yaml` |
+| ConfigMap (Helm values) | `{app-name}-values` | `configmap.yaml` |
+| Ingress | `{app-name}-ingress` (add qualifier for split ingresses: `{app-name}-{qualifier}-ingress`) | `ingress.yaml` or `ingress-{qualifier}.yaml` |
+| SealedSecret | `{app-name}-{purpose}` — never use `-secret` as suffix (redundant) | `{metadata.name}-sealedsecret.yaml` |
+| Flux Kustomization CR | `{namespace}-{app}` | `{app}-kustomization.yaml` |
+
+**SealedSecret filename rule**: the filename base **must exactly equal** `metadata.name`. Stripping `-sealedsecret.yaml` from the filename must give you the object name. See `secrets.md` for the full SealedSecret workflow.
+
 ## Critical rules
 
 - **Never manually apply** manifests under `clusters/` — Flux reconciles from `main` within 10 minutes.

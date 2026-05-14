@@ -11,8 +11,8 @@ resources:
   - helmrelease.yaml
   - configmap.yaml
   - ingress.yaml
-  - alertmanager-sealedsecret.yaml
-  - grafana-admin-sealedsecret.yaml
+  - alertmanager-pushover-config-sealedsecret.yaml
+  - grafana-admin-credentials-sealedsecret.yaml
   - prometheusrule-custom.yaml
   - nodes-dashboard-configmap.yaml
   - longhorn-dashboard-configmap.yaml
