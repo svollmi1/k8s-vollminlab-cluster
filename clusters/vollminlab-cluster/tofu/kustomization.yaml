@@ -8,8 +8,12 @@ metadata:
     category: core
 resources:
   - namespace.yaml
+  - authentik-config/app
+  - b2-config/app
+  - cloudflare-config/app
   - grafana-config/app
   - harbor-config/app
   - minio-config/app
-  - authentik-config/app
+  - radarr-config/app
+  - sonarr-config/app
   - tofu-controller/app
