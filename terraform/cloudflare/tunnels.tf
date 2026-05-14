@@ -8,16 +8,25 @@
 resource "cloudflare_zero_trust_tunnel_cloudflared" "vollminlab_authentik" {
   account_id = var.cloudflare_account_id
   name       = "vollminlab-Authentik"
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 resource "cloudflare_zero_trust_tunnel_cloudflared" "vollminlab_audiobookshelf" {
   account_id = var.cloudflare_account_id
   name       = "vollminlab-Audiobookshelf"
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 resource "cloudflare_zero_trust_tunnel_cloudflared" "vollminlab_jellyfin" {
   account_id = var.cloudflare_account_id
   name       = "vollminlab-Jellyfin"
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 # ---------------------------------------------------------------------------
