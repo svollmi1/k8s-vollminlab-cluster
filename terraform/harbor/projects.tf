@@ -9,7 +9,7 @@ resource "harbor_project" "library" {
 
 resource "harbor_project" "vollminlab" {
   name   = "vollminlab"
-  public = true
+  public = false
 
   lifecycle {
     prevent_destroy = true
