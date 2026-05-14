@@ -5,10 +5,10 @@ import {
 
 import {
   to = harbor_project.library
-  id = "library"
+  id = "/projects/1"
 }
 
 import {
   to = harbor_project.vollminlab
-  id = "vollminlab"
+  id = "/projects/4"
 }
