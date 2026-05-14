@@ -6,4 +6,3 @@ resources:
   - ingress.yaml
   - harbor-admin-sealedsecret.yaml
   - harbor-core-sealedsecret.yaml
-  - harbor-oidc-sealedsecret.yaml
