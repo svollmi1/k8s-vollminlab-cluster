@@ -31,6 +31,20 @@ resource "minio_iam_policy" "velero" {
   })
 }
 
+resource "minio_iam_policy" "homepage_monitor" {
+  name = "homepage-monitor-policy"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["s3:GetBucketLocation", "s3:GetBucketPolicy", "s3:ListAllMyBuckets", "s3:ListBucket"]
+        Resource = ["arn:aws:s3:::*"]
+      },
+    ]
+  })
+}
+
 resource "minio_iam_policy" "tofu_state" {
   name = "tofu-state-policy"
   policy = jsonencode({

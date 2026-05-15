@@ -63,11 +63,6 @@ import {
 }
 
 import {
-  to = minio_iam_user_policy_attachment.homepage_monitor
-  id = "homepage-monitor/consoleAdmin"
-}
-
-import {
   to = minio_iam_user_policy_attachment.tofu_svc
   id = "tofu-svc/tofu-state-policy"
 }
