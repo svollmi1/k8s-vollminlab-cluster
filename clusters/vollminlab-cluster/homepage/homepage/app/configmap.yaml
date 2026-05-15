@@ -157,6 +157,18 @@ data:
                 icon: longhorn.png
                 namespace: longhorn-system
                 app: longhorn
+            - Backblaze:
+                description: B2 offsite backup storage
+                href: https://secure.backblaze.com/b2_buckets.htm
+                icon: backblaze.png
+                widget:
+                  type: prometheus
+                  url: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
+                  query: b2_bucket_bytes_total
+                  format:
+                    type: bytes
+                    scale: 1
+                  label: "B2 Storage"
         - Networking:
             - Pi-hole:
                 description: DNS sinkhole and ad blocker
@@ -197,6 +209,13 @@ data:
                 href: http://haproxydmzvip.vollminlab.com:8404/stats
                 icon: haproxy.png
                 ping: http://haproxydmzvip.vollminlab.com:8404/stats
+            - Cloudflare:
+                description: DNS and CDN
+                href: https://dash.cloudflare.com
+                icon: cloudflare.png
+                widget:
+                  type: cloudflare
+                  key: "{{HOMEPAGE_VAR_CLOUDFLARE_API_TOKEN}}"
         - Monitoring & Observability:
             - Policy Reporter:
                 description: Kubernetes policy reporting
@@ -310,7 +329,7 @@ data:
             columns: 4
           Networking:
             style: row
-            columns: 5
+            columns: 3
           Monitoring & Observability:
             style: row
             columns: 4
@@ -499,6 +518,11 @@ data:
           secretKeyRef:
             name: homepage-env-vars
             key: AUTHENTIK_API_KEY
+      - name: HOMEPAGE_VAR_CLOUDFLARE_API_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: homepage-env-vars
+            key: CLOUDFLARE_API_TOKEN
       - name: HOMEPAGE_ALLOWED_HOSTS
         value: "homepage.vollminlab.com,localhost,127.0.0.1"
     resources:

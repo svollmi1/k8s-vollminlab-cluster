@@ -327,6 +327,11 @@ jobs:
             '''-----BEGIN CERTIFICATE-----''',
             '''-----BEGIN PUBLIC KEY-----'''
           ]
+          # K8s secretKeyRef key names that match generic-api-key pattern but are not secrets
+          stopwords = [
+            "B2_APPLICATION_KEY_ID",
+            "B2_APPLICATION_KEY"
+          ]
           GITLEAKS_CFG
 
           gitleaks detect \

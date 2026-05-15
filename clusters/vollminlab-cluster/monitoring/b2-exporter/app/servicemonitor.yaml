@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: b2-exporter
+  namespace: monitoring
+  labels:
+    app: b2-exporter
+    env: production
+    category: observability
+spec:
+  selector:
+    matchLabels:
+      app: b2-exporter
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 60s
+      scheme: http

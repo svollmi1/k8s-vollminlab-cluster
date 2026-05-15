@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: b2-exporter
+  namespace: monitoring
+  labels:
+    app: b2-exporter
+    env: production
+    category: observability
+spec:
+  type: ClusterIP
+  selector:
+    app: b2-exporter
+  ports:
+    - name: metrics
+      port: 8080
+      targetPort: metrics

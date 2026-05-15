@@ -9,6 +9,7 @@ metadata:
 resources:
   - namespace.yaml
   - harbor-vollminlab-pull-sealedsecret.yaml
+  - b2-exporter/app
   - kube-prometheus-stack/app
   - loki/app
   - promtail/app
