@@ -10,6 +10,7 @@ resource "sonarr_quality_profile" "any" {
   name            = "Any"
   upgrade_allowed = false
   cutoff          = 1 # upgrade_allowed = false, cutoff irrelevant
+  lifecycle { ignore_changes = [quality_groups] }
 
   quality_groups = [
     {
@@ -108,6 +109,7 @@ resource "sonarr_quality_profile" "sd" {
   name            = "SD"
   upgrade_allowed = false
   cutoff          = 1 # upgrade_allowed = false, cutoff irrelevant
+  lifecycle { ignore_changes = [quality_groups] }
 
   quality_groups = [
     {
@@ -206,6 +208,7 @@ resource "sonarr_quality_profile" "hd_720p" {
   name            = "HD-720p"
   upgrade_allowed = false
   cutoff          = 4 # upgrade_allowed = false, cutoff irrelevant
+  lifecycle { ignore_changes = [quality_groups] }
 
   quality_groups = [
     {
@@ -304,6 +307,7 @@ resource "sonarr_quality_profile" "hd_1080p" {
   name            = "HD-1080p"
   upgrade_allowed = false
   cutoff          = 9 # upgrade_allowed = false, cutoff irrelevant
+  lifecycle { ignore_changes = [quality_groups] }
 
   quality_groups = [
     {
@@ -402,6 +406,7 @@ resource "sonarr_quality_profile" "ultra_hd" {
   name            = "Ultra-HD"
   upgrade_allowed = false
   cutoff          = 16 # upgrade_allowed = false, cutoff irrelevant
+  lifecycle { ignore_changes = [quality_groups] }
 
   quality_groups = [
     {
@@ -500,6 +505,7 @@ resource "sonarr_quality_profile" "hd_720p_1080p" {
   name            = "HD - 720p/1080p"
   upgrade_allowed = false
   cutoff          = 4 # upgrade_allowed = false, cutoff irrelevant
+  lifecycle { ignore_changes = [quality_groups] }
 
   quality_groups = [
     {
