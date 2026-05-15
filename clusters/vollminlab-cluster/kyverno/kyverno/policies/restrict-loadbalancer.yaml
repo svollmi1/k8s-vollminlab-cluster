@@ -6,7 +6,7 @@ metadata:
     policies.kyverno.io/title: Restrict LoadBalancer Services
     policies.kyverno.io/category: Network
     policies.kyverno.io/severity: high
-    policies.kyverno.io/description: "Only ingress-nginx-controller in the ingress-nginx namespace may use type LoadBalancer."
+    policies.kyverno.io/description: "Only ingress-nginx-controller (ingress-nginx) and Harbor (harbor) may use type LoadBalancer."
     kyverno.io/enable-background: "true"
   labels:
     app: kyverno
@@ -26,8 +26,9 @@ spec:
           namespaces:
             - ingress-nginx
             - dmz
+            - harbor
       validate:
-        message: "Only ingress-nginx-controller in the ingress-nginx namespace may use Service type LoadBalancer. DMZ namespace is excluded for external-facing services."
+        message: "Only ingress-nginx-controller in the ingress-nginx namespace may use Service type LoadBalancer. DMZ and Harbor namespaces are excluded."
         pattern:
           spec:
             type: ClusterIP
