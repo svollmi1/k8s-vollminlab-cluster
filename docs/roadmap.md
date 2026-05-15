@@ -192,6 +192,29 @@ Tautulli deployed in `mediastack`. Metrics dashboard complete.
 
 ---
 
+### 3.6 Harbor Network Isolation — LoadBalancer Expose
+
+**Status:** `in-progress`
+
+**Context:** Harbor currently uses `expose.type: clusterIP` with a separate nginx Ingress that routes through the shared ingress-nginx LoadBalancer VIP (`192.168.152.244`). All cluster services share that VIP. Kubernetes NetworkPolicy operates at L3/L4 and cannot distinguish HTTP virtual hosts — any NetworkPolicy rule that allows `192.168.152.244:443` allows access to every nginx-served service, not just Harbor.
+
+This was discovered when implementing CI/CD access for GHA runners: the `arc-runners-egress` NetworkPolicy could not be made Harbor-specific without changing Harbor's architecture. PR #585 (ipBlock for nginx VIP) was opened and immediately closed as architecturally wrong.
+
+**Solution:** Migrate Harbor to `expose.type: loadBalancer`. Harbor's own internal nginx handles TLS. Harbor gets a dedicated MetalLB VIP (`192.168.152.245`) separate from the shared ingress. A cert-manager Certificate (issuer: `letsencrypt-cloudflare`) provisions the TLS cert in the `harbor` namespace. The nginx Ingress for Harbor is removed. The `arc-runners-egress` NetworkPolicy rule becomes `ipBlock: 192.168.152.245/32` — genuinely Harbor-specific.
+
+**Why this is the correct enterprise architecture:** The container registry is a critical supply chain component. It must have a dedicated network endpoint so that access can be controlled independently at the network layer. Sharing a VIP with monitoring, admin UIs, and applications prevents any meaningful network isolation for CI/CD systems.
+
+**Files to change:**
+- `clusters/vollminlab-cluster/harbor/harbor/app/configmap.yaml` — update expose type, add TLS config + MetalLB annotation
+- `clusters/vollminlab-cluster/harbor/harbor/app/ingress.yaml` — remove
+- `clusters/vollminlab-cluster/harbor/harbor/app/kustomization.yaml` — remove ingress reference
+- `clusters/vollminlab-cluster/harbor/harbor/app/harbor-tls-certificate.yaml` — new cert-manager Certificate
+- `clusters/vollminlab-cluster/actions-runner-system/arc-runners/app/networkpolicy.yaml` — replace ipBlock with Harbor-specific rule
+
+**Sequencing note:** DNS for `harbor.vollminlab.com` must be updated to `192.168.152.245` after Flux applies the new Harbor LoadBalancer service (Pi-hole A record update). The UI remains at the same hostname.
+
+---
+
 ## Phase 4 — Infrastructure Diagrams
 
 **Goal:** Create living architecture diagrams for every repo in the org once observability and security are settled — so diagrams reflect a stable system and don't need immediate revision.
