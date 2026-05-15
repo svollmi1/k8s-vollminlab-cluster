@@ -200,14 +200,14 @@ data:
                   password: "{{HOMEPAGE_VAR_NPM_PASSWORD}}"
             - HAProxy Internal Stats:
                 description: Load balancer statistics
-                href: http://haproxyvip.vollminlab.com:8404/stats
+                href: https://haproxy.vollminlab.com/stats
                 icon: haproxy.png
-                ping: http://haproxyvip.vollminlab.com:8404/stats
+                ping: https://haproxy.vollminlab.com/stats
             - HAProxy DMZ Stats:
                 description: Load balancer statistics
-                href: http://haproxydmzvip.vollminlab.com:8404/stats
+                href: https://haproxydmz.vollminlab.com/stats
                 icon: haproxy.png
-                ping: http://haproxydmzvip.vollminlab.com:8404/stats
+                ping: https://haproxydmz.vollminlab.com/stats
             - Cloudflare (Authentik):
                 description: Cloudflare tunnel — SSO gateway
                 href: https://dash.cloudflare.com
