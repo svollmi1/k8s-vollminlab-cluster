@@ -110,7 +110,7 @@ data:
         schedule: "0 2 * * *"
         useOwnerReferencesInBackup: false
         template:
-          ttl: 336h
+          ttl: 168h
           storageLocation: minio
           defaultVolumesToFsBackup: true
           excludedNamespaces:
