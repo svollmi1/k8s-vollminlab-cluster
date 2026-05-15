@@ -1,0 +1,33 @@
+name: Build b2-exporter
+
+on:
+  push:
+    tags:
+      - 'b2-exporter/v*'
+
+jobs:
+  build:
+    runs-on: vollminlab
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Log in to Harbor
+        uses: docker/login-action@v4
+        with:
+          registry: harbor.vollminlab.com
+          username: ${{ secrets.HARBOR_USERNAME }}
+          password: ${{ secrets.HARBOR_PASSWORD }}
+
+      - name: Compute semver tag
+        run: |
+          REF="${{ github.ref_name }}"
+          echo "SEMVER=${REF#b2-exporter/v}" >> "$GITHUB_ENV"
+
+      - name: Build and push
+        uses: docker/build-push-action@v7
+        with:
+          context: build/b2-exporter
+          push: true
+          tags: |
+            harbor.vollminlab.com/vollminlab/b2-exporter:v${{ env.SEMVER }}
+            harbor.vollminlab.com/vollminlab/b2-exporter:${{ env.SEMVER }}

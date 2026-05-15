@@ -19,9 +19,11 @@ spec:
         env: production
         category: observability
     spec:
+      imagePullSecrets:
+        - name: harbor-vollminlab-pull
       containers:
         - name: b2-exporter
-          image: harbor.vollminlab.com/library/b2-exporter:1.0.0
+          image: harbor.vollminlab.com/vollminlab/b2-exporter:1.0.0
           ports:
             - name: metrics
               containerPort: 8080
@@ -30,12 +32,12 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: b2-exporter-credentials
-                  key: B2_APPLICATION_KEY_ID
+                  key: B2_APPLICATION_KEY_ID # gitleaks:allow
             - name: B2_APPLICATION_KEY
               valueFrom:
                 secretKeyRef:
                   name: b2-exporter-credentials
-                  key: B2_APPLICATION_KEY
+                  key: B2_APPLICATION_KEY # gitleaks:allow
             - name: B2_BUCKET_NAME
               valueFrom:
                 secretKeyRef:
