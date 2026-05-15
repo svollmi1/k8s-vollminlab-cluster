@@ -545,6 +545,13 @@ data:
             key: CLOUDFLARE_API_TOKEN
       - name: HOMEPAGE_ALLOWED_HOSTS
         value: "homepage.vollminlab.com,localhost,127.0.0.1"
+    persistence:
+      custom-css:
+        enabled: true
+        type: configMap
+        name: homepage-custom-css
+        mountPath: /app/config/custom.css
+        subPath: custom.css
     resources:
       requests:
         cpu: 100m
