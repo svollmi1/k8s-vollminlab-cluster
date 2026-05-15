@@ -11,7 +11,7 @@ data:
   values.yaml: |
     extraArgs:
       - --dns01-recursive-nameservers-only
-      - --dns01-recursive-nameservers=10.96.0.10:53
+      - --dns01-recursive-nameservers=1.1.1.1:53,8.8.8.8:53
     prometheus:
       enabled: true
       servicemonitor:
