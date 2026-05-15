@@ -46,6 +46,12 @@ variable "audiobookshelf_client_secret" {
   sensitive   = true
 }
 
+variable "seerr_client_secret" {
+  description = "OAuth2 client secret for the Seerr application in Authentik"
+  type        = string
+  sensitive   = true
+}
+
 variable "portainer_password" {
   description = "Portainer admin password for Terraform provider authentication"
   type        = string

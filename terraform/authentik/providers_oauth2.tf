@@ -133,6 +133,29 @@ resource "authentik_provider_oauth2" "portainer" {
   ])
 }
 
+resource "authentik_provider_oauth2" "seerr" {
+  name               = "Seerr"
+  client_id          = "EF795DE125C3E104B7ABAE521BA14E14AADB448C" # gitleaks:allow
+  client_secret      = var.seerr_client_secret
+  authorization_flow = data.authentik_flow.default_authorization_implicit.id
+  invalidation_flow  = data.authentik_flow.default_provider_invalidation.id
+  signing_key        = data.authentik_certificate_key_pair.self_signed.id
+  sub_mode           = "hashed_user_id"
+
+  allowed_redirect_uris = [
+    {
+      matching_mode = "strict"
+      url           = "https://seerr.vollminlab.com/login"
+    },
+    {
+      matching_mode = "strict"
+      url           = "https://seerr.vollminlab.com/profile/settings/linked-accounts"
+    },
+  ]
+
+  property_mappings = local.common_property_mappings
+}
+
 resource "authentik_provider_oauth2" "audiobookshelf" {
   name               = "Audiobookshelf"
   client_id          = "8FBzOT0SL5Kz1brCSW25Uuyr71TvQYvvfsBA9f7I" # gitleaks:allow
