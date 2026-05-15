@@ -7,6 +7,7 @@ resource "radarr_quality_profile" "any" {
   name            = "Any"
   upgrade_allowed = false
   cutoff          = 20 # Bluray-1080p
+  lifecycle { ignore_changes = [quality_groups] }
 
   language = {
     id = 1
@@ -129,6 +130,7 @@ resource "radarr_quality_profile" "sd" {
   name            = "SD"
   upgrade_allowed = false
   cutoff          = 20 # upgrade_allowed = false, so cutoff is irrelevant
+  lifecycle { ignore_changes = [quality_groups] }
 
   language = {
     id = 1
@@ -191,6 +193,7 @@ resource "radarr_quality_profile" "hd_720p" {
   name            = "HD-720p"
   upgrade_allowed = false
   cutoff          = 6 # Bluray-720p
+  lifecycle { ignore_changes = [quality_groups] }
 
   language = {
     id = 1
@@ -221,6 +224,7 @@ resource "radarr_quality_profile" "hd_1080p" {
   name            = "HD-1080p"
   upgrade_allowed = false
   cutoff          = 7 # Bluray-1080p
+  lifecycle { ignore_changes = [quality_groups] }
 
   language = {
     id = 1
@@ -255,6 +259,7 @@ resource "radarr_quality_profile" "ultra_hd" {
   name            = "Ultra-HD"
   upgrade_allowed = false
   cutoff          = 31 # Remux-2160p
+  lifecycle { ignore_changes = [quality_groups] }
 
   language = {
     id = 1
@@ -289,6 +294,7 @@ resource "radarr_quality_profile" "hd_720p_1080p" {
   name            = "HD - 720p/1080p"
   upgrade_allowed = false
   cutoff          = 6 # Bluray-720p
+  lifecycle { ignore_changes = [quality_groups] }
 
   language = {
     id = 1
