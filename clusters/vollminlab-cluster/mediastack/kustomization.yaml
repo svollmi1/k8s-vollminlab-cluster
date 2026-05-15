@@ -8,7 +8,6 @@ resources:
   - ./secrets
   - ./audiobookshelf/app
   - ./bazarr/app
-  - ./cloudflared/app
   - ./cloudflared-audiobookshelf/app
   - ./cloudflared-jellyfin/app
   - ./bazarr-exportarr/app
