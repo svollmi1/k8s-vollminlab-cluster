@@ -214,7 +214,9 @@ data:
                 href: https://dash.cloudflare.com
                 icon: cloudflare.png
                 widget:
-                  type: cloudflare
+                  type: cloudflared
+                  accountid: "9013108406ddceed8abc1a3e2e21907d"
+                  tunnelid: "d5a68ca0-0460-47f0-b17b-a4043f9fe69c"
                   key: "{{HOMEPAGE_VAR_CLOUDFLARE_API_TOKEN}}"
         - Monitoring & Observability:
             - Policy Reporter:
