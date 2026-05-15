@@ -28,6 +28,13 @@ resource "authentik_application" "grafana" {
   open_in_new_tab   = false
 }
 
+resource "authentik_application" "haproxy" {
+  name            = "HAProxy"
+  slug            = "haproxy"
+  meta_launch_url = "https://haproxy.vollminlab.com"
+  open_in_new_tab = false
+}
+
 resource "authentik_application" "harbor" {
   name              = "Harbor"
   slug              = "harbor"
@@ -79,6 +86,20 @@ resource "authentik_application" "minio" {
   protocol_provider = authentik_provider_oauth2.minio.id
   meta_launch_url   = "https://minio.vollminlab.com"
   open_in_new_tab   = false
+}
+
+resource "authentik_application" "npm" {
+  name            = "Nginx Proxy Manager"
+  slug            = "npm"
+  meta_launch_url = "https://npm.vollminlab.com"
+  open_in_new_tab = false
+}
+
+resource "authentik_application" "pihole" {
+  name            = "Pi-hole"
+  slug            = "pihole"
+  meta_launch_url = "https://pihole.vollminlab.com"
+  open_in_new_tab = false
 }
 
 resource "authentik_application" "policy_reporter" {
@@ -143,6 +164,13 @@ resource "authentik_application" "sonarr" {
   name            = "Sonarr"
   slug            = "sonarr"
   meta_launch_url = "https://sonarr.vollminlab.com"
+  open_in_new_tab = false
+}
+
+resource "authentik_application" "truenas" {
+  name            = "TrueNAS"
+  slug            = "truenas"
+  meta_launch_url = "https://truenas.vollminlab.com"
   open_in_new_tab = false
 }
 
