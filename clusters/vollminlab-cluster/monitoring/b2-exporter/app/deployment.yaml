@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: b2-exporter
+  namespace: monitoring
+  labels:
+    app: b2-exporter
+    env: production
+    category: observability
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: b2-exporter
+  template:
+    metadata:
+      labels:
+        app: b2-exporter
+        env: production
+        category: observability
+    spec:
+      containers:
+        - name: b2-exporter
+          image: harbor.vollminlab.com/library/b2-exporter:1.0.0
+          ports:
+            - name: metrics
+              containerPort: 8080
+          env:
+            - name: B2_APPLICATION_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: b2-exporter-credentials
+                  key: B2_APPLICATION_KEY_ID
+            - name: B2_APPLICATION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: b2-exporter-credentials
+                  key: B2_APPLICATION_KEY
+            - name: B2_BUCKET_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: b2-exporter-credentials
+                  key: B2_BUCKET_NAME
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
