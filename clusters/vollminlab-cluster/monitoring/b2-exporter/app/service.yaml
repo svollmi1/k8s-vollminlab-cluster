@@ -8,6 +8,7 @@ metadata:
     env: production
     category: observability
 spec:
+  type: ClusterIP
   selector:
     app: b2-exporter
   ports:
