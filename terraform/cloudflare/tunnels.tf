@@ -48,6 +48,9 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "vollminlab_authentik
       },
     ]
   }
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 resource "cloudflare_zero_trust_tunnel_cloudflared_config" "vollminlab_audiobookshelf" {
@@ -65,6 +68,9 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "vollminlab_audiobook
       },
     ]
   }
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 resource "cloudflare_zero_trust_tunnel_cloudflared_config" "vollminlab_jellyfin" {
@@ -81,6 +87,9 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "vollminlab_jellyfin"
         service = "http_status:404"
       },
     ]
+  }
+  lifecycle {
+    ignore_changes = all
   }
 }
 
