@@ -3,6 +3,6 @@ kind: Kustomization
 resources:
   - helmrelease.yaml
   - configmap.yaml
-  - ingress.yaml
+  - harbor-tls-certificate.yaml
   - harbor-admin-credentials-sealedsecret.yaml
   - harbor-core-credentials-sealedsecret.yaml

@@ -15,9 +15,20 @@ data:
     externalURL: https://harbor.vollminlab.com
 
     expose:
-      type: clusterIP
+      type: loadBalancer
       tls:
-        enabled: false
+        enabled: true
+        certSource: secret
+        secret:
+          secretName: harbor-tls
+      loadBalancer:
+        IP: ""
+        ports:
+          httpPort: 80
+          httpsPort: 443
+        annotations:
+          metallb.universe.tf/loadBalancerIPs: "192.168.152.245"
+        sourceRanges: []
 
     existingSecretAdminPassword: harbor-admin-credentials
     existingSecretAdminPasswordKey: HARBOR_ADMIN_PASSWORD
