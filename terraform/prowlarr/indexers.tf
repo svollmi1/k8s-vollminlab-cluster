@@ -17,7 +17,7 @@ resource "prowlarr_indexer" "nzbgeek" {
   fields = [
     { name = "baseUrl", text_value = "https://api.nzbgeek.info" },
     { name = "apiPath", text_value = "/api" },
-    { name = "apiKey",  sensitive_value = var.nzbgeek_api_key },
+    { name = "apiKey", sensitive_value = var.nzbgeek_api_key },
   ]
 }
 
@@ -35,6 +35,6 @@ resource "prowlarr_indexer" "nzbplanet" {
   fields = [
     { name = "baseUrl", text_value = "https://api.nzbplanet.net" },
     { name = "apiPath", text_value = "/api" },
-    { name = "apiKey",  sensitive_value = var.nzbplanet_api_key },
+    { name = "apiKey", sensitive_value = var.nzbplanet_api_key },
   ]
 }
