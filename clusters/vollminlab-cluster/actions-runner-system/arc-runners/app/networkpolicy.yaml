@@ -40,12 +40,16 @@ spec:
       ports:
         - port: 6443
           protocol: TCP
-    # Harbor registry — dedicated LoadBalancer VIP; excluded from internet rule (RFC 1918).
+    # Harbor registry — target harbor namespace pods directly.
+    # Calico evaluates NetworkPolicy after kube-proxy DNAT, so ipBlock on the
+    # LoadBalancer VIP (192.168.152.245) never matches — the destination is already
+    # rewritten to the harbor-nginx pod IP (172.18.x.x) before Calico sees the packet.
     - to:
-        - ipBlock:
-            cidr: 192.168.152.245/32
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: harbor
       ports:
-        - port: 443
+        - port: 8443
           protocol: TCP
     # Public internet — GitHub, OCI registries, apt mirrors, etc.
     # All RFC 1918 ranges blocked to prevent accessing internal cluster services.
