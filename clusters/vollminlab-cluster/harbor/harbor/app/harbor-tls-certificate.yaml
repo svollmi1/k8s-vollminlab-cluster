@@ -5,9 +5,9 @@ metadata:
   namespace: harbor
 spec:
   secretName: harbor-tls
-  commonName: harbor.vollminlab.com
+  commonName: "*.vollminlab.com"
   dnsNames:
-    - harbor.vollminlab.com
+    - "*.vollminlab.com"
   issuerRef:
     name: letsencrypt-cloudflare
     kind: ClusterIssuer
