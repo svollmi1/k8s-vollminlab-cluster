@@ -6,7 +6,8 @@ metadata:
 resources:
   - configmap.yaml
   - helmrelease.yaml
-  - ingress.yaml
+  - homepage-custom-css-configmap.yaml
   - homepage-env-vars-sealedsecret.yaml
+  - ingress.yaml
   - rbac.yaml
   - pihole-watchdog-cronjob.yaml
