@@ -15,3 +15,9 @@ variable "harbor_gha_robot_secret" {
   type        = string
   sensitive   = true
 }
+
+variable "harbor_cluster_pull_secret" {
+  description = "Password for the cluster-pull robot account (pull-only, vollminlab)"
+  type        = string
+  sensitive   = true
+}
