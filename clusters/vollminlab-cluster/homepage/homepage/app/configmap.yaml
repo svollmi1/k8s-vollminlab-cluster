@@ -162,13 +162,12 @@ data:
                 href: https://secure.backblaze.com/b2_buckets.htm
                 icon: backblaze.png
                 widget:
-                  type: prometheus
-                  url: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
-                  query: b2_bucket_bytes_total
-                  format:
-                    type: bytes
-                    scale: 1
-                  label: "B2 Storage"
+                  type: customapi
+                  url: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/query?query=b2_bucket_bytes_total
+                  mappings:
+                    - field: data.result.0.value.1
+                      label: Storage Used
+                      format: bytes
         - Networking:
             - Pi-hole:
                 description: DNS sinkhole and ad blocker
