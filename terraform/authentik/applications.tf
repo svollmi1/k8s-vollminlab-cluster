@@ -35,6 +35,13 @@ resource "authentik_application" "haproxy" {
   open_in_new_tab = false
 }
 
+resource "authentik_application" "haproxydmz" {
+  name            = "HAProxy DMZ"
+  slug            = "haproxydmz"
+  meta_launch_url = "https://haproxydmz.vollminlab.com"
+  open_in_new_tab = false
+}
+
 resource "authentik_application" "harbor" {
   name              = "Harbor"
   slug              = "harbor"
