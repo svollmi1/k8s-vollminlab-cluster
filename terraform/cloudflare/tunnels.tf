@@ -8,16 +8,19 @@
 resource "cloudflare_zero_trust_tunnel_cloudflared" "vollminlab_authentik" {
   account_id = var.cloudflare_account_id
   name       = "vollminlab-Authentik"
+  lifecycle { ignore_changes = all }
 }
 
 resource "cloudflare_zero_trust_tunnel_cloudflared" "vollminlab_audiobookshelf" {
   account_id = var.cloudflare_account_id
   name       = "vollminlab-Audiobookshelf"
+  lifecycle { ignore_changes = all }
 }
 
 resource "cloudflare_zero_trust_tunnel_cloudflared" "vollminlab_jellyfin" {
   account_id = var.cloudflare_account_id
   name       = "vollminlab-Jellyfin"
+  lifecycle { ignore_changes = all }
 }
 
 # ---------------------------------------------------------------------------
@@ -27,6 +30,7 @@ resource "cloudflare_zero_trust_tunnel_cloudflared" "vollminlab_jellyfin" {
 resource "cloudflare_zero_trust_tunnel_cloudflared_config" "vollminlab_authentik" {
   account_id = var.cloudflare_account_id
   tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.vollminlab_authentik.id
+  lifecycle { ignore_changes = all }
 
   config = {
     ingress_rule = [
@@ -44,6 +48,7 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "vollminlab_authentik
 resource "cloudflare_zero_trust_tunnel_cloudflared_config" "vollminlab_audiobookshelf" {
   account_id = var.cloudflare_account_id
   tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.vollminlab_audiobookshelf.id
+  lifecycle { ignore_changes = all }
 
   config = {
     ingress_rule = [
@@ -61,6 +66,7 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "vollminlab_audiobook
 resource "cloudflare_zero_trust_tunnel_cloudflared_config" "vollminlab_jellyfin" {
   account_id = var.cloudflare_account_id
   tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.vollminlab_jellyfin.id
+  lifecycle { ignore_changes = all }
 
   config = {
     ingress_rule = [
