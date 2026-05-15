@@ -8,6 +8,7 @@ metadata:
     category: observability
 resources:
   - namespace.yaml
+  - harbor-vollminlab-pull-sealedsecret.yaml
   - kube-prometheus-stack/app
   - loki/app
   - promtail/app
