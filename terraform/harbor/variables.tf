@@ -9,3 +9,9 @@ variable "harbor_oidc_client_secret" {
   type        = string
   sensitive   = true
 }
+
+variable "harbor_gha_robot_secret" {
+  description = "Password for the github-actions robot account (project-level, vollminlab)"
+  type        = string
+  sensitive   = true
+}
