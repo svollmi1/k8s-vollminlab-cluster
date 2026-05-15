@@ -125,10 +125,11 @@ resource "authentik_application" "sabnzbd" {
 }
 
 resource "authentik_application" "seerr" {
-  name            = "Seerr"
-  slug            = "seerr"
-  meta_launch_url = "https://seerr.vollminlab.com"
-  open_in_new_tab = false
+  name              = "Seerr"
+  slug              = "seerr"
+  protocol_provider = authentik_provider_oauth2.seerr.id
+  meta_launch_url   = "https://seerr.vollminlab.com"
+  open_in_new_tab   = false
 }
 
 resource "authentik_application" "shlink_web" {
