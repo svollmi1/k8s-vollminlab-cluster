@@ -223,10 +223,17 @@ data:
         - '[PriorityClass,*,*]'
         - '[RuntimeClass,*,*]'
         - '[Lease,*,*]'
+        # Kubernetes 1.33 new networking types — Kyverno 1.18 returns 400 for unknown types,
+        # which causes kube-apiserver to crash on startup when creating the default ServiceCIDR.
+        # matchConditions below also excludes these at the apiserver level (belt-and-suspenders).
+        - '[ServiceCIDR,*,*]'
+        - '[IPAddress,*,*]'
       # namespaceSelector can't exclude cluster-scoped resources; CEL evaluated by apiserver before any Kyverno connection
       matchConditions:
         - name: exclude-auth-review-resources
           expression: "!(request.resource.resource in ['subjectaccessreviews', 'selfsubjectaccessreviews', 'selfsubjectrulesreviews', 'tokenreviews'])"
+        - name: exclude-k8s133-network-resources
+          expression: "!(request.resource.resource in ['servicecidrs', 'ipaddresses'])"
 
     serviceMonitor:
       enabled: true
