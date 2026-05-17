@@ -8,7 +8,7 @@ metadata:
     category: media
 spec:
   capacity:
-    storage: 100Gi
+    storage: 250Gi
   accessModes:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
