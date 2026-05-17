@@ -32,3 +32,14 @@ resource "authentik_user" "gkroner" {
     ignore_changes = [password, groups]
   }
 }
+
+resource "authentik_user" "chavelock" {
+  username  = "chavelock"
+  name      = "chavelock"
+  email     = "havelock17@gmail.com"
+  is_active = true
+
+  lifecycle {
+    ignore_changes = [password, groups]
+  }
+}
