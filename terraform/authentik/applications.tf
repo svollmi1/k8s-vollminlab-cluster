@@ -27,6 +27,12 @@ resource "authentik_application" "filebrowser" {
   open_in_new_tab = false
 }
 
+resource "authentik_policy_binding" "filebrowser_users" {
+  target = authentik_application.filebrowser.uuid
+  group  = authentik_group.filebrowser_users.id
+  order  = 0
+}
+
 resource "authentik_application" "grafana" {
   name              = "Grafana"
   slug              = "grafana"
