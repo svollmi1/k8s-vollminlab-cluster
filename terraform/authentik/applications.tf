@@ -20,6 +20,13 @@ resource "authentik_application" "bazarr" {
   open_in_new_tab = false
 }
 
+resource "authentik_application" "filebrowser" {
+  name            = "FileBrowser"
+  slug            = "filebrowser"
+  meta_launch_url = "https://filebrowser.vollminlab.com"
+  open_in_new_tab = false
+}
+
 resource "authentik_application" "grafana" {
   name              = "Grafana"
   slug              = "grafana"
