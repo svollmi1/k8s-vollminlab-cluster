@@ -17,6 +17,12 @@ resource "cloudflare_zero_trust_tunnel_cloudflared" "vollminlab_audiobookshelf" 
   lifecycle { ignore_changes = all }
 }
 
+resource "cloudflare_zero_trust_tunnel_cloudflared" "vollminlab_filebrowser" {
+  account_id = var.cloudflare_account_id
+  name       = "vollminlab-FileBrowser"
+  lifecycle { ignore_changes = all }
+}
+
 resource "cloudflare_zero_trust_tunnel_cloudflared" "vollminlab_jellyfin" {
   account_id = var.cloudflare_account_id
   name       = "vollminlab-Jellyfin"
@@ -55,6 +61,24 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "vollminlab_audiobook
       {
         hostname = "audiobookshelf.vollminlab.com"
         service  = "http://audiobookshelf.mediastack.svc.cluster.local:10223"
+      },
+      {
+        service = "http_status:404"
+      },
+    ]
+  }
+}
+
+resource "cloudflare_zero_trust_tunnel_cloudflared_config" "vollminlab_filebrowser" {
+  account_id = var.cloudflare_account_id
+  tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.vollminlab_filebrowser.id
+  lifecycle { ignore_changes = all }
+
+  config = {
+    ingress_rule = [
+      {
+        hostname = "filebrowser.vollminlab.com"
+        service  = "http://ingress-nginx-controller.ingress-nginx.svc.cluster.local:80"
       },
       {
         service = "http_status:404"
