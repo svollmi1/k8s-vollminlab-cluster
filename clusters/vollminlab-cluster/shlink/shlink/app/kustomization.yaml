@@ -4,7 +4,5 @@ resources:
   - helmrelease.yaml
   - configmap.yaml
   - ingress.yaml
-  - ingress-vl.yaml
-  - vl-certificate.yaml
   - vollm-in-certificate.yaml
   - shlink-credentials-sealedsecret.yaml
