@@ -21,6 +21,15 @@ resource "cloudflare_dns_record" "audiobookshelf" {
   ttl     = 1
 }
 
+resource "cloudflare_dns_record" "filebrowser" {
+  zone_id = var.cloudflare_zone_id
+  name    = "filebrowser.vollminlab.com"
+  type    = "CNAME"
+  content = "${cloudflare_zero_trust_tunnel_cloudflared.vollminlab_filebrowser.id}.cfargotunnel.com"
+  proxied = true
+  ttl     = 1
+}
+
 resource "cloudflare_dns_record" "jellyfin" {
   zone_id = var.cloudflare_zone_id
   name    = "jellyfin.vollminlab.com"

@@ -8,6 +8,11 @@ resource "authentik_group" "audiobookshelf_users" {
   users = toset([authentik_user.jvollmin.id, authentik_user.gkroner.id, authentik_user.chavelock.id])
 }
 
+resource "authentik_group" "filebrowser_users" {
+  name  = "FileBrowser Users"
+  users = toset([authentik_user.vollmin.id, authentik_user.gkroner.id])
+}
+
 resource "authentik_group" "grafana_admins" {
   name  = "Grafana Admins"
   users = [authentik_user.vollmin.id]

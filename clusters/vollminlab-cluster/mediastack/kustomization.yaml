@@ -9,8 +9,10 @@ resources:
   - ./audiobookshelf/app
   - ./bazarr/app
   - ./cloudflared-audiobookshelf/app
+  - ./cloudflared-filebrowser/app
   - ./cloudflared-jellyfin/app
   - ./bazarr-exportarr/app
+  - ./filebrowser/app
   - ./seerr/app
   - ./jellyfin/app
   - ./jellystat-db/app
