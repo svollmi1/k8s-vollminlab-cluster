@@ -5,7 +5,6 @@
 # Claude Code runtime artifacts
 .codex
 .worktrees/
-docs/superpowers/
 session-report-*.html
 
 # macOS
