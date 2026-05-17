@@ -14,6 +14,11 @@ import {
   id = "11"
 }
 
+import {
+  to = authentik_user.chavelock
+  id = "12"
+}
+
 # Groups
 import {
   to = authentik_group.audiobookshelf_admins
