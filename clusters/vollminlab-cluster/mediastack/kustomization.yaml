@@ -11,6 +11,7 @@ resources:
   - ./cloudflared-audiobookshelf/app
   - ./cloudflared-jellyfin/app
   - ./bazarr-exportarr/app
+  - ./filebrowser/app
   - ./seerr/app
   - ./jellyfin/app
   - ./jellystat-db/app
