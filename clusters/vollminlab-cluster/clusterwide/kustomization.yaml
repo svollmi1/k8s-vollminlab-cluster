@@ -8,6 +8,7 @@ resources:
   - pv-audiobooks.yaml
   - pv-books.yaml
   - pv-completed-downloads.yaml
+  - pv-filebrowser.yaml
   - pv-incomplete-downloads.yaml
   - pv-movies.yaml
   - pv-tv.yaml
