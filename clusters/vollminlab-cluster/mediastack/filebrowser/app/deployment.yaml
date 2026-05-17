@@ -34,7 +34,7 @@ spec:
             - name: FB_AUTH_HEADER
               value: X-authentik-username
           ports:
-            - containerPort: 80
+            - containerPort: 8080
           volumeMounts:
             - name: config
               mountPath: /config
