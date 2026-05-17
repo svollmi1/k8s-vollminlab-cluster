@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-audiobooks-incoming
+  namespace: mediastack
+  labels:
+    app: mediastack
+    env: production
+    category: media
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Gi
+  volumeName: pv-audiobooks-incoming
+  storageClassName: smb
