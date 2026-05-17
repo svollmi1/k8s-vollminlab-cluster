@@ -15,23 +15,12 @@ spec:
   tls:
     - hosts:
         - go.vollminlab.com
-        - vl.vollminlab.com
       secretName: wildcard-tls
     - hosts:
         - vollm.in
       secretName: vollm-in-tls
   rules:
     - host: go.vollminlab.com
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: shlink-shlink-backend
-                port:
-                  number: 8080
-    - host: vl.vollminlab.com
       http:
         paths:
           - path: /
