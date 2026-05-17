@@ -20,9 +20,6 @@ spec:
     - hosts:
         - vollm.in
       secretName: vollm-in-tls
-    - hosts:
-        - vl
-      secretName: vl-tls
   rules:
     - host: go.vollminlab.com
       http:
@@ -45,16 +42,6 @@ spec:
                 port:
                   number: 8080
     - host: vollm.in
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: shlink-shlink-backend
-                port:
-                  number: 8080
-    - host: vl
       http:
         paths:
           - path: /
