@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: filebrowser
+  namespace: mediastack
+  labels:
+    app: filebrowser
+    env: production
+    category: apps
+    app.kubernetes.io/name: filebrowser
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: filebrowser
+  template:
+    metadata:
+      labels:
+        app: filebrowser
+        env: production
+        category: apps
+        app.kubernetes.io/name: filebrowser
+    spec:
+      containers:
+        - name: filebrowser
+          image: filebrowser/filebrowser:v2.63.3
+          args: ["--config", "/config/settings.json"]
+          env:
+            - name: FB_AUTH_METHOD
+              value: proxy
+            - name: FB_AUTH_HEADER
+              value: X-authentik-username
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: settings
+              mountPath: /config/settings.json
+              subPath: settings.json
+            - name: data
+              mountPath: /srv
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: pvc-filebrowser-config
+        - name: settings
+          configMap:
+            name: filebrowser-settings
+        - name: data
+          persistentVolumeClaim:
+            claimName: pvc-filebrowser
