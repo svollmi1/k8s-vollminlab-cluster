@@ -38,8 +38,10 @@ spec:
             - name: settings
               mountPath: /config/settings.json
               subPath: settings.json
-            - name: data
-              mountPath: /srv
+            - name: audiobooks-incoming
+              mountPath: /srv/Audiobooks
+            - name: misc-incoming
+              mountPath: /srv/Misc
           resources:
             requests:
               cpu: 50m
@@ -54,6 +56,9 @@ spec:
         - name: settings
           configMap:
             name: filebrowser-settings
-        - name: data
+        - name: audiobooks-incoming
           persistentVolumeClaim:
-            claimName: pvc-filebrowser
+            claimName: pvc-audiobooks-incoming
+        - name: misc-incoming
+          persistentVolumeClaim:
+            claimName: pvc-misc-incoming
