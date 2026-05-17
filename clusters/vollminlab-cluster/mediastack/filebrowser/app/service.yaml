@@ -8,6 +8,7 @@ metadata:
     env: production
     category: apps
 spec:
+  type: ClusterIP
   selector:
     app: filebrowser
   ports:
