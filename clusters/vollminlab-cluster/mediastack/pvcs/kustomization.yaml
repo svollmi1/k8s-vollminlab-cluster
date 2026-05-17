@@ -6,7 +6,8 @@ resources:
   - pvc-audiobooks.yaml
   - pvc-books.yaml
   - pvc-completed-downloads.yaml
-  - pvc-filebrowser.yaml
+  - pvc-audiobooks-incoming.yaml
   - pvc-incomplete-downloads.yaml
+  - pvc-misc-incoming.yaml
   - pvc-movies.yaml
   - pvc-tv.yaml

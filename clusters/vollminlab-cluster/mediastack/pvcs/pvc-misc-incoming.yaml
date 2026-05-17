@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: pvc-filebrowser
+  name: pvc-misc-incoming
   namespace: mediastack
   labels:
     app: mediastack
@@ -13,5 +13,5 @@ spec:
   resources:
     requests:
       storage: 100Gi
-  volumeName: pv-filebrowser
+  volumeName: pv-misc-incoming
   storageClassName: smb
